@@ -1,0 +1,10 @@
+project_name: "UAIS - NLP"
+data:
+  file_name: enron_emails.csv
+  text_column: content      # adjust to actual text column
+  label_column: label       # adjust if you have labels
+training:
+  model_name: distilbert-base-uncased
+  max_samples: 10000
+  test_size: 0.2
+  max_features: 5000        # for TF-IDF baseline

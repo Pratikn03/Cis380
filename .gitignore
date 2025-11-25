@@ -1,0 +1,17 @@
+.venv/
+.venv-macos/
+venv/
+.env
+__pycache__/
+*.pyc
+*.egg-info/
+.ipynb_checkpoints/
+.DS_Store
+logs/
+data/raw/
+data/interim/
+data/processed/
+models/
+experiments/
+reports/*.pdf
+reports/*.html

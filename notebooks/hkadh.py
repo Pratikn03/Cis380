@@ -1,0 +1,60 @@
+from pathlib import Path
+import pandas as pd, numpy as np, sys
+from sklearn.model_selection import train_test_split
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+project_root = Path("..").resolve()
+csv_path = project_root / "data" / "raw" / "behavior" / "r4.2" / "device.csv"  # change to device.csv if needed
+df = pd.read_csv(csv_path, nrows=2000, low_memory=False)  # small slice
+print("Cols:", df.columns.tolist())
+
+time_col = next(c for c in df.columns if "time" in c.lower() or "date" in c.lower())
+user_col = next(c for c in df.columns if "user" in c.lower())
+
+df[time_col] = pd.to_datetime(df[time_col], errors="coerce")
+df = df.dropna(subset=[time_col]).sort_values([user_col, time_col])
+df["hour"] = df[time_col].dt.hour
+df["dayofweek"] = df[time_col].dt.dayofweek
+feature_cols = ["hour", "dayofweek"]
+
+sequence_length = 10
+max_users = 50
+max_seq_per_user = 1
+
+seqs = []
+for idx, (u, g) in enumerate(df.groupby(user_col)):
+    if idx >= max_users:
+        break
+    X = g[feature_cols].values
+    if len(X) <= sequence_length:
+        continue
+    n_take = min(max_seq_per_user, len(X) - sequence_length + 1)
+    for i in range(n_take):
+        seqs.append(X[i:i+sequence_length])
+X_seq = np.array(seqs, dtype=np.float32)
+print("Sequences:", X_seq.shape)
+if len(X_seq) == 0:
+    raise ValueError("No sequences built; lower caps or check file/columns.")
+
+X_train, X_test = train_test_split(X_seq, test_size=0.2, random_state=42)
+
+input_shape = (sequence_length, len(feature_cols))
+model = models.Sequential([
+    layers.Input(shape=input_shape),
+    layers.LSTM(8, return_sequences=False),
+    layers.RepeatVector(sequence_length),
+    layers.LSTM(8, return_sequences=True),
+    layers.TimeDistributed(layers.Dense(len(feature_cols)))
+])
+model.compile(optimizer="adam", loss="mse")
+history = model.fit(X_train, X_train, epochs=1, batch_size=128, verbose=1, validation_split=0.1)
+
+recon = model.predict(X_test, batch_size=256, verbose=0)
+mse = np.mean((X_test - recon) ** 2, axis=(1,2))
+print("Score stats:", pd.Series(mse).describe())
+
+out = project_root / "experiments" / "behavior" / "scores_cert_sequence_min.csv"
+out.parent.mkdir(parents=True, exist_ok=True)
+pd.DataFrame({"sequence_id": np.arange(len(mse)), "anomaly_score": mse}).to_csv(out, index=False)
+print("Saved:", out)

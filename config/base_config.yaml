@@ -1,0 +1,29 @@
+project_name: "Universal Anomaly Intelligence System"
+seed: 42
+
+data:
+  target: label
+  id_column: entity_id
+  datetime_column: event_time
+  test_size: 0.2
+  val_size: 0.1
+  synthetic_rows: 500
+  drop_columns: []
+
+features:
+  numeric: []
+  categorical: []
+
+training:
+  model_type: lightgbm
+  learning_rate: 0.05
+  n_estimators: 200
+  max_depth: 6
+  anomaly_contamination: 0.05
+
+paths:
+  raw_dir: data/raw
+  interim_dir: data/interim
+  processed_dir: data/processed
+  experiments_dir: experiments
+  models_dir: models

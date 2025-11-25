@@ -1,0 +1,25 @@
+# Cyber/intrusion domain override
+project_name: "UAIS - Cyber"
+
+data:
+  target: is_intrusion
+  id_column: host_id
+  datetime_column: event_time
+  file_name: events.csv
+  synthetic_rows: 700
+
+features:
+  numeric:
+    - bytes_in
+    - bytes_out
+    - packets
+    - failed_logins
+  categorical:
+    - protocol
+    - service
+
+training:
+  model_type: random_forest
+  n_estimators: 250
+  max_depth: 10
+  anomaly_contamination: 0.07

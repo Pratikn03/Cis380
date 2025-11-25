@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=62", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "universal-anomaly-intelligence"
+version = "0.1.0"
+description = "Universal Anomaly Intelligence System (UAIS) toolkit."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "UAIS Team" }]
+keywords = ["anomaly detection", "fraud", "cyber", "mlops", "streamlit"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["uais*"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.coverage.run]
+branch = true
+source = ["src/uais"]

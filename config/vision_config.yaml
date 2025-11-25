@@ -1,0 +1,7 @@
+project_name: "UAIS - Vision"
+data:
+  dataset_dir: data/raw/vision/document_forgery
+  image_size: 224
+  batch_size: 32
+  validation_split: 0.2
+  epochs: 3

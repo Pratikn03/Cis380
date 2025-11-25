@@ -1,0 +1,20 @@
+# User/session behavior domain override
+project_name: "UAIS - Behavior (CERT)"
+
+data:
+  target: null             # unsupervised
+  id_column: user          # adjust to your user column
+  datetime_column: date    # adjust to your timestamp column
+  file_name: logon.csv     # or the CERT CSV you’re using
+  synthetic_rows: 0
+
+features:
+  numeric: []              # add engineered numeric features (hour, dayofweek, content_len, etc.)
+  categorical:
+  categorical: []
+
+training:
+  model_type: autoencoder
+  learning_rate: 0.001
+  anomaly_contamination: 0.05
+  anomaly_contamination: 0.05
