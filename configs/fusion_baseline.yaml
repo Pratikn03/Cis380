@@ -1,0 +1,10 @@
+fusion:
+  score_column: score
+  label_column: label
+  test_size: 0.2
+  random_state: 42
+  scores:
+    fraud: experiments/fraud/scores.csv
+    cyber: experiments/cyber/scores.csv
+    behavior: experiments/behavior/scores_cert_unsupervised.csv
+  labels_path: null  # optional path to labels if score files lack labels

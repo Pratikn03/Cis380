@@ -1,0 +1,4 @@
+data:
+  domain: "fraud"
+  raw: "data/raw/fraud/creditcard.csv"
+  processed: "data/processed/fraud/fraud_features.parquet"

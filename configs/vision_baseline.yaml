@@ -1,0 +1,9 @@
+vision:
+  model_name: resnet18
+  num_classes: 2
+  pretrained: true
+  batch_size: 16
+  epochs: 3
+  lr: 0.001
+  num_workers: 2
+  data_dir: data/processed/vision  # expects train/ and val/ subdirs

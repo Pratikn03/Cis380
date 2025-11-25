@@ -1,0 +1,4 @@
+data:
+  domain: "behavior"
+  raw: "data/raw/behavior"
+  processed: "data/processed/behavior/r4_2_raw.parquet"

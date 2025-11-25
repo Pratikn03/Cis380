@@ -1,0 +1,5 @@
+training:
+  batch_size: 32
+  epochs: 20
+  learning_rate: 0.001
+  model_name: "30seq_baseline"

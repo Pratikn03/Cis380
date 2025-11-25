@@ -1,29 +1,40 @@
 version: '3.9'
 services:
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:latest
-    ports:
-      - "5000:5000"
-    command: mlflow server --host 0.0.0.0 --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlruns
-    volumes:
-      - ./mlruns:/mlruns
-
-  prefect:
-    image: prefecthq/prefect:latest
-    ports:
-      - "4200:4200"
-    environment:
-      - PREFECT_API_URL=http://prefect:4200/api
-    command: prefect server start
-
   api:
-    build: .
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: bash -c "pip install --no-cache-dir -r requirements.txt && uvicorn deploy.api.main:app --host 0.0.0.0 --port 8000"
     ports:
       - "8000:8000"
-    command: uvicorn deploy.api.main:app --host 0.0.0.0 --port 8000
+    environment:
+      - PYTHONPATH=/app/src
+    depends_on:
+      - mlflow
 
-  dashboard:
-    build: .
+  streamlit:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: bash -c "pip install --no-cache-dir -r requirements.txt && streamlit run dashboard/app_streamlit.py --server.port 8501 --server.address 0.0.0.0"
     ports:
       - "8501:8501"
-    command: streamlit run dashboard/app_streamlit.py
+    environment:
+      - PYTHONPATH=/app/src
+    depends_on:
+      - api
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlruns
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlruns
+      - ./mlflow.db:/mlflow.db
+
+networks:
+  default:
+    driver: bridge

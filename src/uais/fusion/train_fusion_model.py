@@ -31,7 +31,7 @@ def train_fusion_meta_model(
     model.fit(X_train, y_train)
 
     y_test_proba = model.predict_proba(X_test)[:, 1]
-    metrics = classification_metrics(y_test, model.predict(X_test), y_test_proba)
+    metrics = classification_metrics(y_test, y_test_proba, threshold=0.5)
 
     paths = domain_paths("fusion")
     paths["models"].mkdir(parents=True, exist_ok=True)
