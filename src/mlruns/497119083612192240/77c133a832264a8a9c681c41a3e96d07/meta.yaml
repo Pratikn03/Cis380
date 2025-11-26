@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence/src/mlruns/497119083612192240/77c133a832264a8a9c681c41a3e96d07/artifacts
+end_time: 1764126419859
+entry_point_name: ''
+experiment_id: '497119083612192240'
+lifecycle_stage: active
+run_id: 77c133a832264a8a9c681c41a3e96d07
+run_name: fraud_flow
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764126401333
+status: 4
+tags: []
+user_id: pratik_n

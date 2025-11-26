@@ -35,7 +35,12 @@ def build_behavior_feature_table(
 
     print(f"Numeric features: {len(num_cols)}, Categorical features: {len(cat_cols)}")
 
+    # Fill missing values before encoding
     X_enc = X.copy()
+    if num_cols:
+        X_enc[num_cols] = X_enc[num_cols].fillna(0)
+    if cat_cols:
+        X_enc[cat_cols] = X_enc[cat_cols].fillna("missing")
     for col in cat_cols:
         le = LabelEncoder()
         X_enc[col] = le.fit_transform(X_enc[col].astype(str))

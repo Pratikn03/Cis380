@@ -26,9 +26,18 @@ def load_mlflow_settings(config_path: str | Path | None = None) -> Dict[str, str
 
 def setup_mlflow(experiment_name: str = "UAISV_Experiments", tracking_uri: str | None = None) -> None:
     """Configure the MLflow tracking URI and experiment name."""
-    mlflow.set_tracking_uri(tracking_uri or "http://localhost:5000")
-    mlflow.set_experiment(experiment_name)
-    print(f"MLflow experiment set: {experiment_name}")
+    uri = tracking_uri or "http://localhost:5000"
+    try:
+        mlflow.set_tracking_uri(uri)
+        mlflow.set_experiment(experiment_name)
+        print(f"MLflow experiment set: {experiment_name} ({uri})")
+    except Exception as exc:
+        # Fallback to local file store if remote tracking is unavailable/forbidden.
+        local_uri = PROJECT_ROOT / "mlruns"
+        local_uri.mkdir(parents=True, exist_ok=True)
+        mlflow.set_tracking_uri(local_uri.as_uri())
+        mlflow.set_experiment(experiment_name)
+        print(f"[warn] MLflow tracking at {uri} failed ({exc}); using local file store {local_uri}")
 
 
 def log_run(params: Dict[str, float] | None, metrics: Dict[str, float]) -> None:

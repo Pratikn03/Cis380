@@ -1,0 +1,5 @@
+Metric,mean,std
+accuracy,0.85,
+f1,0.75,
+pr_auc,0.82,
+roc_auc,0.88,

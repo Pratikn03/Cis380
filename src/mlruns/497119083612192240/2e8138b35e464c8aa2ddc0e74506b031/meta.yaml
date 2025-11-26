@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence/src/mlruns/497119083612192240/2e8138b35e464c8aa2ddc0e74506b031/artifacts
+end_time: 1764126127054
+entry_point_name: ''
+experiment_id: '497119083612192240'
+lifecycle_stage: active
+run_id: 2e8138b35e464c8aa2ddc0e74506b031
+run_name: behavior_flow
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764126126125
+status: 4
+tags: []
+user_id: pratik_n

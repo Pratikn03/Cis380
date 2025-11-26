@@ -36,8 +36,12 @@ def train_isolation_forest(
     scaler : StandardScaler
         Fitted scaler used to normalize features before training.
     """
+    numeric_X, imputer_values = _prep_numeric_features(X)
+
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X.values)
+    X_scaled = scaler.fit_transform(numeric_X.values)
+    scaler.feature_columns_ = list(numeric_X.columns)
+    scaler.imputer_values_ = imputer_values.to_dict()
 
     model = IsolationForest(
         n_estimators=200,
@@ -48,6 +52,17 @@ def train_isolation_forest(
     model.fit(X_scaled)
     return model, scaler
 
+
+def _prep_numeric_features(X: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series]:
+    """Keep only numeric columns with at least one observed value and fill NaNs with medians."""
+    numeric = X.select_dtypes(include=[np.number]).copy()
+    usable = [col for col in numeric.columns if numeric[col].notna().any()]
+    if not usable:
+        raise ValueError("No numeric features with observed values found for Isolation Forest.")
+    numeric = numeric[usable]
+    median_vals = numeric.median(skipna=True)
+    numeric = numeric.fillna(median_vals)
+    return numeric, median_vals
 
 def compute_anomaly_score(model: IsolationForest, scaler: StandardScaler, X: pd.DataFrame) -> np.ndarray:
     """
@@ -62,7 +77,18 @@ def compute_anomaly_score(model: IsolationForest, scaler: StandardScaler, X: pd.
     scores : np.ndarray
         Array of anomaly scores in [0, 1].
     """
-    X_scaled = scaler.transform(X.values)
+    cols = getattr(scaler, "feature_columns_", None)
+    if cols is None:
+        cols = X.select_dtypes(include=[np.number]).columns.tolist()
+    X_numeric = X.loc[:, [c for c in cols if c in X.columns]]
+    if X_numeric.shape[1] == 0:
+        raise ValueError("Isolation Forest features missing from provided data.")
+    imputer_values = getattr(scaler, "imputer_values_", None)
+    if imputer_values:
+        for col, val in imputer_values.items():
+            if col in X_numeric.columns:
+                X_numeric[col] = X_numeric[col].fillna(val)
+    X_scaled = scaler.transform(X_numeric.values)
     # decision_function: higher = more normal, lower = more abnormal
     raw_scores = model.decision_function(X_scaled)
     # Convert to anomaly-like scores

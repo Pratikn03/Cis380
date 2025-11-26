@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
+from uais.preprocessing.pipeline import build_tabular_pipeline
 
 from uais.utils.metrics import compute_classification_metrics
 
@@ -87,19 +88,29 @@ def train_cyber_model(
     X_val: pd.DataFrame,
     y_val: pd.Series,
     config: CyberModelConfig,
+    use_pipeline: bool = False,
 ) -> Tuple[object, Dict[str, float]]:
     """Train a supervised cyber intrusion model and return model + validation metrics."""
     model = _build_model(config)
-    model.fit(X_train, y_train)
+    if use_pipeline:
+        pre = build_tabular_pipeline(pd.concat([X_train, y_train], axis=1), target_col=y_train.name or "label")
+        from sklearn.pipeline import Pipeline as SKPipeline
 
-    if hasattr(model, "predict_proba"):
-        y_val_prob = model.predict_proba(X_val)[:, 1]
+        pipe = SKPipeline([("preprocessor", pre), ("model", model)])
+        pipe.fit(X_train, y_train)
+        estimator = pipe
     else:
-        scores = model.decision_function(X_val)
+        model.fit(X_train, y_train)
+        estimator = model
+
+    if hasattr(estimator, "predict_proba"):
+        y_val_prob = estimator.predict_proba(X_val)[:, 1]
+    else:
+        scores = estimator.decision_function(X_val)
         y_val_prob = 1.0 / (1.0 + np.exp(-scores))
 
     val_metrics = compute_classification_metrics(y_val.values, y_val_prob, threshold=0.5)
-    return model, val_metrics
+    return estimator, val_metrics
 
 
 def cross_val_train_cyber(
@@ -121,5 +132,5 @@ def cross_val_train_cyber(
         proba = model.predict_proba(X_val)[:, 1] if hasattr(model, "predict_proba") else model.predict(X_val)
         aucs.append(compute_classification_metrics(y_val.values, proba, threshold=0.5)["roc_auc"])
         models.append(model)
-    metrics = {"cv_roc_auc_mean": float(np.mean(aucs)) if aucs else float("nan")}
+    metrics = {"cv_roc_auc_mean": float(np.mean(aucs)) if aucs else float("nan"), "cv_scores": aucs}
     return models, metrics

@@ -45,13 +45,13 @@ What’s inside:
 - NLP (DistilBERT baseline) and vision (ResNet18) trainers with optional Kaggle downloads.
 - Streamlit dashboard with pre-generated plots/scores for Fraud/Cyber/Behavior/Vision/Fusion.
 
-## 🗺️ Roadmap Snapshot
+## 🗺️ Roadmap Snapshot (now)
 
-1. Finish populating new datasets (emails, forged documents, etc.).
-2. Wire notebooks 70/80/90/100 to their respective modules.
-3. Enable MLflow tracking + Prefect deployments per domain.
-4. Flesh out FastAPI + Streamlit deployment story.
-5. Export docx/pdf reports summarising experiments.
+1. Leakage-free, fold-aware training (pipelines in flows; CV helpers available).
+2. Modern baselines + ablations (boosting, feature engineering, fusion CV).
+3. Explainability artifacts (SHAP, saliency, Grad-CAM) saved under `experiments/`.
+4. Deployment surfaces (FastAPI + Streamlit; Docker Compose for API/MLflow/UI).
+5. Reporting hooks (metrics summaries, plots) under `reports/` and `figures/`.
 
 ## 🧪 Quick Start
 

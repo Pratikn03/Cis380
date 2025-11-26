@@ -1,56 +1,74 @@
 """Dataset loaders for UAIS-V (fraud/cyber/behavior + NLP/Vision)."""
-import os
 import pickle
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 import pandas as pd
+
+from uais.data.load_behavior_data import load_behavior_data as load_behavior_data_domain
+from uais.data.load_cyber_data import load_cyber_data as load_cyber_data_domain
+from uais.data.load_fraud_data import load_fraud_data as load_fraud_data_domain
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DATA_RAW = PROJECT_ROOT / "data" / "raw"
 
 
-# Existing domain loaders
+def _load_all_tabular(path: Path) -> pd.DataFrame:
+    """Load all CSV/Parquet files under a path (file or directory) and concatenate."""
+    if not path.is_absolute():
+        path = PROJECT_ROOT / path
+    if path.is_file():
+        if path.suffix.lower() == ".parquet":
+            return pd.read_parquet(path)
+        return pd.read_csv(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Path not found: {path}")
+    files = sorted(list(path.rglob("*.csv")) + list(path.rglob("*.parquet")))
+    if not files:
+        raise FileNotFoundError(f"No CSV/Parquet files found under {path}")
+    frames = []
+    for f in files:
+        if f.suffix.lower() == ".parquet":
+            frames.append(pd.read_parquet(f))
+        else:
+            frames.append(pd.read_csv(f))
+    return pd.concat(frames, ignore_index=True, sort=False)
 
-def load_fraud_data(path: str | Path = "data/raw/fraud/creditcard.csv"):
+
+# Existing domain loaders (now aggregate all files when given a directory)
+
+def load_fraud_data(path: str | Path = "data/raw/fraud", n_rows: int | None = None, allow_synthetic: bool = True):
+    df = load_fraud_data_domain(csv_path=path, n_rows=n_rows, allow_synthetic=allow_synthetic)
+    print(f"✅ Loaded fraud data from {path} -> {df.shape}")
+    return df
+
+
+def load_cyber_data(path: str | Path = "data/raw/cyber", n_rows: int | None = None, allow_synthetic: bool = True):
+    df = load_cyber_data_domain(raw_dir=path, n_rows=n_rows, allow_synthetic=allow_synthetic)
+    print(f"✅ Loaded cyber data from {path} -> {df.shape}")
+    return df
+
+
+def load_behavior_data(path: str | Path = "data/raw/behavior", n_rows: int | None = None, allow_synthetic: bool = True):
+    df = load_behavior_data_domain(csv_path=path, n_rows=n_rows, allow_synthetic=allow_synthetic)
+    print(f"✅ Loaded behavior data from {path} -> {df.shape}")
+    return df
+
+
+def load_nlp_data(path: str | Path = "data/raw/nlp"):
     p = Path(path)
-    if not p.exists():
-        raise FileNotFoundError(f"Fraud dataset not found: {p}")
-    print(f"✅ Loading fraud dataset: {p}")
-    return pd.read_csv(p)
+    df = _load_all_tabular(p)
+    print(f"✅ Loaded NLP data from {p} -> {df.shape}")
+    return df
 
 
-def load_cyber_data(path: str | Path = "data/raw/cyber/UNSW-NB15.csv"):
+def load_vision_data(path: str | Path = "data/raw/vision"):
     p = Path(path)
-    if not p.exists():
-        raise FileNotFoundError(f"Cyber dataset not found: {p}")
-    print(f"✅ Loading cyber dataset: {p}")
-    return pd.read_csv(p)
-
-
-def load_behavior_data(path: str | Path = "data/raw/behavior/r4.2/logon.csv"):
-    p = Path(path)
-    if not p.exists():
-        raise FileNotFoundError(f"Behavior dataset not found: {p}")
-    print(f"✅ Loading CERT behavior dataset: {p}")
-    return pd.read_csv(p)
-
-
-def load_nlp_data(path: str | Path = "data/raw/nlp/enron_emails.csv"):
-    p = Path(path)
-    if not p.exists():
-        raise FileNotFoundError(f"NLP dataset not found: {p}")
-    print(f"✅ Loading NLP dataset: {p}")
-    return pd.read_csv(p)
-
-
-def load_vision_data(path: str | Path = "data/raw/vision/deepfake_real.csv"):
-    p = Path(path)
-    if not p.exists():
-        raise FileNotFoundError(f"Vision dataset not found: {p}")
-    print(f"✅ Loading Vision dataset: {p}")
-    return pd.read_csv(p)
+    # If pointing to images, this will fail; use CSV/Parquet metadata under vision if present.
+    df = _load_all_tabular(p)
+    print(f"✅ Loaded vision tabular data from {p} -> {df.shape}")
+    return df
 
 
 # Enron email loader

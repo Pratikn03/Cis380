@@ -42,22 +42,32 @@ def add_basic_fraud_features(
     else:
         df_feats = df
 
-    # Log-transformed amount to reduce skew
-    if amount_column in df_feats.columns:
-        df_feats["amount_log"] = np.log1p(df_feats[amount_column])
+    # Amount column fallback (creditcard uses 'Amount', PaySim uses 'amount')
+    amt_col = amount_column if amount_column in df_feats.columns else ("amount" if "amount" in df_feats.columns else None)
+    if amt_col:
+        df_feats["amount_log"] = np.log1p(df_feats[amt_col].fillna(0))
     else:
-        raise KeyError(f"{amount_column} column not found in DataFrame")
+        raise KeyError(f"Amount column not found in DataFrame (checked '{amount_column}' and 'amount').")
 
-    # Time-based features (specific to the Kaggle fraud dataset)
+    # Time-based features: creditcard uses 'Time' (seconds), PaySim uses 'step' (hours).
     if time_column in df_feats.columns:
-        # Time is in seconds from first transaction
-        df_feats["time_hours"] = df_feats[time_column] / 3600.0
-        # Map to hour-of-day assuming day length of 24h
+        # Time is in seconds from first transaction (coerce to numeric to avoid NaNs/strings)
+        seconds = pd.to_numeric(df_feats[time_column], errors="coerce").fillna(0)
+        df_feats["time_hours"] = seconds / 3600.0
         seconds_per_day = 24 * 3600
-        df_feats["time_seconds_mod_day"] = df_feats[time_column] % seconds_per_day
-        df_feats["hour_of_day"] = (df_feats["time_seconds_mod_day"] / 3600.0).astype(int)
+        df_feats["time_seconds_mod_day"] = seconds % seconds_per_day
+        df_feats["hour_of_day"] = (df_feats["time_seconds_mod_day"] / 3600.0).fillna(0).astype(int)
+    elif "step" in df_feats.columns:
+        # PaySim step is in hours; derive hour-of-day proxy
+        steps = pd.to_numeric(df_feats["step"], errors="coerce").fillna(0)
+        df_feats["time_hours"] = steps
+        df_feats["time_seconds_mod_day"] = (steps * 3600) % (24 * 3600)
+        df_feats["hour_of_day"] = (df_feats["time_seconds_mod_day"] / 3600.0).fillna(0).astype(int)
     else:
-        raise KeyError(f"{time_column} column not found in DataFrame")
+        # Fallback: zeroed time features to avoid breaking pipelines
+        df_feats["time_hours"] = 0
+        df_feats["time_seconds_mod_day"] = 0
+        df_feats["hour_of_day"] = 0
 
     return df_feats
 
@@ -100,8 +110,27 @@ def build_fraud_feature_table(
     if drop_original_time and time_column in df_feats.columns:
         df_feats = df_feats.drop(columns=[time_column])
 
-    # Ensure target column is present
+    # Ensure target column is present; fallback to common alternatives and fill missing values.
+    # This protects against mixing datasets like CreditCard (Class) and PaySim (isFraud)
+    # where concatenation introduces NaNs in one of the label columns.
+    # Include lower-case variants for compatibility with PaySim loader normalization
+    alternate_targets = [c for c in ("isFraud", "isfraud", "Class", "class") if c != target_column]
     if target_column not in df_feats.columns:
-        raise KeyError(f"Target column '{target_column}' not found in DataFrame")
+        for alt in alternate_targets:
+            if alt in df_feats.columns:
+                df_feats[target_column] = df_feats[alt]
+                break
+        else:
+            raise KeyError(f"Target column '{target_column}' not found in DataFrame")
+    else:
+        for alt in alternate_targets:
+            if alt in df_feats.columns:
+                df_feats[target_column] = df_feats[target_column].fillna(df_feats[alt])
+
+    # Coerce target to numeric, drop any remaining missing labels, and cast to int
+    df_feats[target_column] = pd.to_numeric(df_feats[target_column], errors="coerce")
+    if df_feats[target_column].isna().any():
+        df_feats = df_feats.dropna(subset=[target_column]).reset_index(drop=True)
+    df_feats[target_column] = df_feats[target_column].astype(int)
 
     return df_feats
