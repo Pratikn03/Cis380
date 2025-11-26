@@ -1,4 +1,11 @@
-"""Prefect flow for fraud data processing and training with MLflow logging."""
+"""Prefect flow for fraud data processing and training with MLflow logging and explainability.
+
+Flow steps:
+- Load raw fraud data
+- Build features
+- Train with train/val split
+- Export scores/feature importances/SHAP for downstream fusion and dashboard
+"""
 
 import mlflow
 import numpy as np
@@ -30,7 +37,7 @@ def train_task(df):
     y = df[target_col]
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
-    # Correlation leak guard
+    # Correlation leak guard (warn if a feature is overly correlated with the target)
     corr = df.corr(numeric_only=True)[target_col].abs().sort_values(ascending=False)
     leak_features = [idx for idx, val in corr.items() if idx != target_col and val > 0.95]
     if leak_features:

@@ -30,7 +30,7 @@ class VAEConfig:
 
 
 def _build_vae(input_dim: int, latent_dim: int) -> tf.keras.Model:
-    """Construct a simple VAE; keeps all math inside Keras-friendly ops."""
+    """Construct a simple VAE; keep math inside Keras-friendly ops to avoid weak tensor issues."""
     inputs = tf.keras.layers.Input(shape=(input_dim,), dtype="float32")
     x = tf.keras.layers.Dense(128, activation="relu")(inputs)
     z_mean = tf.keras.layers.Dense(latent_dim)(x)
@@ -51,10 +51,11 @@ def _build_vae(input_dim: int, latent_dim: int) -> tf.keras.Model:
     decoded = decoder(z)
     vae = tf.keras.Model(inputs, decoded, name="vae")
 
-    # Use Keras-friendly losses to avoid weak-tensor issues.
-    reconstruction_loss = tf.keras.losses.mse(inputs, decoded) * input_dim
-    kl_loss = -0.5 * tf.reduce_sum(1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var), axis=1)
-    vae.add_loss(tf.reduce_mean(reconstruction_loss + kl_loss))
+    # Reconstruction + KL losses defined with basic ops to avoid weak tensors.
+    reconstruction_loss = tf.reduce_sum(tf.square(inputs - decoded), axis=1)
+    kl_loss = -0.5 * tf.reduce_sum(1.0 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var), axis=1)
+    total_loss = tf.reduce_mean(reconstruction_loss + kl_loss)
+    vae.add_loss(total_loss)
     vae.compile(optimizer="adam")
     return vae, decoder
 

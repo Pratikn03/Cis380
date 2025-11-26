@@ -1,4 +1,9 @@
-"""Training entrypoint for the 30-sequence model (PyTorch TCN or TensorFlow)."""
+"""Training entrypoint for the 30-sequence model (PyTorch TCN or TensorFlow).
+
+Reads data from data/sequences/X_30seq.npy/y_30seq.npy (builds if missing)
+and trains either the torch TCN (default) or the TF model based on config.
+Saves artifacts under artifacts/models/30seq/.
+"""
 from typing import Tuple
 
 import numpy as np

@@ -1,19 +1,19 @@
 # Universal Anomaly Intelligence System (UAIS‑V)
 
 UAIS‑V (Universal Anomaly Intelligence System with Multimodal Fusion) is an
-end‑to‑end anomaly intelligence framework that spans fraud analytics,
-cybersecurity intrusion detection, insider behavior monitoring, NLP log
-analysis, document forgery detection, generative data synthesis, and
+end‑to‑end anomaly intelligence framework covering fraud analytics,
+cybersecurity intrusion detection, insider behavior monitoring, NLP log/email
+analysis, document/vision anomaly detection, generative synthesis, and
 cross‑domain fusion.
 
 The repository contains:
 
 - **Multi-domain data pipelines** (fraud, cyber, CERT behavior, NLP, vision).
 - **Supervised + unsupervised models** (gradient boosting, isolation forest,
-autoencoders, LSTM sequence models).
-- **Fusion + explainability** layers (stacked anomaly score, SHAP, drift).
-- **Experiment tracking + orchestration** stubs (MLflow, Prefect flows).
-- **Deployment surfaces** (FastAPI + Streamlit dashboard skeleton).
+  autoencoders, LSTM/GRU/TCN sequence models, transformers for text, ResNet for vision).
+- **Fusion + explainability** layers (stacked anomaly score, SHAP, saliency, Grad-CAM).
+- **Experiment tracking + orchestration** (MLflow, Prefect flows).
+- **Deployment surfaces** (FastAPI + Streamlit dashboard).
 
 ## 📂 Repository Layout
 

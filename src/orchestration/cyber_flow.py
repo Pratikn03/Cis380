@@ -1,4 +1,11 @@
-"""Prefect flow for cyber intrusion modeling with MLflow logging and explainability export."""
+"""Prefect flow for cyber intrusion modeling with MLflow logging and explainability export.
+
+Flow steps:
+- Load raw cyber data
+- Build features
+- Train with train/val split
+- Export scores/feature importances/SHAP for fusion and dashboard
+"""
 
 import mlflow
 import numpy as np
@@ -71,7 +78,7 @@ def train_task(df):
             paths["experiments"] / "feature_importances.csv", index=False
         )
 
-    # SHAP summary plot (best effort)
+    # SHAP summary plot (best effort; optional dependency)
     try:
         import shap  # noqa: F401
         import matplotlib.pyplot as plt

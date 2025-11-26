@@ -1,4 +1,8 @@
-"""Train a ResNet-based vision classifier for deepfake/forgery detection."""
+"""Train a ResNet-based vision classifier for deepfake/forgery detection.
+
+Expects ImageFolder layout under data_dir with train/ and val/ subdirectories.
+Optionally saves the trained model to disk.
+"""
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Tuple

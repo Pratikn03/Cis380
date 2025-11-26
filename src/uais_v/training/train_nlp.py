@@ -1,4 +1,9 @@
-"""Fine-tune DistilBERT on email/text anomalies."""
+"""Fine-tune DistilBERT on email/text anomalies.
+
+Takes raw texts/labels, tokenizes, trains for a few epochs, and optionally
+saves model/tokenizer to disk. Metrics are computed on the training set
+for quick feedback (not a full validation pipeline).
+"""
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple

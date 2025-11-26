@@ -1,4 +1,12 @@
-"""Prefect flow for behavior sequence models with MLflow logging and score export."""
+"""Prefect flow for behavior sequence models with MLflow logging and score export.
+
+Flow steps:
+- Load behavior data
+- Build basic features
+- Create sequences + mask
+- Train LSTM classifier (CPU-friendly)
+- Export scores and simple saliency for dashboard/fusion
+"""
 
 import mlflow
 import numpy as np
