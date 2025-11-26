@@ -56,17 +56,49 @@ What’s inside:
 ## 🧪 Quick Start
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # on Windows use .venv\Scripts\activate
+# 1) Environment
+python -m venv .venv-macos
+source .venv-macos/bin/activate  # Windows: .\.venv-macos\Scripts\activate
 pip install -r requirements.txt
 
-# Fast dashboard/API preview (uses existing artifacts in experiments/)
+# 2) Data (Enron + CIFAR-10 helpers)
+python scripts/download_data.py --all          # requires ~/.kaggle/kaggle.json
+# or place data manually and re-run with --no-kaggle
+
+# 3) Fast dashboard/API preview (ships with sample artifacts)
 streamlit run dashboard/app_streamlit.py --server.port 8501
 uvicorn deploy.api.main:app --reload --port 8000
 
-# Example: run fraud experiment end‑to‑end
-python src/scripts/run_fraud_experiment.py
+# 4) Example: run fraud experiment end-to-end
+PYTHONPATH=src python src/scripts/run_fraud_experiment.py
 ```
+
+### Training Workflow (scripts/flows)
+
+1. **Ingest + build features** (optional but recommended):
+   ```bash
+   bash scripts/run_ingest.sh
+   bash scripts/run_build_features.sh
+   ```
+2. **Domain trainers** (run what you need; each calls the matching Prefect flow):
+   ```bash
+   bash scripts/run_train_fraud.sh      # LightGBM
+   bash scripts/run_train_cyber.sh      # CatBoost
+   bash scripts/run_train_behavior.sh   # LSTM/sequence
+   bash scripts/run_train_nlp.sh        # DistilBERT
+   bash scripts/run_train_vision.sh     # ResNet/ViT (detects nested Kaggle folders)
+   python src/uais/generative/train_vae.py --config config/base_config.yaml  # optional VAE
+   ```
+3. **Fusion meta-model** (requires per-domain outputs in `experiments/`):
+   ```bash
+   bash scripts/run_fusion.sh
+   ```
+4. **One-shot pipeline** (ingest → features → all domains → fusion):
+   ```bash
+   bash scripts/run_full_fusion.sh
+   ```
+
+Artifacts land under `experiments/<domain>/…`, metrics under `reports/metrics_*.csv`, and MLflow runs under `src/mlruns/`, which the FastAPI + Streamlit layers read automatically.
 
 Each notebook under `notebooks/` mirrors a script in `src/uais/...`. Swap in
 your datasets by updating the matching config file under `config/`.
@@ -98,8 +130,8 @@ the model to `experiments/fusion/models/fusion_meta_model.pkl`.
 
 ### NLP/Vision data download
 
-- Run `python src/scripts/download_nlp_vision.py --all` to fetch Enron emails (Kaggle API) and CIFAR-10 (direct HTTP) into `data/raw/nlp` and `data/raw/vision`.
-- Use `--no-kaggle` if you prefer to place `data/raw/nlp/enron_emails.csv` manually without Kaggle credentials.
+- Run `python scripts/download_data.py --all` to fetch Enron emails (Kaggle API, requires `~/.kaggle/kaggle.json`) and CIFAR-10 (direct HTTP) into `data/raw/nlp` and `data/raw/vision`.
+- Use `--no-kaggle` if you manually place `data/raw/nlp/enron_emails.csv`.
 
 ### NLP and Vision trainers
 

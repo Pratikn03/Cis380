@@ -136,9 +136,17 @@ source venv/bin/activate
 
 ```sh
 pip install --upgrade pip
-pip install numpy pandas scikit-learn matplotlib seaborn jupyter streamlit shap mlflow prefect
-pip install tensorflow-macos tensorflow-metal torch torchvision torchaudio transformers opencv-python
-pip install xgboost lightgbm catboost
+pip install -r requirements.txt
+```
+
+**Step 3: Kaggle credentials for NLP/Vision downloads**
+
+Download `kaggle.json` from your Kaggle account settings, then:
+
+```sh
+mkdir -p ~/.kaggle
+mv ~/Downloads/kaggle.json ~/.kaggle/
+chmod 600 ~/.kaggle/kaggle.json
 ```
 
 **Step 3: Verify GPU (Apple Metal Acceleration)**
@@ -154,29 +162,53 @@ print(tf.config.list_physical_devices('GPU'))
 
 ## 9. How to Run the Project
 
-### A. Step-by-Step Notebook Execution
+### A. Stage Data
 
-Run these notebooks sequentially in Jupyter or VS Code:
+```sh
+# Download Enron + CIFAR-10 via helper (requires ~/.kaggle/kaggle.json)
+python scripts/download_data.py --all
+
+# Optional: ingest + engineered feature tables
+bash scripts/run_ingest.sh
+bash scripts/run_build_features.sh
+```
+
+If you cannot use Kaggle, place `data/raw/nlp/enron_emails.csv` manually and re-run with `--no-kaggle`.
+
+### B. Train Each Domain (Prefect-powered scripts)
+
+```sh
+# run what you need; artifacts saved under experiments/<domain>/
+bash scripts/run_train_fraud.sh
+bash scripts/run_train_cyber.sh
+bash scripts/run_train_behavior.sh
+bash scripts/run_train_nlp.sh
+bash scripts/run_train_vision.sh
+python src/uais/generative/train_vae.py --config config/base_config.yaml  # optional
+
+# fusion stacker after individual models finish
+bash scripts/run_fusion.sh
+
+# or trigger everything end-to-end
+bash scripts/run_full_fusion.sh
+```
+
+Each script wires into `src/orchestration/<domain>_flow.py`, which logs metrics to MLflow and exports models/plots into `experiments/` and `reports/metrics_*.csv`.
+
+### C. Step-by-Step Notebook Execution (for analysis)
+
+Use the notebooks to inspect data, reproduce plots, or validate outputs after training:
 1. 00_data_overview.ipynb – Data loading and validation
 2. 01_eda_fraud.ipynb – Fraud dataset analysis
-3. 10_supervised_fraud.ipynb – Fraud model training (LightGBM/XGBoost)
+3. 10_supervised_fraud.ipynb – Fraud model training walkthrough
 4. 20_unsupervised_fraud.ipynb – Isolation Forest anomaly detection
 5. 30_sequence_models.ipynb – Behavior modeling (CERT LSTM autoencoder)
 6. 70_nlp_email_anomalies.ipynb – Enron email analysis (DistilBERT)
-7. 80_vision_forgery_detection.ipynb – Document forgery detection (ViT/CNN)
+7. 80_vision_forgery_detection.ipynb – Document forgery detection (ResNet/ViT)
 8. 90_generative_synthesis.ipynb – Data generation using GAN/VAE
 9. 100_fusion_and_dashboard.ipynb – Combined score and Streamlit integration
 
-### B. Run End-to-End Scripts
-
-```sh
-PYTHONPATH=src python src/scripts/run_fraud_experiment.py
-python src/scripts/run_cyber_experiment.py
-python src/scripts/run_behavior_experiment.py
-python src/scripts/run_fusion_experiment.py
-```
-
-### C. Launch Dashboard
+### D. Launch Dashboard/API
 
 ```sh
 streamlit run dashboard/app_streamlit.py
@@ -195,6 +227,8 @@ streamlit run dashboard/app_streamlit.py
 | Vision    | ViT          | 1–2 hr                    | Train on subset first    |
 | Generative| GAN/VAE      | 1 hr                      | Optional augmentation    |
 | Fusion    | Meta LightGBM| 20 min                    | Final combination layer  |
+
+Times assume Apple Silicon or similar with GPU acceleration. Running `bash scripts/run_full_fusion.sh` executes these sequentially (≈4 hrs).
 
 ---
 
