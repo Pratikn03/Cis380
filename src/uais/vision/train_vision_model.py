@@ -22,6 +22,7 @@ class VisionConfig:
     epochs: int = 3
     validation_split: float = 0.2
     seed: int = 42
+    backbone: str = "simple_cnn"  # supported: simple_cnn, resnet50/resnet18
 
     def resolve_dir(self) -> Path:
         path = Path(self.dataset_dir)
@@ -30,7 +31,28 @@ class VisionConfig:
         return path
 
 
-def _build_model(num_classes: int, image_size: int) -> tf.keras.Model:
+def _build_model(num_classes: int, image_size: int, backbone: str) -> tf.keras.Model:
+    backbone = (backbone or "simple_cnn").lower()
+
+    if backbone in {"resnet18", "resnet50", "resnet"}:
+        inputs = tf.keras.layers.Input(shape=(image_size, image_size, 3))
+        x = tf.keras.applications.resnet.preprocess_input(inputs)
+        base = tf.keras.applications.ResNet50(
+            include_top=False,
+            weights="imagenet",
+            input_shape=(image_size, image_size, 3),
+            pooling="avg",
+        )
+        base.trainable = False
+        x = base(x)
+        outputs = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
+        model = tf.keras.Model(inputs, outputs)
+        model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+        return model
+
+    if backbone not in {"simple_cnn", ""}:
+        raise ValueError(f"Unsupported backbone '{backbone}'. Use 'simple_cnn' or 'resnet50'.")
+
     inputs = tf.keras.layers.Input(shape=(image_size, image_size, 3))
     x = tf.keras.layers.Rescaling(1.0 / 255)(inputs)
     x = tf.keras.layers.Conv2D(32, 3, activation="relu")(x)
@@ -65,7 +87,7 @@ def run_vision_experiment(cfg: VisionConfig) -> Dict[str, float]:
     )
 
     num_classes = len(train_ds.class_names)
-    model = _build_model(num_classes=num_classes, image_size=cfg.image_size)
+    model = _build_model(num_classes=num_classes, image_size=cfg.image_size, backbone=cfg.backbone)
 
     history = model.fit(train_ds, validation_data=val_ds, epochs=cfg.epochs)
     eval_loss, eval_acc = model.evaluate(val_ds, verbose=0)

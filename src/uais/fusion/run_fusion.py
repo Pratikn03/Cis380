@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 from uais.fusion.build_embeddings import generate_meta_features
 from uais.utils.metrics import classification_metrics
@@ -117,6 +118,10 @@ def train_fusion(cfg_path: Path = DEFAULT_CONFIG):
         X, y, test_size=test_size, stratify=y if len(np.unique(y)) > 1 else None, random_state=random_state
     )
 
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
     meta = LogisticRegression(max_iter=500, class_weight="balanced")
     meta.fit(X_train, y_train)
 
@@ -126,7 +131,7 @@ def train_fusion(cfg_path: Path = DEFAULT_CONFIG):
     paths = domain_paths("fusion")
     paths["models"].mkdir(parents=True, exist_ok=True)
     out_path = paths["models"] / "fusion_meta_model.pkl"
-    joblib.dump(meta, out_path)
+    joblib.dump({"model": meta, "scaler": scaler}, out_path)
 
     print("Fusion metrics:")
     for k, v in metrics.items():

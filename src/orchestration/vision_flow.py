@@ -1,5 +1,6 @@
 """Prefect flow to train vision model (best-effort) and export scores for fusion."""
 from pathlib import Path
+import shutil
 
 import mlflow
 import numpy as np
@@ -18,13 +19,47 @@ def _synthetic_scores(n: int = 50):
     return rng.random(n), (rng.random(n) < 0.3).astype(int)
 
 
+def _resolve_vision_root(data_dir: Path) -> Path:
+    """Normalize dataset layout: accept train/val or Kaggle Intel seg_train/seg_test."""
+    train_dir = data_dir / "train"
+    val_dir = data_dir / "val"
+    if train_dir.exists() and val_dir.exists():
+        return data_dir
+
+    seg_train = data_dir / "seg_train"
+    seg_test = data_dir / "seg_test"
+    if seg_train.exists():
+        normalized = data_dir / "_split"
+        normalized.mkdir(parents=True, exist_ok=True)
+        mapping = {"train": seg_train, "val": seg_test if seg_test.exists() else seg_train}
+        for name, src in mapping.items():
+            dest = normalized / name
+            if dest.exists():
+                if dest.is_symlink() and dest.resolve() == src:
+                    continue
+                if dest.is_dir():
+                    shutil.rmtree(dest)
+                else:
+                    dest.unlink()
+            try:
+                dest.symlink_to(src)
+            except OSError:
+                shutil.copytree(src, dest)
+        return normalized
+
+    return data_dir
+
+
 @task
 def train_and_export(data_dir: Path):
-    has_data = (data_dir / "train").exists()
+    resolved_dir = _resolve_vision_root(data_dir)
+    has_data = (resolved_dir / "train").exists()
     if has_data:
         vision_cfg = VisionConfig()
         train_cfg = VisionTrainConfig(epochs=1, batch_size=8)
-        model, metrics, _ = train_resnet_classifier(data_dir, vision_cfg, train_cfg, save_dir=Path("models/vision/resnet"))
+        model, metrics, _ = train_resnet_classifier(
+            resolved_dir, vision_cfg, train_cfg, save_dir=Path("models/vision/resnet")
+        )
     else:
         scores, labels = _synthetic_scores()
         metrics = {}
@@ -44,7 +79,7 @@ def train_and_export(data_dir: Path):
                     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 ]
             )
-            val_ds = ImageFolder(data_dir / "val", transform=transform)
+            val_ds = ImageFolder(resolved_dir / "val", transform=transform)
             loader = torch.utils.data.DataLoader(val_ds, batch_size=8, shuffle=False)
             all_probs = []
             all_labels = []
@@ -80,7 +115,7 @@ def train_and_export(data_dir: Path):
                     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 ]
             )
-            val_ds = ImageFolder(data_dir / "val", transform=transform)
+            val_ds = ImageFolder(resolved_dir / "val", transform=transform)
             if len(val_ds) > 0:
                 img, _ = val_ds[0]
                 from torchvision.transforms.functional import to_pil_image
@@ -95,7 +130,7 @@ def train_and_export(data_dir: Path):
 
 
 @flow(name="Vision Flow")
-def vision_pipeline(data_dir: str = "data/processed/vision"):
+def vision_pipeline(data_dir: str = "data/raw/vision/datasets/puneet6060/intel-image-classification/versions/2"):
     settings = load_mlflow_settings()
     setup_mlflow(experiment_name=settings["experiment_name"], tracking_uri=settings["tracking_uri"])
     with mlflow.start_run(run_name="vision_flow"):

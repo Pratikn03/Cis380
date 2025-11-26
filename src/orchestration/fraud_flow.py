@@ -30,6 +30,12 @@ def train_task(df):
     y = df[target_col]
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
+    # Correlation leak guard
+    corr = df.corr(numeric_only=True)[target_col].abs().sort_values(ascending=False)
+    leak_features = [idx for idx, val in corr.items() if idx != target_col and val > 0.95]
+    if leak_features:
+        print(f"[warn] Potential leakage features with high correlation to target: {leak_features}")
+
     config = FraudModelConfig()
     model, metrics = train_fraud_model(X_train, y_train, X_val, y_val, config)
 
@@ -46,6 +52,11 @@ def train_task(df):
 
     # Export scores for fusion/explainability
     y_val_proba = model.predict_proba(X_val)[:, 1]
+    from uais.utils.metrics import best_f1_threshold
+
+    best_thr = best_f1_threshold(y_val.values, y_val_proba)
+    mlflow.log_metric("best_f1_threshold", best_thr)
+
     paths = domain_paths("fraud")
     scores_path = paths["experiments"] / "scores.csv"
     paths["experiments"].mkdir(parents=True, exist_ok=True)

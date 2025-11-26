@@ -14,10 +14,38 @@ from uais.utils.paths import domain_paths
 
 @task
 def load_nlp_data(path: Path) -> tuple[list[str], list[int]]:
+    def _find_fake_news_root(base: Path) -> Path | None:
+        if (base / "Fake.csv").exists():
+            return base
+        for fake_csv in base.rglob("Fake.csv"):
+            return fake_csv.parent
+        return None
+
+    # Handle Fake/True news dataset laid out in data/raw/nlp/fakenews/datasets/...
     if path.exists():
-        df = pd.read_csv(path)
-        if {"text", "label"}.issubset(df.columns):
-            return df["text"].astype(str).tolist(), df["label"].astype(int).tolist()
+        if path.is_dir():
+            root = _find_fake_news_root(path)
+            if root:
+                fake_path = root / "Fake.csv"
+                true_path = root / "True.csv"
+                if fake_path.exists() and true_path.exists():
+                    df_fake = pd.read_csv(fake_path)
+                    df_true = pd.read_csv(true_path)
+                    text_col = "text" if "text" in df_fake.columns else df_fake.columns[0]
+                    df_fake = df_fake.copy()
+                    df_true = df_true.copy()
+                    df_fake["label"] = 1
+                    df_true["label"] = 0
+                    combined = pd.concat(
+                        [df_fake[[text_col, "label"]], df_true[[text_col, "label"]]], ignore_index=True
+                    )
+                    combined = combined.rename(columns={text_col: "text"})
+                    return combined["text"].astype(str).tolist(), combined["label"].astype(int).tolist()
+
+        if path.is_file():
+            df = pd.read_csv(path)
+            if {"text", "label"}.issubset(df.columns):
+                return df["text"].astype(str).tolist(), df["label"].astype(int).tolist()
     texts = ["normal message", "urgent wire now", "please review invoice"]
     labels = [0, 1, 0]
     return texts, labels
@@ -49,7 +77,7 @@ def train_and_export(texts: list[str], labels: list[int]):
 
 
 @flow(name="NLP Flow")
-def nlp_pipeline(data_path: str = "data/processed/nlp/enron_emails.csv"):
+def nlp_pipeline(data_path: str = "data/raw/nlp/fakenews"):
     settings = load_mlflow_settings()
     setup_mlflow(experiment_name=settings["experiment_name"], tracking_uri=settings["tracking_uri"])
     with mlflow.start_run(run_name="nlp_flow"):

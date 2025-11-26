@@ -80,3 +80,20 @@ def anomaly_metrics(y_true, scores, threshold=None, contamination: float = 0.05)
     out["threshold"] = float(threshold)
     return out
 
+
+def best_f1_threshold(y_true: np.ndarray, y_prob: np.ndarray) -> float:
+    """Find probability threshold that maximizes F1 on given labels."""
+    y_true = np.asarray(y_true)
+    y_prob = np.asarray(y_prob)
+    thresholds = np.unique(y_prob)
+    if len(thresholds) == 0:
+        return 0.5
+    best_thr = 0.5
+    best_f1 = -1.0
+    for thr in thresholds:
+        preds = (y_prob >= thr).astype(int)
+        f1 = metrics.f1_score(y_true, preds, zero_division=0)
+        if f1 > best_f1:
+            best_f1 = f1
+            best_thr = thr
+    return float(best_thr)
