@@ -13,6 +13,8 @@ from typing import Dict
 
 import tensorflow as tf
 
+IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tif", ".tiff")
+
 
 @dataclass
 class VisionConfig:
@@ -67,8 +69,52 @@ def _build_model(num_classes: int, image_size: int, backbone: str) -> tf.keras.M
     return model
 
 
+def _contains_images(directory: Path) -> bool:
+    """Return True if the directory appears to contain image files."""
+    if not directory.exists() or not directory.is_dir():
+        return False
+    for ext in IMAGE_EXTENSIONS:
+        pattern = f"*{ext}"
+        if next(directory.glob(pattern), None) is not None:
+            return True
+        if next(directory.glob(pattern.upper()), None) is not None:
+            return True
+    return False
+
+
+def _normalize_dataset_root(directory: Path) -> Path:
+    """Some Kaggle archives nest the actual class folders under an extra directory.
+
+    If the provided directory only contains a single child directory that in turn
+    has multiple subdirectories with images (e.g., seg_train/seg_train/*), point
+    TensorFlow at that nested directory so class discovery works as expected.
+    """
+    if not directory.exists():
+        return directory
+
+    if _contains_images(directory):
+        return directory
+
+    subdirs = [d for d in directory.iterdir() if d.is_dir()]
+    if len(subdirs) != 1:
+        return directory
+
+    candidate = subdirs[0]
+    grandkids = [d for d in candidate.iterdir() if d.is_dir()]
+    if not grandkids:
+        return directory
+
+    if any(_contains_images(grandchild) for grandchild in grandkids):
+        return candidate
+
+    return directory
+
+
 def run_vision_experiment(cfg: VisionConfig) -> Dict[str, float]:
-    data_dir = cfg.resolve_dir()
+    resolved_dir = cfg.resolve_dir()
+    data_dir = _normalize_dataset_root(resolved_dir)
+    if data_dir != resolved_dir:
+        print(f"Detected nested dataset directory. Using '{data_dir}' as the dataset root instead of '{resolved_dir}'.")
     train_ds = tf.keras.preprocessing.image_dataset_from_directory(
         data_dir,
         validation_split=cfg.validation_split,
