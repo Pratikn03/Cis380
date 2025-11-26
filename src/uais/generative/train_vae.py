@@ -30,17 +30,19 @@ class VAEConfig:
 
 
 def _build_vae(input_dim: int, latent_dim: int) -> tf.keras.Model:
-    inputs = tf.keras.layers.Input(shape=(input_dim,))
+    """Construct a simple VAE; keeps all math inside Keras-friendly ops."""
+    inputs = tf.keras.layers.Input(shape=(input_dim,), dtype="float32")
     x = tf.keras.layers.Dense(128, activation="relu")(inputs)
     z_mean = tf.keras.layers.Dense(latent_dim)(x)
     z_log_var = tf.keras.layers.Dense(latent_dim)(x)
 
     def sampling(args):
         z_mean_, z_log_var_ = args
-        epsilon = tf.keras.backend.random_normal(shape=(tf.shape(z_mean_)[0], latent_dim))
+        epsilon = tf.random.normal(shape=(tf.shape(z_mean_)[0], latent_dim))
         return z_mean_ + tf.exp(0.5 * z_log_var_) * epsilon
 
     z = tf.keras.layers.Lambda(sampling)([z_mean, z_log_var])
+
     decoder_input = tf.keras.layers.Input(shape=(latent_dim,))
     x_dec = tf.keras.layers.Dense(128, activation="relu")(decoder_input)
     outputs = tf.keras.layers.Dense(input_dim, activation="linear")(x_dec)
@@ -49,10 +51,9 @@ def _build_vae(input_dim: int, latent_dim: int) -> tf.keras.Model:
     decoded = decoder(z)
     vae = tf.keras.Model(inputs, decoded, name="vae")
 
-    reconstruction_loss = tf.keras.losses.mse(inputs, decoded)
-    reconstruction_loss *= input_dim
-    kl_loss = 1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var)
-    kl_loss = -0.5 * tf.reduce_mean(kl_loss, axis=-1)
+    # Use Keras-friendly losses to avoid weak-tensor issues.
+    reconstruction_loss = tf.keras.losses.mse(inputs, decoded) * input_dim
+    kl_loss = -0.5 * tf.reduce_sum(1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var), axis=1)
     vae.add_loss(tf.reduce_mean(reconstruction_loss + kl_loss))
     vae.compile(optimizer="adam")
     return vae, decoder
@@ -66,7 +67,7 @@ def run_vae_pipeline(cfg: VAEConfig) -> Dict[str, float]:
         raise ValueError("No numeric columns available for VAE training.")
 
     scaler = StandardScaler()
-    X = scaler.fit_transform(df.values)
+    X = scaler.fit_transform(df.values).astype("float32")
     X_train, X_test = train_test_split(X, test_size=cfg.test_size, random_state=cfg.random_state)
 
     vae, decoder = _build_vae(input_dim=X.shape[1], latent_dim=cfg.latent_dim)
