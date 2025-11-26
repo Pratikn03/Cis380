@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import StratifiedKFold
 
 from uais.utils.metrics import compute_classification_metrics
 
@@ -104,3 +105,26 @@ def train_fraud_model(
 
     metrics_dict = compute_classification_metrics(y_val.values, y_val_prob, threshold=0.5)
     return model, metrics_dict
+
+
+def cross_val_train_fraud(
+    X: pd.DataFrame,
+    y: pd.Series,
+    config: FraudModelConfig,
+    n_splits: int = 3,
+    random_state: int = 42,
+) -> Tuple[list[Any], Dict[str, float]]:
+    """Stratified K-fold training for stability; uses low n_splits to limit budget."""
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    aucs = []
+    models = []
+    for train_idx, val_idx in skf.split(X, y):
+        X_tr, X_val = X.iloc[train_idx], X.iloc[val_idx]
+        y_tr, y_val = y.iloc[train_idx], y.iloc[val_idx]
+        model = _build_model(config)
+        model.fit(X_tr, y_tr)
+        proba = model.predict_proba(X_val)[:, 1] if hasattr(model, "predict_proba") else model.predict(X_val)
+        aucs.append(compute_classification_metrics(y_val.values, proba, threshold=0.5)["roc_auc"])
+        models.append(model)
+    metrics = {"cv_roc_auc_mean": float(np.mean(aucs)) if aucs else float("nan")}
+    return models, metrics
