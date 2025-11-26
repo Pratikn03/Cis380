@@ -1,0 +1,23 @@
+# Optional heavy/UX dependencies. Install as needed:
+# pip install -r requirements-optional.txt
+
+# UI / Dashboard
+streamlit>=1.28.0
+plotly>=5.23.0
+
+# Explainability
+shap>=0.44.0
+lime>=0.2.0.1
+
+# Deep learning (CPU wheels by default; swap for GPU-specific wheels on your platform)
+torch>=2.1.0 --index-url https://download.pytorch.org/whl/cpu
+torchvision>=0.15.0 --index-url https://download.pytorch.org/whl/cpu
+torchaudio>=2.1.0 --index-url https://download.pytorch.org/whl/cpu
+tensorflow-cpu>=2.11.0
+
+# NLP
+transformers>=4.43.0
+
+# Vision
+pillow>=9.0.0
+opencv-python>=4.8.0

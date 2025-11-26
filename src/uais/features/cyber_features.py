@@ -9,6 +9,7 @@ def build_cyber_feature_table(
     df_raw: pd.DataFrame,
     target_column: str = "label",
     drop_columns: Optional[Sequence[str]] = None,
+    freq_encode_cats: bool = True,
 ) -> pd.DataFrame:
     """Build a feature table for UNSW-NB15.
 
@@ -39,6 +40,21 @@ def build_cyber_feature_table(
     X = df.drop(columns=[target_column])
     cat_cols = X.select_dtypes(include=["object", "category", "bool"]).columns.tolist()
     num_cols = X.select_dtypes(include=[np.number]).columns.tolist()
+
+    # Basic rate features if bytes/duration available
+    if all(col in X.columns for col in ["dur", "sbytes", "dbytes"]):
+        dur = pd.to_numeric(X["dur"], errors="coerce").replace([np.inf, -np.inf], np.nan)
+        dur = dur.where(dur > 0, np.nan)
+        X["bytes_per_sec_src"] = X["sbytes"] / dur
+        X["bytes_per_sec_dst"] = X["dbytes"] / dur
+        num_cols.extend(["bytes_per_sec_src", "bytes_per_sec_dst"])
+
+    # Frequency encoding for categoricals to capture rarity
+    if freq_encode_cats and cat_cols:
+        for col in cat_cols:
+            freq = X[col].value_counts(normalize=True)
+            X[f"{col}_freq"] = X[col].map(freq).fillna(0)
+            num_cols.append(f"{col}_freq")
 
     print(f"Numeric features: {len(num_cols)}, Categorical features: {len(cat_cols)}")
 

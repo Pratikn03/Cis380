@@ -11,6 +11,8 @@ Steps:
 """
 
 from pathlib import Path
+import json
+import joblib
 
 import numpy as np
 import pandas as pd
@@ -23,9 +25,11 @@ from uais.utils.metrics import compute_classification_metrics
 from uais.utils.plotting import plot_roc_curve, plot_pr_curve
 from uais.anomaly.train_isolation_forest import train_isolation_forest, compute_anomaly_score
 from uais.ensembles.blending import blend_supervised_and_anomaly
+from uais.utils.paths import domain_paths, ensure_directories
 
 
 def main():
+    ensure_directories()
     project_root = Path(__file__).resolve().parents[2]
     print(f"Project root: {project_root}")
 
@@ -95,12 +99,52 @@ def main():
     for k, v in hybrid_metrics.items():
         print(f"  {k}: {v:.4f}")
 
-    plot_roc_curve(y_test.values, hybrid_scores, title="Fraud ROC (Hybrid)", show=False,
-                   save_path=str(plots_dir / "roc_hybrid.png"))
-    plot_pr_curve(y_test.values, hybrid_scores, title="Fraud PR (Hybrid)", show=False,
-                  save_path=str(plots_dir / "pr_hybrid.png"))
+    plot_roc_curve(
+        y_test.values,
+        hybrid_scores,
+        title="Fraud ROC (Hybrid)",
+        show=False,
+        save_path=str(plots_dir / "roc_hybrid.png"),
+    )
+    plot_pr_curve(
+        y_test.values,
+        hybrid_scores,
+        title="Fraud PR (Hybrid)",
+        show=False,
+        save_path=str(plots_dir / "pr_hybrid.png"),
+    )
+
+    # Persist artifacts for dashboard/API/fusion
+    paths = domain_paths("fraud")
+    (paths["models"] / "supervised").mkdir(parents=True, exist_ok=True)
+    joblib.dump(model, paths["models"] / "supervised" / "fraud_model.pkl")
+
+    metrics_out = {
+        "val": val_metrics,
+        "test": test_metrics,
+        "hybrid": hybrid_metrics,
+    }
+    metrics_dir = paths["experiments"] / "metrics"
+    metrics_dir.mkdir(parents=True, exist_ok=True)
+    with open(metrics_dir / "metrics.json", "w", encoding="utf-8") as f:
+        json.dump(metrics_out, f, indent=2)
+
+    # Flatten key metrics for Streamlit convenience
+    pd.DataFrame(
+        [
+            {"Metric": "test_roc_auc", "Value": test_metrics.get("roc_auc", float("nan"))},
+            {"Metric": "test_f1", "Value": test_metrics.get("f1", float("nan"))},
+            {"Metric": "hybrid_roc_auc", "Value": hybrid_metrics.get("roc_auc", float("nan"))},
+            {"Metric": "hybrid_f1", "Value": hybrid_metrics.get("f1", float("nan"))},
+        ]
+    ).to_csv(metrics_dir / "metrics.csv", index=False)
+
+    scores_dir = paths["experiments"]
+    scores_dir.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame({"score": y_test_prob, "label": y_test.values}).to_csv(scores_dir / "scores.csv", index=False)
 
     print("Experiment completed. Plots saved to:", plots_dir)
+    print("Artifacts saved under:", paths["experiments"])
 
 
 if __name__ == "__main__":

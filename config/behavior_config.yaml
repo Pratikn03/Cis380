@@ -2,7 +2,7 @@
 project_name: "UAIS - Behavior (CERT)"
 
 data:
-  target: null             # unsupervised
+  target: Revenue          # default behavior label; set to null for unsupervised runs
   id_column: user          # adjust to your user column
   datetime_column: date    # adjust to your timestamp column
   file_name: logon.csv     # or the CERT CSV you’re using
@@ -10,11 +10,9 @@ data:
 
 features:
   numeric: []              # add engineered numeric features (hour, dayofweek, content_len, etc.)
-  categorical:
   categorical: []
 
 training:
   model_type: autoencoder
   learning_rate: 0.001
-  anomaly_contamination: 0.05
   anomaly_contamination: 0.05

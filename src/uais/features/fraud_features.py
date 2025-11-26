@@ -78,6 +78,7 @@ def build_fraud_feature_table(
     amount_column: str = "Amount",
     target_column: str = "Class",
     drop_original_time: bool = False,
+    group_id_column: Optional[str] = None,
 ) -> pd.DataFrame:
     """
     Full feature pipeline entrypoint for fraud (v1).
@@ -106,6 +107,25 @@ def build_fraud_feature_table(
         Feature-engineered table ready for modeling, including the target column.
     """
     df_feats = add_basic_fraud_features(df, time_column=time_column, amount_column=amount_column, copy=True)
+
+    # Simple rolling aggregates per entity (if an id column is provided)
+    if group_id_column and group_id_column in df_feats.columns:
+        df_feats = df_feats.sort_values([group_id_column, time_column] if time_column in df_feats.columns else [group_id_column])
+        gb = df_feats.groupby(group_id_column)
+        # Count of txns in past window proxies via expanding counts
+        df_feats["tx_count_per_entity"] = gb.cumcount()
+        # Amount running mean/std
+        df_feats["amount_running_mean"] = gb[amount_column if amount_column in df_feats.columns else "Amount"].transform(
+            lambda s: s.expanding().mean()
+        )
+        df_feats["amount_running_std"] = gb[amount_column if amount_column in df_feats.columns else "Amount"].transform(
+            lambda s: s.expanding().std().fillna(0)
+        )
+        df_feats["amount_zscore_entity"] = (
+            (df_feats[amount_column if amount_column in df_feats.columns else "Amount"] - df_feats["amount_running_mean"])
+            / (df_feats["amount_running_std"] + 1e-6)
+        )
+        df_feats = df_feats.fillna(0)
 
     if drop_original_time and time_column in df_feats.columns:
         df_feats = df_feats.drop(columns=[time_column])

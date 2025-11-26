@@ -1,29 +1,21 @@
-"""Prefect flow to train fusion meta-model from per-domain scores."""
-from pathlib import Path
+"""Best-effort fusion pipeline wrapper."""
+from __future__ import annotations
 
-import mlflow
-from prefect import flow, task
+from uais.utils.logging_utils import setup_logging
 
-from uais.fusion.run_fusion import train_fusion
-from uais.utils.mlflow_utils import load_mlflow_settings, setup_mlflow
+logger = setup_logging(__name__)
 
 
-@task
-def train_fusion_task(cfg_path: Path):
-    model, metrics = train_fusion(cfg_path)
-    mlflow.log_metrics(metrics)
-    return metrics
+def fusion_pipeline():
+    """Run the fusion experiment script."""
+    try:
+        from src.scripts.run_fusion_experiment import main as run_fusion
+    except Exception as exc:  # pragma: no cover - import guard
+        logger.error("Fusion pipeline import failed: %s", exc)
+        return
+    logger.info("Starting fusion pipeline via run_fusion_experiment")
+    run_fusion()
+    logger.info("Fusion pipeline complete")
 
 
-@flow(name="Fusion Flow")
-def fusion_pipeline(cfg_path: str = "configs/fusion_baseline.yaml"):
-    settings = load_mlflow_settings()
-    setup_mlflow(experiment_name=settings["experiment_name"], tracking_uri=settings["tracking_uri"])
-
-    with mlflow.start_run(run_name="fusion_flow"):
-        metrics = train_fusion_task(Path(cfg_path))
-        print("Fusion pipeline completed.", metrics)
-
-
-if __name__ == "__main__":
-    fusion_pipeline()
+__all__ = ["fusion_pipeline"]
