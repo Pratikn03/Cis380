@@ -1,143 +1,343 @@
-# Universal Anomaly Intelligence System (UAIS‑V)
+# 🧠 **OmniChatX – Unified Multi-Domain AI Agent**
 
-UAIS‑V is a multimodal anomaly-intelligence playground that trains domain experts for fraud, cyber, insider behavior, NLP, vision, and fusion models, then serves the results through FastAPI and Streamlit. Prefect + MLflow orchestrate the runs, while pre-generated artifacts allow instant dashboard previews.
-
----
-
-## 🌟 Highlights
-- **Domain coverage:** LightGBM/CatBoost tabular fraud + cyber, sequence LSTM for behavior, DistilBERT NLP, ResNet/ViT vision, optional VAE/GAN synthesis, and stacked fusion.
-- **MLOps tooling:** Prefect flows, MLflow tracking, reproducible configs, and scripted runners.
-- **Explainability:** SHAP summaries, Grad-CAM heatmaps, saliency scores, and drift checks saved under `experiments/`.
-- **Deployment surfaces:** FastAPI endpoints (`deploy/api`) and Streamlit dashboard (`dashboard/`) wired to produced artifacts.
+### *A full-stack AI system integrating LLMs, RAG, multi-domain ML models, anomaly detection, recommendations, and agentic orchestration.*
 
 ---
 
-## 📁 Repository Map (trimmed)
+## 🚀 **Overview**
+
+**OmniChatX** is a **Tier-4 AI Agent System** designed to combine:
+
+* 🔥 **LLM Reasoning (OpenAI / Groq / Mistral)**
+* 🔍 **RAG (Retrieval-Augmented Generation)**
+* 🧩 **Fraud Detection ML Model**
+* 🛡 **Cyber Intrusion Detection Model**
+* 🧠 **Behavior / Insider Threat Detection**
+* 🎯 **Recommendation Engine**
+* 🤖 **Agent Orchestrator**
+* 🖥 **Streamlit Chatbot + Optional Static UI**
+
+This project demonstrates **end-to-end AI engineering**, including model training, vector search, agent routing, frontend design, API development, and explainability.
+
+It is engineered to serve as a **portfolio-quality AI project** for internships in Machine Learning, AI Engineering, MLOps, and Software Development.
+
+---
+
+## ⭐ **Key Features**
+
+### 🧠 **1. LLM Reasoning**
+
+* ChatGPT-like natural language interface
+* Uses OpenAI/Groq/Mistral LLMs
+* Default fallback when no specialized model is needed
+
+---
+
+### 📚 **2. RAG (Retrieval-Augmented Generation)**
+
+* Adds factual knowledge from your documents
+* Supports PDFs, text files, notes, datasets
+* Uses SentenceTransformers embeddings
+* Vector search through custom Vector Store
+
+---
+
+### 🔐 **3. Fraud Detection Module**
+
+* Trained on credit card + PaySim datasets
+* Predicts fraud probability
+* SHAP interpretation support
+* API: `/api/fraud`
+
+---
+
+### 🛡 **4. Cyber Intrusion Detection Module**
+
+* Trained on UNSW-NB15 dataset
+* Attack classification + risk score
+* API: `/api/cyber`
+
+---
+
+### 👤 **5. Behavior / Insider Threat Module**
+
+* Uses CERT r4.2 dataset
+* Unsupervised anomaly detection
+* API: `/api/behavior`
+
+---
+
+### 🎯 **6. Recommendation Engine**
+
+* Returns intelligent suggestions
+* Supports user-item interactions
+* API: `/api/recommend`
+
+---
+
+### 🤖 **7. OmniChatX Agent Orchestrator**
+
+A unified agent that decides automatically:
+
+| Task Type                 | Engine Used    |
+| ------------------------- | -------------- |
+| General questions         | LLM            |
+| Document answers          | RAG            |
+| Fraud queries             | Fraud ML model |
+| Cyber logs                | Cyber model    |
+| Employee/insider patterns | Behavior model |
+| Recommendation tasks      | Recommender    |
+| Other                     | LLM fallback   |
+
+Located in:
+
 ```
-config/                  # YAML configs per domain
-data/                    # raw / processed datasets
-notebooks/               # 00–100 analysis notebooks
-src/
-  ├── uais/              # primary package
-  │   ├── data/, features/, supervised/, anomaly/, sequence/, nlp/, vision/, generative/, fusion/, explainability/
-  ├── orchestration/     # Prefect flows
-  └── scripts/           # CLI helpers
-experiments/             # metrics, plots, saved scores/models
-reports/                 # CSV summaries + docs
-dashboard/               # Streamlit UI
-deploy/                  # FastAPI app
+agent/orchestrator.py
 ```
 
 ---
 
-## ⚙️ Setup
+### 🖥 **8. Frontend UI**
 
-```bash
-# clone repo first, then:
-python -m venv .venv-macos           # any name works
-source .venv-macos/bin/activate      # Windows: .\.venv-macos\Scripts\activate
-pip install --upgrade pip
+Two options:
+
+#### ✔ **Streamlit UI (active by default)**
+
+Live chatbot interface with:
+
+* session memory
+* tool routing
+* multi-model support
+
+#### ✔ **Static HTML UI (optional professional layout)**
+
+Located in `/ui` (index.html, styles.css, app.js)
+
+---
+
+### ⚙ **9. FastAPI Backend**
+
+Unified routes:
+
+```
+/api/chat
+/api/rag
+/api/fraud
+/api/cyber
+/api/behavior
+/api/recommend
+```
+
+Backend entry point:
+
+```
+backend/main.py
+```
+
+---
+
+## 🧩 **Project Structure**
+
+```
+universal-anomaly-intelligence-v2/
+│
+├── ui/
+│   ├── index.html
+│   ├── app.js
+│   ├── styles.css
+│
+├── rag/
+│   ├── loader.py
+│   ├── embed.py
+│   ├── retriever.py
+│   ├── vector_store/
+│
+├── agent/
+│   ├── orchestrator.py
+│   ├── policy.py
+│   ├── utils/
+│       ├── shap_explainer.py
+│       ├── formatters.py
+│
+├── backend/
+│   ├── api/
+│   │   ├── chat.py
+│   │   ├── rag.py
+│   │   ├── fraud.py
+│   │   ├── cyber.py
+│   │   ├── behavior.py
+│   │   ├── recommend.py
+│   ├── main.py
+│
+├── src/
+│   ├── train/
+│       ├── train_fraud.py
+│       ├── train_cyber.py
+│       ├── train_behavior.py
+│       ├── train_recommender.py
+│
+├── data/
+│   ├── raw/
+│   │   ├── fraud/
+│   │   ├── cyber/
+│   │   ├── behavior/
+│   │   ├── nlp/
+│   │   ├── vision/
+│   │   ├── recommendation/
+│   ├── docs/
+│   ├── processed/
+│
+├── models/
+│   ├── fraud_model.pkl
+│   ├── cyber_model.pkl
+│   ├── behavior_model.pkl
+│   ├── recommender_model.pkl
+│
+├── scripts/
+│   ├── start_all.sh
+│   ├── rebuild_rag.sh
+│
+├── requirements.txt
+├── Dockerfile
+└── README.md
+```
+
+---
+
+## ⚡ **Setup & Installation**
+
+### ► Create environment
+
+```
+conda create -n omnichatx python=3.10
+conda activate omnichatx
 pip install -r requirements.txt
 ```
 
-### Kaggle credentials (for Enron/NLP data helper)
-Download `kaggle.json` from https://www.kaggle.com/settings/account and run:
-```bash
-mkdir -p ~/.kaggle
-mv ~/Downloads/kaggle.json ~/.kaggle/
-chmod 600 ~/.kaggle/kaggle.json
+### ► Start backend (FastAPI)
+
+```
+uvicorn backend.main:app --reload
+```
+
+### ► Start Streamlit UI
+
+```
+streamlit run app/streamlit_chatbot/app.py
+```
+
+### ► Optional: Start static UI
+
+Serve `/ui/index.html` using any static server:
+
+```
+python3 -m http.server
 ```
 
 ---
 
-## 📦 Data
+## 🔌 API Endpoints
 
-```bash
-# Fetch Enron emails (via Kaggle API) + CIFAR10
-python scripts/download_data.py --all
+| Endpoint         | Purpose                  |
+| ---------------- | ------------------------ |
+| `/api/chat`      | LLM conversation         |
+| `/api/rag`       | Document retrieval       |
+| `/api/fraud`     | Fraud prediction         |
+| `/api/cyber`     | Cyber threat detection   |
+| `/api/behavior`  | Insider threat detection |
+| `/api/recommend` | Recommender system       |
 
-# No Kaggle? place data/raw/nlp/enron_emails.csv manually and re-run:
-python scripts/download_data.py --all --no-kaggle
+---
+
+## 🧠 **Model Training**
+
+Training scripts are located in:
+
+```
+src/train/
 ```
 
-Optional preprocessing:
-```bash
-bash scripts/run_ingest.sh
-bash scripts/run_build_features.sh
+You can retrain any model:
+
+```
+python src/train/train_fraud.py
+python src/train/train_cyber.py
+python src/train/train_behavior.py
+python src/train/train_recommender.py
 ```
 
 ---
 
-## 🏋️ Training Flows
+## 📘 **How It Works (High-Level)**
 
-All scripts assume the virtualenv is active and `PYTHONPATH=src`.
+1. User sends a message
+2. The **Orchestrator** analyzes the intent
+3. Based on message type, it chooses:
 
-```bash
-# Domain trainers (run the ones you need)
-bash scripts/run_train_fraud.sh        # LightGBM
-bash scripts/run_train_cyber.sh        # CatBoost
-bash scripts/run_train_behavior.sh     # LSTM autoencoder
-bash scripts/run_train_nlp.sh          # DistilBERT
-bash scripts/run_train_vision.sh       # ResNet/ViT (auto-detects nested Kaggle folders)
-python src/uais/generative/train_vae.py --config config/base_config.yaml   # optional VAE/GAN
+   * LLM
+   * RAG
+   * Fraud model
+   * Cyber model
+   * Behavior model
+   * Recommender
+4. Engine produces output
+5. Orchestrator merges results
+6. Streamlit UI displays final response
 
-# Fusion stacker (after domains finish)
-bash scripts/run_fusion.sh
-
-# End-to-end (ingest → features → every domain → fusion; ~4 hrs on M-series GPU)
-bash scripts/run_full_fusion.sh
-```
-
-Outputs:
-- `experiments/<domain>/` → models, plots, Grad-CAM, saliency, etc.
-- `reports/metrics_<domain>.csv` → scoreboard for dashboard/API.
-- `src/mlruns/` → MLflow artifacts.
+This creates a **multi-intelligence AI assistant**, not a basic chatbot.
 
 ---
 
-## 📓 Notebooks
+## 🏆 **Why This Project Is Special**
 
-Use notebooks for EDA or report figures after scripted training:
+* Full end-to-end AI system
+* Multiple ML models integrated
+* Real agentic reasoning
+* Document-aware RAG intelligence
+* Modular backend + UI
+* Professional architecture
+* Internship-level and research-level quality
 
-| Notebook | Purpose |
-|----------|---------|
-| `00_data_overview.ipynb` | sanity check & join data sources |
-| `10_supervised_fraud.ipynb`, `20_unsupervised_fraud.ipynb` | fraud modeling |
-| `30_sequence_models.ipynb` | CERT behavior LSTM autoencoder |
-| `70_nlp_email_anomalies.ipynb` | DistilBERT on Enron |
-| `80_vision_forgery_detection.ipynb` | ResNet/ViT; now auto-detects nested Kaggle folders |
-| `90_generative_synthesis.ipynb` | VAE/GAN data augmentation |
-| `100_fusion_and_dashboard.ipynb` | combine scores + preview dashboard feeds |
+Companies will see this as equivalent to:
 
----
-
-## 🖥️ Serving & Dashboard
-
-```
-streamlit run dashboard/app_streamlit.py --server.port 8501
-uvicorn deploy.api.main:app --reload --port 8000
-```
-- Streamlit reads from `experiments/<domain>/` & `reports/metrics_*.csv`.  
-- FastAPI exposes `/predict_fraud`, `/predict_cyber`, `/predict_behavior`, `/predict_nlp`, `/predict_vision`, `/predict_fusion` if model artifacts exist.
-
-For Dockerized stack (API + Streamlit + MLflow):
-```bash
-docker-compose up --build
-```
+* Junior AI Engineer
+* AI Agent Developer
+* LLM Integration Engineer
+* ML Engineer
+* Research Engineer
 
 ---
 
-## 📊 Testing & Reports
+## 👨‍💻 **Future Extensions**
 
-- `pytest` covers core helpers (`tests/`).
-- Reports + deliverables live under `reports/`, including metrics CSVs consumed by the dashboard and exported plots (e.g., `notebooks/figures/ablations/*.png`).
+* Add LangGraph for multi-step agents
+* Add memory store (Redis / Weaviate)
+* Add SLM (Small Language Model) fine-tuned on your domain
+* Add logging + monitoring (Prometheus/Grafana)
+* Deploy on Render / Railway / HuggingFace Space
 
 ---
 
-## 🤝 Contributing
-1. Fork & branch from `main`.
-2. Keep configs/data paths env-agnostic.
-3. Run relevant scripts or tests before pushing.
-4. PR with a concise summary + screenshots if you touched dashboard/API.
+## 📄 **License**
 
-UAIS‑V is maintained by **Pratik Niroula**. Feel free to adapt it for coursework, demos, or research; just keep the provenance in place. Happy experimenting! 🎯
+MIT License
+
+---
+
+## 🙌 **Author**
+
+Created by **You**, as part of a full-stack AI engineering learning project.
+
+---
+
+If you want, I can also create:
+
+### ✔ A polished GitHub banner
+
+### ✔ A one-page internship PDF
+
+### ✔ Resume bullet points
+
+### ✔ System architecture PNG
+
+### ✔ A project pitch paragraph
