@@ -1,19 +1,14 @@
 # Universal Anomaly Intelligence System (UAIS‑V)
 
-UAIS‑V (Universal Anomaly Intelligence System with Multimodal Fusion) is an
-end‑to‑end anomaly intelligence framework covering fraud analytics,
-cybersecurity intrusion detection, insider behavior monitoring, NLP log/email
-analysis, document/vision anomaly detection, generative synthesis, and
-cross‑domain fusion.
+UAIS‑V is a full-stack, multimodal anomaly intelligence project that ingests data across fraud, cyber, insider behavior, NLP emails/logs, and vision forgeries, then fuses the signals with explainability and deploys them to API + dashboard surfaces. The repo ships with lightweight experiment artifacts so the dashboard can be previewed without heavy training.
 
-The repository contains:
-
-- **Multi-domain data pipelines** (fraud, cyber, CERT behavior, NLP, vision).
-- **Supervised + unsupervised models** (gradient boosting, isolation forest,
-  autoencoders, LSTM/GRU/TCN sequence models, transformers for text, ResNet for vision).
-- **Fusion + explainability** layers (stacked anomaly score, SHAP, saliency, Grad-CAM).
-- **Experiment tracking + orchestration** (MLflow, Prefect flows).
-- **Deployment surfaces** (FastAPI + Streamlit dashboard).
+What’s inside:
+- **Domain pipelines**: fraud, cyber, CERT behavior, NLP, vision, plus a generative VAE for tabular synthesis.
+- **Model zoo**: supervised gradient boosting/logreg, unsupervised isolation forest/LOF/autoencoders, LSTM/TCN sequence models, DistilBERT text, ResNet18 vision.
+- **Fusion + explainability**: stacked meta-model over domain scores, SHAP, saliency, Grad-CAM.
+- **Orchestration + tracking**: Prefect flow stubs and MLflow logging hooks.
+- **Deployment**: FastAPI endpoints and a Streamlit dashboard (with prefilled scores/plots under `experiments/` for instant demo).
+- **Docs**: `docs/local_run.md` for quick API + dashboard startup.
 
 ## 📂 Repository Layout
 
@@ -43,13 +38,12 @@ The repository contains:
 
 ## 🚀 Current Capabilities
 
-- Fraud / Cyber / Behavior (CERT) data ingestion + feature engineering.
-- Supervised fraud + cyber models (HistGB, Logistic Regression).
-- Unsupervised anomaly scores (Isolation Forest, LOF, autoencoder, LSTM).
-- Fusion notebook + scripts for stacking cross-domain scores.
-- Explainability + drift notebooks with shared plotting utilities.
-- Placeholders for NLP, vision, generative, and dashboard orchestration to be
-enabled once data is provided.
+- Fraud / Cyber / Behavior data ingestion + feature engineering; VAE synthesis for tabular fraud.
+- Supervised fraud + cyber models (HistGB/LogReg) with light CV helpers.
+- Unsupervised anomaly scores (IF/LOF/autoencoder/LSTM) and drift/explainability notebooks.
+- Fusion meta-model + notebook to stack cross-domain scores.
+- NLP (DistilBERT baseline) and vision (ResNet18) trainers with optional Kaggle downloads.
+- Streamlit dashboard with pre-generated plots/scores for Fraud/Cyber/Behavior/Vision/Fusion.
 
 ## 🗺️ Roadmap Snapshot
 
@@ -66,13 +60,16 @@ python -m venv .venv
 source .venv/bin/activate  # on Windows use .venv\Scripts\activate
 pip install -r requirements.txt
 
+# Fast dashboard/API preview (uses existing artifacts in experiments/)
+streamlit run dashboard/app_streamlit.py --server.port 8501
+uvicorn deploy.api.main:app --reload --port 8000
+
 # Example: run fraud experiment end‑to‑end
 python src/scripts/run_fraud_experiment.py
 ```
 
-Each notebook under `notebooks/` mirrors a script in `src/uais/...`. You can
-swap in your own datasets by updating the matching config file under
-`config/`.
+Each notebook under `notebooks/` mirrors a script in `src/uais/...`. Swap in
+your datasets by updating the matching config file under `config/`.
 
 ### 30-sequence module (UAIS-V, PyTorch TCN default)
 
