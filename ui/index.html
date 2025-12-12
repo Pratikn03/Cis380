@@ -8,17 +8,64 @@
 </head>
 <body>
   <div id="app">
-    <header>
-      <div class="brand">OmniChatX</div>
-      <div class="status" id="status">Loading...</div>
-    </header>
-    <main>
-      <div id="chat-log"></div>
-      <div class="composer">
-        <textarea id="input" placeholder="Ask anything..."></textarea>
-        <button id="send">Send</button>
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">OX</div>
+        <div class="titles">
+          <div class="title">OmniChatX</div>
+          <div class="subtitle">Multi-domain AI Assistant</div>
+        </div>
       </div>
-    </main>
+      <div class="status-block">
+        <span class="dot" id="status-dot"></span>
+        <span class="status" id="status">Loading...</span>
+        <input type="password" id="auth-token" placeholder="Auth token (optional)" />
+      </div>
+    </header>
+    <div id="banner" class="banner muted">Ready.</div>
+
+    <div class="panels">
+      <aside class="side">
+        <div class="card">
+          <div class="card-title">Examples</div>
+          <ul class="examples">
+            <li data-example="Summarize this PDF from docs">Summarize doc</li>
+            <li data-example="Fraud transaction 1200 45 3">Fraud scoring</li>
+            <li data-example="Cyber attack packet 1 2 3">Cyber scoring</li>
+            <li data-example="recommend 123 45">Recommendation (user 123, movie 45)</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Upload (future hook)</div>
+          <label class="upload">
+            <input type="file" id="file-input" multiple />
+            <span>Attach files (UI only)</span>
+          </label>
+          <div class="note">Hook backend upload when ready.</div>
+        </div>
+      </aside>
+
+      <main class="chat-panel">
+        <div class="card inline-form">
+          <div class="card-title">Quick MovieLens Recommend</div>
+          <div class="form-row">
+            <input type="number" id="form-user" placeholder="user_id" />
+            <input type="number" id="form-movie" placeholder="movie_id" />
+            <button id="btn-form-send">Send</button>
+            <button id="btn-stream">Stream</button>
+          </div>
+          <div class="note">Requires trained MovieLens model; falls back to generic if missing.</div>
+        </div>
+        <div id="chat-log"></div>
+        <div class="composer">
+          <textarea id="input" placeholder="Ask anything..."></textarea>
+          <div class="composer-actions">
+            <button id="send">Send</button>
+          </div>
+        </div>
+      </main>
+    </div>
   </div>
   <script src="./app.js"></script>
 </body>

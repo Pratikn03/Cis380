@@ -1,8 +1,33 @@
 # 🧠 **OmniChatX – Unified Multi-Domain AI Agent**
 
-### *A full-stack AI system integrating LLMs, RAG, multi-domain ML models, anomaly detection, recommendations, and agentic orchestration.*
+### *OmniNex Chat (UAIS-V) is a universal AI agent platform that routes intent across RAG, recommendations, and risk/anomaly detection so you can surface the right intelligence in one product story.*
 
 ---
+
+## 🎯 Elevator pitch
+
+OmniNex Chat is **not just a chatbot**—it is an orchestrator that understands user intent, decides which intelligence (RAG, recommender, or anomaly model) should answer, and delivers structured, explainable outputs plus product-ready UI/metrics. Think of it as **a single agent that offers both positive intelligence (recommendations/RAG) and negative intelligence (fraud/cyber/behavior scoring)** through a consistent backend (FastAPI), ML models, and demo workflow.
+
+## ✍️ Resume + interview-ready brag
+
+*Resume bullet (copy/paste):*  
+`OmniNex Chat (UAIS-V) — Multi-Domain AI Agent Platform`  
+Built a FastAPI-based agent that routes user intent across RAG document Q&A, personalized MovieLens-style recommendations, and anomaly/risk scoring (fraud, cyber, behavior), with dedicated UI tabs, `/metrics` observability, and structured explanations for explainability tooling.
+
+*Interview-friendly summary:*  
+“I built OmniNex Chat to orchestrate recommendations and risk scoring in one system—FastAPI routes the intent, RAG/LLM/ML modules supply answers, and Streamlit or the static UI surfaces results with metrics/demo scripts so the project feels like a real product.”
+
+## 🔌 Extended recommendation domains
+
+OmniNex Chat now understands consumer electronics queries such as “Recommend a phone under $800” or “Best noise-canceling headphones”, plus learning requests such as “Best machine learning course for beginners”. Electronics queries route to CSV-backed handlers that load `data/raw/recommendation/{phones,laptops,headphones}.csv`, filter by price/rating/tags, and return the top-N items. Course requests use `data/raw/recommendation/courses.csv` to match desired skills and difficulties so students can get tailored learning pathways.
+
+## 💸 Budget & Decision Helper
+
+When users include constraints like “budget”, “under $1000”, or a specific use case (“for programming”, “travel”), the electronics recommender synthesizes those filters into a lightweight decision helper: it automatically applies the numeric budget, highlights matched tags, and returns a `tradeoff` note describing the selected price/use case versus rating/popularity. This lets you use OmniNex Chat as a quick decision-support agent without adding new ML models.
+
+## 🧠 Preference memory + trust overlay
+
+OmniNex Chat now keeps light user preferences via `app/chatbot/context_manager.py`: after each recommendation query it stores the last intent, price preference, and favored tags, so subsequent requests can reuse those filters with no external memory service. On top of that, the recommender now runs a mini risk check (powered by the fraud model via `agent/orchestrator.py`) and returns a “Risk overlay” note when a recommendation carries unusual patterns, so you surface trust warnings alongside the standard result cards.
 
 ## 🚀 **Overview**
 
@@ -37,8 +62,11 @@ It is engineered to serve as a **portfolio-quality AI project** for internships 
 
 * Adds factual knowledge from your documents
 * Supports PDFs, text files, notes, datasets
-* Uses SentenceTransformers embeddings
+* Uses TF-IDF embeddings (scikit-learn pipeline)
 * Vector search through custom Vector Store
+* Document pipeline (`rag/loader.py`, `rag/embed.py`, `rag/retriever.py`) loads local docs, TF-IDF embeds them, and retrieves nearest passages.
+* Drop `.txt`/`.md`/`.pdf` files into `data/docs/` (see `data/docs/README.md`) to refresh the RAG knowledge base.
+* Career / job resources live in `data/docs/job_roles.md` and `data/docs/skill_maps.txt` so you can ask “What skills does an ML engineer need?” or “Compare data scientist vs ML engineer” and receive grounded answers.
 
 ---
 
@@ -108,6 +136,8 @@ Live chatbot interface with:
 * session memory
 * tool routing
 * multi-model support
+* Risk & Anomaly tab exposes the fraud/cyber/behavior models with a simple feature form
+* The Streamlit portal respects `OMNINEX_BACKEND` (defaults to `http://localhost:8000`) for API targets, so set it if your FastAPI app runs elsewhere.
 
 #### ✔ **Static HTML UI (optional professional layout)**
 
@@ -126,6 +156,11 @@ Unified routes:
 /api/cyber
 /api/behavior
 /api/recommend
+/api/vision/train
+/metrics
+```
+
+`/metrics` exposes Prometheus request/latency statistics for observability; it also powers structured logging via `backend/main.py`.
 ```
 
 Backend entry point:
@@ -167,6 +202,7 @@ universal-anomaly-intelligence-v2/
 │   │   ├── cyber.py
 │   │   ├── behavior.py
 │   │   ├── recommend.py
+│   │   ├── vision.py
 │   ├── main.py
 │
 ├── src/
@@ -204,11 +240,31 @@ universal-anomaly-intelligence-v2/
 
 ---
 
+## 🎬 **Quick Demo (Five minutes)**
+
+Follow `docs/demo.md` for a scripted walkthrough that covers bootstrapping the backend, the Streamlit UI tabs, fraud/cyber/behavior scoring, RAG answers, the vision/train endpoint, and `/metrics`.
+
+```
+docs/demo.md
+```
+
+Drop real `.txt/.md/.pdf` content into `data/docs/` before the demo so the RAG answer is populated.
+
+---
+
 ## ⚡ **Setup & Installation**
 
 ### ► Create environment
 
 ```
+
+## 🧪 **Testing**
+
+```
+pytest
+```
+
+The suite now skips TensorFlow/HuggingFace-heavy code by default (the `tests/test_multi_sequence_30_tf.py` and `tests/test_nlp_tiny.py` helpers only run when the dependency chain works). Set `RUN_TF_TESTS=1` before calling `pytest` if you have a working TensorFlow build and want those tests to execute; the same flag also controls whether `set_global_seed` initializes TensorFlow randomness.
 conda create -n omnichatx python=3.10
 conda activate omnichatx
 pip install -r requirements.txt
@@ -305,6 +361,35 @@ Companies will see this as equivalent to:
 * LLM Integration Engineer
 * ML Engineer
 * Research Engineer
+
+---
+
+## 🏃‍♂️ Quickstart (FastAPI + Static UI)
+
+1) Start backend (from repo root):
+```bash
+source venv/bin/activate
+bash scripts/start_all.sh   # uvicorn backend.main:app
+```
+
+2) Open UI:
+```
+http://localhost:8000/ui/
+```
+
+3) APIs:
+- `GET /health` (ping)
+- `POST /api/chat` (main chat, routed by orchestrator)
+- `POST /api/rag/query` (doc search)
+- `POST /api/fraud`, `/api/cyber`, `/api/behavior`, `/api/recommend`
+
+### Training entrypoints
+- Recommender: `python src/train/train_recommender.py`
+- Fusion meta-model: `python src/train/train_fusion.py`
+- MovieLens recommender: `python src/train/train_movielens_recommender.py` (expects `data/raw/recommendation/movielens.csv` with userId,movieId,rating)
+- Hybrid recsys (tabular): `python recommender/models/train_xgboost.py`
+- Hybrid recsys (LightFM, optional): `python recommender/models/train_lightfm.py` (requires `pip install -r requirements-optional.txt`)
+- Hybrid recsys (NCF, optional, PyTorch): `python recommender/models/train_ncf.py`
 
 ---
 

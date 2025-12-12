@@ -18,6 +18,9 @@ tensorflow-cpu>=2.11.0
 # NLP
 transformers>=4.43.0
 
+# Recsys
+lightfm>=1.17
+
 # Vision
 pillow>=9.0.0
 opencv-python>=4.8.0

@@ -6,8 +6,11 @@ import os
 
 import sys
 from pathlib import Path
+import re
+import uuid
 
 from PIL import Image
+import requests
 import streamlit as st
 
 # Ensure package import works when launched via streamlit run
@@ -16,11 +19,45 @@ PARENT = THIS_DIR.parent
 if str(PARENT) not in sys.path:
     sys.path.append(str(PARENT))
 
+from chatbot.context_manager import ContextManager
 from recommender_router import route_recommendation
+from agent.orchestrator import OmniChatXOrchestrator
 from image_tags import extract_tags_from_image
 
 
 st.set_page_config(page_title="UAIS-V Recommender Chatbot", page_icon="🤖", layout="wide")
+
+context_manager = ContextManager()
+risk_orchestrator = OmniChatXOrchestrator()
+
+
+def parse_price_from_text(text: str) -> float | None:
+    m = re.search(r"under\s*\$?(\d+)", text.lower())
+    if m:
+        return float(m.group(1))
+    m2 = re.search(r"\$(\d+)", text.lower())
+    if m2:
+        return float(m2.group(1))
+    return None
+
+
+def extract_tags_from_query(text: str) -> set[str]:
+    tokens = re.findall(r"[a-zA-Z0-9]+", text.lower())
+    return {t for t in tokens if len(t) > 2}
+
+
+def compute_risk_note(items: list[dict]) -> str | None:
+    if not items:
+        return None
+    item = items[0]
+    price = float(re.sub(r"[^\d.]", "", item.get("price", "0") or "0"))
+    rating = float(item.get("rating", 0))
+    popularity = float(item.get("popularity", 0))
+    try:
+        msg = risk_orchestrator._fraud_score(f"{price} {rating} {popularity}")
+        return msg
+    except Exception:
+        return None
 
 # ---- Modern styling ----
 st.markdown(
@@ -161,64 +198,126 @@ def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Image upload section
-    st.sidebar.subheader("Upload an image for style-based suggestions")
-    uploaded = st.sidebar.file_uploader("Choose an image", type=["png", "jpg", "jpeg"])
-    image_tags_text = ""
-    if uploaded:
-        try:
-            img = Image.open(uploaded).convert("RGB")
-            tags = extract_tags_from_image(img, top_k=5)
-            if tags:
-                image_tags_text = " ".join(tags)
-                st.sidebar.success(f"Detected tags: {', '.join(tags)}")
-            else:
-                st.sidebar.warning("No tags detected.")
-        except Exception as exc:
-            st.sidebar.error(f"Image processing failed: {exc}")
+    backend_url = os.environ.get("OMNINEX_BACKEND", "http://localhost:8000")
 
-    # Suggestions bar
-    st.markdown(
-        """
-        <div class="glass-card" style="margin: 12px 0;">
-            <div style="color:#e5e7eb;font-size:14px;margin-bottom:6px;">Try asking:</div>
-            <div>
-                <span class="tag">Recommend sci-fi movies</span>
-                <span class="tag">Best coffee shops in NYC</span>
-                <span class="tag">Latest health news</span>
-                <span class="tag">Outfit ideas for a 30 year old</span>
+    def call_model(path: str, payload: dict) -> dict:
+        try:
+            resp = requests.post(f"{backend_url}{path}", json=payload, timeout=10.0)
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as exc:
+            return {"error": f"{exc}"}
+
+    tabs = st.tabs(["Chat & Recommendations", "Risk & Anomaly"])
+
+    with tabs[0]:
+        # Image upload section
+        st.sidebar.subheader("Upload an image for style-based suggestions")
+        uploaded = st.sidebar.file_uploader("Choose an image", type=["png", "jpg", "jpeg"])
+        image_tags_text = ""
+        if uploaded:
+            try:
+                img = Image.open(uploaded).convert("RGB")
+                tags = extract_tags_from_image(img, top_k=5)
+                if tags:
+                    image_tags_text = " ".join(tags)
+                    st.sidebar.success(f"Detected tags: {', '.join(tags)}")
+                else:
+                    st.sidebar.warning("No tags detected.")
+            except Exception as exc:
+                st.sidebar.error(f"Image processing failed: {exc}")
+
+        # Suggestions bar
+        st.markdown(
+            """
+            <div class="glass-card" style="margin: 12px 0;">
+                <div style="color:#e5e7eb;font-size:14px;margin-bottom:6px;">Try asking:</div>
+                <div>
+                    <span class="tag">Recommend sci-fi movies</span>
+                    <span class="tag">Best coffee shops in NYC</span>
+                    <span class="tag">Latest health news</span>
+                    <span class="tag">Outfit ideas for a 30 year old</span>
+                </div>
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            """,
+            unsafe_allow_html=True,
+        )
 
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
 
-    # Manual input box + send button (more reliable than chat_input)
-    user_input = st.text_input("Ask for movies, places, or news (health/crime)...", key="manual_query")
-    send = st.button("Send", type="primary")
+        # Manual input box + send button (more reliable than chat_input)
+        user_input = st.text_input("Ask for movies, places, or news (health/crime)...", key="manual_query")
+        send = st.button("Send", type="primary")
 
-    if send and user_input.strip():
-        text = user_input.strip()
-        st.session_state.messages.append({"role": "user", "content": text})
-        with st.chat_message("user"):
-            st.markdown(text)
+        if send and user_input.strip():
+            text = user_input.strip()
+            st.session_state.messages.append({"role": "user", "content": text})
+            with st.chat_message("user"):
+                st.markdown(text)
 
-        try:
-            query = text
-            if image_tags_text:
-                query = f\"{text} {image_tags_text}\"
-            rec = route_recommendation(query)
-            reply = format_items(rec["category"], rec["items"])
-        except Exception as exc:
-            reply = f"Error: {exc}"
+            try:
+                query = " ".join(filter(None, [text, image_tags_text])).strip()
+                if not query:
+                    query = text
+                price_pref = parse_price_from_text(query)
+                tag_pref = extract_tags_from_query(query)
+                preference_payload = {"price": price_pref, "preferred_tags": tag_pref}
+                rec = route_recommendation(query, preference=preference_payload)
+                context_manager.update(
+                    st.session_state.session_id,
+                    last_intent=rec.get("intent"),
+                    last_user_message=query,
+                    price_preference=price_pref,
+                    preferred_tags=list(tag_pref),
+                )
+                st.session_state.preference = preference_payload
+                reply = format_items(rec["category"], rec["items"])
+                risk_note = compute_risk_note(rec["items"])
+            except Exception as exc:
+                reply = f"Error: {exc}"
+                risk_note = None
 
-        with st.chat_message("assistant"):
-            st.markdown(reply)
-        st.session_state.messages.append({"role": "assistant", "content": reply})
+            with st.chat_message("assistant"):
+                st.markdown(reply)
+                if risk_note:
+                    st.info(f"Risk overlay: {risk_note}")
+            st.session_state.messages.append({"role": "assistant", "content": reply})
+
+    with tabs[1]:
+        st.markdown("### Risk & Anomaly Explorer")
+        st.write(
+            "Send numeric features to the fraud, cyber, or behavior model endpoints and view the returned"
+            " scores/explanations. Features should match the order expected by the deployed models."
+        )
+
+        def render_form(title: str, endpoint: str, key: str):
+            st.subheader(title)
+            features_input = st.text_area(
+                f"Features (comma-separated numbers for {title.lower()})",
+                value="0, 0, 0, 0, 0, 0, 0, 0",
+                key=f"{key}_features",
+                height=80,
+            )
+            submitted = st.button(f"Score {title}", key=f"{key}_submit")
+            if submitted:
+                try:
+                    values = [float(x.strip()) for x in features_input.split(",") if x.strip()]
+                except ValueError:
+                    st.error("Please provide only numbers, separated by commas.")
+                    return
+                payload = {"features": values}
+                result = call_model(endpoint, payload)
+                if "error" in result:
+                    st.error(result["error"])
+                else:
+                    st.success(f"{title} score returned")
+                    st.json(result)
+
+        render_form("Fraud", "/api/fraud", "fraud")
+        render_form("Cyber", "/api/cyber", "cyber")
+        render_form("Behavior", "/api/behavior", "behavior")
 
 
 if __name__ == "__main__":

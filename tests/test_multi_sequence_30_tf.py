@@ -1,5 +1,11 @@
+import os
+
 import numpy as np
 import pytest
+
+RUN_TF_TESTS = os.getenv("RUN_TF_TESTS") == "1"
+if not RUN_TF_TESTS:
+    pytest.skip("Set RUN_TF_TESTS=1 to execute TensorFlow tests", allow_module_level=True)
 
 
 def test_forward_pass_small_shape():

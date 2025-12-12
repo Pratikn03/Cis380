@@ -22,13 +22,14 @@ def set_global_seed(seed: int, deterministic_torch: bool = False) -> None:
         # Torch is optional for UAIS-V
         pass
 
-    try:
-        import tensorflow as tf
+    if os.getenv("RUN_TF_TESTS") == "1":
+        try:
+            import tensorflow as tf
 
-        tf.random.set_seed(seed)
-    except Exception:
-        # TensorFlow is optional; skip if not installed
-        pass
+            tf.random.set_seed(seed)
+        except Exception:
+            # TensorFlow is optional; skip if not installable
+            pass
 
 
 __all__ = ["set_global_seed"]
