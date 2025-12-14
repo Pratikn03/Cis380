@@ -1,40 +1,15 @@
-version: '3.9'
+version: "3.9"
 services:
-  api:
-    image: python:3.11-slim
-    working_dir: /app
-    volumes:
-      - ./:/app
-    command: bash -c "pip install --no-cache-dir -r requirements.txt && uvicorn deploy.api.main:app --host 0.0.0.0 --port 8000"
+  omnichatx:
+    build: .
     ports:
       - "8000:8000"
-    environment:
-      - PYTHONPATH=/app/src
-    depends_on:
-      - mlflow
-
-  streamlit:
-    image: python:3.11-slim
-    working_dir: /app
     volumes:
-      - ./:/app
-    command: bash -c "pip install --no-cache-dir -r requirements.txt && streamlit run dashboard/app_streamlit.py --server.port 8501 --server.address 0.0.0.0"
-    ports:
-      - "8501:8501"
-    environment:
-      - PYTHONPATH=/app/src
-    depends_on:
-      - api
-
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:latest
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlruns
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./mlruns:/mlruns
-      - ./mlflow.db:/mlflow.db
-
-networks:
-  default:
-    driver: bridge
+      - ./:/code
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

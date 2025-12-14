@@ -1,16 +1,11 @@
-# User/session behavior domain override
+# User/session behavior domain override (CERT r4.2 LDAP)
 project_name: "UAIS - Behavior (CERT)"
 
 data:
-  target: Revenue          # default behavior label; set to null for unsupervised runs
-  id_column: user          # adjust to your user column
-  datetime_column: date    # adjust to your timestamp column
-  file_name: logon.csv     # or the CERT CSV you’re using
-  synthetic_rows: 0
-
-features:
-  numeric: []              # add engineered numeric features (hour, dayofweek, content_len, etc.)
-  categorical: []
+  # CERT LDAP is unlabeled; the pipeline will create a placeholder 0/1 label if needed.
+  target: Revenue
+  path: data/raw/behavior/r4.2/LDAP
+  drop_columns: []
 
 training:
   model_type: autoencoder

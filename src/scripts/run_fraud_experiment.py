@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+from uais.config.config_loader import load_config
 from uais.data.load_fraud_data import load_fraud_data
 from uais.features.fraud_features import build_fraud_feature_table
 from uais.supervised.train_fraud_supervised import FraudModelConfig, train_fraud_model
@@ -34,7 +35,8 @@ def main():
     print(f"Project root: {project_root}")
 
     # 1. Load raw data
-    df_raw = load_fraud_data()
+    cfg = load_config("fraud")
+    df_raw = load_fraud_data(cfg)
     print(f"Loaded raw fraud data with shape: {df_raw.shape}")
 
     # 2. Build features

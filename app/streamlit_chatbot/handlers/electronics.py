@@ -7,7 +7,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List, Dict, Any
 
-BASE_DIR = Path(__file__).resolve().parents[1].parent
+BASE_DIR = Path(__file__).resolve().parents[3]
 RECOMMENDATION_DIR = BASE_DIR / "data" / "raw" / "recommendation"
 
 DOMAIN_FILES = {

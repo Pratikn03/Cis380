@@ -1,0 +1,4 @@
+OmniChatX RAG sample document.
+
+This document explains that the multi-domain AI agent orchestration is performed locally.
+The orchestrator reads this file during ingestion and should be able to mention "local-first RAG" in responses.

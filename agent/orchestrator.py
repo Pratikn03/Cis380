@@ -1,6 +1,7 @@
 """Central orchestrator for OmniChatX."""
 from __future__ import annotations
 
+import logging
 import re
 import os
 import requests
@@ -17,6 +18,7 @@ from rag.service import rag_service
 from agent.utils.shap_explainer import explain as shap_explain
 
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
+logger = logging.getLogger(__name__)
 
 
 def _llm_call(message: str) -> str:
@@ -58,15 +60,25 @@ def _load_models() -> ModelBundle:
 
     fraud_path = Path("models/fraud/supervised/fraud_model.pkl")
     if fraud_path.exists():
-        fraud = joblib.load(fraud_path)
+        try:
+            fraud = joblib.load(fraud_path)
+        except Exception as exc:
+            logger.warning("Failed to load fraud model (%s): %s", fraud_path, exc)
 
     cyber_path = Path("models/cyber/supervised/cyber_model.pkl")
     if cyber_path.exists():
-        cyber = joblib.load(cyber_path)
+        try:
+            cyber = joblib.load(cyber_path)
+        except Exception as exc:
+            logger.warning("Failed to load cyber model (%s): %s", cyber_path, exc)
 
     beh_path = Path("models/behavior/behavior_lof.pkl")
     if beh_path.exists():
-        beh = joblib.load(beh_path)
+        try:
+            beh = joblib.load(beh_path)
+        except Exception as exc:
+            logger.warning("Failed to load behavior model (%s): %s", beh_path, exc)
+            beh = None
         # stored as dict with scaler + LOF
         if isinstance(beh, dict):
             behavior_scaler = beh.get("preprocessor")
@@ -74,7 +86,10 @@ def _load_models() -> ModelBundle:
 
     rec_path = Path("models/recommender/recommender_model.pkl")
     if rec_path.exists():
-        recommender = joblib.load(rec_path)
+        try:
+            recommender = joblib.load(rec_path)
+        except Exception as exc:
+            logger.warning("Failed to load recommender model (%s): %s", rec_path, exc)
 
     return ModelBundle(
         fraud=fraud,
@@ -90,10 +105,16 @@ class OmniChatXOrchestrator:
 
     def __init__(self):
         self.models = _load_models()
-        rag_service.build()
         # optional recommender meta for feature names
         rec_meta_path = Path("models/recommender/recommender_meta.joblib")
-        self.rec_meta = joblib.load(rec_meta_path) if rec_meta_path.exists() else {}
+        if rec_meta_path.exists():
+            try:
+                self.rec_meta = joblib.load(rec_meta_path)
+            except Exception as exc:
+                logger.warning("Failed to load recommender meta (%s): %s", rec_meta_path, exc)
+                self.rec_meta = {}
+        else:
+            self.rec_meta = {}
 
     # ---------------- Inference helpers ---------------- #
     def _fraud_score(self, message: str) -> str:

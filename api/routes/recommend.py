@@ -24,24 +24,76 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 # generic/tabular recommender (XGBoost)
 _rec_path = PROJECT_ROOT / "recommender" / "models" / "recommender.pkl"
-_rec_model = joblib.load(_rec_path) if _rec_path.exists() else None
+_rec_model = None
+_rec_model_error: str | None = None
 
 # MovieLens model/meta (uses same xgboost by default)
 _ml_model_path = PROJECT_ROOT / "recommender" / "models" / "recommender.pkl"
 _ml_meta_path = PROJECT_ROOT / "recommender" / "models" / "recommender_meta.joblib"
-_ml_model = joblib.load(_ml_model_path) if _ml_model_path.exists() else None
-_ml_meta = joblib.load(_ml_meta_path) if _ml_meta_path.exists() else None
+_ml_model = None
+_ml_model_error: str | None = None
+_ml_meta = None
+_ml_meta_error: str | None = None
+
+
+def _get_rec_model():
+    global _rec_model, _rec_model_error
+    if _rec_model is not None:
+        return _rec_model
+    if not _rec_path.exists():
+        return None
+    if _rec_model_error is not None:
+        return None
+    try:
+        _rec_model = joblib.load(_rec_path)
+    except Exception as exc:  # pragma: no cover - depends on local env
+        _rec_model_error = str(exc)
+        return None
+    return _rec_model
+
+
+def _get_ml_model():
+    global _ml_model, _ml_model_error
+    if _ml_model is not None:
+        return _ml_model
+    if not _ml_model_path.exists():
+        return None
+    if _ml_model_error is not None:
+        return None
+    try:
+        _ml_model = joblib.load(_ml_model_path)
+    except Exception as exc:  # pragma: no cover - depends on local env
+        _ml_model_error = str(exc)
+        return None
+    return _ml_model
+
+
+def _get_ml_meta():
+    global _ml_meta, _ml_meta_error
+    if _ml_meta is not None:
+        return _ml_meta
+    if not _ml_meta_path.exists():
+        return None
+    if _ml_meta_error is not None:
+        return None
+    try:
+        _ml_meta = joblib.load(_ml_meta_path)
+    except Exception as exc:  # pragma: no cover - depends on local env
+        _ml_meta_error = str(exc)
+        return None
+    return _ml_meta
 
 
 def _ml_features(user_id: int, movie_id: int):
-    if _ml_meta is None:
+    meta = _get_ml_meta()
+    if meta is None:
         return None
-    user_stats = _ml_meta.get("user_stats")
-    item_stats = _ml_meta.get("item_stats")
-    global_mean = _ml_meta.get("global_mean", 3.5)
-    user_codes = _ml_meta.get("user_codes", {})
-    item_codes = _ml_meta.get("item_codes", {})
-    feat_names = _ml_meta.get("feature_names", [])
+    user_stats = meta.get("user_stats")
+    item_stats = meta.get("item_stats")
+    global_mean = meta.get("global_mean", 3.5)
+    user_codes = meta.get("user_codes", {})
+    item_codes = meta.get("item_codes", {})
+    feat_names = meta.get("feature_names", [])
 
     u_mean = user_stats.loc[user_id]["user_mean"] if user_id in user_stats.index else global_mean
     u_count = user_stats.loc[user_id]["user_count"] if user_id in user_stats.index else 0.0
@@ -65,19 +117,22 @@ def _ml_features(user_id: int, movie_id: int):
 @router.post("")
 def recommend(req: RecommendRequest):
     # Path A: MovieLens-style if user_id and movie_id provided and model exists
-    if req.user_id is not None and req.movie_id is not None and _ml_model is not None:
+    ml_model = _get_ml_model()
+    if req.user_id is not None and req.movie_id is not None and ml_model is not None:
         try:
             feats, names = _ml_features(req.user_id, req.movie_id)
             if feats is None:
                 raise ValueError("MovieLens metadata not available.")
-            proba = _ml_model.predict_proba(feats)[0]
-            classes = list(getattr(_ml_model, "classes_", []))
+            proba = ml_model.predict_proba(feats)[0]
+            classes = list(getattr(ml_model, "classes_", []))
             top_idx = int(np.argmax(proba))
+            raw_label = classes[top_idx] if classes else "like"
+            label = raw_label.item() if isinstance(raw_label, np.generic) else raw_label
             return {
                 "mode": "movielens",
                 "user_id": req.user_id,
                 "movie_id": req.movie_id,
-                "label": classes[top_idx] if classes else "like",
+                "label": label,
                 "probability": float(proba[top_idx]),
                 "feature_names": names,
             }
@@ -88,23 +143,30 @@ def recommend(req: RecommendRequest):
             )
 
     # Path B: generic vector fallback
-    if _rec_model is None:
+    rec_model = _get_rec_model()
+    if rec_model is None:
+        detail = "Recommender model not found."
+        if _rec_path.exists() and _rec_model_error:
+            detail = f"Recommender model failed to load: {_rec_model_error}"
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Recommender model not found."
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=detail,
         )
     feats = req.features or []
     try:
-        n = getattr(_rec_model, "n_features_in_", 0)
+        n = getattr(rec_model, "n_features_in_", 0)
         arr = np.zeros((1, n), dtype=float)
         for i, v in enumerate(feats[:n]):
             arr[0, i] = v
-        if hasattr(_rec_model, "predict_proba"):
-            proba = _rec_model.predict_proba(arr)[0]
-            classes = list(getattr(_rec_model, "classes_", []))
+        if hasattr(rec_model, "predict_proba"):
+            proba = rec_model.predict_proba(arr)[0]
+            classes = list(getattr(rec_model, "classes_", []))
             top_idx = int(np.argmax(proba))
-            result = {"label": classes[top_idx] if classes else "item", "probability": float(proba[top_idx])}
+            raw_label = classes[top_idx] if classes else "item"
+            label = raw_label.item() if isinstance(raw_label, np.generic) else raw_label
+            result = {"label": label, "probability": float(proba[top_idx])}
         else:
-            label = _rec_model.predict(arr)[0]
+            label = rec_model.predict(arr)[0]
             result = {"label": str(label), "probability": None}
         return {"mode": "generic", "input_filled": len(feats), "result": result}
     except Exception as exc:
@@ -129,14 +191,16 @@ def recommend_topn(req: TopNRequest):
         # If user unseen or models missing, fall back to popularity
         cold_start = False
 
-        if _ml_model is not None and _ml_meta is not None:
+        ml_model = _get_ml_model()
+        ml_meta = _get_ml_meta()
+        if ml_model is not None and ml_meta is not None:
             for mid in req.candidate_ids:
                 feats = _ml_features(req.user_id, mid)
                 if feats is None:
                     cold_start = True
                     continue
                 try:
-                    proba = _ml_model.predict_proba(feats)[0][1]
+                    proba = ml_model.predict_proba(feats)[0][1]
                 except Exception:
                     cold_start = True
                     continue
@@ -154,7 +218,7 @@ def recommend_topn(req: TopNRequest):
             cold_start = True
 
         # Try LightFM/NCF for remaining candidates or if tabular missing
-        if cold_start or (not results and (_ml_model is None or _ml_meta is None)):
+        if cold_start:
             for mid in req.candidate_ids:
                 s = score_single(req.user_id, mid)
                 item_info = enrich_item(mid)

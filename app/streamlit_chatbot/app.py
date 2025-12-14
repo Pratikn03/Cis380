@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 
 import sys
@@ -15,18 +16,23 @@ import streamlit as st
 
 # Ensure package import works when launched via streamlit run
 THIS_DIR = Path(__file__).resolve().parent
-PARENT = THIS_DIR.parent
-if str(PARENT) not in sys.path:
-    sys.path.append(str(PARENT))
+APP_ROOT = THIS_DIR.parent
+REPO_ROOT = THIS_DIR.parents[1]
 
-from chatbot.context_manager import ContextManager
+for path in (APP_ROOT, REPO_ROOT):
+    p = str(path)
+    if p not in sys.path:
+        sys.path.append(p)
+
+from app.chatbot.context_manager import ContextManager
 from recommender_router import route_recommendation
-from agent.orchestrator import OmniChatXOrchestrator
+from app.agent.orchestrator import OmniChatXOrchestrator
 from image_tags import extract_tags_from_image
 
 
 st.set_page_config(page_title="UAIS-V Recommender Chatbot", page_icon="🤖", layout="wide")
 
+logger = logging.getLogger(__name__)
 context_manager = ContextManager()
 risk_orchestrator = OmniChatXOrchestrator()
 
@@ -56,8 +62,9 @@ def compute_risk_note(items: list[dict]) -> str | None:
     try:
         msg = risk_orchestrator._fraud_score(f"{price} {rating} {popularity}")
         return msg
-    except Exception:
-        return None
+    except Exception as exc:
+        logger.warning("Risk overlay failed: %s", exc, exc_info=True)
+        return "Risk overlay currently unavailable; please try again later."
 
 # ---- Modern styling ----
 st.markdown(
@@ -194,9 +201,36 @@ def format_items(category: str, items: list[dict]) -> str:
     return "\n\n".join(lines)
 
 
+def summarize_constraints(price_pref: float | None, tag_pref: set[str]) -> str | None:
+    components: list[str] = []
+    if price_pref and price_pref > 0:
+        components.append(f"Budget ≤ ${price_pref:.0f}")
+    if tag_pref:
+        components.append(f"Tags: {', '.join(sorted(tag_pref))}")
+    return " & ".join(components) if components else None
+
+
+def domain_source_label(intent: str | None) -> str:
+    mapping = {
+        "movies": "Movie dataset",
+        "places": "Places API / dataset",
+        "news": "News feed",
+        "news_health": "Health news feed",
+        "news_crime": "Crime news feed",
+        "phones": "Electronics phone dataset",
+        "laptops": "Electronics laptop dataset",
+        "headphones": "Electronics headphone dataset",
+        "courses": "Learning resources dataset",
+        "clothes": "Clothes handler",
+    }
+    return mapping.get(intent, "OmniNex knowledge sources")
+
+
 def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
 
     backend_url = os.environ.get("OMNINEX_BACKEND", "http://localhost:8000")
 
@@ -247,28 +281,24 @@ def main():
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
-        # Manual input box + send button (more reliable than chat_input)
-        user_input = st.text_input("Ask for movies, places, or news (health/crime)...", key="manual_query")
-        send = st.button("Send", type="primary")
-
-        if send and user_input.strip():
-            text = user_input.strip()
-            st.session_state.messages.append({"role": "user", "content": text})
+        def _process_query(text: str, tag_source: str) -> None:
+            clean_query = " ".join(filter(None, [text, tag_source])).strip()
+            if not clean_query:
+                return
+            st.session_state.messages.append({"role": "user", "content": clean_query})
             with st.chat_message("user"):
-                st.markdown(text)
+                st.markdown(clean_query)
+
+            price_pref = parse_price_from_text(clean_query)
+            tag_pref = extract_tags_from_query(clean_query)
+            preference_payload = {"price": price_pref, "preferred_tags": tag_pref}
 
             try:
-                query = " ".join(filter(None, [text, image_tags_text])).strip()
-                if not query:
-                    query = text
-                price_pref = parse_price_from_text(query)
-                tag_pref = extract_tags_from_query(query)
-                preference_payload = {"price": price_pref, "preferred_tags": tag_pref}
-                rec = route_recommendation(query, preference=preference_payload)
+                rec = route_recommendation(clean_query, preference=preference_payload)
                 context_manager.update(
                     st.session_state.session_id,
                     last_intent=rec.get("intent"),
-                    last_user_message=query,
+                    last_user_message=clean_query,
                     price_preference=price_pref,
                     preferred_tags=list(tag_pref),
                 )
@@ -278,12 +308,51 @@ def main():
             except Exception as exc:
                 reply = f"Error: {exc}"
                 risk_note = None
+                rec = {"items": [], "category": "Results"}
 
             with st.chat_message("assistant"):
                 st.markdown(reply)
+                tradeoff_note = None
+                if rec["items"]:
+                    tradeoff_note = rec["items"][0].get("tradeoff")
+                constraints = summarize_constraints(price_pref, tag_pref)
+                source_label = domain_source_label(rec.get("intent"))
+                if tradeoff_note:
+                    st.caption(f"Tradeoff note: {tradeoff_note}")
+                if constraints:
+                    st.caption(f"Constraints applied: {constraints}")
+                if source_label:
+                    st.caption(f"Source: {source_label}")
                 if risk_note:
                     st.info(f"Risk overlay: {risk_note}")
             st.session_state.messages.append({"role": "assistant", "content": reply})
+
+        general_filters = [
+            ("Romantic movies", "Recommend a romantic movie"),
+            ("Top NYC coffee shops", "Best coffee shops in NYC"),
+            ("Latest health news", "Latest health news"),
+            ("Crime update", "Crime news about San Francisco"),
+        ]
+        cols = st.columns(len(general_filters))
+        for col, (label, query) in zip(cols, general_filters):
+            if col.button(label):
+                _process_query(query, image_tags_text)
+
+        # Manual input box + send button (more reliable than chat_input)
+        user_input = st.text_input("Ask for movies, places, or news (health/crime)...", key="manual_query")
+        send = st.button("Send", type="primary")
+        if send and user_input.strip():
+            _process_query(user_input.strip(), image_tags_text)
+
+        quick_filters = [
+            ("Budget phones", "Recommend budget phones under $600"),
+            ("Programming laptops", "Recommend laptops for programming under $1200"),
+            ("Noise-canceling headphones", "Recommend noise cancelling headphones"),
+        ]
+        cols = st.columns(len(quick_filters))
+        for col, (label, query) in zip(cols, quick_filters):
+            if col.button(label):
+                _process_query(query, image_tags_text)
 
     with tabs[1]:
         st.markdown("### Risk & Anomaly Explorer")

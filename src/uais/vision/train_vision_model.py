@@ -9,9 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
-
-import tensorflow as tf
+from typing import Any, Dict
 
 IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tif", ".tiff")
 
@@ -33,7 +31,11 @@ class VisionConfig:
         return path
 
 
-def _build_model(num_classes: int, image_size: int, backbone: str) -> tf.keras.Model:
+def _build_model(num_classes: int, image_size: int, backbone: str) -> Any:
+    # Import TensorFlow lazily so the main API can start even if TF is missing
+    # or problematic on the current system.
+    import tensorflow as tf
+
     backbone = (backbone or "simple_cnn").lower()
 
     if backbone in {"resnet18", "resnet50", "resnet"}:
@@ -111,6 +113,8 @@ def _normalize_dataset_root(directory: Path) -> Path:
 
 
 def run_vision_experiment(cfg: VisionConfig) -> Dict[str, float]:
+    import tensorflow as tf
+
     resolved_dir = cfg.resolve_dir()
     data_dir = _normalize_dataset_root(resolved_dir)
     if data_dir != resolved_dir:

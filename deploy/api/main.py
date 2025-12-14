@@ -6,6 +6,7 @@ from typing import Dict, List
 
 import joblib
 import numpy as np
+import pandas as pd
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 
@@ -18,8 +19,10 @@ fusion_model_path = project_root / "experiments" / "fusion" / "models" / "fusion
 nlp_model_dir = project_root / "models" / "nlp" / "distilbert"
 vision_model_dir = project_root / "models" / "vision" / "resnet"
 
-fraud_model = joblib.load(fraud_model_path) if fraud_model_path.exists() else None
-cyber_model = joblib.load(cyber_model_path) if cyber_model_path.exists() else None
+fraud_model = None
+fraud_model_error: str | None = None
+cyber_model = None
+cyber_model_error: str | None = None
 fusion_model = joblib.load(fusion_model_path) if fusion_model_path.exists() else None
 
 # Lazy-loaded NLP / Vision artifacts
@@ -27,6 +30,37 @@ _nlp_artifacts_loaded = False
 _nlp_model = None
 _nlp_tokenizer = None
 _vision_model = None
+
+
+def _load_joblib_model(path: Path, *, name: str):
+    try:
+        return joblib.load(path), None
+    except Exception as exc:  # pragma: no cover - depends on local env
+        return None, f"{name} model failed to load: {exc}"
+
+
+def _get_fraud_model():
+    global fraud_model, fraud_model_error
+    if fraud_model is not None:
+        return fraud_model
+    if not fraud_model_path.exists():
+        return None
+    if fraud_model_error is not None:
+        return None
+    fraud_model, fraud_model_error = _load_joblib_model(fraud_model_path, name="Fraud")
+    return fraud_model
+
+
+def _get_cyber_model():
+    global cyber_model, cyber_model_error
+    if cyber_model is not None:
+        return cyber_model
+    if not cyber_model_path.exists():
+        return None
+    if cyber_model_error is not None:
+        return None
+    cyber_model, cyber_model_error = _load_joblib_model(cyber_model_path, name="Cyber")
+    return cyber_model
 
 
 def _load_nlp():
@@ -100,8 +134,8 @@ def root():
     return {
         "message": "UAIS-V API active.",
         "available": {
-            "fraud": fraud_model is not None,
-            "cyber": cyber_model is not None,
+            "fraud": fraud_model_path.exists(),
+            "cyber": cyber_model_path.exists(),
             "fusion": fusion_model is not None,
             "nlp": nlp_model_dir.exists(),
             "vision": vision_model_dir.exists(),
@@ -116,20 +150,42 @@ def health():
 
 @app.post("/predict_fraud")
 def predict_fraud(req: FraudRequest):
-    if fraud_model is None:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Fraud model not found.")
-    X = np.array(req.features).reshape(1, -1)
-    proba = fraud_model.predict_proba(X)[0, 1]
-    return {"fraud_probability": float(proba)}
+    model = _get_fraud_model()
+    if model is None:
+        detail = "Fraud model not found."
+        if fraud_model_path.exists() and fraud_model_error:
+            detail = fraud_model_error
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=detail)
+
+    cols = list(getattr(model, "feature_names_in_", []))
+    if cols:
+        values = [0.0] * len(cols)
+        for i, v in enumerate(req.features[: len(cols)]):
+            values[i] = float(v)
+        X = pd.DataFrame([values], columns=cols)
+    else:
+        X = np.array(req.features, dtype=float).reshape(1, -1)
+
+    proba = model.predict_proba(X)[0, 1]
+    return {"fraud_probability": float(proba), "input_features": len(req.features), "expected_features": len(cols) or None}
 
 
 @app.post("/predict_cyber")
 def predict_cyber(req: CyberRequest):
-    if cyber_model is None:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Cyber model not found.")
-    X = np.array(req.features).reshape(1, -1)
-    proba = cyber_model.predict_proba(X)[0, 1]
-    return {"cyber_attack_probability": float(proba)}
+    model = _get_cyber_model()
+    if model is None:
+        detail = "Cyber model not found."
+        if cyber_model_path.exists() and cyber_model_error:
+            detail = cyber_model_error
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=detail)
+
+    expected = int(getattr(model, "n_features_in_", 0) or 0)
+    feats = list(req.features)
+    if expected:
+        feats = (feats + [0.0] * expected)[:expected]
+    X = np.array(feats, dtype=float).reshape(1, -1)
+    proba = model.predict_proba(X)[0, 1]
+    return {"cyber_attack_probability": float(proba), "input_features": len(req.features), "expected_features": expected or None}
 
 
 @app.post("/predict_fusion")

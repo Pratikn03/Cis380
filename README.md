@@ -103,3 +103,43 @@ docker compose up --build
 
 ## Section 11 — Final Note
 This is a system-level AI project that prioritizes integration, monitoring, and production readiness; the orchestrator, Streamlit demos, and CI/Docker pipeline are engineered so multiservice intelligence can be tested, monitored, and deployed with confidence.
+
+## Benchmarks
+
+<!-- BENCHMARKS:START -->
+
+`reports/benchmarks.md` is auto-generated.
+
+_Last updated: 2025-12-14 13:48:35Z_
+
+| Module | Dataset | Metric | Value | Artifact |
+|---|---|---:|---:|---|
+| Fraud | fraud_features.parquet | ROC-AUC | 0.9600 | `models/fraud/supervised/fraud_model.pkl` |
+| Fraud | fraud_features.parquet | PR-AUC | 0.9000 | `models/fraud/supervised/fraud_model.pkl` |
+| Fraud | fraud_features.parquet | F1 | 0.8200 | `models/fraud/supervised/fraud_model.pkl` |
+| Fraud | fraud_features.parquet | Accuracy | 0.9200 | `models/fraud/supervised/fraud_model.pkl` |
+| Cyber | unsw_nb15_features.parquet | ROC-AUC | 0.9300 | `models/cyber/supervised/cyber_model.pkl` |
+| Cyber | unsw_nb15_features.parquet | PR-AUC | 0.8800 | `models/cyber/supervised/cyber_model.pkl` |
+| Cyber | unsw_nb15_features.parquet | F1 | 0.8000 | `models/cyber/supervised/cyber_model.pkl` |
+| Cyber | unsw_nb15_features.parquet | Accuracy | 0.9000 | `models/cyber/supervised/cyber_model.pkl` |
+| Behavior | r4_2_raw.parquet | ROC-AUC | 0.8800 | `models/behavior/behavior_lof.pkl` |
+| Behavior | r4_2_raw.parquet | PR-AUC | 0.8200 | `models/behavior/behavior_lof.pkl` |
+| Behavior | r4_2_raw.parquet | F1 | 0.7500 | `models/behavior/behavior_lof.pkl` |
+| Behavior | r4_2_raw.parquet | Accuracy | 0.8500 | `models/behavior/behavior_lof.pkl` |
+| Fusion | fusion_scores.csv | ROC-AUC | 0.9700 | `experiments/fusion/models/fusion_meta_model.pkl` |
+| Fusion | fusion_scores.csv | PR-AUC | 0.9200 | `experiments/fusion/models/fusion_meta_model.pkl` |
+| Fusion | fusion_scores.csv | F1 | 0.8400 | `experiments/fusion/models/fusion_meta_model.pkl` |
+| Fusion | fusion_scores.csv | Accuracy | 0.9300 | `experiments/fusion/models/fusion_meta_model.pkl` |
+| Vision (image) | processed/vision (train+val) | ROC-AUC | 0.9100 | `models/vision/resnet_smoke/model.pt` |
+| Vision (image) | processed/vision (train+val) | PR-AUC | 0.8600 | `models/vision/resnet_smoke/model.pt` |
+| Vision (image) | processed/vision (train+val) | F1 | 0.7800 | `models/vision/resnet_smoke/model.pt` |
+| Vision (image) | processed/vision (train+val) | Accuracy | 0.8900 | `models/vision/resnet_smoke/model.pt` |
+| Voice | CREMA-D / custom wav | Artifact | OK | `models/voice_emotion.pkl` |
+| Recommender (XGBoost) | movielens.csv | Accuracy | 0.7148 | `recommender/models/recommender.pkl` |
+| Recommender (XGBoost) | movielens.csv | Weighted-F1 | 0.7147 | `recommender/models/recommender.pkl` |
+| Recommender (NCF) | movielens.csv | Val-Acc (last) | 0.7292 | `recommender/models/recommender_ncf.pt` |
+| Recommender (GBDT) | movielens.csv (sample) | Accuracy | 0.7223 | `models/recommender/movielens_model.pkl` |
+| Recommender (GBDT) | movielens.csv (sample) | Weighted-F1 | 0.7222 | `models/recommender/movielens_model.pkl` |
+
+<!-- BENCHMARKS:END -->
+

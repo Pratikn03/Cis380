@@ -1,6 +1,7 @@
 import asyncio
 import os
 import requests
+from functools import lru_cache
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -9,7 +10,6 @@ from agent.orchestrator import OmniChatXOrchestrator
 from api.deps import require_auth, check_token_query
 
 router = APIRouter(prefix="/api/chat", tags=["chat"], dependencies=[Depends(require_auth)])
-agent = OmniChatXOrchestrator()
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 
 
@@ -17,9 +17,14 @@ class ChatRequest(BaseModel):
     message: str
 
 
+@lru_cache(maxsize=1)
+def _get_agent() -> OmniChatXOrchestrator:
+    return OmniChatXOrchestrator()
+
+
 @router.post("")
 def chat(req: ChatRequest):
-    reply = agent.route(req.message)
+    reply = _get_agent().route(req.message)
     return {"reply": reply}
 
 
@@ -72,7 +77,7 @@ async def chat_stream(message: str, token: str | None = None):
 
     async def event_gen_fallback():
         try:
-            reply = agent.route(message)
+            reply = _get_agent().route(message)
             for word in reply.split():
                 yield f"data: {word}\\n\\n"
                 await asyncio.sleep(0.01)

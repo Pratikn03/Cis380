@@ -11,7 +11,13 @@ logs/
 data/raw/
 data/interim/
 data/processed/
+data/embeddings/
+data/monitoring/
+data/Celeb_V2/
+data/Video-2/
+data/video-2/
 models/
 experiments/
+reports/benchmarks.md
 reports/*.pdf
 reports/*.html

@@ -1,6 +1,7 @@
 """FastAPI gateway for OmniChatX (pure HTTP, no Streamlit)."""
 from pathlib import Path
 import logging
+import sys
 import time
 
 from fastapi import FastAPI, Request, Response
@@ -8,8 +9,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from prometheus_client import Counter, Histogram, CONTENT_TYPE_LATEST, generate_latest
 
+ROOT = Path(__file__).resolve().parents[1]
+SRC_DIR = ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
 from api.routes import chat, rag, recommend, behavior, fraud, cyber, vision
-from agent.orchestrator import OmniChatXOrchestrator
 from fastapi.responses import RedirectResponse
 
 logger = logging.getLogger("omnichatx")
@@ -36,7 +41,6 @@ REQUEST_LATENCY = Histogram(
 
 
 app = FastAPI(title="OmniChatX API", version="0.2")
-agent = OmniChatXOrchestrator()
 
 # CORS: allow all for demo; tighten for production
 app.add_middleware(

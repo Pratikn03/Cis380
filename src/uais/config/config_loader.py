@@ -4,7 +4,8 @@ from typing import Any, Dict
 
 import yaml
 
-CONFIG_DIR = Path(__file__).resolve().parents[2] / "config"
+# repo_root/src/uais/config/config_loader.py -> parents[3] is repo_root
+CONFIG_DIR = Path(__file__).resolve().parents[3] / "config"
 
 
 def _load_yaml(path: Path) -> Dict[str, Any]:

@@ -8,7 +8,8 @@ from typing import Dict, Any
 import joblib
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+# repo_root/src/uais/recommender/load_models.py -> parents[3] is repo_root
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 MODELS_DIR = PROJECT_ROOT / "models"
 EXPERIMENTS_DIR = PROJECT_ROOT / "experiments"
 

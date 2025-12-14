@@ -40,7 +40,13 @@ def main():
     y = df_feats[target_col].astype(int)
 
     # Split for evaluation even though models are unsupervised.
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, stratify=y, random_state=42)
+    stratify = y if y.nunique(dropna=False) > 1 else None
+    if stratify is None:
+        logger.warning(
+            "Behavior target column '%s' has <2 classes; splitting without stratify and metrics may be non-informative.",
+            target_col,
+        )
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, stratify=stratify, random_state=42)
 
     preprocessor = StandardScaler()
 

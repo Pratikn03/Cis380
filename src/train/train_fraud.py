@@ -1,5 +1,19 @@
-"""Wrapper to train fraud model (calls existing code)."""
-from uais.supervised import train_fraud_supervised
+"""Train the fraud supervised model and write standard artifacts.
 
-# TODO: wire to your data loader and config if you want a standard entrypoint.
-# This file exists for naming consistency for recruiters.
+This script is a stable entrypoint intended for demos/CI:
+- Trains a supervised fraud model
+- Saves to `models/fraud/supervised/fraud_model.pkl`
+"""
+
+from __future__ import annotations
+
+import subprocess
+import sys
+
+
+def main() -> None:
+    subprocess.run([sys.executable, "src/scripts/run_fraud_experiment.py"], check=True)
+
+
+if __name__ == "__main__":
+    main()

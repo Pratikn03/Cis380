@@ -1,20 +1,16 @@
 # Fraud domain override
-project_name: "UAIS - Fraud"  # Updated project name
+project_name: "UAIS - Fraud"
 
 data:
-  target: Class            # binary fraud label
-  id_column: id            # generate if missing
-  datetime_column: Time    # seconds since first transaction
-  file_name: creditcard.csv
+  target: Class
+  # Prefer a single canonical file to avoid mixing mismatched schemas under data/raw/fraud
+  path: data/raw/fraud/creditcard.csv
   synthetic_rows: 0
-
-features:
-  numeric: [Amount, Time]
-  categorical: []
 
 training:
   model_type: hist_gb
   n_estimators: 200
   learning_rate: 0.1
   max_depth: 4
+  max_iter: 200
   anomaly_contamination: 0.01
