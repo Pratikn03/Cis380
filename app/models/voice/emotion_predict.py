@@ -6,19 +6,52 @@ from typing import Any
 import joblib
 import numpy as np
 
-from app.models.voice.features import extract_mfcc, extract_audio_signals, load_audio
+from app.models.voice.features import (
+    extract_mfcc,
+    extract_audio_signals,
+    load_audio,
+    compute_zero_crossing_rate,
+    compute_rms,
+    compute_pitch,
+    compute_spectral_contrast,
+)
 
 MODEL_PATH = Path("models/voice_emotion.pkl")
 _MODEL = None
 
 SUPPORTED_EMOTIONS: tuple[str, ...] = ("happy", "sad", "angry", "neutral", "fearful")
+# Enhanced feature count: 26 MFCC + 5 additional features
+FEATURE_COUNT = 31
+
+
+def _extract_enhanced_features(audio: np.ndarray, sr: int) -> np.ndarray:
+    """Extract MFCC + additional audio features for better emotion recognition."""
+    # MFCC features (26 values)
+    mfcc_feat = extract_mfcc(audio, sr)
+    
+    # Additional features
+    zcr = compute_zero_crossing_rate(audio)
+    rms_mean, rms_std = compute_rms(audio)
+    pitch_mean, _ = compute_pitch(audio, sr)
+    spectral = compute_spectral_contrast(audio, sr)
+    
+    # Convert None to 0.0
+    extra_features = np.array([
+        zcr,
+        rms_mean,
+        rms_std,
+        pitch_mean if pitch_mean is not None else 0.0,
+        spectral if spectral is not None else 0.0
+    ], dtype=np.float64)
+    
+    return np.concatenate([mfcc_feat, extra_features])
 
 
 def _create_fallback_model(*, persist: bool = True):
     from sklearn.linear_model import LogisticRegression
 
     np.random.seed(42)
-    X = np.random.normal(0, 1, (50, 26))
+    X = np.random.normal(0, 1, (50, FEATURE_COUNT))
     y = np.array(["happy"] * 10 + ["sad"] * 10 + ["angry"] * 10 + ["neutral"] * 10 + ["fearful"] * 10)
     # liblinear avoids numerical issues seen in some SciPy/NumPy combos while still
     # providing predict_proba + classes_ for the demo UI.
@@ -89,7 +122,7 @@ def _segment_predictions(audio: np.ndarray, sr: int, model: Any, *, max_segments
         start = i * seg_len
         end = audio.size if i == n_segments - 1 else (i + 1) * seg_len
         segment = audio[start:end]
-        feat = extract_mfcc(segment, sr)
+        feat = _extract_enhanced_features(segment, sr)
         label, conf, vector = _predict_single(model, feat)
         labels.append(label)
         preds.append(
@@ -115,7 +148,7 @@ def _segment_predictions(audio: np.ndarray, sr: int, model: Any, *, max_segments
 
 def predict_emotion(*, audio_bytes: bytes, filename: str | None = None) -> dict[str, Any]:
     audio, sr = load_audio(audio_bytes)
-    feature = extract_mfcc(audio, sr)
+    feature = _extract_enhanced_features(audio, sr)
     model = _load_model()
     label, confidence, vector = _predict_single(model, feature)
     signals = extract_audio_signals(audio, sr)

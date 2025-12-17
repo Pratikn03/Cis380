@@ -1,0 +1,14 @@
+artifact_uri: /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/runs/mlflow/716084780746542089/be07c54f81c840f4b013395c3692aabc/artifacts
+end_time: 1765996342073
+entry_point_name: ''
+experiment_id: '716084780746542089'
+lifecycle_stage: active
+run_id: be07c54f81c840f4b013395c3692aabc
+run_name: train3
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765996289335
+status: 3
+tags: []
+user_id: pratik_n
