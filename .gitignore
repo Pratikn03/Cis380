@@ -44,3 +44,27 @@ reports/*.html
 # Legacy/generated artifacts under src/
 src/models/
 src/experiments/
+data/
+datasets/
+*.pt
+*.pth
+*.onnx
+*.ckpt
+*.pb
+*.joblib
+*.pkl
+*.index
+*.faiss
+*.npy
+*.npz
+*.zip
+*.tar*
+*.mp4
+*.wav
+*.mp3
+archive.zip
+logs/
+__pycache__/
+.ipynb_checkpoints/
+*.egg-info/
+.venv*/runs/

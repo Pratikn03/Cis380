@@ -28,11 +28,11 @@ DEFAULT_LABELS: tuple[str, ...] = (
 
 
 def _infer_category(labels: list[str]) -> str:
-    if any(l in labels for l in ("phone", "laptop", "headphones", "camera")):
+    if any(lbl in labels for lbl in ("phone", "laptop", "headphones", "camera")):
         return "electronics"
-    if any(l in labels for l in ("document", "book")):
+    if any(lbl in labels for lbl in ("document", "book")):
         return "documents"
-    if any(l in labels for l in ("person", "face")):
+    if any(lbl in labels for lbl in ("person", "face")):
         return "people"
     return "unknown"
 
@@ -49,7 +49,7 @@ def detect_objects(image_bytes: bytes, *, labels: tuple[str, ...] = DEFAULT_LABE
         return {"objects": [], "category": "unknown", "scores": []}
 
     img_vec = embed_image_bytes(image_bytes)
-    text_vecs = np.stack([embed_text(l) for l in labels], axis=0).astype(np.float32)
+    text_vecs = np.stack([embed_text(lbl) for lbl in labels], axis=0).astype(np.float32)
     sims = (text_vecs @ img_vec.astype(np.float32)).astype(np.float32)
     order = np.argsort(sims)[::-1][: max(1, int(top_k))]
 

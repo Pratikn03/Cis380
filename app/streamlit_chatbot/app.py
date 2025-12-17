@@ -32,13 +32,13 @@ for p in desired_sys_path:
 sys.path.insert(0, desired_sys_path[0])
 sys.path.insert(1, desired_sys_path[1])
 
-from streamlit_chatbot.ui.theme import apply_partik_theme, sidebar_panel
-from streamlit_chatbot.pages.command_center import render_command_center
-from streamlit_chatbot.pages.live import render_live_page
-from streamlit_chatbot.pages.brand import render_brand_page
-from streamlit_chatbot.pages.tools import render_tools_page
-from streamlit_chatbot.pages.voice_chat import render_voice_chat_page
-from streamlit_chatbot.risk_dashboard import render_risk_command_center
+from streamlit_chatbot.ui.theme import apply_partik_theme, sidebar_panel  # noqa: E402
+from streamlit_chatbot.pages.command_center import render_command_center  # noqa: E402
+from streamlit_chatbot.pages.live import render_live_page  # noqa: E402
+from streamlit_chatbot.pages.brand import render_brand_page  # noqa: E402
+from streamlit_chatbot.pages.tools import render_tools_page  # noqa: E402
+from streamlit_chatbot.pages.voice_chat import render_voice_chat_page  # noqa: E402
+from streamlit_chatbot.risk_dashboard import render_risk_command_center  # noqa: E402
 
 
 def main():

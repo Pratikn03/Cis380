@@ -2,8 +2,8 @@ import pytest
 
 
 def test_distilbert_forward_smoke():
-    torch = pytest.importorskip("torch")
-    transformers = pytest.importorskip("transformers")
+    torch = pytest.importorskip("torch")  # noqa: F841
+    transformers = pytest.importorskip("transformers")  # noqa: F841
     from uais_v.models.nlp_text_model import DistilBERTClassifier, get_tokenizer
 
     try:

@@ -3,7 +3,7 @@ import pytest
 
 def test_resnet_forward_smoke():
     torch = pytest.importorskip("torch")
-    torchvision = pytest.importorskip("torchvision")
+    torchvision = pytest.importorskip("torchvision")  # noqa: F841
     from uais_v.models.vision_resnet import VisionConfig, build_resnet_classifier
 
     cfg = VisionConfig(model_name="resnet18", num_classes=2, pretrained=False)

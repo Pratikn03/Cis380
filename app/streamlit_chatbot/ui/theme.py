@@ -193,7 +193,7 @@ def apply_partik_theme(*, subtitle: str = "Cyber • Fraud • Behavior • Visi
     )
 
     st.markdown(
-        f"""
+        """
         <div class="glass-card" style="padding:18px 22px;margin-bottom:14px;">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
                 <div style="display:flex;align-items:center;gap:12px;">

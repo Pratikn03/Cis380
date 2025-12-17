@@ -5,8 +5,6 @@ from typing import List
 
 try:
     import torch
-    import torchvision.transforms as T
-    from PIL import Image
 
     _TORCH_AVAILABLE = True
 except Exception as exc:  # noqa: F841
@@ -48,7 +46,7 @@ def extract_tags_from_image(image, top_k: int = 5) -> List[str]:
         return []
 
     try:
-        text_tokens = torch.cat([clip.tokenize(l) for l in candidate_labels]).to(device)
+        text_tokens = torch.cat([clip.tokenize(label) for label in candidate_labels]).to(device)
         with torch.no_grad():
             img_tensor = preprocess(image).unsqueeze(0).to(device)
             image_features = model.encode_image(img_tensor)

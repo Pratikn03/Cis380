@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-from datetime import datetime
 from pathlib import Path
 from statistics import mean
 from typing import Dict, List, Optional
-from uuid import uuid4
 
 from app.monitoring.baseline import build_baseline_stats, load_baseline, save_baseline
 from app.monitoring.drift import compute_drift
 from app.monitoring.logger import append_jsonl, read_last_n_jsonl
 from app.monitoring.metrics import compute_metrics
-from app.monitoring.schemas import DriftReport, FraudLogEvent, RiskLogEvent
+from app.monitoring.schemas import FraudLogEvent, RiskLogEvent
 
 FRAUD_LOG_PATH = Path("data/monitoring/logs/fraud_events.jsonl")
 RISK_LOG_PATH = Path("data/monitoring/logs/risk_events.jsonl")
