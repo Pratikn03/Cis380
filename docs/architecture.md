@@ -1,28 +1,26 @@
 ```mermaid
 flowchart TD
-    UI[OmniChatX-UI<br/>(Chat Interface + UX)]
-    API[OmniChatX API Gateway<br/>(FastAPI Backend)]
+    UI[UAIS-V UI<br/>(Streamlit Command Center)]
+    API[FastAPI Gateway<br/>(app.main:app)]
+    ORCH[Agent Orchestrator<br/>(rule-based routing)]
 
     UI --> API
+    API --> ORCH
 
-    API --> LLM[LLM Engine<br/>(OpenAI / Groq / Mistral)]
-    API --> RAG[RAG Retriever<br/>(Chroma / Pinecone)]
-    API --> ML[ML Models Layer<br/>(Fraud / Cyber / Behavior / Rec)]
+    ORCH --> CHAT[Chat / LLM<br/>(OpenAI optional, offline fallback)]
+    ORCH --> RAG[Local RAG<br/>(docs + TF-IDF / local embeddings)]
+    ORCH --> ML[ML Modules<br/>(Fraud • Cyber • Behavior • Recsys • Voice • Vision)]
 
-    RAG --> VDB[Document Embeddings DB<br/>(Vector DB Storage)]
-    VDB --> RAG
+    API --> MON[Monitoring Logger<br/>(JSONL events)]
+    ML --> MON
 
-    LLM --> ORCH[Chat Orchestration]
-    RAG --> ORCH
-    ML --> ORCH
-
-    ORCH --> FINAL[Final Response<br/>(LLM + Facts + Explanations + ML Recommendations)]
+    MON --> SUM[/api/monitor/summary<br/>/api/monitor/drift/]
 ```
 
 **Legend:**
-- **OmniChatX-UI**: your chat frontend (Streamlit or custom)
-- **API Gateway**: FastAPI (or similar) that routes requests
-- **LLM Engine**: GPT/Groq/Mistral, etc.
-- **RAG Retriever**: pulls context from your documents via vector DB
-- **ML Models Layer**: fraud/cyber/behavior/recommender models (`fraud_model.pkl`, `cyber_model.pkl`, `behavior_model.pkl`, `recommender.pkl`)
-- **Chat Orchestration**: fuses outputs from LLM + RAG + ML into the final reply
+- **UAIS-V UI**: Streamlit demo UI (`app/streamlit_chatbot/app.py`)
+- **FastAPI Gateway**: canonical server entrypoint (`app/main.py` → `backend/main.py`)
+- **Agent Orchestrator**: routes requests to the right module (chat/RAG/risk/recs/voice/vision)
+- **Local RAG**: document-grounded answers from local files (`data/docs/`, `data/embeddings/`)
+- **ML Modules**: fraud/cyber/behavior/recommender/voice/vision inference endpoints
+- **Monitoring Logger**: writes events under `data/monitoring/logs/*.jsonl` and summarizes them via `/api/monitor/*`

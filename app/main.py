@@ -1,20 +1,9 @@
-from __future__ import annotations
+"""Compatibility entrypoint.
 
-from fastapi import FastAPI
+Use `uvicorn app.main:app` as the canonical FastAPI entrypoint.
 
-from app.api.chat import router as chat_router
-from app.api.fraud import router as fraud_router
-from app.api.health import router as health_router
-from app.api.monitor import router as monitor_router
-from app.api.rag import router as rag_router
-from app.api.recommender import router as recommender_router
-from app.api.voice import router as voice_router
+The gateway implementation lives in `backend/main.py`. This module re-exports the
+same FastAPI app so imports remain stable across scripts, tests, and deployments.
+"""
 
-app = FastAPI(title="OmniChatX API")
-app.include_router(chat_router, prefix="/api")
-app.include_router(rag_router, prefix="/api")
-app.include_router(recommender_router, prefix="/api")
-app.include_router(fraud_router, prefix="/api")
-app.include_router(monitor_router, prefix="/api")
-app.include_router(health_router)
-app.include_router(voice_router, prefix="/api")
+from backend.main import app  # noqa: F401

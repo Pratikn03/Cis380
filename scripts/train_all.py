@@ -12,6 +12,7 @@ It is intentionally conservative:
 Usage:
   python scripts/train_all.py
   python scripts/train_all.py --with-vision
+  python scripts/train_all.py --with-video-temporal
   python scripts/train_all.py --voice-limit-per-class 500
 """
 
@@ -43,6 +44,11 @@ def main() -> int:
         "--with-vision",
         action="store_true",
         help="Also run vision training (may be slow / require GPU / dataset layout).",
+    )
+    parser.add_argument(
+        "--with-video-temporal",
+        action="store_true",
+        help="Also train the video temporal deepfake model (requires data/raw/vision/video/{real,fake} + ffmpeg).",
     )
     parser.add_argument(
         "--voice-limit-per-class",
@@ -80,6 +86,10 @@ def main() -> int:
             _run(["bash", str(candidate)])
         else:
             print("\n[train_all] --with-vision requested, but scripts/run_train_vision.sh not found; skipping.")
+
+    if args.with_video_temporal:
+        # Trains a lightweight sklearn temporal model used by /api/vision/video/predict.
+        _run([sys.executable, "src/train/train_video_temporal.py"])
 
     print("\n✅ Training complete. Check experiments/*/metrics and models/* outputs.")
     return 0

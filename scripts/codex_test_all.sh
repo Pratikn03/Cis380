@@ -75,7 +75,7 @@ fi
 
 # ---------- 5) Start backend and test endpoints ----------
 echo "[5/7] Backend smoke test"
-uvicorn backend.main:app --host "$HOST" --port "$PORT" >/tmp/omnichatx_uvicorn.log 2>&1 &
+uvicorn app.main:app --host "$HOST" --port "$PORT" >/tmp/omnichatx_uvicorn.log 2>&1 &
 PID=$!
 
 cleanup() {

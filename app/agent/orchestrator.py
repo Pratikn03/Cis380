@@ -6,6 +6,7 @@ from app.agent.decision_engine import DecisionEngine
 from app.agent.memory import MemoryStore
 from app.models.recommender.explain import explain_recommendation
 from app.models.recommender.predict import recommend
+from app.models.recommender.multimodal.multimodal_predict import IndexNotBuiltError, multimodal_recommend
 from app.models.voice.emotion_predict import predict_emotion
 from app.rag.prompting import build_rag_prompt
 from app.rag.retriever import retrieve_context
@@ -35,18 +36,47 @@ class OmniChatXOrchestrator:
         attachments: Mapping[str, Any] | None = None,
     ) -> Dict[str, Any]:
         has_audio = bool(attachments and attachments.get("audio"))
-        route = self.decision_engine.decide_route(text, use_rag=use_rag, has_audio=has_audio)
+        has_image = bool(attachments and attachments.get("image"))
+        route = self.decision_engine.decide_route(text, use_rag=use_rag, has_audio=has_audio, has_image=has_image)
         self.logger.info(
             "Routing request",
             extra={"user_id": user_id, "route": route, "length": len(text)},
         )
         emotion_data = None
         if has_audio:
+            assert attachments is not None
             audio_content = attachments.get("audio")
             try:
-                emotion_data = predict_emotion(audio_bytes=audio_content)
+                if isinstance(audio_content, (bytes, bytearray)):
+                    emotion_data = predict_emotion(audio_bytes=bytes(audio_content))
             except Exception as exc:
                 self.logger.warning("Emotion detection failed: %s", exc)
+        if has_image and route == "recommend":
+            try:
+                assert attachments is not None
+                image_content = attachments.get("image")
+                image_bytes = image_content if isinstance(image_content, (bytes, bytearray)) else None
+                text_value = (text or "").strip()
+                from app.vision_local.analyze import analyze_image_bytes
+
+                rec_meta = multimodal_recommend(image_bytes=image_bytes, text=text_value or None, top_k=5)
+                try:
+                    if image_bytes is not None:
+                        rec_meta["visual"] = analyze_image_bytes(image_bytes)
+                except Exception:
+                    pass
+                return {
+                    "route": "recommend",
+                    "answer": "Here are recommendations based on your image and prompt.",
+                    "meta": rec_meta,
+                }
+            except IndexNotBuiltError as exc:
+                return {
+                    "route": "recommend",
+                    "answer": "Multimodal recommender isn't ready yet.",
+                    "meta": {"error": str(exc)},
+                }
+
         answer, meta = self._invoke_route(route, text, emotion_data, user_id)
         self.memory.add_turn(user_id, text, answer)
         if emotion_data:
@@ -67,7 +97,7 @@ class OmniChatXOrchestrator:
     def _run_rag(self, text: str, emotion: dict[str, Any] | None) -> tuple[str, Dict[str, Any]]:
         context = retrieve_context(text)
         prompt = build_rag_prompt(text, context)
-        context_texts = [chunk.get("text", "") for chunk in context]
+        context_texts: list[str] = [str(chunk.get("text", "")) for chunk in context]
         if emotion:
             context_texts.append(f"Emotion: {emotion['emotion']} ({emotion['confidence']})")
         answer = self.llm.generate(prompt, context_texts)

@@ -26,15 +26,13 @@ Most applied AI capabilities are built as separate, isolated services (fraud det
    - Voice emotion: MFCC/features + classifier (`app/models/voice/`)  
    - Vision: ResNet training/inference pipeline (`src/uais_v/` + `api/routes/vision.py` in the demo gateway)
 3) **Agent/orchestration layer** (the "brain")  
-   - `app/agent/orchestrator.py`: routes `text` to `rag | fraud | voice_emotion | recommend | chat`  
-   - `app/agent/decision_engine.py`: keyword/regex routing (rule-based)  
-   - `app/agent/memory.py`: last-N turns per user (in-memory)  
-   - Returns: `{"route": ..., "answer": ..., "meta": {...}}`
+   - Current gateway uses `agent/orchestrator.py` for `/api/chat` (rule-based + offline fallback).  
+   - Next-gen structured orchestrator lives under `app/agent/*` and returns `{"route","answer","meta"}`.  
 4) **API/serving layer** (FastAPI)  
-   - Primary API: `app/main.py` + routers in `app/api/`  
-   - Demo gateway (includes `/metrics` + vision route): `backend/main.py`
+   - Canonical entrypoint: `app/main.py` (re-exports `backend/main.py`).  
+   - Gateway mounts both legacy `api/routes/*` and newer `app/api/*` routers (see `docs/LEGACY.md`).
 5) **UI + testing + ops**  
-   - Streamlit demo: `app/streamlit_chatbot/app.py` (Chat/Agent/Voice/Vision/Risk tabs)  
+   - Streamlit demo: `app/streamlit_chatbot/app.py` (Recommendations / Live Agent / Audio+Vision / Fraud+Monitoring)  
    - Test gate: `bash scripts/codex_test_all.sh` (runs unit tests + HTTP smoke tests)
 
 ## Current Phase
@@ -59,8 +57,8 @@ OmniChatX (UAIS-V) is a multimodal AI agent system that integrates retrieval-aug
 OmniChatX / Universal Anomaly Intelligence v2 is a multimodal AI agent platform driven by an orchestrator that routes incoming conversations to LLM-based chat, RAG, fraud/cyber/anomaly scoring, speech emotion recognition, and explainable recommendation services. The system ships with monitoring and drift-detection tooling, a Streamlit demo UI, and a CI/CD-backed Docker deployment so that the entire stack can be iterated like a production service.
 
 ## Section 2 — High-Level Architecture
-* **FastAPI backend (`app/`)** exposes a single API gateway (`app/main.py`) that mounts routers for chat, RAG ingestion, risk scoring, recommendation, voice, monitoring, and health checks.
-* **AI agent orchestrator (`app/agent/`)** runs the `OmniChatXOrchestrator` decision engine, keeps lightweight user memories, and fuses router outputs, citations, and metadata before returning a response.
+* **FastAPI gateway (`app/main.py`)** re-exports the HTTP runtime in `backend/main.py` and mounts routers for chat, RAG, risk scoring, recommendation, voice, monitoring, vision, and health checks.
+* **AI agent orchestrator** routes chat requests (current runtime: `agent/orchestrator.py`; next-gen structured orchestrator: `app/agent/*`).
 * **Modular AI services** live under `app/api/`, `app/rag/`, `app/models/`, and `app/monitoring/`—each module (RAG retriever, fraud/cyber/behavior APIs, voice emotion predictor, explainable recommender, monitoring logger/drift) can be swapped or extended independently.
 * **Streamlit UI and static frontend** (`app/streamlit_chatbot`, `ui/`) consume the orchestrator APIs to showcase chat, recommendation, risk overlays, and embeddings-driven RAG demos.
 * **Docker + CI/CD** (`Dockerfile`, `docker-compose.yml`, `.github/workflows/ci.yml`) package the stack, run lint/tests, and build the production image as part of the pipeline.
@@ -68,14 +66,14 @@ OmniChatX / Universal Anomaly Intelligence v2 is a multimodal AI agent platform 
 **Request lifecycle:** user → FastAPI ingress → orchestrator decision engine → selected module (RAG, fraud/cyber/anomaly, recommender, voice, fallback chat) → module prediction + monitoring/logging → orchestrator aggregates answer + lineage → response returned. This agent-based routing keeps the stack flexible while tracing each step for observability.
 
 ## Section 3 — Core Features (What Is Implemented)
-1. **AI Agent Orchestrator** (`app/agent/orchestrator.py`) routes intent via a decision engine, consults the `LLMStub`, executes module-specific helpers, tracks user memory, and annotates answers with citations or risk notes.
+1. **AI Agent Orchestrator** (current runtime: `agent/orchestrator.py`) routes chat/risk/recs requests and supports offline fallback when `OPENAI_API_KEY` is missing. A structured next-gen orchestrator also exists under `app/agent/*`.
 2. **Retrieval-Augmented Generation** (`app/rag/ingest.py`, `app/rag/retriever.py`, `app/rag/prompting.py`) ingests `docs/` content, builds TF-IDF embeddings, retrieves relevant chunks, and supplies `citations` to the orchestrator for transparent responses.
 3. **Fraud / Cyber / Behavior Anomaly APIs** (`app/api/fraud.py`, `app/api/monitor.py` plus legacy `backend/api/*`) surface scoring from `models/fraud/`, `models/cyber/`, and `models/behavior/` artifacts, logging each invocation.
 4. **Fraud Monitoring & Drift Detection** (`app/monitoring/`) append events to `data/monitoring/logs/fraud_events.jsonl`, compute freshness summaries, and expose summary/drift reports via `/api/monitor/summary` and `/api/monitor/drift`.
 5. **Speech Emotion Recognition** (`app/models/voice/emotion_predict.py`, `app/api/voice.py`) extracts MFCC features, loads a local classifier (with a safe fallback model if the artifact is missing/incompatible), and returns an emotion label + confidence.
    - Supported emotion labels depend on the trained artifact’s `classes_` and the labels present in `data/raw/voice/*`.
 6. **Explainable Recommendation Engine** (`app/models/recommender/` and `recommender/` packages) powers `/api/recommend` and `/api/recommend/explain`, supporting movie-style metadata, vectorized fallbacks, and text explanations.
-7. **Streamlit Demo UI** (`app/streamlit_chatbot/app.py`) wires chat, fraud risk, and recommendation tabs to the orchestrator (`app/agent`), styling the experience, showing tags, and surfacing risk overlays.
+7. **Streamlit Demo UI** (`app/streamlit_chatbot/app.py`) exposes Recommendations, Live Agent, Audio/Video/Vision, and Fraud/Cyber/Behavior (including monitoring logs) for a single-machine demo.
 8. **Dockerized Deployment + CI**: `docker compose up --build` launches the service; `.github/workflows/ci.yml` uses Python 3.11, installs dependencies, runs `ruff` + `pytest`, and builds the Docker image to prevent regressions.
 9. **Health & Metrics Endpoints**: `/health` (FastAPI and backend) reports uptime/version, while `backend/main.py` exposes `/metrics` for Prometheus, backed by request counters/histograms for latency tracking.
 
@@ -87,11 +85,15 @@ OmniChatX / Universal Anomaly Intelligence v2 is a multimodal AI agent platform 
   - `app/models/` — ML helpers for recommender explainability, voice emotion extraction, and any shared feature utilities.
   - `app/monitoring/` — fraud log ingestion, baseline builder, drift calculator, and summary metrics.
 - `ui/` — static demo assets (HTML, JS, CSS) served under `/ui` as an optional secondary experience.
-- `data/` — document corpus, embeddings, monitoring logs, and other persistent artifacts ingested by RAG and monitoring layers.
+- `data/` — datasets + persistent artifacts:
+  - `data/raw/` (fraud/cyber/behavior/recommendation/voice/vision/nlp)
+  - `data/docs/` (RAG corpus)
+  - `data/embeddings/` (RAG index artifacts)
+  - `data/monitoring/logs/` (`fraud_events.jsonl`, `risk_events.jsonl`)
 - `tests/` — pytest suites that validate chat routing, RAG retrieval, and monitoring/drift tooling.
 - `docs/` — architecture diagrams, component walkthroughs, and demos used to explain the architecture.
 
-> Legacy or experimental directories such as `backend/`, `agent/`, `api/`, `rag/`, `recommender/`, `scripts/`, `experiments/`, and `deploy/` remain in the tree for reference, but `app/` is the active runtime in new deployments.
+> Canonical FastAPI entrypoint: `app/main.py` (it re-exports the gateway in `backend/main.py` so both `uvicorn app.main:app` and `uvicorn backend.main:app` work).
 
 ## Section 5 — How to Run (Local)
 1. Create and activate a Python 3.11 virtual environment.
@@ -108,12 +110,63 @@ OmniChatX / Universal Anomaly Intelligence v2 is a multimodal AI agent platform 
    ```bash
    OMNICHATX_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
    ```
-   - The **Voice & Vision** tab supports **microphone recording** + **webcam snapshots** (no file uploads).
+   - The **Audio/Video/Vision** tab supports **microphone recording** + **webcam snapshots** (no file uploads).
    - Optional: enable continuous mic+webcam streaming by installing `streamlit-webrtc` (`pip install -r requirements-optional.txt`) and toggling the WebRTC checkbox in the UI.
 4. Run the pytest suites that cover chat, RAG, and monitoring logic.
    ```bash
    pytest tests/test_chat.py tests/test_rag.py tests/test_monitoring.py -q
    ```
+
+## Brand Recognition (LogoDet-3K → YOLOv8) Quickstart
+
+This project supports **true brand recognition** via **logo detection** (YOLOv8) trained on datasets like **LogoDet-3K** and exported to `artifacts/brand/yolo_logo_det.pt`.
+
+### 1) Put the dataset here (ignored by git)
+
+- Place your raw LogoDet-3K dataset under:
+   - `data/raw/brand/logodet3k/`
+
+### 2) Convert to a unified YOLO dataset
+
+The converter auto-detects COCO / Pascal VOC / YOLO layouts and produces:
+
+- `data/processed/brand_yolo/images/{train,val}/...`
+- `data/processed/brand_yolo/labels/{train,val}/...`
+- `data/processed/brand_yolo/brands.yaml` (Ultralytics config)
+
+```bash
+python scripts/prepare_brand_data.py --src_root data/raw/brand/logodet3k --out_root data/processed/brand_yolo
+```
+
+### 3) Train YOLOv8 and export the artifact
+
+Training copies the best weights to:
+
+- `artifacts/brand/yolo_logo_det.pt`
+
+```bash
+python -m src.train.train_brand_logo_detector
+```
+
+Environment variables (optional):
+
+- `BRAND_YOLO_MODEL` (default `yolov8s.pt`)
+- `BRAND_EPOCHS` (default `50`)
+- `BRAND_IMGSZ` (default `640`)
+- `BRAND_BATCH` (default `16`)
+- `BRAND_DEVICE` (default `cpu`)
+
+### 4) Predict via API
+
+- Endpoint: `POST /api/vision/brand/predict`
+- Upload: multipart form field `file`
+- Returns: `{ detections: [{brand, confidence, bbox}], model_path }`
+
+If the model wasn’t trained yet, the endpoint returns **503** with instructions.
+
+### 5) Predict via Streamlit
+
+Open the Streamlit UI and use the **Brand Recognition** tab. It uploads an image and draws bounding boxes over the predicted logos.
 
 ## Quick verification
 ```bash
@@ -135,12 +188,14 @@ docker compose up --build
 ## Section 7 — API Overview
 | Endpoint | Description |
 | --- | --- |
-| `POST /api/chat` | Ingests text (and optional audio/attachments), routes via the orchestrator, and returns routed answers plus metadata/citations. |
-| `POST /api/rag/ingest` | Appends or updates document content under `docs/`, triggers the TF-IDF ingestion pipeline, and reports the number of indexed chunks. |
+| `POST /api/chat` | Text chat; returns `{route, answer, meta}` (and `reply` for UI compatibility). |
+| `POST /api/chat/multimodal` | Multipart chat with optional `audio`/`image`/`video` uploads; attaches voice/vision outputs into `meta.attachments`. |
+| `POST /api/rag/ingest` | Writes docs under `data/docs/`, rebuilds embeddings into `data/embeddings/`, and reports indexed chunk count. |
 | `POST /api/voice/emotion` | Accepts audio uploads, extracts MFCC features, and returns an emotion label with confidence. (Labels depend on the trained model.) |
-| `POST /api/recommend` | Predicts recommendations via explainable XGBoost-based pipelines and MovieLens-derived metadata depending on the payload. |
-| `POST /api/recommend/explain` | Returns short, feature-driven explanations for a user/item pair by calling `app/models/recommender/explain.py`. |
-| `GET /api/monitor/summary` | Summarizes the latest fraud log metrics, request counts, and recent risk scores recorded in `data/monitoring/logs`. |
+| `POST /api/recommend` | Supports both (a) item recommendations (`{user_id, top_k}` → `items`) and (b) MovieLens-style scoring (`{user_id:int, movie_id:int}` → label/probability). |
+| `POST /api/recommend/explain` | Returns an explanation for `{user_id, item_id}` using `app/models/recommender/explain.py`. |
+| `GET /api/monitor/summary` | Summarizes fraud metrics + risk summary (and returns log paths under `data/monitoring/logs`). |
+| `GET /api/monitor/events` | Returns the tail of raw monitoring events (kind=`risk` or `fraud`) for demo/debug. |
 | `GET /api/monitor/drift` | Computes drift summaries against the stored baseline (`app/monitoring/baseline.py`) and exposes feature-level deltas. |
 | `GET /health` | Lightweight uptime/status ping (also used by the Docker healthcheck). |
 
@@ -156,7 +211,7 @@ docker compose up --build
 * Docker + GitHub Actions pipeline covering lint/test/build.
 
 ### PARTIAL / FUTURE
-* RAG pipeline currently uses local TF-IDF embeddings; replacing it with a managed vector DB (Chroma/Pinecone) is a logical next step.
+* RAG pipeline uses local embeddings + a lightweight vector store in `data/embeddings/`; swapping in a managed vector DB (Chroma/Pinecone) is a logical next step.
 * Voice emotion prediction relies on a fallback logistic regression when no pretrained model is present; swapping in a production-grade model is ongoing work.
 * Additional API guards (authentication tokens, rate limiting) and multi-agent orchestration policies can be layered on the existing decision engine.
 

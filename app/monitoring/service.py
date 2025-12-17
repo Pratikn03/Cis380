@@ -10,21 +10,52 @@ from app.monitoring.baseline import build_baseline_stats, load_baseline, save_ba
 from app.monitoring.drift import compute_drift
 from app.monitoring.logger import append_jsonl, read_last_n_jsonl
 from app.monitoring.metrics import compute_metrics
-from app.monitoring.schemas import DriftReport, FraudLogEvent
+from app.monitoring.schemas import DriftReport, FraudLogEvent, RiskLogEvent
 
-LOG_PATH = Path("data/monitoring/logs/fraud_events.jsonl")
+FRAUD_LOG_PATH = Path("data/monitoring/logs/fraud_events.jsonl")
+RISK_LOG_PATH = Path("data/monitoring/logs/risk_events.jsonl")
 
 
 def log_fraud_event(event: FraudLogEvent) -> None:
-    append_jsonl(LOG_PATH, event.model_dump())
+    append_jsonl(FRAUD_LOG_PATH, event.model_dump())
+
+
+def log_risk_event(event: RiskLogEvent) -> None:
+    append_jsonl(RISK_LOG_PATH, event.model_dump())
 
 
 def get_monitor_summary(window_n: int = 1000) -> Dict[str, object]:
-    return compute_metrics(LOG_PATH, window_n)
+    fraud_metrics = compute_metrics(FRAUD_LOG_PATH, window_n)
+    risk_metrics = get_risk_summary(window_n)
+    return {
+        **fraud_metrics,
+        "risk": risk_metrics,
+        "paths": {
+            "fraud_log": str(FRAUD_LOG_PATH),
+            "risk_log": str(RISK_LOG_PATH),
+        },
+    }
+
+
+def get_risk_summary(window_n: int = 1000) -> Dict[str, object]:
+    events = read_last_n_jsonl(RISK_LOG_PATH, window_n)
+    decision_counts: Dict[str, int] = {}
+    risk_acc: Dict[str, list[float]] = {"cyber_risk": [], "behavior_risk": [], "fraud_risk": [], "fusion_risk": []}
+    for event in events:
+        decision = event.get("decision")
+        if decision:
+            decision_counts[decision] = decision_counts.get(decision, 0) + 1
+        scores = event.get("risk_scores", {})
+        for key in risk_acc:
+            value = scores.get(key)
+            if isinstance(value, (int, float)):
+                risk_acc[key].append(float(value))
+    avg_risks = {k: (mean(v) if v else 0.0) for k, v in risk_acc.items()}
+    return {"total_events": len(events), "decision_counts": decision_counts, "avg_risks": avg_risks}
 
 
 def get_drift_report(window_n: int = 1000) -> Dict[str, object]:
-    live_events = read_last_n_jsonl(LOG_PATH, window_n)
+    live_events = read_last_n_jsonl(FRAUD_LOG_PATH, window_n)
     numeric_events = [
         {k: float(v) for k, v in entry.get("features_summary", {}).items() if isinstance(v, (int, float))}
         for entry in live_events

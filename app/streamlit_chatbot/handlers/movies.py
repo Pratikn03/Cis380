@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import List, Dict
 
 import requests
+import numpy as np
 
 try:
     from .static_fallbacks import movies_fallback
@@ -86,6 +87,8 @@ _STOPWORDS = {
     "me",
 }
 
+_LIKE_PAT = re.compile(r"(?:^|\b)(?:like|similar\s+to)\s+(.+)$", re.IGNORECASE)
+
 
 def _extract_genre_ids(query: str) -> list[int]:
     ids = []
@@ -107,13 +110,18 @@ def _load_movielens_items() -> list[dict]:
             title = (row.get("title") or "").strip()
             tags = (row.get("tags") or "").strip()
             popularity = row.get("popularity") or "0"
+            movie_id = row.get("movieId") or row.get("movie_id") or ""
             try:
                 pop_val = int(float(popularity))
             except Exception:
                 pop_val = 0
             if not title:
                 continue
-            items.append({"title": title, "tags": tags, "popularity": pop_val})
+            try:
+                mid_val = int(float(movie_id)) if str(movie_id).strip() else None
+            except Exception:
+                mid_val = None
+            items.append({"movieId": mid_val, "title": title, "tags": tags, "popularity": pop_val})
     return items
 
 
@@ -127,6 +135,138 @@ def _extract_movielens_genres(query: str) -> list[str]:
     return genres
 
 
+def _normalize_title(text: str) -> str:
+    t = (text or "").lower()
+    t = re.sub(r"\\(\\d{4}\\)", " ", t)  # remove year
+    t = re.sub(r"[^a-z0-9]+", " ", t)
+    return " ".join(t.split())
+
+
+def _extract_like_phrase(query: str) -> str | None:
+    m = _LIKE_PAT.search(query or "")
+    if not m:
+        return None
+    phrase = m.group(1).strip()
+    # drop trailing "movies/film" words
+    phrase = re.sub(r"\\b(movies?|films?)\\b", " ", phrase, flags=re.IGNORECASE).strip()
+    return phrase or None
+
+
+@lru_cache(maxsize=1)
+def _similarity_index():
+    """Build a cached TF-IDF matrix over MovieLens item metadata for 'similar to X' queries."""
+    items = _load_movielens_items()
+    if not items:
+        return None
+    try:
+        from sklearn.feature_extraction.text import TfidfVectorizer
+    except Exception:
+        return None
+
+    corpus = []
+    norm_titles = []
+    for it in items:
+        title = str(it.get("title") or "")
+        tags = str(it.get("tags") or "").replace("|", " ")
+        corpus.append(f"{title} {tags}".strip())
+        norm_titles.append(_normalize_title(title))
+
+    vectorizer = TfidfVectorizer(stop_words="english", max_features=5000)
+    matrix = vectorizer.fit_transform(corpus)
+    return {"items": items, "norm_titles": norm_titles, "vectorizer": vectorizer, "matrix": matrix}
+
+
+def _find_anchor_index(phrase: str) -> int | None:
+    idx_data = _similarity_index()
+    if not idx_data:
+        return None
+    norm = _normalize_title(phrase)
+    if not norm:
+        return None
+
+    needle = norm.split()
+    if not needle:
+        return None
+
+    def _has_sequence(tokens: list[str], subseq: list[str]) -> bool:
+        if len(subseq) > len(tokens):
+            return False
+        for j in range(len(tokens) - len(subseq) + 1):
+            if tokens[j : j + len(subseq)] == subseq:
+                return True
+        return False
+
+    best = None
+    for i, t in enumerate(idx_data["norm_titles"]):
+        tokens = t.split()
+        if _has_sequence(tokens, needle):
+            pop = int(idx_data["items"][i].get("popularity") or 0)
+            score = (len(needle), pop)
+            if best is None or score > best[0]:
+                best = (score, i)
+    return None if best is None else int(best[1])
+
+
+def is_movie_similarity_query(query: str) -> bool:
+    phrase = _extract_like_phrase(query or "")
+    if not phrase:
+        return False
+    return _find_anchor_index(phrase) is not None
+
+
+def _recommend_similar_movies(query: str, top_n: int) -> list[dict]:
+    idx_data = _similarity_index()
+    if not idx_data:
+        return []
+    phrase = _extract_like_phrase(query or "")
+    if not phrase:
+        return []
+    anchor_idx = _find_anchor_index(phrase)
+    if anchor_idx is None:
+        return []
+
+    items = idx_data["items"]
+    norm_titles = idx_data["norm_titles"]
+    matrix = idx_data["matrix"]
+    anchor = items[anchor_idx]
+    anchor_title = anchor.get("title") or phrase
+    anchor_tokens = _normalize_title(phrase).split()
+
+    # Cosine similarity on L2-normalized TF-IDF vectors.
+    sims = (matrix @ matrix[anchor_idx].T).toarray().ravel()
+    sims[anchor_idx] = -1.0
+
+    # Optional genre filter if user asked for one.
+    required_genres = _extract_movielens_genres(query)
+
+    ranked = np.argsort(sims)[::-1]
+    out: list[dict] = []
+    for i in ranked:
+        if sims[i] <= 0:
+            continue
+        # Avoid returning alternate editions with the same anchor title token(s)
+        # (e.g., many entries containing "titanic" in the title).
+        if anchor_tokens:
+            title_tokens = norm_titles[int(i)].split()
+            if len(anchor_tokens) == 1 and anchor_tokens[0] in title_tokens:
+                continue
+        it = items[int(i)]
+        tags = str(it.get("tags") or "")
+        if required_genres:
+            tag_parts = {p.strip().lower() for p in tags.split("|") if p.strip()}
+            if not all(g.lower() in tag_parts for g in required_genres):
+                continue
+        out.append(
+            {
+                "title": it.get("title"),
+                "reason": f"Similar to {anchor_title} · Genres: {tags.replace('|', ', ')} · Popularity: {int(it.get('popularity') or 0)}",
+            }
+        )
+        if len(out) >= top_n:
+            break
+    return out
+
+
 def _extract_title_terms(query: str) -> list[str]:
     tokens = re.findall(r"[a-z0-9]+", (query or "").lower())
     terms = [t for t in tokens if len(t) > 2 and t not in _STOPWORDS]
@@ -138,6 +278,12 @@ def _recommend_movies_offline(query: str, top_n: int) -> list[dict]:
     items = _load_movielens_items()
     if not items:
         return movies_fallback(query)
+
+    # "Similar to X" queries: use item-to-item similarity rather than plain genre/popularity filtering.
+    if is_movie_similarity_query(query):
+        similar = _recommend_similar_movies(query, top_n=top_n)
+        if similar:
+            return similar
 
     genres = _extract_movielens_genres(query)
     terms = _extract_title_terms(query)
@@ -195,6 +341,12 @@ def _recommend_movies_offline(query: str, top_n: int) -> list[dict]:
 
 def recommend_movies(query: str, tmdb_api_key: str | None = None, top_n: int = 5) -> List[Dict]:
     """Return a list of movie recommendations."""
+    # If the user asked for "like/similar to <title>", prefer offline similarity since TMDB
+    # doesn't provide true item-to-item similarity for arbitrary titles.
+    if is_movie_similarity_query(query):
+        out = _recommend_similar_movies(query, top_n=top_n)
+        if out:
+            return out
     if not tmdb_api_key:
         return _recommend_movies_offline(query, top_n=top_n)
 

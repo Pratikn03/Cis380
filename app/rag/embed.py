@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List
 
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import HashingVectorizer
 
 try:
     from sentence_transformers import SentenceTransformer
@@ -25,8 +25,16 @@ class EmbeddingModel:
             self.dim = self.model.get_sentence_embedding_dimension()
             self.use_sentence_transformer = True
         else:
-            self.model = TfidfVectorizer(max_features=768)
+            # Offline-friendly deterministic embeddings without fitting:
+            # HashingVectorizer produces a stable fixed-size representation for both
+            # docs and queries (unlike fitting TF-IDF per call).
             self.dim = 768
+            self.model = HashingVectorizer(
+                n_features=self.dim,
+                stop_words="english",
+                alternate_sign=False,
+                norm="l2",
+            )
             self.use_sentence_transformer = False
 
     def embed(self, texts: List[str]) -> np.ndarray:
@@ -37,10 +45,12 @@ class EmbeddingModel:
             if embeddings.shape[1] != self.dim:
                 self.dim = embeddings.shape[1]
             return embeddings
-        matrix = self.model.fit_transform(texts)
-        dense = matrix.toarray()
-        if dense.shape[1] < self.dim:
+        matrix = self.model.transform(texts)
+        dense = matrix.toarray().astype(float, copy=False)
+        if dense.shape[1] != self.dim:
+            # HashingVectorizer should always match, but keep this defensive.
             padded = np.zeros((dense.shape[0], self.dim))
-            padded[:, : dense.shape[1]] = dense
+            take = min(self.dim, dense.shape[1])
+            padded[:, :take] = dense[:, :take]
             return padded
-        return dense[:, : self.dim]
+        return dense

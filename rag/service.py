@@ -49,13 +49,20 @@ def _chunk(text: str) -> List[str]:
     return chunks
 
 
+@dataclass(frozen=True)
+class Passage:
+    text: str
+    source: str
+    chunk_id: str
+
+
 @dataclass
 class RagResult:
     query: str
-    passages: List[Tuple[str, float]]
+    passages: List[Tuple[Passage, float]]
 
     def best_text(self) -> str:
-        return "\n\n".join(p for p, _ in self.passages)
+        return "\n\n".join(p.text for p, _ in self.passages)
 
 
 class RagService:
@@ -64,11 +71,11 @@ class RagService:
     def __init__(self, docs_dir: Path = Path("data/docs")):
         self.docs_dir = Path(docs_dir)
         self.vectorizer = TfidfVectorizer(stop_words="english")
-        self.passages: List[str] = []
+        self.passages: List[Passage] = []
         self.matrix = None
 
-    def _load_docs(self) -> List[str]:
-        texts: List[str] = []
+    def _load_docs(self) -> List[tuple[str, str]]:
+        texts: List[tuple[str, str]] = []
         if not self.docs_dir.exists():
             logger.info("Docs folder %s not found; skipping RAG load.", self.docs_dir)
             return texts
@@ -82,17 +89,20 @@ class RagService:
             else:
                 continue
             if text:
-                texts.append(text)
+                rel = str(path.relative_to(self.docs_dir))
+                texts.append((rel, text))
         return texts
 
     def build(self) -> None:
         texts = self._load_docs()
-        for t in texts:
-            self.passages.extend(_chunk(t))
+        for source, t in texts:
+            for idx, chunk in enumerate(_chunk(t)):
+                chunk_id = f"{source}#{idx}"
+                self.passages.append(Passage(text=chunk, source=source, chunk_id=chunk_id))
         if not self.passages:
             logger.warning("No docs found for RAG index.")
             return
-        self.matrix = self.vectorizer.fit_transform(self.passages)
+        self.matrix = self.vectorizer.fit_transform([p.text for p in self.passages])
         logger.info("Built RAG index with %d passages.", len(self.passages))
 
     def _ensure_index(self) -> bool:

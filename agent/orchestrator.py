@@ -5,9 +5,10 @@ import logging
 import re
 import os
 import requests
+from collections import defaultdict, deque
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import joblib
 import numpy as np
@@ -19,6 +20,22 @@ from agent.utils.shap_explainer import explain as shap_explain
 
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 logger = logging.getLogger(__name__)
+
+_DEFAULT_MAX_TURNS = 8
+
+
+class MemoryStore:
+    """Tiny in-memory per-user chat history (demo use only)."""
+
+    def __init__(self, max_turns: int = _DEFAULT_MAX_TURNS) -> None:
+        self.max_turns = int(max_turns)
+        self._store: dict[str, deque[dict[str, str]]] = defaultdict(lambda: deque(maxlen=self.max_turns))
+
+    def add_turn(self, user_id: str, user_text: str, assistant_text: str) -> None:
+        self._store[user_id].append({"user": user_text, "assistant": assistant_text})
+
+    def get_history(self, user_id: str) -> list[dict[str, str]]:
+        return list(self._store.get(user_id, []))
 
 
 def _looks_like_numeric_vector(text: str) -> bool:
@@ -171,6 +188,7 @@ class OmniChatXOrchestrator:
 
     def __init__(self):
         self.models = _load_models()
+        self.memory = MemoryStore()
         # optional recommender meta for feature names
         rec_meta_path = Path("models/recommender/recommender_meta.joblib")
         if rec_meta_path.exists():
@@ -183,13 +201,13 @@ class OmniChatXOrchestrator:
             self.rec_meta = {}
 
     # ---------------- Inference helpers ---------------- #
-    def _fraud_score(self, message: str) -> str:
+    def _fraud_score(self, message: str) -> tuple[str, dict[str, Any]]:
         model = self.models.fraud
         if model is None:
-            return "Fraud model not available."
+            return "Fraud model not available.", {"available": False}
         cols = list(getattr(model, "feature_names_in_", []))
         if not cols:
-            return "Fraud model missing feature names."
+            return "Fraud model missing feature names.", {"available": True, "feature_names": None}
 
         nums = _extract_numbers(message)
         values = [0.0] * len(cols)
@@ -208,15 +226,29 @@ class OmniChatXOrchestrator:
 
         shap_res = shap_explain(model, df.values, cols, top_k=3, force_kernel=force_kernel)
         top_txt = "; ".join([f"{n}:{v:+.3f}" for n, v in shap_res.top_features]) if shap_res.top_features else shap_res.note
-        return (
+        answer = (
             f"Fraud probability: {score:.4f} (filled {len(nums)} numeric fields; rest set to 0). "
             f"Top features: {top_txt}"
         )
+        meta: dict[str, Any] = {
+            "available": True,
+            "score": round(float(score), 6),
+            "filled_fields": len(nums),
+            "expected_fields": len(cols),
+            "feature_names": cols,
+            "explain": {
+                "method": "shap" if shap_res.values is not None else "fallback",
+                "model_class": shap_res.model_class,
+                "top_features": [{"name": n, "value": round(float(v), 6)} for n, v in (shap_res.top_features or [])],
+                "note": shap_res.note,
+            },
+        }
+        return answer, meta
 
-    def _cyber_score(self, message: str) -> str:
+    def _cyber_score(self, message: str) -> tuple[str, dict[str, Any]]:
         model = self.models.cyber
         if model is None:
-            return "Cyber model not available."
+            return "Cyber model not available.", {"available": False}
         n = getattr(model, "n_features_in_", 0)
         feat_names = list(getattr(model, "feature_names_in_", [f"f{i}" for i in range(n)]))
         nums = _extract_numbers(message)
@@ -227,15 +259,30 @@ class OmniChatXOrchestrator:
             score = float(model.predict_proba(arr)[0][1])
             shap_res = shap_explain(model, arr, feat_names, top_k=3, force_kernel=False)
             top_txt = "; ".join([f"{n}:{v:+.3f}" for n, v in shap_res.top_features]) if shap_res.top_features else shap_res.note
-            return f"Cyber attack probability: {score:.4f} (filled {len(nums)} numeric fields; rest set to 0). Top: {top_txt}"
+            answer = f"Cyber attack probability: {score:.4f} (filled {len(nums)} numeric fields; rest set to 0). Top: {top_txt}"
+            meta = {
+                "available": True,
+                "score": round(float(score), 6),
+                "filled_fields": len(nums),
+                "expected_fields": int(n),
+                "feature_names": feat_names,
+                "explain": {
+                    "method": "shap" if shap_res.values is not None else "fallback",
+                    "model_class": shap_res.model_class,
+                    "top_features": [{"name": n, "value": round(float(v), 6)} for n, v in (shap_res.top_features or [])],
+                    "note": shap_res.note,
+                },
+            }
+            return answer, meta
         pred = model.predict(arr)[0]
-        return f"Cyber model prediction: {pred} (filled {len(nums)} numeric fields; rest set to 0)."
+        answer = f"Cyber model prediction: {pred} (filled {len(nums)} numeric fields; rest set to 0)."
+        return answer, {"available": True, "prediction": str(pred), "filled_fields": len(nums), "expected_fields": int(n)}
 
-    def _behavior_score(self, message: str) -> str:
+    def _behavior_score(self, message: str) -> tuple[str, dict[str, Any]]:
         scaler = self.models.behavior_scaler
         model = self.models.behavior_model
         if scaler is None or model is None:
-            return "Behavior model not available."
+            return "Behavior model not available.", {"available": False}
         n = getattr(scaler, "n_features_in_", 0)
         nums = _extract_numbers(message)
         arr = np.zeros((1, n), dtype=float)
@@ -243,12 +290,21 @@ class OmniChatXOrchestrator:
             arr[0, i] = v
         arr_scaled = scaler.transform(arr)
         score = float(model.decision_function(arr_scaled)[0])
-        return f"Behavior anomaly score (LOF): {score:.4f} (filled {len(nums)} numeric fields; rest set to 0)."
+        answer = f"Behavior anomaly score (LOF): {score:.4f} (filled {len(nums)} numeric fields; rest set to 0)."
+        return (
+            answer,
+            {
+                "available": True,
+                "score": round(float(score), 6),
+                "filled_fields": len(nums),
+                "expected_fields": int(n),
+            },
+        )
 
-    def _recommend(self, message: str) -> str:
+    def _recommend(self, message: str) -> tuple[str, dict[str, Any]]:
         model = self.models.recommender
         if model is None:
-            return "Recommender model not available."
+            return "Recommender model not available.", {"available": False}
         n = getattr(model, "n_features_in_", 0)
         nums = _extract_numbers(message)
         arr = np.zeros((1, n), dtype=float)
@@ -262,11 +318,26 @@ class OmniChatXOrchestrator:
             top_label = classes[top_idx] if len(classes) > top_idx else "item"
             shap_res = shap_explain(model, arr, feat_names, top_k=3, force_kernel=False)
             top_txt = "; ".join([f"{n}:{v:+.3f}" for n, v in shap_res.top_features]) if shap_res.top_features else shap_res.note
-            return f"Recommended action: {top_label} (p={proba[top_idx]:.3f}). Top features: {top_txt}"
+            answer = f"Recommended action: {top_label} (p={proba[top_idx]:.3f}). Top features: {top_txt}"
+            meta = {
+                "available": True,
+                "label": str(top_label),
+                "probability": round(float(proba[top_idx]), 6),
+                "filled_fields": len(nums),
+                "expected_fields": int(n),
+                "feature_names": feat_names,
+                "explain": {
+                    "method": "shap" if shap_res.values is not None else "fallback",
+                    "model_class": shap_res.model_class,
+                    "top_features": [{"name": n, "value": round(float(v), 6)} for n, v in (shap_res.top_features or [])],
+                    "note": shap_res.note,
+                },
+            }
+            return answer, meta
         pred = model.predict(arr)[0]
-        return f"Recommended action: {pred}."
+        return f"Recommended action: {pred}.", {"available": True, "prediction": str(pred), "filled_fields": len(nums), "expected_fields": int(n)}
 
-    def _recommend_nl(self, message: str) -> str:
+    def _recommend_nl(self, message: str) -> tuple[str, dict[str, Any]]:
         """Natural-language recommendation helper for the agent chat (movies/electronics/places/news)."""
         try:
             from app.streamlit_chatbot.recommender_router import route_recommendation
@@ -274,13 +345,13 @@ class OmniChatXOrchestrator:
             route_recommendation = None
 
         if route_recommendation is None:
-            return "Recommendation module not available (missing app/streamlit_chatbot)."
+            return "Recommendation module not available (missing app/streamlit_chatbot).", {"available": False}
 
         rec = route_recommendation(message)
         category = str(rec.get("category") or "Recommendations")
         items = rec.get("items") or []
         if not items:
-            return f"No {category} results right now."
+            return f"No {category} results right now.", {"available": True, "category": category, "items": []}
 
         lines = [f"Here are some {category.lower()} picks:"]
         for i, it in enumerate(items[:5], 1):
@@ -296,7 +367,7 @@ class OmniChatXOrchestrator:
             if details:
                 bullet += " — " + " · ".join(details)
             lines.append(bullet)
-        return "\n".join(lines)
+        return "\n".join(lines), {"available": True, "category": category, "items": items}
 
     def _recommend_movie(self, user_id: int, movie_id: int) -> str:
         ml_path = Path("recommender/models/recommender.pkl")
@@ -336,32 +407,105 @@ class OmniChatXOrchestrator:
         return f"Movie recommendation: {label} (p={proba[top_idx]:.3f}) for user {user_id}, movie {movie_id}."
 
     # ---------------- Routing ---------------- #
-    def route(self, message: str) -> str:
+    def handle(
+        self,
+        message: str,
+        user_id: str = "anon",
+        *,
+        use_rag: bool = True,
+        attachments: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Return a structured response: {route, answer, meta}.
+
+        This is the stable interface used by the Streamlit UI and the HTTP gateway.
+        """
         intent = decide(message)
+        route = "chat" if intent == "llm" else intent
+        if route == "rag" and not use_rag:
+            route = "chat"
 
-        if intent == "fraud":
-            return self._fraud_score(message)
-        if intent == "cyber":
-            return self._cyber_score(message)
-        if intent == "behavior":
-            return self._behavior_score(message)
-        if intent == "recommend":
-            # 1) If the user provided a numeric vector (e.g., "0.1, 1.2, ..."), use the tabular model.
-            if _looks_like_numeric_vector(message):
-                return self._recommend(message)
+        meta: dict[str, Any] = {"intent": intent}
 
-            # 2) If the user explicitly provided "user/movie" IDs, keep that path.
-            m = re.search(
-                r"\buser(?:_id)?\s*[:=]?\s*(\d+)\b.*\bmovie(?:_id)?\s*[:=]?\s*(\d+)\b",
-                (message or "").lower(),
-            )
-            if m:
-                return self._recommend_movie(int(m.group(1)), int(m.group(2)))
+        # If the caller already computed multimodal outputs, accept them as hints.
+        if attachments:
+            meta["attachments"] = {k: ("<bytes>" if isinstance(v, (bytes, bytearray)) else v) for k, v in attachments.items()}
 
-            # 3) Otherwise, use the natural-language recommender handlers (offline-capable).
-            return self._recommend_nl(message)
-        if intent == "rag":
-            return rag_service.answer(message)
+        try:
+            if route == "fraud":
+                answer, route_meta = self._fraud_score(message)
+            elif route == "cyber":
+                answer, route_meta = self._cyber_score(message)
+            elif route == "behavior":
+                answer, route_meta = self._behavior_score(message)
+            elif route == "recommend":
+                if _looks_like_numeric_vector(message):
+                    answer, route_meta = self._recommend(message)
+                else:
+                    # If the user explicitly provided "user/movie" IDs, keep that path.
+                    m = re.search(
+                        r"\buser(?:_id)?\s*[:=]?\s*(\d+)\b.*\bmovie(?:_id)?\s*[:=]?\s*(\d+)\b",
+                        (message or "").lower(),
+                    )
+                    if m:
+                        user = int(m.group(1))
+                        movie = int(m.group(2))
+                        answer = self._recommend_movie(user, movie)
+                        route_meta = {"available": True, "mode": "movie_user_item", "user_id": user, "movie_id": movie}
+                    else:
+                        answer, route_meta = self._recommend_nl(message)
+            elif route == "rag":
+                # Prefer the embeddings/vector-store RAG pipeline if available; fall back to TF-IDF.
+                try:
+                    from app.rag.retriever import retrieve_context as _retrieve_context
 
-        # default: LLM if key is set, else offline helper
-        return _llm_call(message)
+                    chunks = _retrieve_context(message, top_k=3)
+                    answer = "\n\n".join([str(c.get("text") or "") for c in chunks if c.get("text")]) or (
+                        "I could not find anything in your local docs. Add files under data/docs/ and run /api/rag/ingest."
+                    )
+                    route_meta = {
+                        "chunks": [
+                            {
+                                "text": c.get("text"),
+                                "score": round(float(c.get("score") or 0.0), 6),
+                                "source": c.get("source"),
+                                "chunk_id": c.get("chunk_id"),
+                            }
+                            for c in chunks
+                        ],
+                        "citations": [c.get("chunk_id") for c in chunks if c.get("chunk_id")],
+                    }
+                except Exception:
+                    result = rag_service.query(message, top_k=3)
+                    answer = result.best_text() or "I could not find anything in your local docs. Add files under data/docs/."
+                    route_meta = {
+                        "passages": [
+                            {
+                                "text": p.text,
+                                "score": round(float(s), 6),
+                                "source": p.source,
+                                "chunk_id": p.chunk_id,
+                            }
+                            for p, s in result.passages
+                        ],
+                        "citations": [p.chunk_id for p, _ in result.passages],
+                    }
+            else:
+                answer = _llm_call(message)
+                route_meta = {"offline": not bool(os.getenv("OPENAI_API_KEY"))}
+        except Exception as exc:  # pragma: no cover - defensive
+            answer = f"Orchestrator error: {exc}"
+            route_meta = {"error": str(exc)}
+
+        meta.update(route_meta or {})
+
+        try:
+            self.memory.add_turn(user_id, message, answer)
+        except Exception:
+            pass
+        meta["history_turns"] = len(self.memory.get_history(user_id))
+
+        return {"route": route, "answer": str(answer), "meta": meta}
+
+    def route(self, message: str) -> str:
+        out = self.handle(message, user_id="anon", use_rag=True, attachments=None)
+        return str(out.get("answer") or "")

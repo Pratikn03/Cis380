@@ -25,7 +25,9 @@ fastapi>=0.110.0
 uvicorn[standard]>=0.23.0
 librosa>=0.10.0
 plotly>=5.23.0
-pillow>=9.0.0
+pillow>=10.0.0
+opencv-python-headless>=4.8
+ultralytics>=8.2.0
 requests>=2.31.0
 kaggle>=1.6.0
 prometheus_client>=0.16.0
@@ -35,3 +37,5 @@ faiss-cpu>=1.7.4
 python-multipart>=0.0.6
 pytest>=7.0.0
 ruff>=0.0.300
+faster-whisper==1.0.3
+soundfile==0.12.1

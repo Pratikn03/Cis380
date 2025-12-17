@@ -230,7 +230,11 @@ async def vision_video_predict(
     max_frames: int = 30,
     top_k: int = 3,
 ):
-    """Predict for an uploaded video by sampling frames and aggregating probabilities + temporal-consistency signals."""
+    """Predict for an uploaded video by sampling frames, aggregating probabilities, and scoring temporal-consistency.
+
+    If `models/vision/video_temporal_model.pkl` exists, also returns a learned temporal confidence score
+    via `temporal_confidence_model`.
+    """
     try:
         from PIL import Image, ImageChops
         import torch
@@ -416,7 +420,7 @@ async def vision_video_predict(
                 "embedding_cosine": _stats(cos_sims),
                 "pixel_diff_norm": _stats(pixel_diffs),
                 "prob_entropy": _stats(entropies),
-                "notes": "Heuristic temporal signals (frame deltas, embedding consistency). Not a dedicated temporal deepfake model.",
+                "notes": "Temporal signals (frame deltas, embedding consistency). A learned temporal model may be available via temporal_confidence_model.",
             }
 
             # Simple heuristic anomaly score in [0, 1].
@@ -429,6 +433,35 @@ async def vision_video_predict(
             anomaly = 0.35 * flip_rate + 0.25 * l1_mean + 0.25 * emb_penalty + 0.15 * pix_mean
             temporal["anomaly_score_heuristic"] = round(float(min(max(anomaly, 0.0), 1.0)), 4)
 
+            # --- Temporal deepfake model (trained, not heuristic) ---
+            temporal_confidence_model = None
+            temporal_label_model = None
+            temporal_model_meta: dict[str, object] | None = None
+            try:
+                from uais_v.models.video_temporal import build_temporal_feature_dict, predict_temporal_confidence
+
+                feature_dict = build_temporal_feature_dict(
+                    flip_rate=flip_rate,
+                    flip_count=flip_count,
+                    frames_used=len(probs_list),
+                    fps=fps,
+                    max_confs=max_confs,
+                    l1_diffs=l1_diffs,
+                    cos_sims=cos_sims,
+                    pixel_diffs=pixel_diffs,
+                    entropies=entropies,
+                )
+                proba, meta = predict_temporal_confidence(feature_dict)
+                temporal_model_meta = meta
+                temporal["model_features"] = {k: round(float(v), 6) for k, v in feature_dict.items()}
+                temporal["model"] = meta
+                if proba is not None:
+                    temporal_confidence_model = round(float(proba), 6)
+                    temporal_label_model = "fake" if float(proba) >= 0.5 else "real"
+            except Exception as exc:  # pragma: no cover - best effort
+                temporal_model_meta = {"available": False, "error": str(exc)}
+                temporal["model"] = temporal_model_meta
+
             return {
                 "filename": file.filename,
                 "prediction": class_names[int(best_idx)] if int(best_idx) < len(class_names) else str(best_idx),
@@ -438,6 +471,8 @@ async def vision_video_predict(
                 "frames_used": len(probs_list),
                 "frames_skipped": skipped,
                 "fps": fps,
+                "temporal_confidence_model": temporal_confidence_model,
+                "temporal_label_model": temporal_label_model,
                 "temporal": temporal,
                 "top_k": [
                     {

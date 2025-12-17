@@ -12,7 +12,7 @@ class DecisionEngine:
     RECOMMEND_KEYWORDS: Set[str] = {"recommend", "suggest", "similar", "best", "top", "like"}
     RECOMMEND_PHRASES: Set[str] = {"like this", "similar to", "recommendation", "recommendations", "favorite", "favorites"}
 
-    def decide_route(self, text: str, use_rag: bool = True, has_audio: bool = False) -> str:
+    def decide_route(self, text: str, use_rag: bool = True, has_audio: bool = False, has_image: bool = False) -> str:
         normalized = text.lower()
         words = set(re.findall(r"\w+", normalized))
 
@@ -22,6 +22,8 @@ class DecisionEngine:
             return "fraud"
         if use_rag and any(keyword in normalized for keyword in self.RAG_KEYWORDS):
             return "rag"
+        if has_image:
+            return "recommend"
         if self.RECOMMEND_KEYWORDS & words:
             return "recommend"
         if any(phrase in normalized for phrase in self.RECOMMEND_PHRASES):

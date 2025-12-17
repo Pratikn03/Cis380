@@ -1,5 +1,8 @@
 # UAIS-V API and Dashboard Notes
 
+> ⚠️ Legacy note: this doc describes the older `deploy/api/main.py` + `dashboard/app_streamlit.py` stack.  
+> For the current demo/runtime, see `docs/demo.md` and `README.md` (FastAPI: `app.main:app`, UI: `app/streamlit_chatbot/app.py`).
+
 ## FastAPI (deploy/api/main.py)
 - Endpoints: `/`, `/predict_fraud`, `/predict_cyber`, `/predict_fusion`, `/predict_nlp`, `/predict_vision`
 - Models loaded if present:

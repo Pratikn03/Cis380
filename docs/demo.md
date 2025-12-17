@@ -8,13 +8,16 @@ Run this script when you want to show OmniNex Chat in under five minutes (perfec
 source .venv-macos/bin/activate
 pip install -r requirements.txt
 pip install -e .
-uvicorn backend.main:app --reload
+uvicorn app.main:app --reload
 ```
 
-Leave this running; it serves:
+Leave this running; it serves (highlights):
 
-* `/api/chat`, `/api/rag`, `/api/recommend`, `/api/fraud`, `/api/cyber`, `/api/behavior`
-* `/api/vision/train`
+* `/api/chat` + `/api/chat/multimodal`
+* `/api/recommend` + `/api/recommend/multimodal`
+* `/api/fraud`, `/api/cyber`, `/api/behavior`
+* `/api/risk/analyze`
+* `/api/monitor/summary` + `/api/monitor/drift`
 * `/metrics`
 * the optional `/ui/` static site under `/ui/index.html`
 
@@ -26,42 +29,36 @@ In a second terminal:
 streamlit run app/streamlit_chatbot/app.py
 ```
 
-The UI has two tabs:
+The UI has four main tabs (top bar):
 
-1. **Chat & Recommendations** – ask for movies, places, or news. It uses `route_recommendation` (or LLM fallback) and renders cards.
-2. **Risk & Anomaly** – paste a comma-delimited feature vector (matching the backend model) and click “Score Fraud”, “Score Cyber”, or “Score Behavior” to hit each API.
+1. **Recommendations** – text recommendations + multimodal (image/text) similarity.
+2. **Live Agent** – `/api/chat` with optional media attachments via `/api/chat/multimodal`.
+3. **Audio/Video/Vision** – mic/webcam snapshot + optional WebRTC loop, plus uploads (voice/image/video), plus brand recognition.
+4. **Fraud/Cyber/Behavior** – Risk Command Center simulator, direct scoring, and monitoring/log viewer.
 
-The UI respects `OMNINEX_BACKEND` if your FastAPI server runs somewhere other than `http://localhost:8000`.
+The UI respects `OMNICHATX_BACKEND` if your FastAPI server runs somewhere other than `http://localhost:8000`.
 
 ## 3. Demo walkthrough
 
-1. **Movie recommender**  
-   * In the Chat tab enter: `Recommend some sci-fi movies`  
-   * Demo: `route_recommendation` + curated list with reasons/links.
+1. **Recommendations**  
+   * In **Recommendations**, enter: `Recommend some sci-fi movies`  
+   * Then try: `Recommend budget phones under $600` / `Recommend laptops for programming under $1200`.
 
-2. **Fraud detection**  
-   * In “Risk & Anomaly”: enter `0,0,0,0,0,0,0,0` (or real features) and click “Score Fraud”.  
-   * Show the returned `score`/`probability` plus any SHAP explanation.
+2. **Multimodal similarity**  
+   * In **Recommendations → Multimodal**, upload an image + type: `Find items like this`.
 
-3. **Cyber detection**  
-   * Reuse the feature input, click “Score Cyber”.  
-   * Show threat probability.
+3. **Live agent (multimodal chat)**  
+   * In **Live Agent**, attach an image/audio/video and ask: `What do you detect?`  
+   * Show that the response includes `meta.attachments` for voice/vision outputs.
 
-4. **Behavior anomaly**  
-   * Click “Score Behavior” with the same vector.  
-   * Highlight LOF anomaly score in the JSON response.
+4. **Risk simulator + monitoring**  
+   * In **Fraud/Cyber/Behavior → Risk Command Center**, click **Analyze Risk** a few times.  
+   * Then open **Monitoring & Logs** and show `/api/monitor/summary` plus the tail of `risk_events.jsonl`.
 
-5. **RAG experiment**  
-   * Open `/api/rag/query` (via curl/postman or send a direct `/api/chat` prompt) with `{"query":"Explain the fraud detection pipeline"}` and show the TF-IDF passages from `data/docs/`.
-
-6. **Vision (optional)**  
-   * POST to `/api/vision/train` with the default dataset path to showcase the dataset summary and optional training metrics.
-
-7. **Metrics & logs**  
-   * Hit `/metrics` in your browser to show Prometheus counters/latency.  
-   * Point to the console where uvicorn logs structured request events.
+5. **Metrics**  
+   * Open `/metrics` to show Prometheus counters/latency.
 
 ## 4. Optional polish
 
 * Drop hand-crafted `.txt`/`.md` documents into `data/docs/`, restart uvicorn, and repeat the RAG query to show new knowledge.  
-* Change `OMNINEX_BACKEND` to the production host before demos that hit deployed APIs.  
+* Change `OMNICHATX_BACKEND` to the production host before demos that hit deployed APIs.  

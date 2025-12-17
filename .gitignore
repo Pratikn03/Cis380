@@ -1,9 +1,23 @@
 .venv/
 .venv-macos/
+.venv-omnichatx/
 venv/
 .env
 __pycache__/
 *.pyc
+.DS_Store
+
+# Local image datasets (do not commit large raw media)
+data/raw/clothing_images/
+
+# LogoDet-3K raw + derived YOLO dataset + trained artifacts
+data/raw/brand/logodet3k/
+data/processed/brand_yolo/
+artifacts/brand/
+
+# Trained vision artifacts (generated)
+models/vision_brand/
+models/vision_category/
 *.egg-info/
 .ipynb_checkpoints/
 .DS_Store
@@ -16,8 +30,8 @@ data/monitoring/
 data/Celeb_V2/
 data/Video-2/
 data/video-2/
-models/
-experiments/
+/models/
+/experiments/
 reports/benchmarks.md
 reports/duplicates_*.csv
 reports/duplicates_*.json
@@ -26,3 +40,7 @@ scripts/find_duplicates.py
 scripts/dedupe_data.sh
 reports/*.pdf
 reports/*.html
+
+# Legacy/generated artifacts under src/
+src/models/
+src/experiments/

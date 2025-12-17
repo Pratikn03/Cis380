@@ -23,3 +23,18 @@ class DriftReport(BaseModel):
     per_feature: Dict[str, Dict[str, float]]
     status: str
     generated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
+class RiskLogEvent(BaseModel):
+    timestamp: str
+    request_id: str
+    scenario: str | None = None
+    payload: Dict[str, Any]
+    risk_scores: Dict[str, float]
+    decision: str
+
+
+class RiskSummary(BaseModel):
+    total_events: int
+    decision_counts: Dict[str, int]
+    avg_risks: Dict[str, float]

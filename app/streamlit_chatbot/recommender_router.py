@@ -15,7 +15,7 @@ if str(PARENT) not in sys.path:
 # Try package-relative import first, then fallback to absolute
 try:
     from .config import load_config
-    from .handlers.movies import recommend_movies
+    from .handlers.movies import recommend_movies, is_movie_similarity_query
     from .handlers.places import recommend_places
     from .handlers.news import recommend_news
     from .handlers.clothes import recommend_clothes
@@ -23,7 +23,7 @@ try:
     from .handlers.courses import recommend_courses
 except ImportError:
     from config import load_config
-    from handlers.movies import recommend_movies
+    from handlers.movies import recommend_movies, is_movie_similarity_query
     from handlers.places import recommend_places
     from handlers.news import recommend_news
     from handlers.clothes import recommend_clothes
@@ -83,6 +83,14 @@ def _detect_intent(text: str) -> Tuple[str, str]:
         if tokens.intersection(phone_terms):
             return "phones", text
         return "headphones", text
+
+    # "Recommend something like Titanic" (no explicit 'movie' token) should still route to movies,
+    # but only if the query isn't clearly about electronics/courses/etc.
+    try:
+        if is_movie_similarity_query(text):
+            return "movies", text
+    except Exception:
+        pass
     if tokens.intersection({"course", "learn", "skill", "training", "certification"}):
         return "courses", text
 
@@ -185,7 +193,11 @@ def route_recommendation(text: str, preference: dict | None = None) -> Dict[str,
                 age = int(m.group(1))
             except Exception:
                 age = None
-        items = recommend_clothes(age=age, query=query)
+        items = recommend_clothes(
+            age=age,
+            query=query,
+            preferred_tags=sorted([str(t) for t in (tag_pref or set())]),
+        )
         category = "Clothes"
     elif intent == "news_health":
         items = recommend_news(query=query, topic="health", news_api_key=cfg.news_api_key)

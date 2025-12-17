@@ -9,7 +9,7 @@ from app.rag.embed import EmbeddingModel
 from app.rag.vector_store import VectorStore
 
 ROOT = Path(__file__).resolve().parents[1]
-DOCS_DIR = ROOT.parent / "docs"
+DOCS_DIR = ROOT.parent / "data" / "docs"
 EMBED_DIR = ROOT.parent / "data" / "embeddings"
 
 

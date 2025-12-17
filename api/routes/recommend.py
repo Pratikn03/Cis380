@@ -3,19 +3,29 @@ from typing import List, Optional
 
 import joblib
 import numpy as np
-from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, status, Depends, File, Form, UploadFile
+from pydantic import BaseModel, Field
 
 from api.deps import require_auth
+
+# Optional multimodal extension (must not break if deps/index missing)
+try:  # pragma: no cover
+    from app.models.recommender.multimodal import multimodal_predict as _mm
+except Exception:  # pragma: no cover
+    _mm = None
 
 router = APIRouter(prefix="/api/recommend", tags=["recommend"], dependencies=[Depends(require_auth)])
 
 
 class RecommendRequest(BaseModel):
-    # Option A: MovieLens-style
-    user_id: Optional[int] = None
+    # Option A: "items" recommender (app/models/recommender) used by tests + demo.
+    user_id: str | int | None = None
+    top_k: int | None = Field(default=5, ge=1, le=20)
+
+    # Option B: MovieLens-style point scoring (legacy)
     movie_id: Optional[int] = None
-    # Option B: generic numeric vector (backward compatible)
+
+    # Option C: generic numeric vector (legacy)
     features: Optional[List[float]] = None
     candidate_ids: Optional[List[int]] = None  # for top-N from a provided set
 
@@ -116,13 +126,14 @@ def _ml_features(user_id: int, movie_id: int):
 
 @router.post("")
 def recommend(req: RecommendRequest):
-    # Path A: MovieLens-style if user_id and movie_id provided and model exists
+    # Path A: MovieLens-style if user_id and movie_id provided and model exists.
     ml_model = _get_ml_model()
-    if req.user_id is not None and req.movie_id is not None and ml_model is not None:
+    if isinstance(req.user_id, int) and req.movie_id is not None and ml_model is not None:
         try:
-            feats, names = _ml_features(req.user_id, req.movie_id)
-            if feats is None:
+            ml_feats = _ml_features(req.user_id, req.movie_id)
+            if ml_feats is None:
                 raise ValueError("MovieLens metadata not available.")
+            feats, names = ml_feats
             proba = ml_model.predict_proba(feats)[0]
             classes = list(getattr(ml_model, "classes_", []))
             top_idx = int(np.argmax(proba))
@@ -142,7 +153,21 @@ def recommend(req: RecommendRequest):
                 detail=f"MovieLens recommendation failed: {exc}",
             )
 
-    # Path B: generic vector fallback
+    # Path B: app-style "items" recommender when top_k is provided and no explicit vector request.
+    if req.features is None and req.movie_id is None:
+        try:
+            from app.models.recommender.predict import recommend as recommend_items
+
+            uid = "anon" if req.user_id is None else str(req.user_id)
+            items = recommend_items(user_id=uid, top_k=int(req.top_k or 5))
+            return {"mode": "items", "user_id": uid, "items": items}
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Item recommendation failed: {exc}",
+            )
+
+    # Path C: generic vector fallback.
     rec_model = _get_rec_model()
     if rec_model is None:
         detail = "Recommender model not found."
@@ -173,6 +198,56 @@ def recommend(req: RecommendRequest):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Recommendation failed: {exc}",
+        )
+
+
+class ExplainRequest(BaseModel):
+    user_id: str | int | None = None
+    item_id: str
+
+
+@router.post("/explain")
+def explain(req: ExplainRequest):
+    try:
+        from app.models.recommender.explain import explain_recommendation
+
+        uid = "anon" if req.user_id is None else str(req.user_id)
+        text = explain_recommendation(uid, req.item_id)
+        return {"explanation": text}
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Explanation failed: {exc}",
+        )
+
+
+@router.post("/multimodal")
+async def recommend_multimodal(
+    text: Optional[str] = Form(default=None),
+    top_k: int = Form(default=5, ge=1, le=20),
+    image: UploadFile | None = File(default=None),
+):
+    """CLIP + FAISS multimodal recommender (additive).
+
+    Provide either a text query or an uploaded image. If the index isn't built yet,
+    this endpoint returns 503 with instructions.
+    """
+    try:
+        image_bytes = await image.read() if image is not None else None
+        if _mm is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Multimodal recommender dependencies are not available.",
+            )
+        return _mm.multimodal_recommend(image_bytes=image_bytes, text=text, top_k=top_k)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    except Exception as exc:
+        if _mm is not None and isinstance(exc, _mm.IndexNotBuiltError):
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Multimodal recommendation failed: {exc}",
         )
 
 

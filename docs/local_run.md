@@ -1,5 +1,8 @@
 # Local Run Guide (API + Dashboard)
 
+> ⚠️ Legacy note: this guide references the older `deploy/api/main.py` + `dashboard/` stack.  
+> For the current demo/runtime, use `docs/demo.md` and run `uvicorn app.main:app --reload` + `streamlit run app/streamlit_chatbot/app.py`.
+
 ## Prerequisites
 - Python 3.11
 - Install dependencies: `pip install -r requirements.txt`

@@ -1,6 +1,11 @@
 """FastAPI gateway for OmniChatX (pure HTTP, no Streamlit)."""
+
+from __future__ import annotations
+
 from pathlib import Path
+import importlib.util
 import logging
+import platform
 import sys
 import time
 
@@ -25,11 +30,57 @@ except Exception:
 from api.deps import require_auth
 from api.routes import chat, rag, recommend, behavior, fraud, cyber, vision
 
-# Optional: reuse the app/ voice router so the backend exposes /api/voice/emotion.
-try:
-    from app.api.voice import router as voice_router
-except Exception:  # pragma: no cover - defensive fallback if app package missing
-    voice_router = None
+_app_risk_router = None
+_app_monitor_router = None
+_app_voice_router = None
+_app_rag_router = None
+_app_brand_router = None
+_app_stt_router = None
+_app_vision_temporal_router = None
+
+# Optional: reuse selected app/ routers so `backend.main` can be the single runtime.
+# Import each router independently so an optional module doesn't disable the whole stack.
+try:  # pragma: no cover
+    from app.api.risk import router as _app_risk_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.risk router unavailable: %s", exc)
+    _app_risk_router = None
+
+try:  # pragma: no cover
+    from app.api.monitor import router as _app_monitor_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.monitor router unavailable: %s", exc)
+    _app_monitor_router = None
+
+try:  # pragma: no cover
+    from app.api.voice import router as _app_voice_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.voice router unavailable: %s", exc)
+    _app_voice_router = None
+
+try:  # pragma: no cover
+    from app.api.rag import router as _app_rag_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.rag router unavailable: %s", exc)
+    _app_rag_router = None
+
+try:  # pragma: no cover
+    from app.api.brand import router as _app_brand_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.brand router unavailable: %s", exc)
+    _app_brand_router = None
+
+try:  # pragma: no cover
+    from app.api.stt import router as _app_stt_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.stt router unavailable: %s", exc)
+    _app_stt_router = None
+
+try:  # pragma: no cover
+    from app.api.vision_temporal import router as _app_vision_temporal_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.vision_temporal router unavailable: %s", exc)
+    _app_vision_temporal_router = None
 from fastapi.responses import RedirectResponse
 
 logger = logging.getLogger("omnichatx")
@@ -79,8 +130,20 @@ app.include_router(behavior.router)
 app.include_router(fraud.router)
 app.include_router(cyber.router)
 app.include_router(vision.router)
-if voice_router is not None:
-    app.include_router(voice_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_risk_router is not None:
+    app.include_router(_app_risk_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_monitor_router is not None:
+    app.include_router(_app_monitor_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_voice_router is not None:
+    app.include_router(_app_voice_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_rag_router is not None:
+    app.include_router(_app_rag_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_brand_router is not None:
+    app.include_router(_app_brand_router, dependencies=[Depends(require_auth)])
+if _app_stt_router is not None:
+    app.include_router(_app_stt_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_vision_temporal_router is not None:
+    app.include_router(_app_vision_temporal_router, prefix="/api", dependencies=[Depends(require_auth)])
 
 
 @app.middleware("http")
@@ -111,7 +174,60 @@ def metrics():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    # Backward-compatible minimal health endpoint.
+    return {"status": "ok", "service": "omnichatx", "version": app.version}
+
+
+def _module_available(module_name: str) -> bool:
+    """Return True if a module can be imported (without importing it).
+
+    Using `find_spec` avoids importing heavy packages (torch, faiss, etc.) during
+    health checks and keeps startup fast.
+    """
+
+    try:
+        return importlib.util.find_spec(module_name) is not None
+    except Exception:  # pragma: no cover
+        return False
+
+
+@app.get("/api/health")
+def api_health():
+    """Richer health endpoint for the Streamlit dashboard.
+
+    Contract:
+      {status, service, version, python, platform, optional_features}
+
+    optional_features reports "availability" only (installed/importable), not whether
+    a model/index has been built.
+    """
+
+    optional_features = {
+        # Streamlit WebRTC support.
+        "webrtc": _module_available("streamlit_webrtc") and _module_available("av"),
+        # Speech-to-text support.
+        "stt": _module_available("faster_whisper") or _module_available("whisper"),
+        # Multimodal embedding support.
+        "clip": _module_available("transformers") and _module_available("torch"),
+        # Similarity index support.
+        "faiss": _module_available("faiss") or _module_available("faiss_cpu"),
+    }
+
+    return {
+        "status": "ok",
+        "service": "omnichatx",
+        "version": app.version,
+        "python": {
+            "version": platform.python_version(),
+            "implementation": platform.python_implementation(),
+        },
+        "platform": {
+            "system": platform.system(),
+            "release": platform.release(),
+            "machine": platform.machine(),
+        },
+        "optional_features": optional_features,
+    }
 
 
 @app.get("/")

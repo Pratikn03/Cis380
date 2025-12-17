@@ -27,12 +27,11 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "🚀 Starting backend: backend.main:app on $HOST:$PORT"
-uvicorn backend.main:app --host "$HOST" --port "$PORT" >/tmp/omnichatx_demo_backend.log 2>&1 &
+echo "🚀 Starting backend: app.main:app on $HOST:$PORT"
+uvicorn app.main:app --host "$HOST" --port "$PORT" >/tmp/omnichatx_demo_backend.log 2>&1 &
 PID=$!
 sleep 2
 
 echo "✅ Backend up (log: /tmp/omnichatx_demo_backend.log)"
 echo "🌐 Starting Streamlit UI (OMNICHATX_BACKEND=$BACKEND_URL)"
 OMNICHATX_BACKEND="$BACKEND_URL" streamlit run app/streamlit_chatbot/app.py
-
