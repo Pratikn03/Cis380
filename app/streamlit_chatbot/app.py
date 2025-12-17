@@ -74,7 +74,7 @@ def main():
         except Exception as exc:
             return {"error": f"{exc}"}
 
-    def call_get(path: str, *, params: dict[str, object] | None = None, timeout: float = 15.0) -> dict:
+    def call_get(path: str, *, params: dict[str, str | int | float] | None = None, timeout: float = 15.0) -> dict:
         try:
             resp = requests.get(
                 f"{backend_url}{path}",

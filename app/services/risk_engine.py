@@ -136,6 +136,8 @@ def _fusion_score(*, cyber_risk: float, behavior_risk: float, fraud_risk: float)
             return 0.0, {"available": False, "path": fusion.get("path"), "error": f"scaler transform failed: {exc}"}
 
     model = fusion.get("model")
+    if model is None:
+        return 0.0, {"available": False, "path": fusion.get("path"), "error": "fusion model not loaded"}
     try:
         if hasattr(model, "predict_proba"):
             score = float(model.predict_proba(X)[0][1])

@@ -66,7 +66,7 @@ def render_risk_dashboard() -> None:
                     timeout=15,
                 )
                 st.session_state.latest_response["explanation"] = explain_resp.json().get("explanation", "—")
-                st.experimental_rerun()
+                st.rerun()
         else:
             st.info("Submit the simulator to see risk scores, decision, and explanation.")
 
