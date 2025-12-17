@@ -96,26 +96,28 @@ OmniChatX / Universal Anomaly Intelligence v2 is a multimodal AI agent platform 
 > Canonical FastAPI entrypoint: `app/main.py` (it re-exports the gateway in `backend/main.py` so both `uvicorn app.main:app` and `uvicorn backend.main:app` work).
 
 ## Section 5 — How to Run (Local)
-1. Create and activate a Python 3.11 virtual environment.
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
-2. Start the FastAPI backend.
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-3. Launch the Streamlit UI, pointing at the running backend if it is not on `http://localhost:8000`.
-   ```bash
-   OMNICHATX_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
-   ```
-   - The **Audio/Video/Vision** tab supports **microphone recording** + **webcam snapshots** (no file uploads).
-   - Optional: enable continuous mic+webcam streaming by installing `streamlit-webrtc` (`pip install -r requirements-optional.txt`) and toggling the WebRTC checkbox in the UI.
-4. Run the pytest suites that cover chat, RAG, and monitoring logic.
-   ```bash
-   pytest tests/test_chat.py tests/test_rag.py tests/test_monitoring.py -q
-   ```
+1) Create and activate a Python 3.11 virtual environment.
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+2) Start the FastAPI backend (canonical entrypoint).
+```bash
+uvicorn app.main:app --reload
+```
+
+3) Launch the Streamlit UI (uses backend at `http://localhost:8000` by default).
+```bash
+OMNICHATX_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
+```
+- Snapshot mic/webcam works out-of-the-box. WebRTC live streaming is **optional**—install extras with `pip install -r requirements-optional.txt` and toggle it in the UI.
+
+4) Run tests (lightweight, no big artifacts required).
+```bash
+pytest -q
+```
 
 ## Brand Recognition (LogoDet-3K → YOLOv8) Quickstart
 
@@ -189,15 +191,16 @@ docker compose up --build
 | Endpoint | Description |
 | --- | --- |
 | `POST /api/chat` | Text chat; returns `{route, answer, meta}` (and `reply` for UI compatibility). |
-| `POST /api/chat/multimodal` | Multipart chat with optional `audio`/`image`/`video` uploads; attaches voice/vision outputs into `meta.attachments`. |
+| `POST /api/chat/multimodal` | Multipart chat with optional `audio`/`image`/`video`; attaches voice/vision/STT outputs into `meta.attachments`. |
+| `POST /api/recommend/multimodal` | CLIP+FAISS multimodal similarity (image+text) over unified catalog (movies, electronics, courses). |
+| `POST /api/recommend` | Item recommendations (`{user_id, top_k}` → `items`) and MovieLens-style scoring (`{user_id:int, movie_id:int}` → label/probability). |
+| `POST /api/recommend/explain` | Explanation for `{user_id, item_id}` using `app/models/recommender/explain.py`. |
 | `POST /api/rag/ingest` | Writes docs under `data/docs/`, rebuilds embeddings into `data/embeddings/`, and reports indexed chunk count. |
-| `POST /api/voice/emotion` | Accepts audio uploads, extracts MFCC features, and returns an emotion label with confidence. (Labels depend on the trained model.) |
-| `POST /api/recommend` | Supports both (a) item recommendations (`{user_id, top_k}` → `items`) and (b) MovieLens-style scoring (`{user_id:int, movie_id:int}` → label/probability). |
-| `POST /api/recommend/explain` | Returns an explanation for `{user_id, item_id}` using `app/models/recommender/explain.py`. |
-| `GET /api/monitor/summary` | Summarizes fraud metrics + risk summary (and returns log paths under `data/monitoring/logs`). |
-| `GET /api/monitor/events` | Returns the tail of raw monitoring events (kind=`risk` or `fraud`) for demo/debug. |
-| `GET /api/monitor/drift` | Computes drift summaries against the stored baseline (`app/monitoring/baseline.py`) and exposes feature-level deltas. |
-| `GET /health` | Lightweight uptime/status ping (also used by the Docker healthcheck). |
+| `POST /api/voice/emotion` | Audio upload → MFCC features → emotion label + confidence (labels depend on the trained model). |
+| `GET /api/monitor/summary` | Summarizes fraud/risk metrics and log paths under `data/monitoring/logs`. |
+| `GET /api/monitor/events` | Tail of raw monitoring events (kind=`risk` or `fraud`). |
+| `GET /api/monitor/drift` | Drift summaries vs. baseline (`app/monitoring/baseline.py`). |
+| `GET /health` | Lightweight uptime/status ping; reports optional feature availability (STT, CLIP/FAISS, WebRTC). |
 
 ## Section 8 — Testing & Quality
 * **Pytest** suites in `tests/` verify the orchestrator chat flow, document retriever, and monitoring stats. Run with `pytest tests/test_chat.py tests/test_rag.py tests/test_monitoring.py -q`.
@@ -227,31 +230,10 @@ docker compose up --build
 ## Section 11 — Final Note
 This is a system-level AI project that prioritizes integration, monitoring, and production readiness; the orchestrator, Streamlit demos, and CI/Docker pipeline are engineered so multiservice intelligence can be tested, monitored, and deployed with confidence.
 
-## Benchmarks
+## Data & Artifacts (not in git)
+- Large datasets, model weights, indexes, and archives are **ignored** (see `.gitignore`). Keep them under `data/`, `artifacts/`, `models/`, or `recommender/models/` locally.
+- Use the provided scripts for preparation and indexing:
+   - `scripts/prepare_brand_data.py` (LogoDet-3K → YOLO format)
+   - `scripts/build_recommender_index.py` (CLIP+FAISS index over unified catalog)
+   - `scripts/run_demo.sh` / `scripts/start_all.sh` for local demo
 
-<!-- BENCHMARKS:START -->
-
-`reports/benchmarks.md` is auto-generated.
-
-_Last updated: 2025-12-14 13:48:35Z_
-
-| Module | Dataset | Metric | Value | Artifact |
-|---|---|---:|---:|---|
-| Fraud | fraud_features.parquet | test ROC-AUC | 0.8920 | `experiments/fraud/metrics/metrics.csv` |
-| Fraud | fraud_features.parquet | hybrid ROC-AUC | 0.9581 | `experiments/fraud/metrics/metrics.csv` |
-| Cyber | unsw_nb15_features.parquet | test F1 | 0.9786 | `experiments/cyber/metrics/metrics.csv` |
-| Cyber | unsw_nb15_features.parquet | test ROC-AUC | 0.9974 | `experiments/cyber/metrics/metrics.csv` |
-| Behavior | r4_2_raw.parquet | LOF accuracy | 0.9492 | `reports/metrics_behavior.csv` |
-| Behavior | r4_2_raw.parquet | Autoencoder accuracy | 0.9490 | `reports/metrics_behavior.csv` |
-| Fusion | fusion_scores.csv | ROC-AUC | 0.8870 | `experiments/fusion/metrics/metrics.csv` |
-| Fusion | fusion_scores.csv | F1 | 0.4516 | `experiments/fusion/metrics/metrics.csv` |
-| Vision (image) | processed/vision (train+val) | Inference | frame-level ResNet | `models/vision/resnet/model.pt` |
-| Vision (video) | uploaded video | Inference | frame sampling + mean prob | `/api/vision/video/predict` |
-| Voice | CREMA-D / custom wav | Artifact | OK (labels depend on trained model) | `models/voice_emotion.pkl` |
-| Recommender (XGBoost) | movielens.csv | Accuracy | 0.7148 | `recommender/models/recommender.pkl` |
-| Recommender (XGBoost) | movielens.csv | Weighted-F1 | 0.7147 | `recommender/models/recommender.pkl` |
-| Recommender (NCF) | movielens.csv | Val-Acc (last) | 0.7292 | `recommender/models/recommender_ncf.pt` |
-| Recommender (GBDT) | movielens.csv (sample) | Accuracy | 0.7223 | `models/recommender/movielens_model.pkl` |
-| Recommender (GBDT) | movielens.csv (sample) | Weighted-F1 | 0.7222 | `models/recommender/movielens_model.pkl` |
-
-<!-- BENCHMARKS:END -->
