@@ -313,44 +313,40 @@ def train_brand_model():
     print_header("Training BRAND Detection (YOLOv8 - 1 epoch)")
     
     try:
-        from ultralytics import YOLO
-    except ImportError:
+        import ultralytics  # noqa: F401
+    except Exception:
         print("⚠️ ultralytics not installed, skipping brand training")
         return None
     
-    data_yaml = ROOT / "data/processed/brand_yolo/data.yaml"
-    if not data_yaml.exists():
-        print(f"⚠️ Brand data not found at {data_yaml}")
+    # Reuse the canonical trainer used by the API (`app/api/vision/brand`).
+    # This writes: artifacts/brand/yolo_logo_det.pt
+    try:
+        from src.train.train_brand_logo_detector import main as _train_brand
+    except Exception as exc:
+        print(f"⚠️ Could not import brand trainer: {exc}")
         return None
-    
-    print(f"📂 Using data: {data_yaml}")
-    
-    model = YOLO('yolov8n.pt')
-    
-    print("🔄 Training YOLOv8 for 1 epoch...")
-    results = model.train(
-        data=str(data_yaml),
-        epochs=1,
-        imgsz=640,
-        batch=8,
-        device='cpu',
-        project=str(ROOT / "runs/detect"),
-        name="brand_prod",
-        exist_ok=True,
-        verbose=False
-    )
-    
-    model_path = ROOT / "models/vision/brand_yolo.pt"
-    model_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    best_path = ROOT / "runs/detect/brand_prod/weights/best.pt"
-    if best_path.exists():
-        import shutil
-        shutil.copy(best_path, model_path)
-        print(f"📁 Saved: {model_path}")
+
+    # Ensure YOLO-format dataset exists (idempotent).
+    yaml_path = ROOT / "data/processed/brand_yolo/brands.yaml"
+    if not yaml_path.exists():
+        print("🧱 Preparing brand dataset...")
+        try:
+            import subprocess
+            subprocess.run([sys.executable, str(ROOT / "scripts/prepare_brand_data.py")], check=True, cwd=str(ROOT))
+        except Exception as exc:
+            print(f"⚠️ Brand data prep failed: {exc}")
+            return None
+
+    print(f"📂 Using data: {yaml_path}")
+    os.environ.setdefault("BRAND_EPOCHS", "1")
+    os.environ.setdefault("BRAND_YOLO_MODEL", "yolov8n.pt")
+    os.environ.setdefault("BRAND_DEVICE", "cpu")
+    try:
+        _train_brand()
         return True
-    
-    return None
+    except Exception as exc:
+        print(f"⚠️ Brand training failed: {exc}")
+        return None
 
 
 # ============================================================

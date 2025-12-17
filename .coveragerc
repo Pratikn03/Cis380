@@ -1,0 +1,36 @@
+[run]
+source = app/
+branch = true
+omit =
+    */tests/*
+    */__pycache__/*
+    */migrations/*
+    */notebooks/*
+    */experiments/*
+    */venv/*
+    */.venv/*
+    */site-packages/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    if typing.TYPE_CHECKING:
+    @abstractmethod
+    @abc.abstractmethod
+
+show_missing = true
+precision = 2
+
+[html]
+directory = reports/coverage_html
+
+[xml]
+output = reports/coverage.xml
+
+[json]
+output = reports/coverage.json

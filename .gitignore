@@ -1,27 +1,125 @@
-.venv/
-.venv-macos/
-.venv-omnichatx/
-venv/
-.env
+# ============================================
+# Python
+# ============================================
 __pycache__/
-*.pyc
-.DS_Store
+*.py[cod]
+*$py.class
+*.so
+.Python
 
-# Local image datasets (do not commit large raw media)
-data/raw/clothing_images/
+# ============================================
+# Virtual Environments (KEEP ALL)
+# ============================================
+.venv/
+.venv-*/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
 
-# LogoDet-3K raw + derived YOLO dataset + trained artifacts
-data/raw/brand/logodet3k/
-data/processed/brand_yolo/
-artifacts/brand/
+# ============================================
+# Environment Variables
+# ============================================
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.production.example
 
-# Trained vision artifacts (generated)
-models/vision_brand/
-models/vision_category/
-*.egg-info/
+# ============================================
+# IDEs and Editors
+# ============================================
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+
+# Jupyter
 .ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+Untitled*.ipynb
+*-checkpoint.ipynb
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# ============================================
+# Operating System
+# ============================================
 .DS_Store
-logs/
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Testing
+# ============================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+coverage.xml
+*.cover
+.cache
+nosetests.xml
+
+# ============================================
+# Build & Distribution
+# ============================================
+build/
+dist/
+*.egg-info/
+*.egg
+wheels/
+*.whl
+
+# ============================================
+# ML/AI Specific
+# ============================================
+# Models
+*.pt
+*.pth
+*.onnx
+*.ckpt
+*.pb
+*.h5
+*.hdf5
+*.pkl
+*.joblib
+*.pickle
+
+# Weights
+*.safetensors
+*.bin
+
+# Indexes
+*.index
+*.faiss
+
+# Arrays
+*.npy
+*.npz
+
+# ============================================
+# Data
+# ============================================
 data/raw/
 data/interim/
 data/processed/
@@ -30,41 +128,112 @@ data/monitoring/
 data/Celeb_V2/
 data/Video-2/
 data/video-2/
-/models/
-/experiments/
+
+# Large image datasets
+data/raw/clothing_images/
+data/raw/brand/logodet3k/
+data/processed/brand_yolo/
+
+# ============================================
+# Artifacts & Outputs
+# ============================================
+artifacts/
+models/
+experiments/
+runs/
+logs/
+*.log
+mlruns/
+
+# Specific artifacts
+artifacts/brand/
+models/vision_brand/
+models/vision_category/
+
+# ============================================
+# Reports
+# ============================================
 reports/benchmarks.md
 reports/duplicates_*.csv
 reports/duplicates_*.json
 reports/duplicates_move_*.sh
-scripts/find_duplicates.py
-scripts/dedupe_data.sh
 reports/*.pdf
 reports/*.html
 
-# Legacy/generated artifacts under src/
-src/models/
-src/experiments/
-data/
-datasets/
-*.pt
-*.pth
-*.onnx
-*.ckpt
-*.pb
-*.joblib
-*.pkl
-*.index
-*.faiss
-*.npy
-*.npz
-*.zip
-*.tar*
+# ============================================
+# Media Files
+# ============================================
 *.mp4
+*.avi
+*.mov
+*.mkv
 *.wav
 *.mp3
+*.m4a
+*.ogg
+*.flac
+
+# ============================================
+# Archives
+# ============================================
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tgz
+*.rar
+*.7z
 archive.zip
-logs/
-__pycache__/
-.ipynb_checkpoints/
-*.egg-info/
-.venv*/runs/
+
+# ============================================
+# Temporary Files
+# ============================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# ============================================
+# MLflow
+# ============================================
+mlruns/
+mlartifacts/
+
+# ============================================
+# Monitoring
+# ============================================
+.prometheus/
+grafana/data/
+
+# ============================================
+# Docker
+# ============================================
+.dockerignore
+docker-compose.override.yml
+
+# ============================================
+# Cache
+# ============================================
+.ruff_cache/
+.mypy_cache/
+.pytype/
+.dmypy.json
+dmypy.json
+
+# ============================================
+# Legacy paths (from original gitignore)
+# ============================================
+src/models/
+src/experiments/
+datasets/
+scripts/find_duplicates.py
+scripts/dedupe_data.sh
+
+# ============================================
+# Keep These
+# ============================================
+!.gitkeep
+!.github/

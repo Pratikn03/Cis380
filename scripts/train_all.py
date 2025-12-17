@@ -46,6 +46,11 @@ def main() -> int:
         help="Also run vision training (may be slow / require GPU / dataset layout).",
     )
     parser.add_argument(
+        "--with-brand",
+        action="store_true",
+        help="Also train the brand/logo detector (requires ultralytics + data/raw/brand).",
+    )
+    parser.add_argument(
         "--with-video-temporal",
         action="store_true",
         help="Also train the video temporal deepfake model (requires data/raw/vision/video/{real,fake} + ffmpeg).",
@@ -86,6 +91,11 @@ def main() -> int:
             _run(["bash", str(candidate)])
         else:
             print("\n[train_all] --with-vision requested, but scripts/run_train_vision.sh not found; skipping.")
+
+    if args.with_brand:
+        # Prepare dataset (idempotent) and train YOLO detector.
+        _run([sys.executable, "scripts/prepare_brand_data.py"])
+        _run([sys.executable, "-m", "src.train.train_brand_logo_detector"])
 
     if args.with_video_temporal:
         # Trains a lightweight sklearn temporal model used by /api/vision/video/predict.

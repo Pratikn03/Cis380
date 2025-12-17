@@ -1,0 +1,5 @@
+ml engineer -> python, deep learning, MLOps, deployment, statistics
+data scientist -> statistics, storytelling, visualization, experimentation
+product manager -> requirements, AI strategy, measurement
+ml ops -> pipelines, Kubernetes, observability
+security analyst -> logs, alerting, risk scoring

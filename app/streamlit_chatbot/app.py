@@ -40,6 +40,7 @@ from streamlit_chatbot.pages.tools import render_tools_page  # noqa: E402
 from streamlit_chatbot.pages.voice_chat import render_voice_chat_page  # noqa: E402
 from streamlit_chatbot.risk_dashboard import render_risk_command_center  # noqa: E402
 from streamlit_chatbot.chatgpt_style import render_chatgpt_style  # noqa: E402
+from streamlit_chatbot.omnichat_unified import render_omnichat_unified  # noqa: E402
 
 
 def main():
@@ -112,6 +113,7 @@ def main():
 
     top_tabs = st.tabs(
         [
+            "🧠 OmniChat Pratik (All-in-One)",
             "💬 ChatGPT Style",
             "Recommendations",
             "Live Agent",
@@ -121,6 +123,15 @@ def main():
     )
 
     with top_tabs[0]:
+        render_omnichat_unified(
+            backend_url=backend_url,
+            call_model=call_model,
+            call_multipart=call_multipart,
+            call_get=call_get,
+            auth_headers=_auth_headers,
+        )
+
+    with top_tabs[1]:
         render_chatgpt_style(
             backend_url=backend_url,
             call_model=call_model,
@@ -128,10 +139,10 @@ def main():
             auth_headers=_auth_headers,
         )
 
-    with top_tabs[1]:
+    with top_tabs[2]:
         render_command_center(backend_url=backend_url, call_model=call_model, call_multipart=call_multipart)
 
-    with top_tabs[2]:
+    with top_tabs[3]:
         st.markdown("## Live Agent Chat")
         st.caption("Calls `/api/chat` (and `/api/chat/multimodal` when you attach media).")
 
@@ -230,7 +241,7 @@ def main():
                                 st.json(res)
                             st.session_state.agent_chat_messages.append({"role": "assistant", "content": reply})
 
-    with top_tabs[3]:
+    with top_tabs[4]:
         media_tabs = st.tabs(["Live (Mic/Webcam)", "Voice Chat", "Uploads", "Brand Recognition"])
         with media_tabs[0]:
             render_live_page(backend_url=backend_url, call_multipart=call_multipart, auth_headers=_auth_headers)
@@ -246,7 +257,7 @@ def main():
         with media_tabs[3]:
             render_brand_page(call_upload=call_upload)
 
-    with top_tabs[4]:
+    with top_tabs[5]:
         risk_tabs = st.tabs(["Risk Command Center", "Direct Model Scoring", "Monitoring & Logs"])
         with risk_tabs[0]:
             render_risk_command_center(backend_url=backend_url, auth_headers=_auth_headers)

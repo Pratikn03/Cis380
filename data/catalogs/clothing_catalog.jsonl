@@ -1,0 +1,8 @@
+{"id":"tee_001","category":"tshirt","title":"Unisex Heavyweight T-Shirt","brand":"Uniqlo","tags":["casual","cotton","minimal","tee","t-shirt"],"gender":"unisex","price_usd":19.9}
+{"id":"hoodie_001","category":"hoodie","title":"Fleece Hoodie","brand":"Nike","tags":["streetwear","hoodie","sportswear","casual"],"gender":"unisex","price_usd":65.0}
+{"id":"jeans_001","category":"jeans","title":"501 Original Fit Jeans","brand":"Levi's","tags":["jeans","denim","casual","classic"],"gender":"unisex","price_usd":79.0}
+{"id":"sneakers_001","category":"sneakers","title":"Stan Smith Sneakers","brand":"adidas","tags":["sneakers","casual","streetwear","minimal"],"gender":"unisex","price_usd":95.0}
+{"id":"dress_001","category":"dress","title":"Wrap Midi Dress","brand":"Zara","tags":["dress","summer","smart casual","formal"],"gender":"women","price_usd":59.0}
+{"id":"suit_001","category":"suit","title":"Slim Fit Suit","brand":"Hugo Boss","tags":["formal suit","business attire","formal"],"gender":"men","price_usd":495.0}
+{"id":"jacket_001","category":"jacket","title":"Down Puffer Jacket","brand":"The North Face","tags":["winter outfit","jacket","outerwear"],"gender":"unisex","price_usd":229.0}
+{"id":"boots_001","category":"boots","title":"Classic Leather Boots","brand":"Dr. Martens","tags":["boots","streetwear","winter outfit"],"gender":"unisex","price_usd":170.0}
