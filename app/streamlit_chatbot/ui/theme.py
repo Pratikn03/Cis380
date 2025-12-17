@@ -29,6 +29,23 @@ def apply_partik_theme(*, subtitle: str = "Cyber • Fraud • Behavior • Visi
             letter-spacing: 0.01em;
         }
         section.main > div { padding-top: 1.5rem; position: relative; }
+        div[data-testid="stSidebar"], section[data-testid="stSidebar"] {
+            width: 0 !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            visibility: hidden !important;
+        }
+        .css-1d391kg, .css-1dq8tca {
+            display: none !important;
+        }
+        .block-container {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-left: 0 !important;
+            max-width: 1200px;
+        }
         .stApp > header, .stApp > footer { visibility: hidden; }
 
         .stChatInput > div > div {
