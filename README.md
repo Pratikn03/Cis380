@@ -237,3 +237,20 @@ This is a system-level AI project that prioritizes integration, monitoring, and 
    - `scripts/build_recommender_index.py` (CLIP+FAISS index over unified catalog)
    - `scripts/run_demo.sh` / `scripts/start_all.sh` for local demo
 
+## 📚 Documentation
+
+All documentation is organized under [`docs/`](docs/README.md):
+
+| Category | Contents |
+|----------|----------|
+| **[docs/guides/](docs/guides/)** | How-to guides, installation, demos |
+| **[docs/setup/](docs/setup/)** | Local setup, Git LFS configuration |
+| **[docs/fixes/](docs/fixes/)** | Bug fixes and troubleshooting |
+| **[docs/analysis/](docs/analysis/)** | Project analysis and cleanup reports |
+
+**Quick Links:**
+- [Production Deployment](docs/PRODUCTION_DEPLOYMENT.md)
+- [Local Setup](docs/setup/local_run.md)
+- [OmniChat Guide](docs/guides/OMNICHAT_COMPLETE.md)
+- [Architecture](docs/architecture.md)
+
