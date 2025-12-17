@@ -1,5 +1,5 @@
 Metric,mean,std
-accuracy,0.9,
-f1,0.8,
-pr_auc,0.88,
-roc_auc,0.93,
+anomaly_f1,0.0316205533596837,
+anomaly_roc_auc,0.3410189758524379,
+test_f1,0.9785536159600996,
+test_roc_auc,0.9974359199830688,

@@ -1,5 +1,60 @@
 # OmniChatX / Universal Anomaly Intelligence v2
 
+## Overview (Narrative)
+OmniChatX / Universal Anomaly Intelligence System (UAIS-V) is a multimodal AI agent platform that **routes one user request to the right subsystem** (RAG, fraud/risk scoring, recommendation, voice emotion, vision) and returns a **single structured response** with lineage/metadata.
+
+It is not "just a chatbot". It's a **system-level AI stack** intended to look and behave like a production service:
+- Real datasets and repeatable training scripts
+- A central **agent orchestrator** that performs intent routing
+- FastAPI endpoints for inference + monitoring
+- Streamlit UI for interactive demos
+- Tests + a one-command offline verification gate
+
+## Why It Exists
+Most applied AI capabilities are built as separate, isolated services (fraud detection, recommenders, vision models, voice emotion, and LLM chat). OmniChatX unifies them under one API surface so you can:
+- Ask one question and get the correct tool routed automatically
+- Log and monitor model behavior consistently
+- Run a demo offline (with local models) and optionally enable an LLM later
+
+## Architecture (5 Layers)
+1) **Data layer** (realistic inputs)  
+   - Raw datasets under `data/raw/` and domain docs under `docs/` / `data/docs/`
+   - RAG embeddings under `data/embeddings/`
+2) **Model layer** (core intelligence)  
+   - Tabular models (fraud/cyber/behavior): scikit-learn + XGBoost/LightGBM/CatBoost (see `requirements.txt`)  
+   - Recommender: offline MovieLens-style + explainability (`app/models/recommender/`)  
+   - Voice emotion: MFCC/features + classifier (`app/models/voice/`)  
+   - Vision: ResNet training/inference pipeline (`src/uais_v/` + `api/routes/vision.py` in the demo gateway)
+3) **Agent/orchestration layer** (the "brain")  
+   - `app/agent/orchestrator.py`: routes `text` to `rag | fraud | voice_emotion | recommend | chat`  
+   - `app/agent/decision_engine.py`: keyword/regex routing (rule-based)  
+   - `app/agent/memory.py`: last-N turns per user (in-memory)  
+   - Returns: `{"route": ..., "answer": ..., "meta": {...}}`
+4) **API/serving layer** (FastAPI)  
+   - Primary API: `app/main.py` + routers in `app/api/`  
+   - Demo gateway (includes `/metrics` + vision route): `backend/main.py`
+5) **UI + testing + ops**  
+   - Streamlit demo: `app/streamlit_chatbot/app.py` (Chat/Agent/Voice/Vision/Risk tabs)  
+   - Test gate: `bash scripts/codex_test_all.sh` (runs unit tests + HTTP smoke tests)
+
+## Current Phase
+The core stack is built; the work now is "flagship polish":
+- Make every capability visible in the UI (including voice + vision)
+- Keep training + inference reproducible offline
+- Keep docs and demo scripts aligned with the real entrypoints/endpoints
+
+## Strength (Honest Assessment)
+| Category | Assessment |
+|---|---|
+| Coursework / toy demo | No |
+| Kaggle notebook | No |
+| Internship-level system | Yes |
+| Research-grade foundation | Yes (extensible multimodal platform) |
+| Startup MVP | Yes (FastAPI + UI + monitoring + tests) |
+
+## One-Paragraph Summary
+OmniChatX (UAIS-V) is a multimodal AI agent system that integrates retrieval-augmented generation, fraud/risk scoring, recommendations, voice emotion recognition, and vision inference into a single orchestrated platform. It is built with real data pipelines, reproducible training scripts, FastAPI deployment, monitoring hooks, and a Streamlit demo UI so the full stack can be tested, monitored, and iterated like a production service.
+
 ## Section 1 — Project Identity
 OmniChatX / Universal Anomaly Intelligence v2 is a multimodal AI agent platform driven by an orchestrator that routes incoming conversations to LLM-based chat, RAG, fraud/cyber/anomaly scoring, speech emotion recognition, and explainable recommendation services. The system ships with monitoring and drift-detection tooling, a Streamlit demo UI, and a CI/CD-backed Docker deployment so that the entire stack can be iterated like a production service.
 
@@ -17,7 +72,8 @@ OmniChatX / Universal Anomaly Intelligence v2 is a multimodal AI agent platform 
 2. **Retrieval-Augmented Generation** (`app/rag/ingest.py`, `app/rag/retriever.py`, `app/rag/prompting.py`) ingests `docs/` content, builds TF-IDF embeddings, retrieves relevant chunks, and supplies `citations` to the orchestrator for transparent responses.
 3. **Fraud / Cyber / Behavior Anomaly APIs** (`app/api/fraud.py`, `app/api/monitor.py` plus legacy `backend/api/*`) surface scoring from `models/fraud/`, `models/cyber/`, and `models/behavior/` artifacts, logging each invocation.
 4. **Fraud Monitoring & Drift Detection** (`app/monitoring/`) append events to `data/monitoring/logs/fraud_events.jsonl`, compute freshness summaries, and expose summary/drift reports via `/api/monitor/summary` and `/api/monitor/drift`.
-5. **Speech Emotion Recognition** (`app/models/voice/emotion_predict.py`, `app/api/voice.py`) extracts MFCC features, loads a fallback classifier, and delivers emotion/confidence once users upload audio.
+5. **Speech Emotion Recognition** (`app/models/voice/emotion_predict.py`, `app/api/voice.py`) extracts MFCC features, loads a local classifier (with a safe fallback model if the artifact is missing/incompatible), and returns an emotion label + confidence.
+   - Supported emotion labels depend on the trained artifact’s `classes_` and the labels present in `data/raw/voice/*`.
 6. **Explainable Recommendation Engine** (`app/models/recommender/` and `recommender/` packages) powers `/api/recommend` and `/api/recommend/explain`, supporting movie-style metadata, vectorized fallbacks, and text explanations.
 7. **Streamlit Demo UI** (`app/streamlit_chatbot/app.py`) wires chat, fraud risk, and recommendation tabs to the orchestrator (`app/agent`), styling the experience, showing tags, and surfacing risk overlays.
 8. **Dockerized Deployment + CI**: `docker compose up --build` launches the service; `.github/workflows/ci.yml` uses Python 3.11, installs dependencies, runs `ruff` + `pytest`, and builds the Docker image to prevent regressions.
@@ -52,10 +108,22 @@ OmniChatX / Universal Anomaly Intelligence v2 is a multimodal AI agent platform 
    ```bash
    OMNICHATX_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
    ```
+   - The **Voice & Vision** tab supports **microphone recording** + **webcam snapshots** (no file uploads).
+   - Optional: enable continuous mic+webcam streaming by installing `streamlit-webrtc` (`pip install -r requirements-optional.txt`) and toggling the WebRTC checkbox in the UI.
 4. Run the pytest suites that cover chat, RAG, and monitoring logic.
    ```bash
    pytest tests/test_chat.py tests/test_rag.py tests/test_monitoring.py -q
    ```
+
+## Quick verification
+```bash
+bash scripts/test.sh
+```
+
+## One-command demo
+```bash
+bash scripts/run_demo.sh
+```
 
 ## Section 6 — How to Run (Docker)
 ```bash
@@ -69,7 +137,7 @@ docker compose up --build
 | --- | --- |
 | `POST /api/chat` | Ingests text (and optional audio/attachments), routes via the orchestrator, and returns routed answers plus metadata/citations. |
 | `POST /api/rag/ingest` | Appends or updates document content under `docs/`, triggers the TF-IDF ingestion pipeline, and reports the number of indexed chunks. |
-| `POST /api/voice/emotion` | Accepts audio uploads, extracts MFCC features, and returns an emotion label with confidence from the fallback classifier. |
+| `POST /api/voice/emotion` | Accepts audio uploads, extracts MFCC features, and returns an emotion label with confidence. (Labels depend on the trained model.) |
 | `POST /api/recommend` | Predicts recommendations via explainable XGBoost-based pipelines and MovieLens-derived metadata depending on the payload. |
 | `POST /api/recommend/explain` | Returns short, feature-driven explanations for a user/item pair by calling `app/models/recommender/explain.py`. |
 | `GET /api/monitor/summary` | Summarizes the latest fraud log metrics, request counts, and recent risk scores recorded in `data/monitoring/logs`. |
@@ -114,27 +182,17 @@ _Last updated: 2025-12-14 13:48:35Z_
 
 | Module | Dataset | Metric | Value | Artifact |
 |---|---|---:|---:|---|
-| Fraud | fraud_features.parquet | ROC-AUC | 0.9600 | `models/fraud/supervised/fraud_model.pkl` |
-| Fraud | fraud_features.parquet | PR-AUC | 0.9000 | `models/fraud/supervised/fraud_model.pkl` |
-| Fraud | fraud_features.parquet | F1 | 0.8200 | `models/fraud/supervised/fraud_model.pkl` |
-| Fraud | fraud_features.parquet | Accuracy | 0.9200 | `models/fraud/supervised/fraud_model.pkl` |
-| Cyber | unsw_nb15_features.parquet | ROC-AUC | 0.9300 | `models/cyber/supervised/cyber_model.pkl` |
-| Cyber | unsw_nb15_features.parquet | PR-AUC | 0.8800 | `models/cyber/supervised/cyber_model.pkl` |
-| Cyber | unsw_nb15_features.parquet | F1 | 0.8000 | `models/cyber/supervised/cyber_model.pkl` |
-| Cyber | unsw_nb15_features.parquet | Accuracy | 0.9000 | `models/cyber/supervised/cyber_model.pkl` |
-| Behavior | r4_2_raw.parquet | ROC-AUC | 0.8800 | `models/behavior/behavior_lof.pkl` |
-| Behavior | r4_2_raw.parquet | PR-AUC | 0.8200 | `models/behavior/behavior_lof.pkl` |
-| Behavior | r4_2_raw.parquet | F1 | 0.7500 | `models/behavior/behavior_lof.pkl` |
-| Behavior | r4_2_raw.parquet | Accuracy | 0.8500 | `models/behavior/behavior_lof.pkl` |
-| Fusion | fusion_scores.csv | ROC-AUC | 0.9700 | `experiments/fusion/models/fusion_meta_model.pkl` |
-| Fusion | fusion_scores.csv | PR-AUC | 0.9200 | `experiments/fusion/models/fusion_meta_model.pkl` |
-| Fusion | fusion_scores.csv | F1 | 0.8400 | `experiments/fusion/models/fusion_meta_model.pkl` |
-| Fusion | fusion_scores.csv | Accuracy | 0.9300 | `experiments/fusion/models/fusion_meta_model.pkl` |
-| Vision (image) | processed/vision (train+val) | ROC-AUC | 0.9100 | `models/vision/resnet_smoke/model.pt` |
-| Vision (image) | processed/vision (train+val) | PR-AUC | 0.8600 | `models/vision/resnet_smoke/model.pt` |
-| Vision (image) | processed/vision (train+val) | F1 | 0.7800 | `models/vision/resnet_smoke/model.pt` |
-| Vision (image) | processed/vision (train+val) | Accuracy | 0.8900 | `models/vision/resnet_smoke/model.pt` |
-| Voice | CREMA-D / custom wav | Artifact | OK | `models/voice_emotion.pkl` |
+| Fraud | fraud_features.parquet | test ROC-AUC | 0.8920 | `experiments/fraud/metrics/metrics.csv` |
+| Fraud | fraud_features.parquet | hybrid ROC-AUC | 0.9581 | `experiments/fraud/metrics/metrics.csv` |
+| Cyber | unsw_nb15_features.parquet | test F1 | 0.9786 | `experiments/cyber/metrics/metrics.csv` |
+| Cyber | unsw_nb15_features.parquet | test ROC-AUC | 0.9974 | `experiments/cyber/metrics/metrics.csv` |
+| Behavior | r4_2_raw.parquet | LOF accuracy | 0.9492 | `reports/metrics_behavior.csv` |
+| Behavior | r4_2_raw.parquet | Autoencoder accuracy | 0.9490 | `reports/metrics_behavior.csv` |
+| Fusion | fusion_scores.csv | ROC-AUC | 0.8870 | `experiments/fusion/metrics/metrics.csv` |
+| Fusion | fusion_scores.csv | F1 | 0.4516 | `experiments/fusion/metrics/metrics.csv` |
+| Vision (image) | processed/vision (train+val) | Inference | frame-level ResNet | `models/vision/resnet/model.pt` |
+| Vision (video) | uploaded video | Inference | frame sampling + mean prob | `/api/vision/video/predict` |
+| Voice | CREMA-D / custom wav | Artifact | OK (labels depend on trained model) | `models/voice_emotion.pkl` |
 | Recommender (XGBoost) | movielens.csv | Accuracy | 0.7148 | `recommender/models/recommender.pkl` |
 | Recommender (XGBoost) | movielens.csv | Weighted-F1 | 0.7147 | `recommender/models/recommender.pkl` |
 | Recommender (NCF) | movielens.csv | Val-Acc (last) | 0.7292 | `recommender/models/recommender_ncf.pt` |
@@ -142,4 +200,3 @@ _Last updated: 2025-12-14 13:48:35Z_
 | Recommender (GBDT) | movielens.csv (sample) | Weighted-F1 | 0.7222 | `models/recommender/movielens_model.pkl` |
 
 <!-- BENCHMARKS:END -->
-

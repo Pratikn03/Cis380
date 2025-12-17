@@ -29,4 +29,4 @@ dependencies = {file = ["requirements.txt"]}
 
 [tool.coverage.run]
 branch = true
-source = ["src/uais"]
+source = ["src/uais", "src/uais_v"]

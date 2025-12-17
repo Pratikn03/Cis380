@@ -55,9 +55,11 @@ Outputs feed into supervised, unsupervised, sequence, NLP, vision trainers, and 
 - Frameworks: transformers, torch, datasets
 
 **Vision (deepfake/forgery)**
-- Data: DFDC, CelebDF
-- Models: ResNet18 baseline; optional GAN/VAE for synthesis
-- Frameworks: torchvision, timm
+- Data: DFDC, CelebDF (or any ImageFolder-style real/fake dataset)
+- Models: ResNet18/ResNet-style baseline classifier.
+- Video inference (if used): sample frames with ffmpeg and **aggregate per-frame probabilities** (mean-prob baseline).
+- Explainability: Grad-CAM is explored in notebooks (e.g. `50_explainability.ipynb`), but it is not a required production feature.
+- Frameworks: torchvision (optional timm)
 
 ## Fusion Meta-Model
 Combine risk scores from fraud, cyber, behavior, NLP, vision -> stacking/blending (e.g., sklearn StackingClassifier) or weighted fusion -> unified risk index / recommendations. Artifacts stored under `experiments/fusion/`.

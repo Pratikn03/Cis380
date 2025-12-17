@@ -10,8 +10,14 @@ This script:
 - Extracts 16kHz mono WAV audio from every video using ffmpeg
 - Infers labels from CREMA-D filename pattern
 - Writes data/raw/crema_d/labels/crema_d_labels.csv
-- Copies WAVs into data/raw/voice/{happy,sad,angry,neutral}
-  mapping only HAP/SAD/ANG/NEU (drops DIS/FEA by default)
+- Copies WAVs into data/raw/voice/{happy,sad,angry,neutral} (and optionally fearful)
+    mapping HAP/SAD/ANG/NEU and FEA when present.
+
+Important:
+- This script can *create* a `fearful/` folder and copy FEA clips into it.
+    However, your voice model will only predict classes it was trained on.
+    If the local audio set is sparse/absent, the training code may fall back to
+    synthetic data, and class availability/quality may vary.
 
 Requirements
 ------------
@@ -41,8 +47,10 @@ CREMA_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
-# Map to your 4-class folders
-EMO_MAP = {"HAP": "happy", "SAD": "sad", "ANG": "angry", "NEU": "neutral"}
+# Map to your voice folders (keep DIS dropped by default).
+# Note: including FEA here does not "guarantee" the trained model will support it;
+# that depends on training data availability and the trained artifact.
+EMO_MAP = {"HAP": "happy", "SAD": "sad", "ANG": "angry", "NEU": "neutral", "FEA": "fearful"}
 
 VIDEO_EXTS = {".flv", ".mp4", ".avi", ".mkv"}
 
@@ -220,7 +228,7 @@ def main() -> None:
     print("\nOutputs:")
     print("- data/raw/crema_d/audio_wav/*.wav")
     print("- data/raw/crema_d/labels/crema_d_labels.csv")
-    print("- data/raw/voice/{happy,sad,angry,neutral}/*.wav (copied subset)")
+    print("- data/raw/voice/{happy,sad,angry,neutral,fearful}/*.wav (copied subset)")
 
 
 if __name__ == "__main__":

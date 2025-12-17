@@ -4,7 +4,7 @@ import logging
 import sys
 import time
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from prometheus_client import Counter, Histogram, CONTENT_TYPE_LATEST, generate_latest
@@ -14,7 +14,22 @@ SRC_DIR = ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
+# Pre-import torch/torchvision if available.
+# This avoids a known macOS hang when XGBoost is imported before Torch in the same process.
+try:  # pragma: no cover
+    import torch  # noqa: F401
+    import torchvision  # noqa: F401
+except Exception:
+    pass
+
+from api.deps import require_auth
 from api.routes import chat, rag, recommend, behavior, fraud, cyber, vision
+
+# Optional: reuse the app/ voice router so the backend exposes /api/voice/emotion.
+try:
+    from app.api.voice import router as voice_router
+except Exception:  # pragma: no cover - defensive fallback if app package missing
+    voice_router = None
 from fastapi.responses import RedirectResponse
 
 logger = logging.getLogger("omnichatx")
@@ -64,6 +79,8 @@ app.include_router(behavior.router)
 app.include_router(fraud.router)
 app.include_router(cyber.router)
 app.include_router(vision.router)
+if voice_router is not None:
+    app.include_router(voice_router, prefix="/api", dependencies=[Depends(require_auth)])
 
 
 @app.middleware("http")

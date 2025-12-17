@@ -19,15 +19,22 @@ THIS_DIR = Path(__file__).resolve().parent
 APP_ROOT = THIS_DIR.parent
 REPO_ROOT = THIS_DIR.parents[1]
 
-for path in (APP_ROOT, REPO_ROOT):
-    p = str(path)
-    if p not in sys.path:
-        sys.path.append(p)
+# NOTE: This file is named `app.py`, and Streamlit may load it under the module
+# name `app`, which can shadow the repo's `app/` package. To avoid that, we:
+# - import from `agent.*`, `rag.*` (repo-root packages) and `chatbot.*`,
+#   `streamlit_chatbot.*` (packages under app/)
+# - ensure REPO_ROOT is searched before APP_ROOT
+desired_sys_path = [str(REPO_ROOT), str(APP_ROOT)]
+for p in desired_sys_path:
+    while p in sys.path:
+        sys.path.remove(p)
+sys.path.insert(0, desired_sys_path[0])
+sys.path.insert(1, desired_sys_path[1])
 
-from app.chatbot.context_manager import ContextManager
-from recommender_router import route_recommendation
-from app.agent.orchestrator import OmniChatXOrchestrator
-from image_tags import extract_tags_from_image
+from chatbot.context_manager import ContextManager
+from streamlit_chatbot.recommender_router import route_recommendation
+from agent.orchestrator import OmniChatXOrchestrator
+from streamlit_chatbot.image_tags import extract_tags_from_image
 
 
 st.set_page_config(page_title="UAIS-V Recommender Chatbot", page_icon="🤖", layout="wide")
@@ -60,8 +67,11 @@ def compute_risk_note(items: list[dict]) -> str | None:
     rating = float(item.get("rating", 0))
     popularity = float(item.get("popularity", 0))
     try:
-        msg = risk_orchestrator._fraud_score(f"{price} {rating} {popularity}")
-        return msg
+        # Prefer the orchestrator's public interface when possible.
+        out = risk_orchestrator.handle(f"{price} {rating} {popularity}", user_id="streamlit", use_rag=False)
+        if isinstance(out, dict):
+            return str(out.get("answer") or out)
+        return str(out)
     except Exception as exc:
         logger.warning("Risk overlay failed: %s", exc, exc_info=True)
         return "Risk overlay currently unavailable; please try again later."
@@ -217,13 +227,15 @@ def domain_source_label(intent: str | None) -> str:
         "news": "News feed",
         "news_health": "Health news feed",
         "news_crime": "Crime news feed",
-        "phones": "Electronics phone dataset",
-        "laptops": "Electronics laptop dataset",
-        "headphones": "Electronics headphone dataset",
+        "phones": "Electronics catalog (CSV or curated fallback)",
+        "laptops": "Electronics catalog (CSV or curated fallback)",
+        "headphones": "Electronics catalog (CSV or curated fallback)",
         "courses": "Learning resources dataset",
         "clothes": "Clothes handler",
     }
-    return mapping.get(intent, "OmniNex knowledge sources")
+    if not intent:
+        return "OmniChatX knowledge sources"
+    return mapping.get(intent, "OmniChatX knowledge sources")
 
 
 def main():
@@ -232,17 +244,34 @@ def main():
     if "session_id" not in st.session_state:
         st.session_state.session_id = str(uuid.uuid4())
 
-    backend_url = os.environ.get("OMNINEX_BACKEND", "http://localhost:8000")
+    # Backward-compatible backend URL env var.
+    # README uses OMNICHATX_BACKEND; older docs used OMNINEX_BACKEND.
+    backend_url = os.environ.get("OMNICHATX_BACKEND") or os.environ.get("OMNINEX_BACKEND", "http://localhost:8000")
 
     def call_model(path: str, payload: dict) -> dict:
         try:
-            resp = requests.post(f"{backend_url}{path}", json=payload, timeout=10.0)
+            headers: dict[str, str] = {}
+            if os.getenv("AUTH_TOKEN"):
+                headers["Authorization"] = f"Bearer {os.environ['AUTH_TOKEN']}"
+            resp = requests.post(f"{backend_url}{path}", json=payload, headers=headers, timeout=10.0)
             resp.raise_for_status()
             return resp.json()
         except Exception as exc:
             return {"error": f"{exc}"}
 
-    tabs = st.tabs(["Chat & Recommendations", "Risk & Anomaly"])
+    def call_upload(path: str, *, filename: str, content: bytes, content_type: str) -> dict:
+        try:
+            headers: dict[str, str] = {}
+            if os.getenv("AUTH_TOKEN"):
+                headers["Authorization"] = f"Bearer {os.environ['AUTH_TOKEN']}"
+            files = {"file": (filename, content, content_type)}
+            resp = requests.post(f"{backend_url}{path}", files=files, headers=headers, timeout=30.0)
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as exc:
+            return {"error": f"{exc}"}
+
+    tabs = st.tabs(["Chat & Recommendations", "OmniChatX Agent", "Voice & Vision", "Risk & Anomaly"])
 
     with tabs[0]:
         # Image upload section
@@ -355,6 +384,450 @@ def main():
                 _process_query(query, image_tags_text)
 
     with tabs[1]:
+        st.markdown("### OmniChatX Agent Chat")
+        st.caption(
+            "This calls the backend `/api/chat`. For GPT-like answers, set `OPENAI_API_KEY` in your environment. "
+            "You can also attach an audio clip or image; their predictions are appended to your prompt as context."
+        )
+
+        if "agent_messages" not in st.session_state:
+            st.session_state.agent_messages = []
+
+        col_a, col_b, col_c = st.columns(3)
+        with col_a:
+            agent_audio = st.file_uploader(
+                "Attach audio (optional)",
+                type=["wav", "mp3", "m4a", "aac", "ogg"],
+                key="agent_audio_upload",
+            )
+        with col_b:
+            agent_image = st.file_uploader(
+                "Attach image (optional)",
+                type=["png", "jpg", "jpeg", "webp"],
+                key="agent_image_upload",
+            )
+        with col_c:
+            agent_video = st.file_uploader(
+                "Attach video (optional)",
+                type=["mp4", "mov", "avi", "mkv"],
+                key="agent_video_upload",
+            )
+
+        for msg in st.session_state.agent_messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
+        agent_text = st.text_input("Ask anything (agent chat)…", key="agent_query")
+        if st.button("Send to agent", key="agent_send", type="primary") and agent_text.strip():
+            user_text = agent_text.strip()
+            st.session_state.agent_messages.append({"role": "user", "content": user_text})
+            with st.chat_message("user"):
+                st.markdown(user_text)
+
+            context_lines: list[str] = []
+            if agent_audio is not None:
+                voice_res = call_upload(
+                    "/api/voice/emotion",
+                    filename=agent_audio.name,
+                    content=agent_audio.getvalue(),
+                    content_type=agent_audio.type or "audio/wav",
+                )
+                if "error" in voice_res:
+                    context_lines.append(f"[voice] error: {voice_res['error']}")
+                else:
+                    context_lines.append(
+                        f"[voice] emotion={voice_res.get('emotion')} confidence={voice_res.get('confidence')}"
+                    )
+
+            if agent_image is not None:
+                vision_res = call_upload(
+                    "/api/vision/predict",
+                    filename=agent_image.name,
+                    content=agent_image.getvalue(),
+                    content_type=agent_image.type or "image/jpeg",
+                )
+                if "error" in vision_res:
+                    context_lines.append(f"[vision] error: {vision_res['error']}")
+                else:
+                    context_lines.append(
+                        f"[vision] label={vision_res.get('label')} confidence={vision_res.get('confidence')}"
+                    )
+
+            if agent_video is not None:
+                video_res = call_upload(
+                    "/api/vision/video/predict?fps=1&max_frames=25",
+                    filename=agent_video.name,
+                    content=agent_video.getvalue(),
+                    content_type=agent_video.type or "video/mp4",
+                )
+                if "error" in video_res:
+                    context_lines.append(f"[vision] video error: {video_res['error']}")
+                else:
+                    context_lines.append(
+                        f"[vision] label={video_res.get('label')} confidence={video_res.get('confidence')} (video)"
+                    )
+
+            prompt = user_text
+            if context_lines:
+                prompt += "\n\nContext:\n" + "\n".join(context_lines)
+
+            chat_res = call_model("/api/chat", {"message": prompt})
+            if "error" in chat_res:
+                reply_text = chat_res["error"]
+            else:
+                reply_text = chat_res.get("reply") or chat_res.get("answer") or json.dumps(chat_res, indent=2)
+
+            with st.chat_message("assistant"):
+                st.markdown(reply_text)
+                if context_lines:
+                    st.caption("Context attached: " + " | ".join(context_lines))
+            st.session_state.agent_messages.append({"role": "assistant", "content": reply_text})
+
+    with tabs[2]:
+        st.markdown("### Live Capture (No Uploads)")
+        st.write("Use your microphone/webcam directly. The app sends the captured media to your local backend for inference.")
+
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.markdown("#### Microphone (record → analyze)")
+            mic_audio = st.audio_input("Record audio", key="voice_mic_input")
+            if mic_audio is not None:
+                if st.button("Analyze recorded audio", key="voice_mic_analyze", type="primary"):
+                    result = call_upload(
+                        "/api/voice/emotion",
+                        filename=mic_audio.name or "mic.wav",
+                        content=mic_audio.getvalue(),
+                        content_type=mic_audio.type or "audio/wav",
+                    )
+                    if "error" in result:
+                        st.error(result["error"])
+                    else:
+                        st.success("Voice emotion detected")
+                        st.json(result)
+
+        with col_b:
+            st.markdown("#### Webcam (snapshot → predict)")
+            cam_img = st.camera_input("Take a photo", key="vision_cam_input")
+            if cam_img is not None:
+                st.image(cam_img, caption=cam_img.name, use_container_width=True)
+                if st.button("Predict snapshot", key="vision_cam_predict", type="primary"):
+                    result = call_upload(
+                        "/api/vision/predict",
+                        filename=cam_img.name or "webcam.jpg",
+                        content=cam_img.getvalue(),
+                        content_type=cam_img.type or "image/jpeg",
+                    )
+                    if "error" in result:
+                        st.error(result["error"])
+                    else:
+                        st.success("Vision prediction complete")
+                        st.json(result)
+
+        st.divider()
+
+        st.markdown("### Real-Time (Mic + Webcam) — Optional")
+        st.write(
+            "For continuous live updates (like a real-time demo), enable WebRTC streaming. "
+            "This is optional and requires extra dependencies."
+        )
+        enable_webrtc = st.checkbox(
+            "Enable real-time streaming (requires `streamlit-webrtc`)",
+            value=False,
+            key="enable_webrtc_realtime",
+        )
+        if enable_webrtc:
+            try:
+                import io
+                import threading
+                import time
+                import wave
+                from dataclasses import dataclass, field
+
+                import numpy as np
+                from PIL import Image, ImageDraw
+
+                from streamlit_webrtc import (
+                    AudioProcessorBase,
+                    RTCConfiguration,
+                    VideoProcessorBase,
+                    WebRtcMode,
+                    webrtc_streamer,
+                )
+            except Exception as exc:
+                st.error(
+                    "Real-time streaming dependencies are missing.\n\n"
+                    "Install (recommended in a Python 3.11+ venv):\n"
+                    "`pip install streamlit-webrtc av aiortc`\n\n"
+                    f"Import error: {exc}"
+                )
+            else:
+
+                @dataclass
+                class _RealtimeState:
+                    lock: threading.Lock = field(default_factory=threading.Lock)
+                    vision_label: str | None = None
+                    vision_confidence: float | None = None
+                    voice_emotion: str | None = None
+                    voice_confidence: float | None = None
+                    last_vision_raw: dict | None = None
+                    last_voice_raw: dict | None = None
+
+                    def snapshot(self) -> dict[str, object]:
+                        with self.lock:
+                            return {
+                                "vision_label": self.vision_label,
+                                "vision_confidence": self.vision_confidence,
+                                "voice_emotion": self.voice_emotion,
+                                "voice_confidence": self.voice_confidence,
+                            }
+
+                    def update_vision(self, payload: dict) -> None:
+                        with self.lock:
+                            self.vision_label = payload.get("label") or payload.get("prediction")
+                            self.vision_confidence = payload.get("confidence")
+                            self.last_vision_raw = payload
+
+                    def update_voice(self, payload: dict) -> None:
+                        with self.lock:
+                            self.voice_emotion = payload.get("emotion")
+                            self.voice_confidence = payload.get("confidence")
+                            self.last_voice_raw = payload
+
+                if "webrtc_rt_state" not in st.session_state:
+                    st.session_state.webrtc_rt_state = _RealtimeState()
+                rt_state: _RealtimeState = st.session_state.webrtc_rt_state
+
+                def _headers() -> dict[str, str]:
+                    if os.getenv("AUTH_TOKEN"):
+                        return {"Authorization": f"Bearer {os.environ['AUTH_TOKEN']}"}
+                    return {}
+
+                def _encode_jpeg(rgb: "np.ndarray") -> bytes:
+                    buf = io.BytesIO()
+                    Image.fromarray(rgb).save(buf, format="JPEG", quality=85)
+                    return buf.getvalue()
+
+                def _pcm16_to_wav_bytes(pcm16: "np.ndarray", sr: int) -> bytes:
+                    pcm16 = np.asarray(pcm16, dtype=np.int16)
+                    buf = io.BytesIO()
+                    with wave.open(buf, "wb") as w:
+                        w.setnchannels(1)
+                        w.setsampwidth(2)
+                        w.setframerate(int(sr))
+                        w.writeframes(pcm16.tobytes())
+                    return buf.getvalue()
+
+                def _safe_float(x) -> float | None:
+                    try:
+                        return None if x is None else float(x)
+                    except Exception:
+                        return None
+
+                class _RealtimeVideoProcessor(VideoProcessorBase):
+                    def __init__(self) -> None:
+                        self._last_sent = 0.0
+                        self._inflight = False
+
+                    def _infer(self, jpeg_bytes: bytes) -> None:
+                        nonlocal backend_url
+                        try:
+                            files = {"file": ("frame.jpg", jpeg_bytes, "image/jpeg")}
+                            resp = requests.post(
+                                f"{backend_url}/api/vision/predict",
+                                files=files,
+                                headers=_headers(),
+                                timeout=20,
+                            )
+                            resp.raise_for_status()
+                            payload = resp.json()
+                            rt_state.update_vision(payload)
+                        except Exception:
+                            # Keep the stream alive even if inference fails.
+                            pass
+                        finally:
+                            self._inflight = False
+
+                    def recv(self, frame):
+                        import av  # local import (required by streamlit-webrtc)
+
+                        rgb = frame.to_ndarray(format="rgb24")
+                        now = time.monotonic()
+                        if (now - self._last_sent) >= 1.0 and not self._inflight:
+                            self._last_sent = now
+                            self._inflight = True
+                            jpeg = _encode_jpeg(rgb)
+                            threading.Thread(target=self._infer, args=(jpeg,), daemon=True).start()
+
+                        snap = rt_state.snapshot()
+                        img = Image.fromarray(rgb)
+                        draw = ImageDraw.Draw(img)
+                        v_label = snap.get("vision_label") or "…"
+                        v_conf = _safe_float(snap.get("vision_confidence"))
+                        a_label = snap.get("voice_emotion") or "…"
+                        a_conf = _safe_float(snap.get("voice_confidence"))
+                        text = f"vision: {v_label} ({'' if v_conf is None else f'{v_conf:.2f}'})  |  voice: {a_label} ({'' if a_conf is None else f'{a_conf:.2f}'})"
+                        draw.rectangle((0, 0, 1100, 36), fill=(0, 0, 0))
+                        draw.text((10, 10), text, fill=(255, 255, 255))
+                        return av.VideoFrame.from_ndarray(np.array(img), format="rgb24")
+
+                class _RealtimeAudioProcessor(AudioProcessorBase):
+                    def __init__(self) -> None:
+                        self._buf = np.zeros((0,), dtype=np.int16)
+                        self._sr = 16000
+                        self._last_sent = 0.0
+                        self._inflight = False
+
+                    def _infer(self, wav_bytes: bytes) -> None:
+                        nonlocal backend_url
+                        try:
+                            files = {"file": ("live.wav", wav_bytes, "audio/wav")}
+                            resp = requests.post(
+                                f"{backend_url}/api/voice/emotion",
+                                files=files,
+                                headers=_headers(),
+                                timeout=30,
+                            )
+                            resp.raise_for_status()
+                            payload = resp.json()
+                            rt_state.update_voice(payload)
+                        except Exception:
+                            pass
+                        finally:
+                            self._inflight = False
+
+                    def recv(self, frame):
+                        import av  # local import (required by streamlit-webrtc)
+
+                        arr = frame.to_ndarray()
+                        try:
+                            self._sr = int(getattr(frame, "sample_rate", None) or self._sr)
+                        except Exception:
+                            pass
+
+                        pcm = arr
+                        if pcm.ndim == 2:
+                            # Handle both (channels, samples) and (samples, channels)
+                            if pcm.shape[0] <= 2 and pcm.shape[1] > pcm.shape[0]:
+                                pcm = pcm.mean(axis=0)
+                            else:
+                                pcm = pcm.mean(axis=1)
+                        pcm = np.asarray(pcm)
+
+                        if np.issubdtype(pcm.dtype, np.floating):
+                            pcm = np.clip(pcm, -1.0, 1.0)
+                            pcm16 = (pcm * 32767.0).astype(np.int16)
+                        else:
+                            pcm16 = pcm.astype(np.int16, copy=False)
+
+                        self._buf = np.concatenate([self._buf, pcm16])
+
+                        # Keep only the last ~3 seconds.
+                        max_keep = int(max(1, self._sr) * 3)
+                        if self._buf.size > max_keep:
+                            self._buf = self._buf[-max_keep:]
+
+                        now = time.monotonic()
+                        if (
+                            not self._inflight
+                            and (now - self._last_sent) >= 1.2
+                            and self._buf.size >= int(max(1, self._sr) * 1)
+                        ):
+                            self._last_sent = now
+                            self._inflight = True
+                            window = self._buf[-int(self._sr * 1) :]
+                            wav_bytes = _pcm16_to_wav_bytes(window, self._sr)
+                            threading.Thread(target=self._infer, args=(wav_bytes,), daemon=True).start()
+
+                        return frame
+
+                st.caption(f"Backend target: `{backend_url}` (start it with `uvicorn backend.main:app --port 8000`).")
+                webrtc_streamer(
+                    key="omnichatx_realtime_webrtc",
+                    mode=WebRtcMode.SENDRECV,
+                    rtc_configuration=RTCConfiguration({"iceServers": []}),
+                    media_stream_constraints={"video": True, "audio": True},
+                    video_processor_factory=_RealtimeVideoProcessor,
+                    audio_processor_factory=_RealtimeAudioProcessor,
+                    async_processing=True,
+                )
+
+        st.divider()
+
+        st.markdown("### Voice Emotion Detection")
+        st.write("Upload a short WAV/MP3/M4A clip and get an emotion label + confidence.")
+
+        audio_file = st.file_uploader(
+            "Audio file",
+            type=["wav", "mp3", "m4a", "aac", "ogg"],
+            key="voice_upload",
+        )
+        if audio_file is not None:
+            if st.button("Detect voice emotion", type="primary"):
+                result = call_upload(
+                    "/api/voice/emotion",
+                    filename=audio_file.name,
+                    content=audio_file.getvalue(),
+                    content_type=audio_file.type or "audio/wav",
+                )
+                if "error" in result:
+                    st.error(result["error"])
+                else:
+                    st.success("Voice emotion detected")
+                    st.json(result)
+
+        st.divider()
+
+        st.markdown("### Vision (Image) Prediction")
+        st.write("Upload an image to run the trained vision model (real/fake or multi-class, depending on your dataset).")
+
+        image_file = st.file_uploader(
+            "Image file",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="vision_upload",
+        )
+        if image_file is not None:
+            st.image(image_file, caption=image_file.name, use_container_width=True)
+            if st.button("Predict image label"):
+                result = call_upload(
+                    "/api/vision/predict",
+                    filename=image_file.name,
+                    content=image_file.getvalue(),
+                    content_type=image_file.type or "image/jpeg",
+                )
+                if "error" in result:
+                    st.error(result["error"])
+                else:
+                    st.success("Vision prediction complete")
+                    st.json(result)
+
+        st.divider()
+
+        st.markdown("### Vision (Video) Prediction")
+        st.write("Upload a short video; the backend samples frames and averages per-frame probabilities.")
+
+        vid_file = st.file_uploader(
+            "Video file",
+            type=["mp4", "mov", "avi", "mkv"],
+            key="vision_video_upload",
+        )
+        fps = st.number_input("Frame sampling FPS", min_value=0.1, max_value=10.0, value=1.0, step=0.5)
+        max_frames = st.number_input("Max frames to analyze", min_value=1, max_value=200, value=30, step=5)
+        if vid_file is not None:
+            if st.button("Predict video", key="vision_video_predict"):
+                path = f"/api/vision/video/predict?fps={float(fps)}&max_frames={int(max_frames)}"
+                result = call_upload(
+                    path,
+                    filename=vid_file.name,
+                    content=vid_file.getvalue(),
+                    content_type=vid_file.type or "video/mp4",
+                )
+                if "error" in result:
+                    st.error(result["error"])
+                else:
+                    st.success("Video prediction complete")
+                    st.json(result)
+
+    with tabs[3]:
         st.markdown("### Risk & Anomaly Explorer")
         st.write(
             "Send numeric features to the fraud, cyber, or behavior model endpoints and view the returned"

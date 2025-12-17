@@ -1,5 +1,5 @@
 Metric,mean,std
-accuracy,0.92,
-f1,0.82,
-pr_auc,0.9,
-roc_auc,0.96,
+hybrid_f1,0.7079646017699115,
+hybrid_roc_auc,0.9581045138261606,
+test_f1,0.7079646017699115,
+test_roc_auc,0.8920228612559301,

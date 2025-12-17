@@ -21,14 +21,80 @@ OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 logger = logging.getLogger(__name__)
 
 
+def _looks_like_numeric_vector(text: str) -> bool:
+    """Return True if the input is basically a numeric vector (optionally prefixed with 'recommend'/'suggest')."""
+    stripped = (text or "").strip()
+    if not stripped:
+        return False
+    # Remove common command words, then check if the remainder is a numeric-looking blob.
+    stripped = re.sub(r"\b(recommend|suggest|predict|score)\b", " ", stripped, flags=re.IGNORECASE).strip()
+    if not stripped:
+        return False
+    if not re.search(r"\d", stripped):
+        return False
+    return bool(re.fullmatch(r"[\s,;|()eE+\-.\d]+", stripped))
+
+
+def _extract_multimodal_context(message: str) -> list[str]:
+    """Extract streamlit-attached context lines like [voice]/[vision] so offline mode can respond usefully."""
+    text = message or ""
+    lines: list[str] = []
+
+    m_voice = re.search(
+        r"\[voice\]\s*emotion\s*=\s*([^\s]+)\s+confidence\s*=\s*([0-9.]+)",
+        text,
+        re.IGNORECASE,
+    )
+    if m_voice:
+        lines.append(f"Voice emotion: {m_voice.group(1)} (confidence {m_voice.group(2)})")
+
+    m_vis = re.search(
+        r"\[vision\]\s*label\s*=\s*([^\s]+)\s+confidence\s*=\s*([0-9.]+)",
+        text,
+        re.IGNORECASE,
+    )
+    if m_vis:
+        lines.append(f"Vision label: {m_vis.group(1)} (confidence {m_vis.group(2)})")
+
+    return lines
+
+
+def _offline_assistant(message: str) -> str:
+    """Best-effort offline reply (no OpenAI key)."""
+    m = (message or "").strip()
+    if not m:
+        return "Say something and I’ll help."
+
+    lower = m.lower()
+
+    # Provide actionable guidance for common project questions.
+    if any(k in lower for k in ("next step", "next steps", "what are we doing", "what to do", "train", "training", "demo")):
+        return (
+            "Offline mode is enabled (no OPENAI_API_KEY).\n\n"
+            "Next steps:\n"
+            "1) Train everything: `python scripts/train_all.py --with-vision --voice-limit-per-class 0`\n"
+            "2) Run the demo: `bash scripts/run_demo.sh`\n"
+            "3) Verify end-to-end: `bash scripts/codex_test_all.sh`\n\n"
+            "Tip: In Streamlit, use the **Voice & Vision** tab for uploads, and **OmniChatX Agent** for chat + attachments."
+        )
+
+    context_lines = _extract_multimodal_context(m)
+    if context_lines:
+        return "Offline multimodal summary:\n- " + "\n- ".join(context_lines)
+
+    # Fall back to local docs (RAG).
+    return rag_service.answer(m)
+
+
 def _llm_call(message: str) -> str:
-    """Call OpenAI if key set; otherwise instruct user to set it."""
-    if not OPENAI_KEY:
-        return "Set OPENAI_API_KEY to enable LLM replies."
+    """Call OpenAI if key set; otherwise use an offline helper response."""
+    key = os.getenv("OPENAI_API_KEY")
+    if not key:
+        return _offline_assistant(message)
     try:
         resp = requests.post(
             "https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": f"Bearer {OPENAI_KEY}"},
+            headers={"Authorization": f"Bearer {key}"},
             json={
                 "model": "gpt-4o-mini",
                 "messages": [{"role": "user", "content": message}],
@@ -199,6 +265,39 @@ class OmniChatXOrchestrator:
             return f"Recommended action: {top_label} (p={proba[top_idx]:.3f}). Top features: {top_txt}"
         pred = model.predict(arr)[0]
         return f"Recommended action: {pred}."
+
+    def _recommend_nl(self, message: str) -> str:
+        """Natural-language recommendation helper for the agent chat (movies/electronics/places/news)."""
+        try:
+            from app.streamlit_chatbot.recommender_router import route_recommendation
+        except Exception:
+            route_recommendation = None
+
+        if route_recommendation is None:
+            return "Recommendation module not available (missing app/streamlit_chatbot)."
+
+        rec = route_recommendation(message)
+        category = str(rec.get("category") or "Recommendations")
+        items = rec.get("items") or []
+        if not items:
+            return f"No {category} results right now."
+
+        lines = [f"Here are some {category.lower()} picks:"]
+        for i, it in enumerate(items[:5], 1):
+            title = it.get("title") or it.get("name") or "Item"
+            reason = it.get("reason") or it.get("overview") or ""
+            url = it.get("url")
+            bullet = f"{i}. {title}"
+            details = []
+            if reason:
+                details.append(str(reason))
+            if url:
+                details.append(str(url))
+            if details:
+                bullet += " — " + " · ".join(details)
+            lines.append(bullet)
+        return "\n".join(lines)
+
     def _recommend_movie(self, user_id: int, movie_id: int) -> str:
         ml_path = Path("recommender/models/recommender.pkl")
         meta_path = Path("recommender/models/recommender_meta.joblib")
@@ -247,21 +346,22 @@ class OmniChatXOrchestrator:
         if intent == "behavior":
             return self._behavior_score(message)
         if intent == "recommend":
-            # try to parse two ints as user/movie
-            nums = _extract_numbers(message)
-            if len(nums) >= 2:
-                res = self._recommend_movie(int(nums[0]), int(nums[1]))
-                # include approximate explanation if present
-                if isinstance(res, dict):
-                    expl = res.get("explanation")
-                    label = res.get("label")
-                    prob = res.get("probability")
-                    mode = res.get("mode")
-                    return f"Recommend (mode={mode}): {label} (p={prob}). {expl or ''}"
-                return res
-            return self._recommend(message)
+            # 1) If the user provided a numeric vector (e.g., "0.1, 1.2, ..."), use the tabular model.
+            if _looks_like_numeric_vector(message):
+                return self._recommend(message)
+
+            # 2) If the user explicitly provided "user/movie" IDs, keep that path.
+            m = re.search(
+                r"\buser(?:_id)?\s*[:=]?\s*(\d+)\b.*\bmovie(?:_id)?\s*[:=]?\s*(\d+)\b",
+                (message or "").lower(),
+            )
+            if m:
+                return self._recommend_movie(int(m.group(1)), int(m.group(2)))
+
+            # 3) Otherwise, use the natural-language recommender handlers (offline-capable).
+            return self._recommend_nl(message)
         if intent == "rag":
             return rag_service.answer(message)
 
-        # default: LLM if key is set, else RAG fallback
+        # default: LLM if key is set, else offline helper
         return _llm_call(message)

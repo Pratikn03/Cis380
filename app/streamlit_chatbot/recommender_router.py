@@ -1,6 +1,7 @@
 """Intent routing for the chatbot recommender."""
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 from typing import Dict, Any, Tuple
@@ -33,19 +34,88 @@ except ImportError:
 def _detect_intent(text: str) -> Tuple[str, str]:
     """Very simple keyword-based intent detection."""
     t = text.lower()
-    if any(k in t for k in ["clothes", "outfit", "fashion", "wear"]):
+    tokens = set(re.findall(r"[a-z0-9]+", t))
+
+    if tokens.intersection({"clothes", "outfit", "fashion", "wear"}):
         return "clothes", text
-    if any(k in t for k in ["phone", "smartphone", "laptop", "notebook", "headphone", "earbuds"]):
-        if "laptop" in t or "macbook" in t or "xps" in t:
+
+    phone_terms = {
+        "phone",
+        "phones",
+        "cellphone",
+        "smartphone",
+        "smartphones",
+        "iphone",
+        "pixel",
+        "galaxy",
+        "android",
+    }
+    laptop_terms = {
+        "laptop",
+        "laptops",
+        "notebook",
+        "notebooks",
+        "macbook",
+        "thinkpad",
+        "xps",
+        "dell",
+        "lenovo",
+        "hp",
+        "asus",
+        "acer",
+        "surface",
+    }
+    headphone_terms = {
+        "headphone",
+        "headphones",
+        "earbud",
+        "earbuds",
+        "earphone",
+        "headset",
+        "airpods",
+        "bose",
+        "sony",
+    }
+
+    if tokens.intersection(phone_terms | laptop_terms | headphone_terms):
+        if tokens.intersection(laptop_terms):
             return "laptops", text
-        if "phone" in t or "smartphone" in t:
+        if tokens.intersection(phone_terms):
             return "phones", text
         return "headphones", text
-    if any(k in t for k in ["course", "learn", "skill", "training", "certification"]):
+    if tokens.intersection({"course", "learn", "skill", "training", "certification"}):
         return "courses", text
-    if any(k in t for k in ["movie", "film", "show", "latest movies", "new movies"]):
+
+    movie_terms = {
+        "movie",
+        "movies",
+        "film",
+        "films",
+        "show",
+        "shows",
+        "latest movies",
+        "new movies",
+        # genre keywords so users can type just "romantic", "sci-fi", etc.
+        "romance",
+        "romantic",
+        "romcom",
+        "action",
+        "comedy",
+        "drama",
+        "thriller",
+        "horror",
+        "mystery",
+        "crime",
+        "sci-fi",
+        "scifi",
+        "science fiction",
+        "fantasy",
+        "animation",
+        "documentary",
+    }
+    if tokens.intersection(movie_terms) or "science fiction" in t:
         return "movies", text
-    if any(k in t for k in ["place", "restaurant", "cafe", "coffee", "park", "visit", "trip"]):
+    if tokens.intersection({"place", "restaurant", "cafe", "coffee", "park", "visit", "trip"}):
         return "places", text
     if "health" in t:
         return "news_health", text

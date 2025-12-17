@@ -24,3 +24,7 @@ lightfm>=1.17
 # Vision
 pillow>=9.0.0
 opencv-python>=4.8.0
+
+# Real-time mic/webcam streaming in Streamlit (optional).
+# Note: On some platforms this is easiest to install in a Python 3.11+ venv.
+streamlit-webrtc>=0.47.0

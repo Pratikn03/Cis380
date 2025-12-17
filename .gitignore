@@ -19,5 +19,10 @@ data/video-2/
 models/
 experiments/
 reports/benchmarks.md
+reports/duplicates_*.csv
+reports/duplicates_*.json
+reports/duplicates_move_*.sh
+scripts/find_duplicates.py
+scripts/dedupe_data.sh
 reports/*.pdf
 reports/*.html
