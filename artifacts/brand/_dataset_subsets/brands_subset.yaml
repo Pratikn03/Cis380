@@ -1,0 +1,5 @@
+path: /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo
+train: /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/artifacts/brand/_dataset_subsets/brands_train_5000_seed42.txt
+val: /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/images/val
+names:
+- logo

@@ -117,6 +117,18 @@ wheels/
 *.npy
 *.npz
 
+# Allow curated release artifacts (tracked via Git LFS)
+!artifacts/**/*.pt
+!artifacts/**/*.pth
+!artifacts/**/*.pkl
+!artifacts/**/*.pickle
+!artifacts/**/*.onnx
+!artifacts/**/*.h5
+!artifacts/**/*.hdf5
+!artifacts/**/*.pb
+!artifacts/**/*.npy
+!artifacts/**/*.npz
+
 # ============================================
 # Data
 # ============================================
@@ -137,18 +149,16 @@ data/processed/brand_yolo/
 # ============================================
 # Artifacts & Outputs
 # ============================================
-artifacts/
+artifacts/*
+!artifacts/.gitkeep
+!artifacts/README.md
+!artifacts/brand/
 models/
 experiments/
 runs/
 logs/
 *.log
 mlruns/
-
-# Specific artifacts
-artifacts/brand/
-models/vision_brand/
-models/vision_category/
 
 # ============================================
 # Reports
