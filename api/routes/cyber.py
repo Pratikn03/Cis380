@@ -60,7 +60,11 @@ def predict_cyber(req: CyberRequest):
             score = float(cyber_model.decision_function(X)[0])
         else:
             score = float(cyber_model.predict(X)[0])
-        return {"score": score, "input_features": len(req.features), "expected_features": expected or None}
+        return {
+            "score": score,
+            "input_features": len(req.features),
+            "expected_features": expected or None,
+        }
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

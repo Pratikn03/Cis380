@@ -1,4 +1,5 @@
 """Simple Transformer and TCN sequence classifiers for behavior anomalies."""
+
 from typing import Dict, Tuple
 
 import numpy as np
@@ -26,7 +27,9 @@ class SequenceDataset(Dataset):
 class TransformerClassifier(nn.Module):
     def __init__(self, input_dim: int, n_heads: int = 4, num_layers: int = 2, hidden_dim: int = 64):
         super().__init__()
-        encoder_layer = nn.TransformerEncoderLayer(d_model=input_dim, nhead=n_heads, dim_feedforward=hidden_dim)
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=input_dim, nhead=n_heads, dim_feedforward=hidden_dim
+        )
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
         self.fc = nn.Linear(input_dim, 1)
 
@@ -49,7 +52,11 @@ class TCNBlock(nn.Module):
     def forward(self, x):
         out = self.conv(x)
         # remove padding on the right to keep length
-        out = out[:, :, :-((self.conv.kernel_size[0] - 1) * self.conv.dilation[0])] if self.conv.kernel_size[0] > 1 else out
+        out = (
+            out[:, :, : -((self.conv.kernel_size[0] - 1) * self.conv.dilation[0])]
+            if self.conv.kernel_size[0] > 1
+            else out
+        )
         return self.bn(self.relu(out))
 
 
@@ -109,7 +116,9 @@ def train_sequence_model(
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item() * len(batch_y)
-        logger.info("%s epoch %s loss %.4f", model_type.upper(), epoch + 1, epoch_loss / len(dataset))
+        logger.info(
+            "%s epoch %s loss %.4f", model_type.upper(), epoch + 1, epoch_loss / len(dataset)
+        )
     return model, epoch_loss / len(dataset)
 
 
@@ -122,4 +131,9 @@ def predict_sequence_model(model: nn.Module, sequences: np.ndarray) -> np.ndarra
     return probs
 
 
-__all__ = ["train_sequence_model", "predict_sequence_model", "TransformerClassifier", "TCNClassifier"]
+__all__ = [
+    "train_sequence_model",
+    "predict_sequence_model",
+    "TransformerClassifier",
+    "TCNClassifier",
+]

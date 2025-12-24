@@ -1,4 +1,5 @@
 """Logging configuration helpers."""
+
 import logging
 from pathlib import Path
 from typing import Optional
@@ -6,7 +7,9 @@ from typing import Optional
 from .paths import LOGS_DIR, ensure_directories
 
 
-def setup_logging(name: str, level: int = logging.INFO, log_file: Optional[str] = None) -> logging.Logger:
+def setup_logging(
+    name: str, level: int = logging.INFO, log_file: Optional[str] = None
+) -> logging.Logger:
     """Create a module-specific logger with optional file handler."""
     ensure_directories()
     logger = logging.getLogger(name)

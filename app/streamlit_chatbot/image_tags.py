@@ -1,4 +1,5 @@
 """Extract simple tags from an image using CLIP (torch/torchvision), with safe fallback."""
+
 from __future__ import annotations
 
 from typing import List
@@ -33,10 +34,24 @@ def extract_tags_from_image(image, top_k: int = 5) -> List[str]:
         return []
 
     candidate_labels = [
-        "formal suit", "business attire", "casual wear", "streetwear", "sportswear",
-        "jacket", "hoodie", "dress", "skirt", "jeans", "sneakers", "boots",
-        "superhero costume", "sci-fi armor", "fantasy costume", "classic film",
-        "summer outfit", "winter outfit",
+        "formal suit",
+        "business attire",
+        "casual wear",
+        "streetwear",
+        "sportswear",
+        "jacket",
+        "hoodie",
+        "dress",
+        "skirt",
+        "jeans",
+        "sneakers",
+        "boots",
+        "superhero costume",
+        "sci-fi armor",
+        "fantasy costume",
+        "classic film",
+        "summer outfit",
+        "winter outfit",
     ]
 
     try:

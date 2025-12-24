@@ -1,4 +1,5 @@
 """Evaluation utilities for supervised models."""
+
 from typing import Dict, Tuple
 
 import numpy as np

@@ -7,7 +7,9 @@ from app.utils import LLMStub
 llm = LLMStub()
 
 
-def explain_decision(risks: Mapping[str, float], decision: str, context: Sequence[str] | None = None) -> str:
+def explain_decision(
+    risks: Mapping[str, float], decision: str, context: Sequence[str] | None = None
+) -> str:
     prompt_lines = ["Explain the risk decision:"]
     for key, value in risks.items():
         prompt_lines.append(f"- {key}: {value:.3f}")

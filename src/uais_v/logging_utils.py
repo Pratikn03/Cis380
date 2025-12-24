@@ -1,4 +1,5 @@
 """Lightweight logging setup shared across UAIS-V."""
+
 import logging
 from typing import Optional
 

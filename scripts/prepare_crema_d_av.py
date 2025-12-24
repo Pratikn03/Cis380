@@ -137,7 +137,9 @@ def prepare(
     voice_root = paths["voice_root"]
 
     # Detect videos
-    videos = [p for p in sorted(video_dir.glob("*")) if p.is_file() and p.suffix.lower() in VIDEO_EXTS]
+    videos = [
+        p for p in sorted(video_dir.glob("*")) if p.is_file() and p.suffix.lower() in VIDEO_EXTS
+    ]
     if limit is not None:
         videos = videos[:limit]
 
@@ -215,10 +217,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Extract WAVs + labels from CREMA-D videos")
     parser.add_argument("--project-root", type=Path, default=Path("."))
     parser.add_argument("--limit", type=int, default=None)
-    parser.add_argument("--no-copy-to-voice", action="store_true", help="Don't copy mapped WAVs into data/raw/voice/*")
+    parser.add_argument(
+        "--no-copy-to-voice",
+        action="store_true",
+        help="Don't copy mapped WAVs into data/raw/voice/*",
+    )
 
     args = parser.parse_args()
-    stats = prepare(project_root=args.project_root, limit=args.limit, copy_to_voice=not args.no_copy_to_voice)
+    stats = prepare(
+        project_root=args.project_root, limit=args.limit, copy_to_voice=not args.no_copy_to_voice
+    )
 
     print("CREMA-D PREP SUMMARY")
     print("--------------------")

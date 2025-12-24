@@ -1,4 +1,5 @@
 """PyTorch training loop for the multi-sequence TCN classifier."""
+
 from pathlib import Path
 from typing import Dict, Tuple
 
@@ -9,7 +10,6 @@ from torch.utils.data import DataLoader, Dataset
 
 from uais_v.evaluation.metrics import classification_metrics
 from uais_v.models.multi_sequence_30_torch import MultiSequenceTCNClassifier
-from uais_v.utils.seed import set_global_seed
 
 
 class Sequence30Dataset(Dataset):

@@ -1,4 +1,5 @@
 """Wrappers around existing UAIS cyber feature builders."""
+
 try:
     from uais.features.cyber_features import build_cyber_features as _core_build
 except Exception:  # pragma: no cover - optional dependency

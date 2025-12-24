@@ -1,4 +1,5 @@
 """Binary/softmax metric helpers for UAIS-V models."""
+
 from typing import Dict
 
 import numpy as np

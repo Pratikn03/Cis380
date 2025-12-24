@@ -5,4 +5,3 @@ This package provides lightweight, optional components for image understanding:
 - simple object/category tagging
 - small vector index helpers
 """
-

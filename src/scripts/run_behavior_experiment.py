@@ -1,4 +1,5 @@
 """CLI: behavior anomaly detection run (autoencoder + LOF) using current components."""
+
 from __future__ import annotations
 
 import json
@@ -35,7 +36,9 @@ def main():
     drop_cols = cfg.get("data", {}).get("drop_columns")
 
     df_raw = load_behavior_data(cfg)
-    df_feats = build_behavior_feature_table(df_raw, target_column=target_col, drop_columns=drop_cols)
+    df_feats = build_behavior_feature_table(
+        df_raw, target_column=target_col, drop_columns=drop_cols
+    )
     X = df_feats.drop(columns=[target_col])
     y = df_feats[target_col].astype(int)
 
@@ -46,7 +49,9 @@ def main():
             "Behavior target column '%s' has <2 classes; splitting without stratify and metrics may be non-informative.",
             target_col,
         )
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, stratify=stratify, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.3, stratify=stratify, random_state=42
+    )
 
     preprocessor = StandardScaler()
 
@@ -75,9 +80,9 @@ def main():
     metrics_dir = paths["experiments"] / "metrics"
     metrics_dir.mkdir(parents=True, exist_ok=True)
     save_json(metrics, metrics_dir / "metrics.json")
-    pd.DataFrame(
-        [{"Metric": k, "Value": v} for k, v in metrics.items()]
-    ).to_csv(metrics_dir / "metrics.csv", index=False)
+    pd.DataFrame([{"Metric": k, "Value": v} for k, v in metrics.items()]).to_csv(
+        metrics_dir / "metrics.csv", index=False
+    )
 
     # Normalize autoencoder errors for fusion friendliness.
     ae_norm = (ae_recon_error - ae_recon_error.min()) / (np.ptp(ae_recon_error) + 1e-8)

@@ -39,7 +39,11 @@ def _read_metrics_csv(path: Path) -> dict[str, float]:
         reader = csv.DictReader(f)
         if reader.fieldnames is None:
             return {}
-        value_key = "mean" if "mean" in reader.fieldnames else "Value" if "Value" in reader.fieldnames else None
+        value_key = (
+            "mean"
+            if "mean" in reader.fieldnames
+            else "Value" if "Value" in reader.fieldnames else None
+        )
         if value_key is None:
             return {}
         for row in reader:
@@ -96,8 +100,7 @@ def _extract_ncf_last_val_acc(payload: dict) -> float | None:
 def _to_markdown(rows: list[Row]) -> str:
     header = "| Module | Dataset | Metric | Value | Artifact |\n|---|---|---:|---:|---|\n"
     lines = [
-        f"| {r.module} | {r.dataset} | {r.metric} | {r.value} | `{r.artifact}` |"
-        for r in rows
+        f"| {r.module} | {r.dataset} | {r.metric} | {r.value} | `{r.artifact}` |" for r in rows
     ]
     return header + "\n".join(lines) + "\n"
 
@@ -131,28 +134,48 @@ def generate_rows() -> list[Row]:
         dataset="fraud_features.parquet",
         artifact="models/fraud/supervised/fraud_model.pkl",
         metrics_path=Path("reports/metrics_fraud.csv"),
-        metrics_order=[("roc_auc", "ROC-AUC"), ("pr_auc", "PR-AUC"), ("f1", "F1"), ("accuracy", "Accuracy")],
+        metrics_order=[
+            ("roc_auc", "ROC-AUC"),
+            ("pr_auc", "PR-AUC"),
+            ("f1", "F1"),
+            ("accuracy", "Accuracy"),
+        ],
     )
     add_report_rows(
         module="Cyber",
         dataset="unsw_nb15_features.parquet",
         artifact="models/cyber/supervised/cyber_model.pkl",
         metrics_path=Path("reports/metrics_cyber.csv"),
-        metrics_order=[("roc_auc", "ROC-AUC"), ("pr_auc", "PR-AUC"), ("f1", "F1"), ("accuracy", "Accuracy")],
+        metrics_order=[
+            ("roc_auc", "ROC-AUC"),
+            ("pr_auc", "PR-AUC"),
+            ("f1", "F1"),
+            ("accuracy", "Accuracy"),
+        ],
     )
     add_report_rows(
         module="Behavior",
         dataset="r4_2_raw.parquet",
         artifact="models/behavior/behavior_lof.pkl",
         metrics_path=Path("reports/metrics_behavior.csv"),
-        metrics_order=[("roc_auc", "ROC-AUC"), ("pr_auc", "PR-AUC"), ("f1", "F1"), ("accuracy", "Accuracy")],
+        metrics_order=[
+            ("roc_auc", "ROC-AUC"),
+            ("pr_auc", "PR-AUC"),
+            ("f1", "F1"),
+            ("accuracy", "Accuracy"),
+        ],
     )
     add_report_rows(
         module="Fusion",
         dataset="fusion_scores.csv",
         artifact="experiments/fusion/models/fusion_meta_model.pkl",
         metrics_path=Path("reports/metrics_fusion.csv"),
-        metrics_order=[("roc_auc", "ROC-AUC"), ("pr_auc", "PR-AUC"), ("f1", "F1"), ("accuracy", "Accuracy")],
+        metrics_order=[
+            ("roc_auc", "ROC-AUC"),
+            ("pr_auc", "PR-AUC"),
+            ("f1", "F1"),
+            ("accuracy", "Accuracy"),
+        ],
     )
 
     vision_artifact = "models/vision/resnet/model.pt"
@@ -163,7 +186,12 @@ def generate_rows() -> list[Row]:
         dataset="processed/vision (train+val)",
         artifact=vision_artifact,
         metrics_path=Path("reports/metrics_vision.csv"),
-        metrics_order=[("roc_auc", "ROC-AUC"), ("pr_auc", "PR-AUC"), ("f1", "F1"), ("accuracy", "Accuracy")],
+        metrics_order=[
+            ("roc_auc", "ROC-AUC"),
+            ("pr_auc", "PR-AUC"),
+            ("f1", "F1"),
+            ("accuracy", "Accuracy"),
+        ],
     )
 
     # Voice: artifact-only (training metrics are not standardized in the repo yet).
@@ -238,4 +266,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

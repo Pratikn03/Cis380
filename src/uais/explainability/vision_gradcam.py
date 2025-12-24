@@ -1,4 +1,5 @@
 """Grad-CAM utility for vision models."""
+
 from pathlib import Path
 
 import numpy as np
@@ -7,7 +8,9 @@ from PIL import Image
 from torchvision import transforms
 
 
-def grad_cam(model: torch.nn.Module, image: Image.Image, target_layer: str = "layer4") -> np.ndarray:
+def grad_cam(
+    model: torch.nn.Module, image: Image.Image, target_layer: str = "layer4"
+) -> np.ndarray:
     model.eval()
     activations = {}
     gradients = {}
@@ -44,7 +47,9 @@ def grad_cam(model: torch.nn.Module, image: Image.Image, target_layer: str = "la
     weights = grads.mean(dim=(2, 3), keepdim=True)
     cam = (weights * acts).sum(dim=1, keepdim=True)
     cam = torch.relu(cam)
-    cam = torch.nn.functional.interpolate(cam, size=(224, 224), mode="bilinear", align_corners=False)
+    cam = torch.nn.functional.interpolate(
+        cam, size=(224, 224), mode="bilinear", align_corners=False
+    )
     cam = cam.squeeze().cpu().numpy()
     cam = (cam - cam.min()) / (cam.max() - cam.min() + 1e-8)
 
@@ -53,7 +58,9 @@ def grad_cam(model: torch.nn.Module, image: Image.Image, target_layer: str = "la
     return cam
 
 
-def save_gradcam(model: torch.nn.Module, image: Image.Image, out_path: Path, target_layer: str = "layer4") -> Path:
+def save_gradcam(
+    model: torch.nn.Module, image: Image.Image, out_path: Path, target_layer: str = "layer4"
+) -> Path:
     cam = grad_cam(model, image, target_layer=target_layer)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     np.save(out_path.with_suffix(".npy"), cam)

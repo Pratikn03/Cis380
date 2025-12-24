@@ -7,6 +7,7 @@ Usage:
     python scripts/download_data.py --all
     python scripts/download_data.py --enron --no-kaggle
 """
+
 import argparse
 import tarfile
 from pathlib import Path
@@ -62,6 +63,7 @@ def download_file(url: str, dest_path: Path, chunk_size: int = 1 << 20):
 # -----------
 # NLP (Enron)
 # -----------
+
 
 def download_enron_via_kaggle() -> Path:
     if not KAGGLE_AVAILABLE:
@@ -125,6 +127,7 @@ def download_enron(prefer_kaggle: bool = True) -> Path:
 # Vision CIFAR-10
 # --------------
 
+
 def download_cifar10() -> Path:
     makedirs()
     tar_path = VISION_DIR / "cifar-10-python.tar.gz"
@@ -151,8 +154,11 @@ def download_cifar10() -> Path:
 # CLI
 # -----
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Download NLP (Enron) and Vision (CIFAR-10) datasets for UAIS-V.")
+    parser = argparse.ArgumentParser(
+        description="Download NLP (Enron) and Vision (CIFAR-10) datasets for UAIS-V."
+    )
     parser.add_argument("--enron", action="store_true", help="Download/prepare Enron email CSV.")
     parser.add_argument("--cifar10", action="store_true", help="Download CIFAR-10 image dataset.")
     parser.add_argument("--all", action="store_true", help="Download both Enron and CIFAR-10.")

@@ -6,4 +6,3 @@ This package exists so commands like:
 
 work reliably from the repo root.
 """
-

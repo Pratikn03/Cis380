@@ -4,6 +4,7 @@ Reads data from data/sequences/X_30seq.npy/y_30seq.npy (builds if missing)
 and trains either the torch TCN (default) or the TF model based on config.
 Saves artifacts under artifacts/models/30seq/.
 """
+
 from typing import Tuple
 
 import numpy as np
@@ -48,7 +49,7 @@ def _train_torch(X_dict, y, train_cfg, model_cfg):
 
 def _train_tf(X_dict, y, train_cfg, model_cfg):
     try:
-        import tensorflow as tf
+        pass
     except Exception as exc:  # pragma: no cover - optional dependency
         raise ImportError(
             "TensorFlow is required to train the 30-sequence TF model. Install tensorflow or tensorflow-cpu."

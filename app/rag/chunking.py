@@ -20,7 +20,9 @@ def chunk_text(text: str, chunk_size: int = 900, overlap: int = 150) -> List[str
     return chunks
 
 
-def chunk_with_metadata(text: str, source: str, chunk_size: int = 900, overlap: int = 150) -> Iterable[dict]:
+def chunk_with_metadata(
+    text: str, source: str, chunk_size: int = 900, overlap: int = 150
+) -> Iterable[dict]:
     for index, chunk in enumerate(chunk_text(text, chunk_size=chunk_size, overlap=overlap)):
         yield {
             "source": source,

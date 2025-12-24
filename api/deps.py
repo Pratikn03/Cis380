@@ -4,6 +4,7 @@ If AUTH_TOKEN env var is set, incoming requests must send:
 Authorization: Bearer <AUTH_TOKEN>
 If AUTH_TOKEN is unset, auth is skipped (dev mode).
 """
+
 from __future__ import annotations
 
 import os

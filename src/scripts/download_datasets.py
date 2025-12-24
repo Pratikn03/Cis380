@@ -67,7 +67,9 @@ def download_unsw_nb15() -> None:
 
 def download_online_shoppers_intention() -> None:
     """Download the Online Shoppers Intention dataset and copy the main CSV into data/raw/behavior/."""
-    print("=== Downloading Online Shoppers Intention dataset (mkechadi/online-shoppers-intention) ===")
+    print(
+        "=== Downloading Online Shoppers Intention dataset (mkechadi/online-shoppers-intention) ==="
+    )
     local_path = Path(kagglehub.dataset_download("mkechadi/online-shoppers-intention"))
     print(f"Downloaded to kagglehub cache: {local_path}")
 

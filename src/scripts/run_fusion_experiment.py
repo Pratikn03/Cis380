@@ -1,4 +1,5 @@
 """CLI: train a fusion meta-model from fraud, cyber, and behavior scores."""
+
 from __future__ import annotations
 
 import json
@@ -36,10 +37,14 @@ def save_json(obj: dict, path: Path) -> None:
 
 
 def _train_fraud_scores(cfg: dict) -> tuple[np.ndarray, np.ndarray]:
-    df = build_fraud_feature_table(load_fraud_data(cfg), time_column="Time", amount_column="Amount", target_column="Class")
+    df = build_fraud_feature_table(
+        load_fraud_data(cfg), time_column="Time", amount_column="Amount", target_column="Class"
+    )
     X = df.drop(columns=["Class"])
     y = df["Class"].astype(int)
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(
+        X, y, test_size=0.2, stratify=y, random_state=42
+    )
     model_cfg = FraudModelConfig(
         model_type=cfg.get("training", {}).get("model_type", "hist_gb"),
         max_depth=cfg.get("training", {}).get("max_depth", 4),
@@ -55,11 +60,16 @@ def _train_fraud_scores(cfg: dict) -> tuple[np.ndarray, np.ndarray]:
 
 def _train_cyber_scores(cfg: dict) -> tuple[np.ndarray, np.ndarray]:
     df_raw = load_cyber_data(cfg)
-    df = build_cyber_feature_table(df_raw, target_column=cfg.get("data", {}).get("target", "label"),
-                                   drop_columns=cfg.get("data", {}).get("drop_columns"))
+    df = build_cyber_feature_table(
+        df_raw,
+        target_column=cfg.get("data", {}).get("target", "label"),
+        drop_columns=cfg.get("data", {}).get("drop_columns"),
+    )
     X = df.drop(columns=[cfg.get("data", {}).get("target", "label")])
     y = df[cfg.get("data", {}).get("target", "label")].astype(int)
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(
+        X, y, test_size=0.2, stratify=y, random_state=42
+    )
     model_cfg = CyberModelConfig(
         model_type=cfg.get("training", {}).get("model_type", "hist_gb"),
         max_depth=cfg.get("training", {}).get("max_depth", 6),
@@ -69,14 +79,20 @@ def _train_cyber_scores(cfg: dict) -> tuple[np.ndarray, np.ndarray]:
         random_state=cfg.get("seed", 42),
     )
     model, _ = train_cyber_model(X_train, y_train, X_val, y_val, model_cfg, use_pipeline=False)
-    scores = model.predict_proba(X)[:, 1] if hasattr(model, "predict_proba") else model.decision_function(X)
+    scores = (
+        model.predict_proba(X)[:, 1]
+        if hasattr(model, "predict_proba")
+        else model.decision_function(X)
+    )
     return scores, y.values
 
 
 def _train_behavior_scores(cfg: dict) -> tuple[np.ndarray, np.ndarray]:
     df_raw = load_behavior_data(cfg)
     target_col = cfg.get("data", {}).get("target", "Revenue")
-    df = build_behavior_feature_table(df_raw, target_column=target_col, drop_columns=cfg.get("data", {}).get("drop_columns"))
+    df = build_behavior_feature_table(
+        df_raw, target_column=target_col, drop_columns=cfg.get("data", {}).get("drop_columns")
+    )
     X = df.drop(columns=[target_col])
     y = df[target_col].astype(int)
     preprocessor = StandardScaler()
@@ -115,7 +131,10 @@ def main():
         [
             {"Metric": "roc_auc", "Value": fusion_metrics.get("roc_auc", float("nan"))},
             {"Metric": "f1", "Value": fusion_metrics.get("f1", float("nan"))},
-            {"Metric": "cv_roc_auc_mean", "Value": fusion_metrics.get("cv_roc_auc_mean", float("nan"))},
+            {
+                "Metric": "cv_roc_auc_mean",
+                "Value": fusion_metrics.get("cv_roc_auc_mean", float("nan")),
+            },
         ]
     ).to_csv(metrics_dir / "metrics.csv", index=False)
 

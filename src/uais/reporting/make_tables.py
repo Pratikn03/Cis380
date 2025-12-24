@@ -1,9 +1,9 @@
 """Generate summary tables from experiments metrics (mean±sd if available)."""
+
 from __future__ import annotations
 
 from pathlib import Path
 import pandas as pd
-import numpy as np
 
 DOMAINS = ["fraud", "cyber", "behavior", "nlp", "vision", "fusion"]
 
@@ -38,11 +38,13 @@ def make_summary():
             try:
                 cv_df = pd.read_csv(cv_path)
                 if "fold_roc_auc" in cv_df.columns:
-                    summary_cv = pd.DataFrame({
-                        "Metric": ["cv_roc_auc"],
-                        "mean": [cv_df["fold_roc_auc"].mean()],
-                        "std": [cv_df["fold_roc_auc"].std()]
-                    })
+                    summary_cv = pd.DataFrame(
+                        {
+                            "Metric": ["cv_roc_auc"],
+                            "mean": [cv_df["fold_roc_auc"].mean()],
+                            "std": [cv_df["fold_roc_auc"].std()],
+                        }
+                    )
                     summaries.append(summary_cv)
             except Exception:
                 pass

@@ -1,4 +1,5 @@
 """Centralized project paths and helpers."""
+
 from pathlib import Path
 from typing import Dict
 
@@ -15,7 +16,15 @@ LOGS_DIR = PROJECT_ROOT / "logs"
 
 def ensure_directories() -> None:
     """Create common directories if they do not already exist."""
-    for path in [DATA_DIR, RAW_DIR, INTERIM_DIR, PROCESSED_DIR, MODELS_DIR, EXPERIMENTS_DIR, LOGS_DIR]:
+    for path in [
+        DATA_DIR,
+        RAW_DIR,
+        INTERIM_DIR,
+        PROCESSED_DIR,
+        MODELS_DIR,
+        EXPERIMENTS_DIR,
+        LOGS_DIR,
+    ]:
         path.mkdir(parents=True, exist_ok=True)
 
 

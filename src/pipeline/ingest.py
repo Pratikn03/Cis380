@@ -1,4 +1,5 @@
 """Data ingestion utilities: raw -> lake parquet with basic validation."""
+
 from pathlib import Path
 from datetime import datetime
 from typing import Optional

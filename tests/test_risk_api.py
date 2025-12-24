@@ -16,7 +16,14 @@ def test_risk_analyze_endpoint_happy_path():
     resp = client.post("/api/risk/analyze", json=payload)
     assert resp.status_code == 200
     body = resp.json()
-    assert set(body.keys()) >= {"cyber_risk", "behavior_risk", "fraud_risk", "fusion_risk", "decision", "reason_code"}
+    assert set(body.keys()) >= {
+        "cyber_risk",
+        "behavior_risk",
+        "fraud_risk",
+        "fusion_risk",
+        "decision",
+        "reason_code",
+    }
     assert 0.0 <= body["cyber_risk"] <= 1.0
     assert 0.0 <= body["behavior_risk"] <= 1.0
     assert 0.0 <= body["fraud_risk"] <= 1.0

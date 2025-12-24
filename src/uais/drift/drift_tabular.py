@@ -1,7 +1,7 @@
 """Tabular drift detection utilities."""
+
 from typing import Dict, List
 
-import numpy as np
 import pandas as pd
 from scipy.stats import ks_2samp
 

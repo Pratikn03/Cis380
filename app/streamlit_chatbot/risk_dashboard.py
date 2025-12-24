@@ -30,7 +30,9 @@ def render_risk_command_center(
     with st.form("risk_simulator"):
         c1, c2, c3 = st.columns(3)
         with c1:
-            login_country = st.selectbox("Login Country", ["US", "CA", "UK", "DE", "IN", "BR", "NG"], index=0)
+            login_country = st.selectbox(
+                "Login Country", ["US", "CA", "UK", "DE", "IN", "BR", "NG"], index=0
+            )
         with c2:
             device_known = st.checkbox("Device Known", value=True)
         with c3:
@@ -42,7 +44,9 @@ def render_risk_command_center(
         with c5:
             files_accessed = st.slider("Files Accessed", min_value=0, max_value=500, value=0)
         with c6:
-            transaction_amount = st.slider("Transaction Amount ($)", min_value=0.0, max_value=25000.0, value=0.0, step=50.0)
+            transaction_amount = st.slider(
+                "Transaction Amount ($)", min_value=0.0, max_value=25000.0, value=0.0, step=50.0
+            )
 
         explain = st.checkbox("Explain decision", value=True)
         submitted = st.form_submit_button("Analyze Risk")
@@ -95,7 +99,13 @@ def render_risk_command_center(
             st.caption(f"Monitoring: not logged (expected path `{log_path}`)")
 
     st.subheader("Event timeline")
-    st.json({"event": payload, "risks": {k: data.get(k) for k in ["cyber_risk", "behavior_risk", "fraud_risk"]}, "decision": data.get("decision")})
+    st.json(
+        {
+            "event": payload,
+            "risks": {k: data.get(k) for k in ["cyber_risk", "behavior_risk", "fraud_risk"]},
+            "decision": data.get("decision"),
+        }
+    )
 
     if data.get("explanation"):
         st.subheader("Explain decision")

@@ -1,4 +1,5 @@
 """SHAP helpers with graceful fallback when shap is missing."""
+
 from __future__ import annotations
 
 import logging
@@ -28,7 +29,9 @@ class ShapResult:
     note: str
 
 
-def explain(model, X: np.ndarray, feature_names: List[str], top_k: int = 5, force_kernel: bool = False) -> ShapResult:
+def explain(
+    model, X: np.ndarray, feature_names: List[str], top_k: int = 5, force_kernel: bool = False
+) -> ShapResult:
     """Return SHAP values (or fallback) for a single-row X."""
     if X.ndim == 1:
         X = X.reshape(1, -1)
@@ -65,7 +68,10 @@ def explain(model, X: np.ndarray, feature_names: List[str], top_k: int = 5, forc
             shap_vec = np.array(shap_vals).reshape(-1)
 
         order = np.argsort(np.abs(shap_vec))[::-1][:top_k]
-        top = [(feature_names[i] if i < len(feature_names) else f"f{i}", float(shap_vec[i])) for i in order]
+        top = [
+            (feature_names[i] if i < len(feature_names) else f"f{i}", float(shap_vec[i]))
+            for i in order
+        ]
 
         return ShapResult(
             values=shap_vec,

@@ -1,8 +1,8 @@
 """Interactive Streamlit dashboard for UAIS-V results."""
+
 from pathlib import Path
 import subprocess
 
-import pandas as pd
 
 # Optional dependencies: Streamlit + Plotly.
 _missing = []
@@ -31,7 +31,9 @@ def _deps_message() -> str:
     )
 
 
-def launch_preview(project_root: str | Path | None = None, *, start_server: bool = False, port: int = 8501):
+def launch_preview(
+    project_root: str | Path | None = None, *, start_server: bool = False, port: int = 8501
+):
     """Helper for notebooks/scripts to point to the Streamlit app."""
     app_root = Path(project_root) if project_root else PROJECT_ROOT
     app_path = app_root / "dashboard" / "app_streamlit.py"

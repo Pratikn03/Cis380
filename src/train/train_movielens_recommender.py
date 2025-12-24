@@ -3,6 +3,7 @@
 Note: `movielens.csv` can be very large (20M+ rows). By default this script trains
 on a sample for safety; pass `--sample-size 0` to use the full file.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -10,7 +11,6 @@ import json
 from pathlib import Path
 
 import joblib
-import numpy as np
 import pandas as pd
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import classification_report
@@ -49,11 +49,15 @@ def build_features(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, dict]:
     df["label"] = (df["rating"] >= 4.0).astype(int)
 
     # aggregates
-    user_stats = df.groupby("userId")["rating"].agg(["mean", "count"]).rename(
-        columns={"mean": "user_mean", "count": "user_count"}
+    user_stats = (
+        df.groupby("userId")["rating"]
+        .agg(["mean", "count"])
+        .rename(columns={"mean": "user_mean", "count": "user_count"})
     )
-    item_stats = df.groupby("movieId")["rating"].agg(["mean", "count"]).rename(
-        columns={"mean": "item_mean", "count": "item_count"}
+    item_stats = (
+        df.groupby("movieId")["rating"]
+        .agg(["mean", "count"])
+        .rename(columns={"mean": "item_mean", "count": "item_count"})
     )
     global_mean = df["rating"].mean()
 
@@ -113,7 +117,9 @@ def train(*, sample_size: int = 200_000):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Train a MovieLens recommender (rating>=4 -> like).")
+    parser = argparse.ArgumentParser(
+        description="Train a MovieLens recommender (rating>=4 -> like)."
+    )
     parser.add_argument(
         "--sample-size",
         type=int,

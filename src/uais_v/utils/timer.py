@@ -1,4 +1,5 @@
 """Timing context manager for quick profiling."""
+
 import time
 from contextlib import contextmanager
 from typing import Iterator

@@ -1,4 +1,5 @@
 """Inference helper for hybrid recommender (tabular classifier)."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -41,7 +42,14 @@ def load_items() -> pd.DataFrame:
             title_col = cols.get("title", "title")
             tags_col = cols.get("tags", "tags")
             pop_col = cols.get("popularity", "popularity")
-            df = df.rename(columns={id_col: "movieId", title_col: "title", tags_col: "tags", pop_col: "popularity"})
+            df = df.rename(
+                columns={
+                    id_col: "movieId",
+                    title_col: "title",
+                    tags_col: "tags",
+                    pop_col: "popularity",
+                }
+            )
             if "popularity" not in df:
                 df["popularity"] = 0.0
             return df[["movieId", "title", "tags", "popularity"]]
@@ -60,7 +68,12 @@ def enrich_item(movie_id: int) -> Dict[str, Any]:
     if row.empty:
         return {"movieId": movie_id, "title": f"movie {movie_id}", "tags": "", "popularity": 0}
     r = row.iloc[0]
-    return {"movieId": int(r["movieId"]), "title": str(r["title"]), "tags": str(r["tags"]), "popularity": float(r["popularity"])}
+    return {
+        "movieId": int(r["movieId"]),
+        "title": str(r["title"]),
+        "tags": str(r["tags"]),
+        "popularity": float(r["popularity"]),
+    }
 
 
 def top_popular(top_k: int = 5):
@@ -112,6 +125,7 @@ def score_single(user_id: int, item_id: int) -> Dict[str, Any]:
     if LIGHTFM_PATH.exists() and LIGHTFM_META.exists():
         try:
             from lightfm import LightFM  # type: ignore
+
             meta = joblib.load(LIGHTFM_META)
             users = meta.get("users", [])
             items = meta.get("items", [])
@@ -132,6 +146,7 @@ def score_single(user_id: int, item_id: int) -> Dict[str, Any]:
     # Try NCF if available
     if NCF_PATH.exists() and NCF_META.exists():
         from recommender.models.train_ncf import NCF  # reuse class
+
         meta_ncf = joblib.load(NCF_META)
         user_codes = meta_ncf.get("user_codes", {})
         item_codes = meta_ncf.get("item_codes", {})
@@ -162,6 +177,11 @@ def score_single(user_id: int, item_id: int) -> Dict[str, Any]:
         classes = getattr(model, "classes_", [])
         top_idx = int(np.argmax(proba))
         label = classes[top_idx] if len(classes) > top_idx else "like"
-        return {"label": label, "probability": float(proba[top_idx]), "classes": list(classes), "mode": "tabular"}
+        return {
+            "label": label,
+            "probability": float(proba[top_idx]),
+            "classes": list(classes),
+            "mode": "tabular",
+        }
     pred = model.predict(feats)[0]
     return {"label": str(pred), "probability": None, "classes": [], "mode": "tabular"}

@@ -1,6 +1,6 @@
 """Anomaly insights tab."""
+
 import json
-from pathlib import Path
 import pandas as pd
 import streamlit as st
 
@@ -44,7 +44,9 @@ def render_anomaly_insights(domain: str):
     metric_items = list(metrics.items())
     for idx, (name, value) in enumerate(metric_items):
         with cols[idx % 3]:
-            st.metric(label=name, value=f"{value:.3f}" if isinstance(value, (int, float)) else value)
+            st.metric(
+                label=name, value=f"{value:.3f}" if isinstance(value, (int, float)) else value
+            )
 
 
 __all__ = ["render_anomaly_insights"]

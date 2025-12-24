@@ -38,7 +38,12 @@ def get_monitor_summary(window_n: int = 1000) -> Dict[str, object]:
 def get_risk_summary(window_n: int = 1000) -> Dict[str, object]:
     events = read_last_n_jsonl(RISK_LOG_PATH, window_n)
     decision_counts: Dict[str, int] = {}
-    risk_acc: Dict[str, list[float]] = {"cyber_risk": [], "behavior_risk": [], "fraud_risk": [], "fusion_risk": []}
+    risk_acc: Dict[str, list[float]] = {
+        "cyber_risk": [],
+        "behavior_risk": [],
+        "fraud_risk": [],
+        "fusion_risk": [],
+    }
     for event in events:
         decision = event.get("decision")
         if decision:
@@ -55,7 +60,11 @@ def get_risk_summary(window_n: int = 1000) -> Dict[str, object]:
 def get_drift_report(window_n: int = 1000) -> Dict[str, object]:
     live_events = read_last_n_jsonl(FRAUD_LOG_PATH, window_n)
     numeric_events = [
-        {k: float(v) for k, v in entry.get("features_summary", {}).items() if isinstance(v, (int, float))}
+        {
+            k: float(v)
+            for k, v in entry.get("features_summary", {}).items()
+            if isinstance(v, (int, float))
+        }
         for entry in live_events
     ]
     baseline_stats = load_baseline()
@@ -63,7 +72,9 @@ def get_drift_report(window_n: int = 1000) -> Dict[str, object]:
     return report.model_dump()
 
 
-def ensure_baseline_exists_or_create(sample_events: Optional[List[Dict[str, float]]] = None) -> None:
+def ensure_baseline_exists_or_create(
+    sample_events: Optional[List[Dict[str, float]]] = None,
+) -> None:
     existing = load_baseline()
     if existing:
         return

@@ -94,7 +94,9 @@ def render_command_center(
         st.caption("Movies • Electronics • Courses • News/Places (fallbacks if APIs are missing).")
 
         st.markdown("#### Style from Image (quick tags)")
-        uploaded = st.file_uploader("Choose an image", type=["png", "jpg", "jpeg"], key="style_image_upload")
+        uploaded = st.file_uploader(
+            "Choose an image", type=["png", "jpg", "jpeg"], key="style_image_upload"
+        )
         if uploaded:
             try:
                 img = Image.open(uploaded).convert("RGB")
@@ -144,13 +146,17 @@ def render_command_center(
                         if isinstance(res, dict) and "error" in res:
                             answer = res["error"]
                         else:
-                            answer = (res or {}).get("reply") or (res or {}).get("answer") or str(res)
+                            answer = (
+                                (res or {}).get("reply") or (res or {}).get("answer") or str(res)
+                            )
                     st.markdown(answer)
             st.session_state.messages.append({"role": "assistant", "content": answer})
 
     with tabs[1]:
         st.markdown("### Multimodal (Image + Text)")
-        st.caption("Backend: `/api/recommend/multimodal` (local multimodal; supports text-only, image-only, or both).")
+        st.caption(
+            "Backend: `/api/recommend/multimodal` (local multimodal; supports text-only, image-only, or both)."
+        )
 
         mm_col1, mm_col2 = st.columns([1, 2])
         with mm_col1:
@@ -180,8 +186,16 @@ def render_command_center(
                 payload["text"] = mm_text.strip()
             files = None
             if mm_image is not None:
-                files = {"image": (mm_image.name or "image.jpg", mm_image.getvalue(), mm_image.type or "image/jpeg")}
-            res = call_multipart("/api/recommend/multimodal", data=payload, files=files, timeout=90.0)
+                files = {
+                    "image": (
+                        mm_image.name or "image.jpg",
+                        mm_image.getvalue(),
+                        mm_image.type or "image/jpeg",
+                    )
+                }
+            res = call_multipart(
+                "/api/recommend/multimodal", data=payload, files=files, timeout=90.0
+            )
             if "error" in res:
                 st.error(res["error"])
             elif "detail" in res and res.get("detail"):
@@ -231,7 +245,9 @@ def render_command_center(
                         if meta_bits:
                             st.caption(" · ".join(meta_bits))
                         source = item.get("source") or "catalog"
-                        st.markdown(f"<span class='tag'>Source: {source}</span>", unsafe_allow_html=True)
+                        st.markdown(
+                            f"<span class='tag'>Source: {source}</span>", unsafe_allow_html=True
+                        )
                         if item.get("image_path"):
                             st.code(str(item.get("image_path")), language="text")
                 else:

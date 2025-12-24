@@ -5,14 +5,16 @@ ChatGPT-Style Chatbot UI for UAIS-V
 - Camera and microphone recording
 - Modern icons and styling
 """
+
 from __future__ import annotations
 
 import os
-import base64
 from typing import Callable
 
 import requests
 import streamlit as st
+
+from .utils import call_with_container_width
 
 
 def render_chatgpt_style(
@@ -23,9 +25,10 @@ def render_chatgpt_style(
     auth_headers: Callable[[], dict[str, str]],
 ) -> None:
     """Render ChatGPT-style chat interface."""
-    
+
     # Custom CSS for ChatGPT-like styling
-    st.markdown("""
+    st.markdown(
+        """
     <style>
     /* Hide default streamlit elements */
     #MainMenu {visibility: hidden;}
@@ -121,16 +124,21 @@ def render_chatgpt_style(
         margin-bottom: 10px;
     }
     </style>
-    """, unsafe_allow_html=True)
-    
+    """,
+        unsafe_allow_html=True,
+    )
+
     # Header
-    st.markdown("""
+    st.markdown(
+        """
     <div class="chat-header">
         <h1>🤖 OmniChatX Assistant</h1>
         <p style="color: #666; margin-top: 8px;">Fraud • Cyber • Voice • Vision • Recommendations</p>
     </div>
-    """, unsafe_allow_html=True)
-    
+    """,
+        unsafe_allow_html=True,
+    )
+
     # Initialize session state
     if "chatgpt_messages" not in st.session_state:
         st.session_state.chatgpt_messages = []
@@ -138,21 +146,21 @@ def render_chatgpt_style(
         st.session_state.captured_image = None
     if "captured_audio" not in st.session_state:
         st.session_state.captured_audio = None
-    
+
     # Sidebar with quick actions
     with st.sidebar:
         st.markdown("### ⚡ Quick Actions")
-        
+
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("🗑️ Clear Chat", key="chatgpt_clear_chat", use_container_width=True):
+            if call_with_container_width(st.button, "🗑️ Clear Chat", key="chatgpt_clear_chat"):
                 st.session_state.chatgpt_messages = []
                 st.session_state.captured_image = None
                 st.session_state.captured_audio = None
                 st.rerun()
-        
+
         with col2:
-            if st.button("📥 Export", key="chatgpt_export_chat", use_container_width=True):
+            if call_with_container_width(st.button, "📥 Export", key="chatgpt_export_chat"):
                 st.download_button(
                     "💾 Download",
                     data=str(st.session_state.chatgpt_messages),
@@ -160,39 +168,44 @@ def render_chatgpt_style(
                     mime="text/plain",
                     key="chatgpt_export_download",
                 )
-        
+
         st.divider()
         st.markdown("### 🎯 Capabilities")
-        st.markdown("""
+        st.markdown(
+            """
         - 💳 **Fraud Detection**
         - 🛡️ **Cyber Security**
         - 🎤 **Voice Emotion**
         - 👁️ **Vision Analysis**
         - 🎬 **Video Analysis**
         - 📊 **Recommendations**
-        """)
-        
+        """
+        )
+
         st.divider()
         st.markdown("### ⚙️ Settings")
         use_rag = st.toggle("📚 Use RAG", value=True, key="chatgpt_rag")
-        auto_tts = st.toggle("🔊 Auto TTS", value=False, key="chatgpt_tts")
-    
+        st.toggle("🔊 Auto TTS", value=False, key="chatgpt_tts")
+
     # Display chat messages (top area)
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-    
+
     for msg in st.session_state.chatgpt_messages:
         role = msg.get("role", "user")
         content = msg.get("content", "")
-        
+
         if role == "user":
             col1, col2 = st.columns([1, 5])
             with col2:
-                st.markdown(f"""
+                st.markdown(
+                    f"""
                 <div class="user-message">
                     <strong>👤 You</strong><br>{content}
                 </div>
-                """, unsafe_allow_html=True)
-                
+                """,
+                    unsafe_allow_html=True,
+                )
+
                 # Show attachments if any
                 if msg.get("has_image"):
                     st.markdown("📷 *Image attached*")
@@ -201,48 +214,61 @@ def render_chatgpt_style(
         else:
             col1, col2 = st.columns([5, 1])
             with col1:
-                st.markdown(f"""
+                st.markdown(
+                    f"""
                 <div class="assistant-message">
                     <strong>🤖 Assistant</strong><br>{content}
                 </div>
-                """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
+                """,
+                    unsafe_allow_html=True,
+                )
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
     # Spacer for fixed input area
     st.markdown("<div style='height: 200px;'></div>", unsafe_allow_html=True)
-    
+
     # Bottom input area
     st.markdown("---")
-    
+
     # Media capture row
     st.markdown("##### 📎 Attach Media")
     media_cols = st.columns([1, 1, 1, 1])
-    
+
     with media_cols[0]:
         camera_input = st.camera_input("📷", key="chatgpt_camera", label_visibility="collapsed")
         if camera_input:
             st.session_state.captured_image = camera_input.getvalue()
             st.success("📷 Photo captured!")
-    
+
     with media_cols[1]:
         audio_input = st.audio_input("🎤", key="chatgpt_mic", label_visibility="collapsed")
         if audio_input:
             st.session_state.captured_audio = audio_input.read()
             st.success("🎤 Audio recorded!")
-    
+
     with media_cols[2]:
-        uploaded_image = st.file_uploader("🖼️", type=["png", "jpg", "jpeg", "webp"], key="chatgpt_img_upload", label_visibility="collapsed")
+        uploaded_image = st.file_uploader(
+            "🖼️",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="chatgpt_img_upload",
+            label_visibility="collapsed",
+        )
         if uploaded_image:
             st.session_state.captured_image = uploaded_image.getvalue()
             st.success("🖼️ Image uploaded!")
-    
+
     with media_cols[3]:
-        uploaded_audio = st.file_uploader("🎵", type=["wav", "mp3", "m4a"], key="chatgpt_audio_upload", label_visibility="collapsed")
+        uploaded_audio = st.file_uploader(
+            "🎵",
+            type=["wav", "mp3", "m4a"],
+            key="chatgpt_audio_upload",
+            label_visibility="collapsed",
+        )
         if uploaded_audio:
             st.session_state.captured_audio = uploaded_audio.getvalue()
             st.success("🎵 Audio uploaded!")
-    
+
     # Show attachment previews
     preview_cols = st.columns(2)
     with preview_cols[0]:
@@ -251,21 +277,21 @@ def render_chatgpt_style(
             if st.button("❌ Remove Image", key="remove_img"):
                 st.session_state.captured_image = None
                 st.rerun()
-    
+
     with preview_cols[1]:
         if st.session_state.captured_audio:
             st.audio(st.session_state.captured_audio)
             if st.button("❌ Remove Audio", key="remove_audio"):
                 st.session_state.captured_audio = None
                 st.rerun()
-    
+
     # Chat input
     st.markdown("##### 💬 Message")
     prompt = st.chat_input("Type your message here...", key="chatgpt_input")
-    
+
     if prompt:
         user_text = prompt.strip()
-        
+
         # Add user message
         user_msg = {
             "role": "user",
@@ -274,17 +300,17 @@ def render_chatgpt_style(
             "has_audio": st.session_state.captured_audio is not None,
         }
         st.session_state.chatgpt_messages.append(user_msg)
-        
+
         # Prepare API call
         with st.spinner("🤔 Thinking..."):
             files: dict = {}
-            
+
             if st.session_state.captured_image:
                 files["image"] = ("image.jpg", st.session_state.captured_image, "image/jpeg")
-            
+
             if st.session_state.captured_audio:
                 files["audio"] = ("audio.wav", st.session_state.captured_audio, "audio/wav")
-            
+
             # Call API
             if files:
                 res = call_multipart(
@@ -300,26 +326,31 @@ def render_chatgpt_style(
                 )
             else:
                 res = call_model(
-                    "/api/chat",
-                    {"message": user_text, "user_id": "streamlit", "use_rag": use_rag}
+                    "/api/chat", {"message": user_text, "user_id": "streamlit", "use_rag": use_rag}
                 )
-            
+
             # Process response
             if isinstance(res, dict) and "error" not in res:
                 reply = res.get("reply") or res.get("answer") or "I processed your request."
             else:
-                reply = f"Error: {res.get('error', 'Unknown error')}" if isinstance(res, dict) else str(res)
-            
+                reply = (
+                    f"Error: {res.get('error', 'Unknown error')}"
+                    if isinstance(res, dict)
+                    else str(res)
+                )
+
             # Add assistant message
-            st.session_state.chatgpt_messages.append({
-                "role": "assistant",
-                "content": reply,
-            })
-            
+            st.session_state.chatgpt_messages.append(
+                {
+                    "role": "assistant",
+                    "content": reply,
+                }
+            )
+
             # Clear attachments after sending
             st.session_state.captured_image = None
             st.session_state.captured_audio = None
-        
+
         st.rerun()
 
 
@@ -331,31 +362,39 @@ def main():
         layout="wide",
         initial_sidebar_state="expanded",
     )
-    
+
     backend_url = os.environ.get("OMNICHATX_BACKEND", "http://localhost:8000").strip().rstrip("/")
-    
+
     def _auth_headers() -> dict[str, str]:
         headers: dict[str, str] = {}
         if os.getenv("AUTH_TOKEN"):
             headers["Authorization"] = f"Bearer {os.environ['AUTH_TOKEN']}"
         return headers
-    
+
     def call_model(path: str, payload: dict) -> dict:
         try:
-            resp = requests.post(f"{backend_url}{path}", json=payload, headers=_auth_headers(), timeout=15.0)
+            resp = requests.post(
+                f"{backend_url}{path}", json=payload, headers=_auth_headers(), timeout=15.0
+            )
             resp.raise_for_status()
             return resp.json()
         except Exception as exc:
             return {"error": str(exc)}
-    
+
     def call_multipart(path: str, *, data: dict, files: dict | None, timeout: float = 90.0) -> dict:
         try:
-            resp = requests.post(f"{backend_url}{path}", data=data, files=files, headers=_auth_headers(), timeout=timeout)
+            resp = requests.post(
+                f"{backend_url}{path}",
+                data=data,
+                files=files,
+                headers=_auth_headers(),
+                timeout=timeout,
+            )
             resp.raise_for_status()
             return resp.json()
         except Exception as exc:
             return {"error": str(exc)}
-    
+
     render_chatgpt_style(
         backend_url=backend_url,
         call_model=call_model,

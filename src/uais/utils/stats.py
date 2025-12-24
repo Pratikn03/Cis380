@@ -1,4 +1,5 @@
 """Simple statistical utilities for CI and significance tests."""
+
 from __future__ import annotations
 
 from typing import Callable, Tuple

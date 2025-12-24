@@ -181,8 +181,12 @@ def train_deepfake_full(
     train_dataset = ImageDataset(train_images, train_labels, train_transform)
     val_dataset = ImageDataset(val_images, val_labels, val_transform)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    train_loader = DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers
+    )
+    val_loader = DataLoader(
+        val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers
+    )
 
     weights = models.MobileNet_V2_Weights.IMAGENET1K_V1 if pretrained else None
     model = models.mobilenet_v2(weights=weights)
@@ -317,8 +321,12 @@ def train_realfake_full(
     train_dataset = ImageDataset(train_imgs, train_lbls, train_transform)
     val_dataset = ImageDataset(val_imgs, val_lbls, val_transform)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    train_loader = DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers
+    )
+    val_loader = DataLoader(
+        val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers
+    )
 
     weights = models.EfficientNet_B0_Weights.IMAGENET1K_V1 if pretrained else None
     model = models.efficientnet_b0(weights=weights)
@@ -393,10 +401,18 @@ def main() -> int:
     parser.add_argument("--epochs", type=int, default=3, help="Epochs per model.")
     parser.add_argument("--batch-size", type=int, default=64, help="Batch size.")
     parser.add_argument("--num-workers", type=int, default=0, help="DataLoader workers.")
-    parser.add_argument("--val-split", type=float, default=0.15, help="Validation split for real/fake dataset.")
-    parser.add_argument("--max-train", type=int, default=0, help="Cap training samples (0 = no cap).")
-    parser.add_argument("--max-val", type=int, default=0, help="Cap validation samples (0 = no cap).")
-    parser.add_argument("--no-pretrained", action="store_true", help="Disable ImageNet pretrained weights.")
+    parser.add_argument(
+        "--val-split", type=float, default=0.15, help="Validation split for real/fake dataset."
+    )
+    parser.add_argument(
+        "--max-train", type=int, default=0, help="Cap training samples (0 = no cap)."
+    )
+    parser.add_argument(
+        "--max-val", type=int, default=0, help="Cap validation samples (0 = no cap)."
+    )
+    parser.add_argument(
+        "--no-pretrained", action="store_true", help="Disable ImageNet pretrained weights."
+    )
 
     parser.add_argument(
         "--out-dir",
@@ -414,7 +430,9 @@ def main() -> int:
         help="Raw vision root containing train_real/ and train_fake/ (default: data/raw/vision).",
     )
     parser.add_argument("--deepfake", action="store_true", help="Train deepfake model (Celeb_V2).")
-    parser.add_argument("--realfake", action="store_true", help="Train real/fake model (raw vision).")
+    parser.add_argument(
+        "--realfake", action="store_true", help="Train real/fake model (raw vision)."
+    )
     args = parser.parse_args()
 
     if args.epochs <= 0:

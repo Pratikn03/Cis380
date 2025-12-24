@@ -4,6 +4,7 @@ It ingests score files defined in configs/fusion_baseline.yaml (or a supplied YA
 aligns them by minimum length, and trains a simple logistic regression stacker.
 If scores/labels are missing, it falls back to synthetic data so the pipeline still runs.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -29,7 +30,9 @@ def _load_yaml(path: Path) -> Dict:
     return yaml.safe_load(path.read_text())
 
 
-def _read_scores(path: Path, score_col: str, label_col: str | None) -> Tuple[np.ndarray, np.ndarray | None]:
+def _read_scores(
+    path: Path, score_col: str, label_col: str | None
+) -> Tuple[np.ndarray, np.ndarray | None]:
     if not path.exists():
         raise FileNotFoundError(f"Score file not found: {path}")
 
@@ -74,10 +77,10 @@ def _load_inputs(cfg_path: Path) -> Tuple[Dict[str, np.ndarray], np.ndarray]:
     scores = {}
     labels = None
     for domain, path in score_paths.items():
-        s, l = _read_scores(Path(path), score_col, label_col)
+        s, domain_labels = _read_scores(Path(path), score_col, label_col)
         scores[domain] = s
-        if l is not None:
-            labels = l
+        if domain_labels is not None:
+            labels = domain_labels
 
     scores = _align_scores(scores)
     if labels is not None:
@@ -115,7 +118,11 @@ def train_fusion(cfg_path: Path = DEFAULT_CONFIG):
     random_state = fusion_cfg.get("random_state", 42)
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, stratify=y if len(np.unique(y)) > 1 else None, random_state=random_state
+        X,
+        y,
+        test_size=test_size,
+        stratify=y if len(np.unique(y)) > 1 else None,
+        random_state=random_state,
     )
 
     scaler = StandardScaler()

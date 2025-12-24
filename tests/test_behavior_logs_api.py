@@ -18,4 +18,3 @@ def test_behavior_logs_endpoint_accepts_csv():
     assert isinstance(body["top_anomalous"], list)
     assert set(body["top_anomalous"][0].keys()) >= {"lof_score", "anomaly_score", "features"}
     assert 0.0 <= body["top_anomalous"][0]["anomaly_score"] <= 1.0
-

@@ -16,7 +16,9 @@ def test_build_sequences_writes_files(tmp_path, monkeypatch):
         }
     )
     monkeypatch.setattr(b30, "load_behavior_events", lambda path=None, n_rows=None: sample_df)
-    cfg = b30.SequenceBuildConfig(seq_len=6, n_features=4, anomaly_ratio=0.1, seed=7, min_events_per_entity=1)
+    cfg = b30.SequenceBuildConfig(
+        seq_len=6, n_features=4, anomaly_ratio=0.1, seed=7, min_events_per_entity=1
+    )
     X_dict, y = b30.build_30seq_arrays(cfg)
 
     assert len(X_dict) == 30

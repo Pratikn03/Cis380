@@ -29,9 +29,19 @@ def rag_query(req: RAGQuery):
             }
             for c in chunks
         ]
-        answer = "\n\n".join([str(p.get("text") or "") for p in passages if p.get("text")]) if passages else ""
+        answer = (
+            "\n\n".join([str(p.get("text") or "") for p in passages if p.get("text")])
+            if passages
+            else ""
+        )
         citations = [p.get("chunk_id") for p in passages if p.get("chunk_id")]
-        return {"query": req.query, "passages": passages, "answer": answer, "citations": citations, "mode": "vector_store"}
+        return {
+            "query": req.query,
+            "passages": passages,
+            "answer": answer,
+            "citations": citations,
+            "mode": "vector_store",
+        }
     except Exception:
         result = rag_service.query(req.query, top_k=req.top_k or 3)
         return {

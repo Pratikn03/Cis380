@@ -1,4 +1,5 @@
 """Lightweight LSTM classifier for sequence anomalies."""
+
 from typing import Dict, Tuple
 
 import numpy as np
@@ -31,8 +32,7 @@ class LSTMClassifier(nn.Module):
         self.fc = nn.Linear(hidden_dim, 1)
 
     def forward(self, x, mask):
-        lengths = mask.sum(dim=1).long()
-        packed_output, (h_n, _) = self.lstm(x)
+        _, (h_n, _) = self.lstm(x)
         last_hidden = h_n[-1]
         logits = self.fc(last_hidden).squeeze(-1)
         return logits
@@ -74,7 +74,9 @@ def train_lstm_classifier(
 def predict_lstm(model: LSTMClassifier, sequences: np.ndarray, mask: np.ndarray) -> np.ndarray:
     model.eval()
     with torch.no_grad():
-        logits = model(torch.tensor(sequences, dtype=torch.float32), torch.tensor(mask, dtype=torch.float32))
+        logits = model(
+            torch.tensor(sequences, dtype=torch.float32), torch.tensor(mask, dtype=torch.float32)
+        )
         probs = torch.sigmoid(logits).numpy()
     return probs
 

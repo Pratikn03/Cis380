@@ -1,4 +1,5 @@
 """Postprocessing utilities for recommendations."""
+
 from __future__ import annotations
 
 from typing import List, Any

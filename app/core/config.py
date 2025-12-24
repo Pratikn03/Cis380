@@ -2,6 +2,7 @@
 OmniChatX Production Settings Module
 Centralized configuration management with Pydantic
 """
+
 from __future__ import annotations
 
 import os
@@ -15,10 +16,8 @@ from pydantic import BaseModel, Field, field_validator
 
 class DatabaseSettings(BaseModel):
     """Database configuration."""
-    url: str = Field(
-        default="sqlite:///./data/omnichatx.db",
-        description="Database connection URL"
-    )
+
+    url: str = Field(default="sqlite:///./data/omnichatx.db", description="Database connection URL")
     pool_size: int = Field(default=5, ge=1, le=50)
     max_overflow: int = Field(default=10, ge=0)
     echo: bool = Field(default=False, description="Echo SQL statements")
@@ -26,6 +25,7 @@ class DatabaseSettings(BaseModel):
 
 class RedisSettings(BaseModel):
     """Redis cache configuration."""
+
     url: str = Field(default="redis://localhost:6379/0")
     password: str | None = None
     ttl: int = Field(default=3600, description="Default cache TTL in seconds")
@@ -34,19 +34,16 @@ class RedisSettings(BaseModel):
 
 class SecuritySettings(BaseModel):
     """Security configuration."""
+
     secret_key: str = Field(
-        default_factory=lambda: secrets.token_hex(32),
-        description="Application secret key"
+        default_factory=lambda: secrets.token_hex(32), description="Application secret key"
     )
     auth_token: str | None = Field(default=None, description="API authentication token")
-    cors_origins: list[str] = Field(
-        default=["*"],
-        description="Allowed CORS origins"
-    )
+    cors_origins: list[str] = Field(default=["*"], description="Allowed CORS origins")
     rate_limit_enabled: bool = Field(default=True)
     rate_limit_requests: int = Field(default=100, description="Requests per window")
     rate_limit_window: int = Field(default=60, description="Window in seconds")
-    
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, v: Any) -> list[str]:
@@ -57,17 +54,18 @@ class SecuritySettings(BaseModel):
 
 class MLSettings(BaseModel):
     """Machine Learning model configuration."""
+
     models_dir: Path = Field(default=Path("./models"))
     artifacts_dir: Path = Field(default=Path("./artifacts"))
-    
+
     # Vision
     vision_model: str = Field(default="yolov8n")
     vision_confidence_threshold: float = Field(default=0.5, ge=0.0, le=1.0)
-    
+
     # Voice
     voice_emotion_model: str = Field(default="default")
     whisper_model: str = Field(default="base")
-    
+
     # RAG
     rag_enabled: bool = Field(default=True)
     rag_embeddings_dir: Path = Field(default=Path("./data/embeddings"))
@@ -78,6 +76,7 @@ class MLSettings(BaseModel):
 
 class ExternalAPISettings(BaseModel):
     """External API configuration."""
+
     openai_api_key: str | None = None
     openai_model: str = Field(default="gpt-4")
     openai_max_tokens: int = Field(default=2000, ge=100)
@@ -86,17 +85,17 @@ class ExternalAPISettings(BaseModel):
 
 class MonitoringSettings(BaseModel):
     """Monitoring and observability configuration."""
+
     prometheus_enabled: bool = Field(default=True)
     prometheus_port: int = Field(default=9090)
     sentry_dsn: str | None = None
     log_level: str = Field(default="INFO")
-    log_format: str = Field(
-        default="%(asctime)s %(levelname)s %(name)s %(message)s"
-    )
+    log_format: str = Field(default="%(asctime)s %(levelname)s %(name)s %(message)s")
 
 
 class FeatureFlags(BaseModel):
     """Feature flags for enabling/disabling functionality."""
+
     fraud_detection: bool = Field(default=True)
     cyber_analysis: bool = Field(default=True)
     behavior_profiling: bool = Field(default=True)
@@ -108,22 +107,20 @@ class FeatureFlags(BaseModel):
 
 class Settings(BaseModel):
     """Main application settings."""
-    
+
     # Application
     app_name: str = Field(default="OmniChatX")
     app_version: str = Field(default="1.0.0")
-    app_env: Literal["development", "staging", "production"] = Field(
-        default="development"
-    )
+    app_env: Literal["development", "staging", "production"] = Field(default="development")
     debug: bool = Field(default=False)
-    
+
     # Server
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8000, ge=1, le=65535)
     workers: int = Field(default=4, ge=1, le=32)
     timeout: int = Field(default=120, ge=10)
     max_request_size: str = Field(default="50MB")
-    
+
     # Sub-configurations
     database: DatabaseSettings = Field(default_factory=DatabaseSettings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
@@ -132,15 +129,15 @@ class Settings(BaseModel):
     external_apis: ExternalAPISettings = Field(default_factory=ExternalAPISettings)
     monitoring: MonitoringSettings = Field(default_factory=MonitoringSettings)
     features: FeatureFlags = Field(default_factory=FeatureFlags)
-    
+
     @property
     def is_production(self) -> bool:
         return self.app_env == "production"
-    
+
     @property
     def is_development(self) -> bool:
         return self.app_env == "development"
-    
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

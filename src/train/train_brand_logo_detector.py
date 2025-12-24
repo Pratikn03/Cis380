@@ -250,7 +250,11 @@ def main() -> int:
     if run_dir is None:
         detect_root = project_root / "runs" / "detect"
         candidates = [p for p in detect_root.iterdir()] if detect_root.exists() else []
-        run_dir = max((p for p in candidates if p.is_dir()), key=lambda p: p.stat().st_mtime, default=detect_root)
+        run_dir = max(
+            (p for p in candidates if p.is_dir()),
+            key=lambda p: p.stat().st_mtime,
+            default=detect_root,
+        )
 
     ckpt_path = _pick_checkpoint(run_dir)
     out_dir = project_root / "artifacts" / "brand"

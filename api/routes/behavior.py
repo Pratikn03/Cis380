@@ -64,7 +64,11 @@ def predict_behavior(req: BehaviorRequest):
         X = np.array(feats, dtype=float).reshape(1, -1)
         Xs = _scaler.transform(X)
         score = float(_lof.decision_function(Xs)[0])
-        return {"score": score, "input_features": len(req.features), "expected_features": expected or None}
+        return {
+            "score": score,
+            "input_features": len(req.features),
+            "expected_features": expected or None,
+        }
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -91,7 +95,10 @@ def _compute_log_features(df) -> tuple[list[str], list[float], dict[str, float]]
         try:
             ts = np.array(
                 np.asarray(
-                    __import__("pandas").to_datetime(df[time_col], errors="coerce").dropna().astype("int64"),
+                    __import__("pandas")
+                    .to_datetime(df[time_col], errors="coerce")
+                    .dropna()
+                    .astype("int64"),
                     dtype=np.int64,
                 )
             )
@@ -104,9 +111,13 @@ def _compute_log_features(df) -> tuple[list[str], list[float], dict[str, float]]
             events_per_min = float(n_rows)
 
     host_col = _first_column(df, ["pc", "computer", "device", "host", "src", "src_pc", "src_host"])
-    dest_col = _first_column(df, ["dst", "dest", "dst_pc", "dst_host", "to", "target", "recipient", "server"])
+    dest_col = _first_column(
+        df, ["dst", "dest", "dst_pc", "dst_host", "to", "target", "recipient", "server"]
+    )
     url_col = _first_column(df, ["url", "uri", "domain", "website"])
-    action_col = _first_column(df, ["action", "event", "operation", "activity", "type", "protocol", "method"])
+    action_col = _first_column(
+        df, ["action", "event", "operation", "activity", "type", "protocol", "method"]
+    )
 
     def nunique(col: str | None) -> float:
         if not col:
@@ -196,17 +207,23 @@ async def predict_behavior_logs(
     try:
         raw = await file.read()
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read upload: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read upload: {exc}"
+        ) from exc
 
     try:
         import pandas as pd
     except Exception as exc:  # pragma: no cover - optional in minimal envs
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"Missing pandas: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"Missing pandas: {exc}"
+        ) from exc
 
     try:
         df = pd.read_csv(io.BytesIO(raw), nrows=int(max_rows) if max_rows else None)
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not parse CSV: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not parse CSV: {exc}"
+        ) from exc
 
     user_col = _first_column(df, ["user", "user_id", "userid", "employee", "employee_id"])
     groups = [(None, df)]
@@ -259,7 +276,11 @@ async def predict_behavior_logs(
         "rows_read": int(len(df)),
         "feature_schema": schema,
         "model_expected_features": expected or None,
-        "feature_mismatch": {"provided": provided, "expected": expected} if expected and expected != provided else None,
+        "feature_mismatch": (
+            {"provided": provided, "expected": expected}
+            if expected and expected != provided
+            else None
+        ),
         "note": "Best-effort CSV → fixed numeric features → LOF score. For best accuracy, retrain the behavior model on the same feature_schema.",
     }
 

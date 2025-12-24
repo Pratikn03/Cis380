@@ -1,6 +1,6 @@
 """Generate lightweight reports (JSON aggregation)."""
+
 import json
-from pathlib import Path
 from typing import Dict
 
 import pandas as pd

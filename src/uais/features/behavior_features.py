@@ -22,7 +22,9 @@ def build_behavior_feature_table(
     df = df_raw.copy()
 
     if target_column not in df.columns:
-        raise KeyError(f"Target column '{target_column}' not found. Available: {df.columns.tolist()}")
+        raise KeyError(
+            f"Target column '{target_column}' not found. Available: {df.columns.tolist()}"
+        )
 
     if drop_columns:
         for col in drop_columns:

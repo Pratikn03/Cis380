@@ -88,6 +88,7 @@ def _pad_features(features: np.ndarray, expected: int) -> np.ndarray:
     pad = np.zeros((features.shape[0], expected - cur), dtype=float)
     return np.concatenate([features, pad], axis=1)
 
+
 def _load_fusion() -> dict[str, Any]:
     global _FUSION
     if _FUSION is not None:
@@ -103,7 +104,13 @@ def _load_fusion() -> dict[str, Any]:
         try:
             obj = joblib.load(path)
         except Exception as exc:  # pragma: no cover
-            _FUSION = {"available": False, "path": str(path), "error": str(exc), "model": None, "scaler": None}
+            _FUSION = {
+                "available": False,
+                "path": str(path),
+                "error": str(exc),
+                "model": None,
+                "scaler": None,
+            }
             return _FUSION
 
         if isinstance(obj, dict):
@@ -113,19 +120,37 @@ def _load_fusion() -> dict[str, Any]:
             model = obj
             scaler = None
 
-        _FUSION = {"available": model is not None, "path": str(path), "error": None, "model": model, "scaler": scaler}
+        _FUSION = {
+            "available": model is not None,
+            "path": str(path),
+            "error": None,
+            "model": model,
+            "scaler": scaler,
+        }
         return _FUSION
 
-    _FUSION = {"available": False, "path": None, "error": "fusion model not found", "model": None, "scaler": None}
+    _FUSION = {
+        "available": False,
+        "path": None,
+        "error": "fusion model not found",
+        "model": None,
+        "scaler": None,
+    }
     return _FUSION
 
 
-def _fusion_score(*, cyber_risk: float, behavior_risk: float, fraud_risk: float) -> tuple[float, dict[str, Any]]:
+def _fusion_score(
+    *, cyber_risk: float, behavior_risk: float, fraud_risk: float
+) -> tuple[float, dict[str, Any]]:
     fusion = _load_fusion()
     if not fusion.get("available") or fusion.get("model") is None:
         return 0.0, {"available": False, "path": fusion.get("path"), "error": fusion.get("error")}
 
-    score_dict = {"behavior": float(behavior_risk), "cyber": float(cyber_risk), "fraud": float(fraud_risk)}
+    score_dict = {
+        "behavior": float(behavior_risk),
+        "cyber": float(cyber_risk),
+        "fraud": float(fraud_risk),
+    }
     keys = sorted(score_dict)
     X = np.array([[score_dict[k] for k in keys]], dtype=float)
     scaler = fusion.get("scaler")
@@ -133,11 +158,19 @@ def _fusion_score(*, cyber_risk: float, behavior_risk: float, fraud_risk: float)
         try:
             X = scaler.transform(X)
         except Exception as exc:  # pragma: no cover
-            return 0.0, {"available": False, "path": fusion.get("path"), "error": f"scaler transform failed: {exc}"}
+            return 0.0, {
+                "available": False,
+                "path": fusion.get("path"),
+                "error": f"scaler transform failed: {exc}",
+            }
 
     model = fusion.get("model")
     if model is None:
-        return 0.0, {"available": False, "path": fusion.get("path"), "error": "fusion model not loaded"}
+        return 0.0, {
+            "available": False,
+            "path": fusion.get("path"),
+            "error": "fusion model not loaded",
+        }
     try:
         if hasattr(model, "predict_proba"):
             score = float(model.predict_proba(X)[0][1])
@@ -147,10 +180,19 @@ def _fusion_score(*, cyber_risk: float, behavior_risk: float, fraud_risk: float)
         else:
             score = float(model.predict(X)[0])
     except Exception as exc:  # pragma: no cover
-        return 0.0, {"available": False, "path": fusion.get("path"), "error": f"fusion predict failed: {exc}"}
+        return 0.0, {
+            "available": False,
+            "path": fusion.get("path"),
+            "error": f"fusion predict failed: {exc}",
+        }
 
     score = float(min(max(score, 0.0), 1.0))
-    return score, {"available": True, "path": fusion.get("path"), "inputs": score_dict, "feature_order": keys}
+    return score, {
+        "available": True,
+        "path": fusion.get("path"),
+        "inputs": score_dict,
+        "feature_order": keys,
+    }
 
 
 def analyze_risk(payload: Mapping[str, Any]) -> Dict[str, Any]:
@@ -192,7 +234,9 @@ def analyze_risk(payload: Mapping[str, Any]) -> Dict[str, Any]:
     behavior_risk = _score_behavior()
     fraud_risk = _score("fraud")
 
-    fusion_risk, fusion_meta = _fusion_score(cyber_risk=cyber_risk, behavior_risk=behavior_risk, fraud_risk=fraud_risk)
+    fusion_risk, fusion_meta = _fusion_score(
+        cyber_risk=cyber_risk, behavior_risk=behavior_risk, fraud_risk=fraud_risk
+    )
 
     return {
         "cyber_risk": cyber_risk,

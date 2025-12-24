@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Iterable, Sequence
 
 import numpy as np
 
@@ -34,6 +32,11 @@ def retrieve(query: str, corpus: EmbeddedCorpus, top_k: int = 5) -> list[dict]:
         if score <= 0:
             continue
         results.append(
-            {"id": corpus.docs[i]["id"], "path": corpus.docs[i]["path"], "text": corpus.docs[i]["text"], "score": score}
+            {
+                "id": corpus.docs[i]["id"],
+                "path": corpus.docs[i]["path"],
+                "text": corpus.docs[i]["text"],
+                "score": score,
+            }
         )
     return results

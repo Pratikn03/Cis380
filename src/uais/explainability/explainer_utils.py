@@ -8,6 +8,7 @@ from typing import Any
 def safe_import_shap() -> Any | None:
     try:
         import shap  # type: ignore
+
         return shap
     except Exception:
         return None

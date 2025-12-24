@@ -1,8 +1,8 @@
 """Local inference example for UAIS."""
+
 import pandas as pd
 import joblib
 
-from uais.config.config_loader import load_config
 from uais.utils.paths import domain_paths
 from uais.utils.logging_utils import setup_logging
 
@@ -21,7 +21,11 @@ def load_artifact(domain: str):
 
 def predict(domain: str, samples: list[dict]):
     model_bundle = load_artifact(domain)
-    model = model_bundle if not isinstance(model_bundle, dict) else model_bundle.get("model", model_bundle)
+    model = (
+        model_bundle
+        if not isinstance(model_bundle, dict)
+        else model_bundle.get("model", model_bundle)
+    )
     df = pd.DataFrame(samples)
     if hasattr(model, "predict_proba"):
         proba = model.predict_proba(df)[:, 1]
@@ -31,7 +35,6 @@ def predict(domain: str, samples: list[dict]):
 
 def demo():
     domain = "fraud"
-    cfg = load_config(domain)
     example_samples = [
         {
             "amount": 123.4,

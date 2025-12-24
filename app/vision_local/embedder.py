@@ -66,14 +66,24 @@ def _load_clip() -> tuple[Any, Any, str]:
         import torch
         from transformers import CLIPModel, CLIPProcessor
     except Exception as exc:  # pragma: no cover
-        raise OptionalDependencyError("CLIP embedding requires 'torch' and 'transformers'.") from exc
+        raise OptionalDependencyError(
+            "CLIP embedding requires 'torch' and 'transformers'."
+        ) from exc
 
     device = "cuda"
     if not torch.cuda.is_available():
-        device = "mps" if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available() else "cpu"
+        device = (
+            "mps"
+            if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available()
+            else "cpu"
+        )
     try:
-        model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32", local_files_only=True).to(device)
-        processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32", local_files_only=True)
+        model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32", local_files_only=True).to(
+            device
+        )
+        processor = CLIPProcessor.from_pretrained(
+            "openai/clip-vit-base-patch32", local_files_only=True
+        )
     except Exception as exc:
         raise OptionalDependencyError(
             "CLIP weights not available locally. Run once online to cache, or use fallback embeddings."

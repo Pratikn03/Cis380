@@ -1,4 +1,5 @@
 """Wrappers around existing UAIS fraud feature builders."""
+
 try:
     from uais.features.fraud_features import build_fraud_features as _core_build
 except Exception:  # pragma: no cover - optional dependency

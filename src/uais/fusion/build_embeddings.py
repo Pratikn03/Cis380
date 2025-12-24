@@ -1,4 +1,5 @@
 """Utilities for building/combining embeddings across domains."""
+
 from typing import Dict, Iterable
 
 import numpy as np

@@ -17,12 +17,7 @@ def _ensure_readme_markers(readme_path: Path) -> str:
     if START in text and END in text:
         return text
 
-    block = (
-        "\n## Benchmarks\n\n"
-        f"{START}\n"
-        "_Benchmarks not generated yet._\n"
-        f"{END}\n"
-    )
+    block = "\n## Benchmarks\n\n" f"{START}\n" "_Benchmarks not generated yet._\n" f"{END}\n"
     return text.rstrip() + "\n" + block + "\n"
 
 
@@ -43,4 +38,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

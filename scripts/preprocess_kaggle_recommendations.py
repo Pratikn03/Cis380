@@ -148,6 +148,7 @@ def _open_json_file(path: Path) -> Iterable[str]:
         return gzip.open(path, mode="rt", encoding="utf-8", errors="ignore")
     return path.open("r", encoding="utf-8", errors="ignore")
 
+
 def _guess_domain_from_text(text: str) -> Optional[str]:
     search_space = text.lower()
     for domain, keywords in DOMAIN_KEYWORDS.items():
@@ -245,9 +246,15 @@ def build_domain_rows(
         if domain not in tokens:
             tokens.append(domain)
         summary_words = [w.strip(".,!\"'") for w in summary.split() if w.strip()]
-        assigned_brand = summary_words[0].title() if summary_words else BRAND_TEMPLATE.get(domain, "OmniTech")
+        assigned_brand = (
+            summary_words[0].title() if summary_words else BRAND_TEMPLATE.get(domain, "OmniTech")
+        )
         model_name = " ".join(summary_words[1:4]).title() if len(summary_words) > 1 else asin
-        price = 100 + (rating_data.get("avg", 3.0) * 100) + min(400, int(rating_data.get("count", 0) / 5))
+        price = (
+            100
+            + (rating_data.get("avg", 3.0) * 100)
+            + min(400, int(rating_data.get("count", 0) / 5))
+        )
         rows = per_domain[domain]
         rows.append(
             {
@@ -318,14 +325,20 @@ def preprocess(
         ratings = load_ratings(ratings_path)
         domain_rows = build_domain_rows(reviews, ratings)
         for domain, rows in domain_rows.items():
-            rows_sorted = sorted(rows, key=lambda x: (x.get("rating", 0.0), x.get("popularity", 0)), reverse=True)
+            rows_sorted = sorted(
+                rows, key=lambda x: (x.get("rating", 0.0), x.get("popularity", 0)), reverse=True
+            )
             destination = output_dir / f"{domain}.csv"
             _write_csv(rows_sorted, destination, ELECTRONICS_FIELDS)
     else:
         LOGGER.warning("Missing metadata or rating files; skipping electronics preprocessing.")
 
     courses, source = load_course_candidates(output_dir)
-    courses_sorted = sorted(courses, key=lambda x: (float(x.get("rating", 0)), int(x.get("popularity", 0))), reverse=True)
+    courses_sorted = sorted(
+        courses,
+        key=lambda x: (float(x.get("rating", 0)), int(x.get("popularity", 0))),
+        reverse=True,
+    )
     _write_csv(courses_sorted, output_dir / "courses.csv", COURSE_FIELDS)
     if source:
         LOGGER.info("Courses data sourced from %s", source)
@@ -352,9 +365,18 @@ def locate_ratings(root: Path, hint: Optional[Path]) -> Optional[Path]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Preprocess Kaggle electronics downloads for OmniNex.")
-    parser.add_argument("--data-root", type=Path, default=Path(__file__).resolve().parents[1] / "data" / "raw" / "recommendation", help="Base recommendation folder.")
-    parser.add_argument("--metadata-file", type=Path, help="Path to meta_Electronics.json (or .gz).")
+    parser = argparse.ArgumentParser(
+        description="Preprocess Kaggle electronics downloads for OmniNex."
+    )
+    parser.add_argument(
+        "--data-root",
+        type=Path,
+        default=Path(__file__).resolve().parents[1] / "data" / "raw" / "recommendation",
+        help="Base recommendation folder.",
+    )
+    parser.add_argument(
+        "--metadata-file", type=Path, help="Path to meta_Electronics.json (or .gz)."
+    )
     parser.add_argument("--ratings-file", type=Path, help="Path to ratings_Electronics.csv.")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")

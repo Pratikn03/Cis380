@@ -96,14 +96,20 @@ def load_fraud_data(
         paysim_csv = path / "paysim" / "paysim_transactions.csv"
         if prefer in (None, "paysim"):
             try:
-                frames.append(_normalize_fraud_frame(load_paysim(n_rows=n_rows, path=paysim_csv, allow_synthetic=allow_synthetic)))
+                frames.append(
+                    _normalize_fraud_frame(
+                        load_paysim(n_rows=n_rows, path=paysim_csv, allow_synthetic=allow_synthetic)
+                    )
+                )
             except FileNotFoundError as exc:
                 print(f"[warn] PaySim not available: {exc}")
 
         # Creditcard dataset if present
         creditcard_csv = path / "creditcard.csv"
         if prefer in (None, "creditcard") and creditcard_csv.exists():
-            frames.append(_normalize_fraud_frame(load_creditcard(n_rows, allow_synthetic=allow_synthetic)))
+            frames.append(
+                _normalize_fraud_frame(load_creditcard(n_rows, allow_synthetic=allow_synthetic))
+            )
 
         try:
             files = _find_all_fraud_files(path)

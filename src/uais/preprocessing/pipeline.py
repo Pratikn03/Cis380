@@ -1,4 +1,5 @@
 """Leakage-free preprocessing pipelines for tabular data."""
+
 from __future__ import annotations
 
 from typing import List

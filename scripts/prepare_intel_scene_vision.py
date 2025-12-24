@@ -89,7 +89,9 @@ def prepare(*, src_version_dir: Path, out_dir: Path) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Prepare Intel scene dataset into train/val ImageFolder layout")
+    parser = argparse.ArgumentParser(
+        description="Prepare Intel scene dataset into train/val ImageFolder layout"
+    )
     parser.add_argument(
         "--src",
         type=Path,

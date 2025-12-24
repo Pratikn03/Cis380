@@ -1,4 +1,5 @@
 """Train a simple recommender model based on domain/fusion scores."""
+
 from __future__ import annotations
 
 import json
@@ -46,7 +47,13 @@ def _derive_action_label(label: int, fusion_score: float) -> str:
         return "ALLOW"
 
 
-def _append_rows_from_scores(rows: List[Dict[str, Any]], df: pd.DataFrame, label_cols: List[str], score_cols: List[str], domain: str):
+def _append_rows_from_scores(
+    rows: List[Dict[str, Any]],
+    df: pd.DataFrame,
+    label_cols: List[str],
+    score_cols: List[str],
+    domain: str,
+):
     if df.empty:
         return
     label_col = next((c for c in label_cols if c in df.columns), None)
@@ -89,7 +96,9 @@ def build_training_rows() -> List[Dict[str, Any]]:
     # BEHAVIOR (unsupervised, use anomaly score)
     df_beh = _safe_read_csv(os.path.join(EXPERIMENTS_DIR, "behavior", "scores.csv"))
     if not df_beh.empty:
-        score_col = next((c for c in ["anomaly_score", "lof_score", "score"] if c in df_beh.columns), None)
+        score_col = next(
+            (c for c in ["anomaly_score", "lof_score", "score"] if c in df_beh.columns), None
+        )
         if score_col:
             beh_vals = df_beh[score_col].values.astype(float)
             thr = np.quantile(beh_vals, 0.98) if len(beh_vals) > 0 else 0.9
@@ -119,7 +128,9 @@ def build_training_rows() -> List[Dict[str, Any]]:
                     "cyber": float(row[cyber_c]),
                     "behavior": float(row[beh_c]),
                 }
-                scores["fusion"] = float(np.mean([scores["fraud"], scores["cyber"], scores["behavior"]]))
+                scores["fusion"] = float(
+                    np.mean([scores["fraud"], scores["cyber"], scores["behavior"]])
+                )
                 action = _derive_action_label(y, scores["fusion"])
                 meta_features, _ = build_meta_features(scores, event_features={})
                 rows.append({"meta_features": meta_features, "action": action})
@@ -132,12 +143,16 @@ def build_training_rows() -> List[Dict[str, Any]]:
 def main():
     rows = build_training_rows()
     if not rows:
-        raise RuntimeError("No training rows constructed. Check experiments/*/scores.csv and column names.")
+        raise RuntimeError(
+            "No training rows constructed. Check experiments/*/scores.csv and column names."
+        )
 
     X = np.stack([r["meta_features"] for r in rows], axis=0)
     y = np.array([r["action"] for r in rows])
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, stratify=y, random_state=42
+    )
 
     clf = RandomForestClassifier(
         n_estimators=200,

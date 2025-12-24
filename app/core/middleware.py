@@ -2,6 +2,7 @@
 OmniChatX Production Middleware & Error Handling
 Rate limiting, security headers, logging, and error handling
 """
+
 from __future__ import annotations
 
 import logging
@@ -11,7 +12,7 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Callable
 
-from fastapi import FastAPI, Request, Response, HTTPException, status
+from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -23,8 +24,10 @@ logger = logging.getLogger("omnichatx.middleware")
 # Custom Exceptions
 # ============================================
 
+
 class OmniChatXException(Exception):
     """Base exception for OmniChatX."""
+
     def __init__(
         self,
         message: str,
@@ -41,6 +44,7 @@ class OmniChatXException(Exception):
 
 class ValidationError(OmniChatXException):
     """Validation error."""
+
     def __init__(self, message: str, details: dict | None = None):
         super().__init__(
             message=message,
@@ -52,6 +56,7 @@ class ValidationError(OmniChatXException):
 
 class AuthenticationError(OmniChatXException):
     """Authentication error."""
+
     def __init__(self, message: str = "Authentication required"):
         super().__init__(
             message=message,
@@ -62,6 +67,7 @@ class AuthenticationError(OmniChatXException):
 
 class AuthorizationError(OmniChatXException):
     """Authorization error."""
+
     def __init__(self, message: str = "Insufficient permissions"):
         super().__init__(
             message=message,
@@ -72,6 +78,7 @@ class AuthorizationError(OmniChatXException):
 
 class RateLimitError(OmniChatXException):
     """Rate limit exceeded error."""
+
     def __init__(self, retry_after: int = 60):
         super().__init__(
             message="Rate limit exceeded",
@@ -83,6 +90,7 @@ class RateLimitError(OmniChatXException):
 
 class ModelError(OmniChatXException):
     """ML model error."""
+
     def __init__(self, message: str, model_name: str | None = None):
         super().__init__(
             message=message,
@@ -94,6 +102,7 @@ class ModelError(OmniChatXException):
 
 class NotFoundError(OmniChatXException):
     """Resource not found error."""
+
     def __init__(self, resource: str, resource_id: str | None = None):
         super().__init__(
             message=f"{resource} not found",
@@ -106,6 +115,7 @@ class NotFoundError(OmniChatXException):
 # ============================================
 # Error Response Model
 # ============================================
+
 
 def create_error_response(
     request_id: str,
@@ -133,9 +143,10 @@ def create_error_response(
 # Exception Handlers
 # ============================================
 
+
 def register_exception_handlers(app: FastAPI) -> None:
     """Register all exception handlers."""
-    
+
     @app.exception_handler(OmniChatXException)
     async def omnichatx_exception_handler(
         request: Request, exc: OmniChatXException
@@ -158,11 +169,9 @@ def register_exception_handlers(app: FastAPI) -> None:
                 path=str(request.url.path),
             ),
         )
-    
+
     @app.exception_handler(HTTPException)
-    async def http_exception_handler(
-        request: Request, exc: HTTPException
-    ) -> JSONResponse:
+    async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
         request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
         error_code = {
             400: "BAD_REQUEST",
@@ -174,7 +183,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             429: "TOO_MANY_REQUESTS",
             500: "INTERNAL_SERVER_ERROR",
         }.get(exc.status_code, "HTTP_ERROR")
-        
+
         return JSONResponse(
             status_code=exc.status_code,
             content=create_error_response(
@@ -185,11 +194,9 @@ def register_exception_handlers(app: FastAPI) -> None:
                 path=str(request.url.path),
             ),
         )
-    
+
     @app.exception_handler(Exception)
-    async def general_exception_handler(
-        request: Request, exc: Exception
-    ) -> JSONResponse:
+    async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
         request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
         logger.exception(
             "Unhandled exception request_id=%s: %s",
@@ -212,9 +219,10 @@ def register_exception_handlers(app: FastAPI) -> None:
 # Rate Limiting Middleware
 # ============================================
 
+
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Simple in-memory rate limiting middleware."""
-    
+
     def __init__(
         self,
         app: FastAPI,
@@ -227,43 +235,42 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.window_seconds = window_seconds
         self.enabled = enabled
         self.request_counts: dict[str, list[float]] = defaultdict(list)
-    
+
     def _get_client_ip(self, request: Request) -> str:
         """Get client IP from request."""
         forwarded = request.headers.get("X-Forwarded-For")
         if forwarded:
             return forwarded.split(",")[0].strip()
         return request.client.host if request.client else "unknown"
-    
+
     def _is_rate_limited(self, client_ip: str) -> bool:
         """Check if client is rate limited."""
         now = time.time()
         window_start = now - self.window_seconds
-        
+
         # Clean old entries
         self.request_counts[client_ip] = [
-            ts for ts in self.request_counts[client_ip]
-            if ts > window_start
+            ts for ts in self.request_counts[client_ip] if ts > window_start
         ]
-        
+
         # Check rate limit
         if len(self.request_counts[client_ip]) >= self.requests_per_minute:
             return True
-        
+
         # Add current request
         self.request_counts[client_ip].append(now)
         return False
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         if not self.enabled:
             return await call_next(request)
-        
+
         # Skip rate limiting for health checks
         if request.url.path in ["/health", "/metrics", "/ready"]:
             return await call_next(request)
-        
+
         client_ip = self._get_client_ip(request)
-        
+
         if self._is_rate_limited(client_ip):
             request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
             return JSONResponse(
@@ -278,7 +285,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 ),
                 headers={"Retry-After": str(self.window_seconds)},
             )
-        
+
         return await call_next(request)
 
 
@@ -286,13 +293,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 # Request ID Middleware
 # ============================================
 
+
 class RequestIDMiddleware(BaseHTTPMiddleware):
     """Add unique request ID to each request."""
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
         request.state.request_id = request_id
-        
+
         response = await call_next(request)
         response.headers["X-Request-ID"] = request_id
         return response
@@ -302,13 +310,14 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 # Logging Middleware
 # ============================================
 
+
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Log all requests with timing."""
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         start_time = time.time()
         request_id = getattr(request.state, "request_id", "unknown")
-        
+
         # Log request
         logger.info(
             "Request started: %s %s request_id=%s client=%s",
@@ -317,9 +326,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             request_id,
             request.client.host if request.client else "unknown",
         )
-        
+
         response = await call_next(request)
-        
+
         # Log response
         duration_ms = (time.time() - start_time) * 1000
         logger.info(
@@ -330,7 +339,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             duration_ms,
             request_id,
         )
-        
+
         # Add timing header
         response.headers["X-Response-Time"] = f"{duration_ms:.2f}ms"
         return response
@@ -340,12 +349,13 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 # Security Headers Middleware
 # ============================================
 
+
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Add security headers to responses."""
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         response = await call_next(request)
-        
+
         # Security headers
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
@@ -353,17 +363,18 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
         response.headers["Pragma"] = "no-cache"
-        
+
         # CSP for API (strict)
         if request.url.path.startswith("/api/"):
             response.headers["Content-Security-Policy"] = "default-src 'none'"
-        
+
         return response
 
 
 # ============================================
 # Setup Function
 # ============================================
+
 
 def setup_production_middleware(
     app: FastAPI,
@@ -373,18 +384,18 @@ def setup_production_middleware(
     rate_limit_window: int = 60,
 ) -> None:
     """Setup all production middleware and error handlers."""
-    
+
     # Register exception handlers
     register_exception_handlers(app)
-    
+
     # Add middleware (order matters - last added is first executed)
-    
+
     # 1. Security headers
     app.add_middleware(SecurityHeadersMiddleware)
-    
+
     # 2. Request logging
     app.add_middleware(RequestLoggingMiddleware)
-    
+
     # 3. Rate limiting
     app.add_middleware(
         RateLimitMiddleware,
@@ -392,10 +403,10 @@ def setup_production_middleware(
         window_seconds=rate_limit_window,
         enabled=rate_limit_enabled,
     )
-    
+
     # 4. Request ID
     app.add_middleware(RequestIDMiddleware)
-    
+
     # 5. CORS (always last - first executed)
     app.add_middleware(
         CORSMiddleware,
@@ -405,5 +416,5 @@ def setup_production_middleware(
         allow_headers=["*"],
         expose_headers=["X-Request-ID", "X-Response-Time"],
     )
-    
+
     logger.info("Production middleware configured successfully")

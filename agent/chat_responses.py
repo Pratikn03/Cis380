@@ -1,4 +1,5 @@
 """Enhanced chat responses for OmniChatX offline mode."""
+
 from __future__ import annotations
 
 
@@ -100,56 +101,61 @@ def get_fallback_response() -> str:
 def is_greeting(text: str) -> bool:
     """Check if text is a greeting."""
     lower = text.lower()
-    return any(k in lower for k in (
-        "hello", "hi ", "hey", "greet", 
-        "good morning", "good afternoon", "good evening"
-    ))
+    return any(
+        k in lower
+        for k in ("hello", "hi ", "hey", "greet", "good morning", "good afternoon", "good evening")
+    )
 
 
 def is_help_request(text: str) -> bool:
     """Check if text is asking for help."""
     lower = text.lower()
-    return any(k in lower for k in (
-        "help", "what can you do", "capabilities", 
-        "features", "how to use"
-    ))
+    return any(
+        k in lower for k in ("help", "what can you do", "capabilities", "features", "how to use")
+    )
 
 
 def is_training_request(text: str) -> bool:
     """Check if text is asking about training/demo."""
     lower = text.lower()
-    return any(k in lower for k in (
-        "next step", "next steps", "what are we doing",
-        "what to do", "train", "training", "demo"
-    ))
+    return any(
+        k in lower
+        for k in (
+            "next step",
+            "next steps",
+            "what are we doing",
+            "what to do",
+            "train",
+            "training",
+            "demo",
+        )
+    )
 
 
 def is_about_request(text: str) -> bool:
     """Check if text is asking about the bot."""
     lower = text.lower()
-    return any(k in lower for k in (
-        "about", "who are you", "what are you", "your name"
-    ))
+    return any(k in lower for k in ("about", "who are you", "what are you", "your name"))
 
 
 def get_enhanced_response(message: str) -> str | None:
     """Get enhanced response based on message type.
-    
+
     Returns None if no specific response is available.
     """
     if not message or not message.strip():
         return get_greeting_response()
-    
+
     if is_greeting(message):
         return get_greeting_response()
-    
+
     if is_help_request(message):
         return get_help_response()
-    
+
     if is_training_request(message):
         return get_training_response()
-    
+
     if is_about_request(message):
         return get_about_response()
-    
+
     return None

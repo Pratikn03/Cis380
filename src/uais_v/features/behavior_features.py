@@ -1,4 +1,5 @@
 """Wrappers around existing UAIS behavior feature builders."""
+
 try:
     from uais.features.behavior_features import build_behavior_feature_table as _core_build
 except Exception:  # pragma: no cover - optional dependency

@@ -1,4 +1,5 @@
 """LLM explainer stub for recommendations."""
+
 from __future__ import annotations
 
 import os
@@ -31,4 +32,3 @@ def explain_recommendations(items, user_context: str = "") -> str:
         return data["choices"][0]["message"]["content"]
     except Exception as exc:  # pragma: no cover
         return f"[LLM error: {exc}] Items: {items}"
-

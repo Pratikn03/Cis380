@@ -1,4 +1,5 @@
 """Static fallback recommendations when APIs are unavailable."""
+
 from __future__ import annotations
 
 from typing import List, Dict

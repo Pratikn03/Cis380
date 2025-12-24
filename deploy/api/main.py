@@ -1,4 +1,5 @@
 """FastAPI endpoint to serve UAIS-V predictions (fraud, cyber, fusion, NLP, vision)."""
+
 from base64 import b64decode
 from io import BytesIO
 from pathlib import Path
@@ -167,7 +168,11 @@ def predict_fraud(req: FraudRequest):
         X = np.array(req.features, dtype=float).reshape(1, -1)
 
     proba = model.predict_proba(X)[0, 1]
-    return {"fraud_probability": float(proba), "input_features": len(req.features), "expected_features": len(cols) or None}
+    return {
+        "fraud_probability": float(proba),
+        "input_features": len(req.features),
+        "expected_features": len(cols) or None,
+    }
 
 
 @app.post("/predict_cyber")
@@ -185,13 +190,19 @@ def predict_cyber(req: CyberRequest):
         feats = (feats + [0.0] * expected)[:expected]
     X = np.array(feats, dtype=float).reshape(1, -1)
     proba = model.predict_proba(X)[0, 1]
-    return {"cyber_attack_probability": float(proba), "input_features": len(req.features), "expected_features": expected or None}
+    return {
+        "cyber_attack_probability": float(proba),
+        "input_features": len(req.features),
+        "expected_features": expected or None,
+    }
 
 
 @app.post("/predict_fusion")
 def predict_fusion(req: FusionRequest):
     if fusion_model is None:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Fusion model not found.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Fusion model not found."
+        )
     keys = sorted(req.scores)
     X = np.array([[req.scores[k] for k in keys]])
     proba = fusion_model.predict_proba(X)[0, 1]
@@ -203,13 +214,18 @@ def predict_nlp(req: NLPRequest):
     model, tokenizer = _load_nlp()
     if model is None or tokenizer is None:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="NLP model/tokenizer not available."
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="NLP model/tokenizer not available.",
         )
     try:
         import torch
     except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Torch not available for NLP.")
-    enc = tokenizer(req.text, return_tensors="pt", truncation=True, padding="max_length", max_length=128)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Torch not available for NLP."
+        )
+    enc = tokenizer(
+        req.text, return_tensors="pt", truncation=True, padding="max_length", max_length=128
+    )
     with torch.no_grad():
         logits = model(enc["input_ids"], enc["attention_mask"])
         proba = torch.softmax(logits, dim=1)[:, 1].item()
@@ -220,7 +236,9 @@ def predict_nlp(req: NLPRequest):
 def predict_vision(req: VisionRequest):
     model = _load_vision()
     if model is None:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Vision model not available.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Vision model not available."
+        )
     try:
         import torch
         from PIL import Image

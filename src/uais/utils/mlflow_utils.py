@@ -24,7 +24,9 @@ def load_mlflow_settings(config_path: str | Path | None = None) -> Dict[str, str
     }
 
 
-def setup_mlflow(experiment_name: str = "UAISV_Experiments", tracking_uri: str | None = None) -> None:
+def setup_mlflow(
+    experiment_name: str = "UAISV_Experiments", tracking_uri: str | None = None
+) -> None:
     """Configure the MLflow tracking URI and experiment name."""
     uri = tracking_uri or "http://localhost:5000"
     try:

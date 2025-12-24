@@ -10,4 +10,9 @@ _START = time()
 @router.get("/health")
 async def health() -> dict[str, object]:
     uptime = time() - _START
-    return {"status": "ok", "service": "omnichatx", "version": "0.1.0", "uptime_seconds": round(uptime, 2)}
+    return {
+        "status": "ok",
+        "service": "omnichatx",
+        "version": "0.1.0",
+        "uptime_seconds": round(uptime, 2),
+    }

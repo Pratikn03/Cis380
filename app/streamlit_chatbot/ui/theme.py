@@ -12,7 +12,9 @@ import streamlit as st
 import requests
 
 
-def apply_partik_theme(*, subtitle: str = "Cyber • Fraud • Behavior • Vision • Voice • Recsys") -> None:
+def apply_partik_theme(
+    *, subtitle: str = "Cyber • Fraud • Behavior • Vision • Voice • Recsys"
+) -> None:
     """Apply global CSS theme + render the top header."""
 
     st.set_page_config(page_title="UAIS-V Command Center", page_icon="🧠", layout="wide")
@@ -223,7 +225,9 @@ def sidebar_panel(*, backend_url: str) -> str:
     """Sidebar settings + tips (no page navigation)."""
 
     st.sidebar.markdown("## Settings")
-    backend_url = (st.sidebar.text_input("Backend URL", value=backend_url, key="backend_url") or backend_url).strip()
+    backend_url = (
+        st.sidebar.text_input("Backend URL", value=backend_url, key="backend_url") or backend_url
+    ).strip()
     backend_url = backend_url.rstrip("/")
 
     st.sidebar.caption(f"AUTH_TOKEN: {'set' if os.getenv('AUTH_TOKEN') else 'not set'}")
@@ -245,6 +249,7 @@ def sidebar_panel(*, backend_url: str) -> str:
             st.sidebar.markdown("## Status")
             st.sidebar.success("Backend reachable ✅")
             with st.sidebar.expander("Optional features", expanded=True):
+
                 def _flag(name: str, ok: bool | None) -> str:
                     if ok is True:
                         return f"{name}: ✅"

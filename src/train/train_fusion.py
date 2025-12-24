@@ -1,4 +1,5 @@
 """Train a simple fusion meta-model stacking domain scores."""
+
 from __future__ import annotations
 
 import json
@@ -26,7 +27,6 @@ def _load_scores() -> pd.DataFrame:
             pass
 
     # fallback: merge fraud/cyber/behavior scores if available
-    dfs = []
     fraud = EXP_DIR / "fraud/scores.csv"
     cyber = EXP_DIR / "cyber/scores.csv"
     beh = EXP_DIR / "behavior/scores.csv"
@@ -76,7 +76,9 @@ def main():
     X = df[features].values
     y = df["label"].values
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
 
     model = GradientBoostingClassifier(random_state=42)
     model.fit(X_train, y_train)

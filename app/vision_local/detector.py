@@ -37,7 +37,9 @@ def _infer_category(labels: list[str]) -> str:
     return "unknown"
 
 
-def detect_objects(image_bytes: bytes, *, labels: tuple[str, ...] = DEFAULT_LABELS, top_k: int = 3) -> dict[str, object]:
+def detect_objects(
+    image_bytes: bytes, *, labels: tuple[str, ...] = DEFAULT_LABELS, top_k: int = 3
+) -> dict[str, object]:
     """Best-effort local object tagging.
 
     Uses CLIP zero-shot scoring when available locally; otherwise returns empty tags.
@@ -64,4 +66,3 @@ def detect_objects(image_bytes: bytes, *, labels: tuple[str, ...] = DEFAULT_LABE
         "category": category,
         "scores": [{"label": d.label, "score": d.score} for d in detected],
     }
-

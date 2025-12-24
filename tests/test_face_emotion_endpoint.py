@@ -17,4 +17,3 @@ def test_face_emotion_predict_invalid_file():
     )
     # Depending on whether the model is trained locally, this can fail before/after model load.
     assert resp.status_code in [400, 422, 500, 503]
-

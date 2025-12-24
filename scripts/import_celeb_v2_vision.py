@@ -112,7 +112,12 @@ def _resolve_source_layout(src: Path) -> dict[str, Path]:
             p = src / split / cls
             if p.exists():
                 expected[f"{split.lower()}_{cls}"] = p
-    if expected.get("train_real") and expected.get("train_fake") and expected.get("val_real") and expected.get("val_fake"):
+    if (
+        expected.get("train_real")
+        and expected.get("train_fake")
+        and expected.get("val_real")
+        and expected.get("val_fake")
+    ):
         return expected
     raise FileNotFoundError(
         "Could not find expected Celeb_V2 layout under "
@@ -145,23 +150,43 @@ def run(*, src: Path, mode: str, cap: int | None, include_test: bool) -> dict[st
     stats = ImportStats()
 
     # Train split
-    _import_split(src_dir=layout["train_real"], dst_dir=raw_real_train, mode=mode, cap=cap, stats=stats)
-    _import_split(src_dir=layout["train_fake"], dst_dir=raw_fake_train, mode=mode, cap=cap, stats=stats)
-    _import_split(src_dir=layout["train_real"], dst_dir=proc_train_real, mode=mode, cap=cap, stats=stats)
-    _import_split(src_dir=layout["train_fake"], dst_dir=proc_train_fake, mode=mode, cap=cap, stats=stats)
+    _import_split(
+        src_dir=layout["train_real"], dst_dir=raw_real_train, mode=mode, cap=cap, stats=stats
+    )
+    _import_split(
+        src_dir=layout["train_fake"], dst_dir=raw_fake_train, mode=mode, cap=cap, stats=stats
+    )
+    _import_split(
+        src_dir=layout["train_real"], dst_dir=proc_train_real, mode=mode, cap=cap, stats=stats
+    )
+    _import_split(
+        src_dir=layout["train_fake"], dst_dir=proc_train_fake, mode=mode, cap=cap, stats=stats
+    )
 
     # Val split
     _import_split(src_dir=layout["val_real"], dst_dir=raw_real_val, mode=mode, cap=cap, stats=stats)
     _import_split(src_dir=layout["val_fake"], dst_dir=raw_fake_val, mode=mode, cap=cap, stats=stats)
-    _import_split(src_dir=layout["val_real"], dst_dir=proc_val_real, mode=mode, cap=cap, stats=stats)
-    _import_split(src_dir=layout["val_fake"], dst_dir=proc_val_fake, mode=mode, cap=cap, stats=stats)
+    _import_split(
+        src_dir=layout["val_real"], dst_dir=proc_val_real, mode=mode, cap=cap, stats=stats
+    )
+    _import_split(
+        src_dir=layout["val_fake"], dst_dir=proc_val_fake, mode=mode, cap=cap, stats=stats
+    )
 
     # Optional test split
     if include_test and layout.get("test_real") and layout.get("test_fake"):
-        _import_split(src_dir=layout["test_real"], dst_dir=raw_real_test, mode=mode, cap=cap, stats=stats)
-        _import_split(src_dir=layout["test_fake"], dst_dir=raw_fake_test, mode=mode, cap=cap, stats=stats)
-        _import_split(src_dir=layout["test_real"], dst_dir=proc_test_real, mode=mode, cap=cap, stats=stats)
-        _import_split(src_dir=layout["test_fake"], dst_dir=proc_test_fake, mode=mode, cap=cap, stats=stats)
+        _import_split(
+            src_dir=layout["test_real"], dst_dir=raw_real_test, mode=mode, cap=cap, stats=stats
+        )
+        _import_split(
+            src_dir=layout["test_fake"], dst_dir=raw_fake_test, mode=mode, cap=cap, stats=stats
+        )
+        _import_split(
+            src_dir=layout["test_real"], dst_dir=proc_test_real, mode=mode, cap=cap, stats=stats
+        )
+        _import_split(
+            src_dir=layout["test_fake"], dst_dir=proc_test_fake, mode=mode, cap=cap, stats=stats
+        )
 
     # Counts (recursive)
     def count_imgs(p: Path) -> int:
@@ -183,7 +208,9 @@ def run(*, src: Path, mode: str, cap: int | None, include_test: bool) -> dict[st
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Import Celeb_V2 frames into OmniChatX vision folders.")
+    parser = argparse.ArgumentParser(
+        description="Import Celeb_V2 frames into OmniChatX vision folders."
+    )
     parser.add_argument("--src", type=Path, default=Path("data/Celeb_V2"))
     parser.add_argument(
         "--mode",
@@ -197,7 +224,9 @@ def main() -> None:
         default=None,
         help="Optional cap per split/class (e.g. 20000). Applies independently to each split/class.",
     )
-    parser.add_argument("--include-test", action="store_true", help="Also import Test split into raw+processed.")
+    parser.add_argument(
+        "--include-test", action="store_true", help="Also import Test split into raw+processed."
+    )
     args = parser.parse_args()
 
     out = run(src=args.src, mode=args.mode, cap=args.cap, include_test=args.include_test)
@@ -210,4 +239,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

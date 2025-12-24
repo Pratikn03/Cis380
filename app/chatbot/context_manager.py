@@ -1,4 +1,5 @@
 """Minimal context manager for storing user preferences."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
@@ -26,7 +27,9 @@ class ContextManager:
     def get(self, session_id: str) -> SessionState:
         now = time()
         if session_id not in self._sessions:
-            self._sessions[session_id] = SessionState(session_id=session_id, created_at=now, updated_at=now)
+            self._sessions[session_id] = SessionState(
+                session_id=session_id, created_at=now, updated_at=now
+            )
         return self._sessions[session_id]
 
     def update(self, session_id: str, **fields) -> SessionState:

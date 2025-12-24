@@ -1,8 +1,9 @@
 """Utility helpers for the recommender layer."""
+
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, Iterable
+from typing import Any, Dict
 
 import numpy as np
 

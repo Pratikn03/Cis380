@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, List, Sequence, Tuple
+from typing import Dict, Iterator, Sequence
 
 
 @dataclass(frozen=True)
@@ -26,7 +26,9 @@ def read_coco(coco_json_path: Path, images_root: Path) -> Iterator[tuple[Path, l
     cat_id_to_name: dict[int, str] = {}
     for c in data.get("categories", []) or []:
         try:
-            cat_id_to_name[int(c["id"])] = str(c.get("name") or c.get("category") or c.get("label") or c["id"])
+            cat_id_to_name[int(c["id"])] = str(
+                c.get("name") or c.get("category") or c.get("label") or c["id"]
+            )
         except Exception:
             continue
 
@@ -52,7 +54,9 @@ def read_coco(coco_json_path: Path, images_root: Path) -> Iterator[tuple[Path, l
             x, y, w, h = bbox
             cls_name = cat_id_to_name.get(cat_id, str(cat_id))
             img_id_to_boxes.setdefault(img_id, []).append(
-                BoxXYXY(cls_name=cls_name, x1=float(x), y1=float(y), x2=float(x + w), y2=float(y + h))
+                BoxXYXY(
+                    cls_name=cls_name, x1=float(x), y1=float(y), x2=float(x + w), y2=float(y + h)
+                )
             )
         except Exception:
             continue
@@ -100,7 +104,9 @@ def read_voc(xml_path: Path) -> tuple[Path | None, list[BoxXYXY]]:
     return img_path, boxes
 
 
-def read_yolo(label_txt_path: Path, img_path: Path, class_names: Sequence[str]) -> tuple[Path, list[BoxXYXY]]:
+def read_yolo(
+    label_txt_path: Path, img_path: Path, class_names: Sequence[str]
+) -> tuple[Path, list[BoxXYXY]]:
     """Read a YOLO label txt file for a known image.
 
     label format: cls_id cx cy w h (normalized)
@@ -140,7 +146,9 @@ def read_yolo(label_txt_path: Path, img_path: Path, class_names: Sequence[str]) 
         y1 = (cy - bh / 2) * h
         x2 = (cx + bw / 2) * w
         y2 = (cy + bh / 2) * h
-        boxes.append(BoxXYXY(cls_name=str(cls_name), x1=float(x1), y1=float(y1), x2=float(x2), y2=float(y2)))
+        boxes.append(
+            BoxXYXY(cls_name=str(cls_name), x1=float(x1), y1=float(y1), x2=float(x2), y2=float(y2))
+        )
 
     return img_path, boxes
 
@@ -175,7 +183,9 @@ def write_yolo_label(
     label_path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
 
 
-def write_brands_yaml(out_yaml_path: Path, train_images_dir: Path, val_images_dir: Path, class_list: Sequence[str]) -> None:
+def write_brands_yaml(
+    out_yaml_path: Path, train_images_dir: Path, val_images_dir: Path, class_list: Sequence[str]
+) -> None:
     """Write ultralytics dataset yaml."""
     # Ultralytics expects YAML with keys: path/train/val/names.
     # Keep paths absolute to avoid surprises when training from different CWDs.

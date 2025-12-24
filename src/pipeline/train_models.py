@@ -1,4 +1,5 @@
 """Train supervised models using processed feature tables with optional MLflow logging."""
+
 from pathlib import Path
 import json
 from typing import Any, Dict
@@ -37,7 +38,12 @@ def _maybe_start_mlflow(cfg: Dict[str, Any]):
     return mlflow.start_run(run_name=run_name)
 
 
-def _log_mlflow_params_metrics(cfg: Dict[str, Any], model_params: Dict[str, Any], val_metrics: Dict[str, float], test_metrics: Dict[str, float]):
+def _log_mlflow_params_metrics(
+    cfg: Dict[str, Any],
+    model_params: Dict[str, Any],
+    val_metrics: Dict[str, float],
+    test_metrics: Dict[str, float],
+):
     try:
         import mlflow
     except ImportError:  # pragma: no cover

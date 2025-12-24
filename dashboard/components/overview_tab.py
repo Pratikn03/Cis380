@@ -1,6 +1,6 @@
 """Overview tab components."""
+
 import json
-from pathlib import Path
 import pandas as pd
 import streamlit as st
 
@@ -41,7 +41,9 @@ def _load_fallback_metrics():
 
 def render_overview():
     st.header("Universal Anomaly Intelligence System")
-    st.write("Multidomain anomaly detection playground: fraud, cyber, behavior, vision, and fusion.")
+    st.write(
+        "Multidomain anomaly detection playground: fraud, cyber, behavior, vision, and fusion."
+    )
 
     summary = _load_summary()
     if not summary:
@@ -61,8 +63,14 @@ def render_overview():
         f1 = metrics.get("test_f1") or metrics.get("f1")
         roc_auc = metrics.get("test_roc_auc") or metrics.get("roc_auc")
         with cols[idx % 3]:
-            st.metric(label=f"{domain.title()} F1", value=f"{f1:.3f}" if isinstance(f1, (int, float)) else "N/A")
-            st.metric(label=f"{domain.title()} ROC-AUC", value=f"{roc_auc:.3f}" if isinstance(roc_auc, (int, float)) else "N/A")
+            st.metric(
+                label=f"{domain.title()} F1",
+                value=f"{f1:.3f}" if isinstance(f1, (int, float)) else "N/A",
+            )
+            st.metric(
+                label=f"{domain.title()} ROC-AUC",
+                value=f"{roc_auc:.3f}" if isinstance(roc_auc, (int, float)) else "N/A",
+            )
 
 
 __all__ = ["render_overview"]

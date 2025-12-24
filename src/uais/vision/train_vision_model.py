@@ -51,7 +51,9 @@ def _build_model(num_classes: int, image_size: int, backbone: str) -> Any:
         x = base(x)
         outputs = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
         model = tf.keras.Model(inputs, outputs)
-        model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+        model.compile(
+            optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
+        )
         return model
 
     if backbone not in {"simple_cnn", ""}:
@@ -118,7 +120,9 @@ def run_vision_experiment(cfg: VisionConfig) -> Dict[str, float]:
     resolved_dir = cfg.resolve_dir()
     data_dir = _normalize_dataset_root(resolved_dir)
     if data_dir != resolved_dir:
-        print(f"Detected nested dataset directory. Using '{data_dir}' as the dataset root instead of '{resolved_dir}'.")
+        print(
+            f"Detected nested dataset directory. Using '{data_dir}' as the dataset root instead of '{resolved_dir}'."
+        )
     train_ds = tf.keras.preprocessing.image_dataset_from_directory(
         data_dir,
         validation_split=cfg.validation_split,
@@ -141,7 +145,11 @@ def run_vision_experiment(cfg: VisionConfig) -> Dict[str, float]:
 
     history = model.fit(train_ds, validation_data=val_ds, epochs=cfg.epochs)
     eval_loss, eval_acc = model.evaluate(val_ds, verbose=0)
-    metrics = {"val_loss": float(eval_loss), "val_accuracy": float(eval_acc), "history": history.history}
+    metrics = {
+        "val_loss": float(eval_loss),
+        "val_accuracy": float(eval_acc),
+        "history": history.history,
+    }
     return metrics
 
 

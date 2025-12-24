@@ -8,7 +8,9 @@ import numpy as np
 from sklearn import metrics
 
 
-def compute_classification_metrics(y_true: np.ndarray, y_prob: np.ndarray, threshold: float = 0.5) -> Dict[str, float]:
+def compute_classification_metrics(
+    y_true: np.ndarray, y_prob: np.ndarray, threshold: float = 0.5
+) -> Dict[str, float]:
     """
     Compute common binary classification metrics for fraud detection.
 
@@ -68,6 +70,7 @@ def compute_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarr
 
 # Backwards-compatible aliases for other modules
 classification_metrics = compute_classification_metrics
+
 
 def anomaly_metrics(y_true, scores, threshold=None, contamination: float = 0.05):
     # Simple anomaly metric: threshold by quantile if none provided

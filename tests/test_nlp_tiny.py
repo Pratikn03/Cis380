@@ -2,19 +2,14 @@ import pytest
 
 
 def test_distilbert_forward_smoke():
-    torch = pytest.importorskip("torch")  # noqa: F841
-    transformers = pytest.importorskip("transformers")  # noqa: F841
-    from uais_v.models.nlp_text_model import DistilBERTClassifier, get_tokenizer
+    torch = pytest.importorskip("torch")
+    pytest.importorskip("transformers")
 
-    try:
-        tokenizer = get_tokenizer("distilbert-base-uncased")
-    except OSError as exc:
-        pytest.skip(f"HuggingFace model download unavailable offline: {exc}")
-    enc = tokenizer("hello world", return_tensors="pt")
+    from uais_v.models.nlp_text_model import DistilBERTClassifier
 
-    try:
-        model = DistilBERTClassifier("distilbert-base-uncased", num_labels=2)
-    except OSError as exc:
-        pytest.skip(f"HuggingFace model download unavailable offline: {exc}")
-    out = model(enc["input_ids"], enc["attention_mask"])
-    assert out.shape[1] == 2
+    # Avoid downloading large HF weights during tests.
+    model = DistilBERTClassifier("distilbert-base-uncased", num_labels=2, from_scratch=True)
+    input_ids = torch.randint(0, int(model.config.vocab_size), (2, 8))
+    attention_mask = torch.ones_like(input_ids)
+    out = model(input_ids, attention_mask)
+    assert out.shape == (2, 2)

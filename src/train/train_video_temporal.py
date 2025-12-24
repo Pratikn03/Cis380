@@ -36,7 +36,9 @@ VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
 def _load_class_names() -> list[str]:
     path = Path("models/vision/resnet/classes.txt")
     if path.exists():
-        names = [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        names = [
+            line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
+        ]
         if names:
             return names
     return ["fake", "real"]
@@ -53,7 +55,9 @@ def _load_vision_predictor(*, device: str = "cpu"):
         raise FileNotFoundError(f"Missing {model_path}. Train the vision model first.")
 
     class_names = _load_class_names()
-    model = build_resnet_classifier(ResNetCfg(num_classes=len(class_names), pretrained=False)).to(torch.device(device))
+    model = build_resnet_classifier(ResNetCfg(num_classes=len(class_names), pretrained=False)).to(
+        torch.device(device)
+    )
     state = torch.load(model_path, map_location=torch.device(device))
     model.load_state_dict(state, strict=True)
     model.eval()
@@ -111,7 +115,9 @@ def _compute_features_for_video(
 
     frames_dir: Path | None = None
     try:
-        frame_paths = _extract_frames(video_path=video_path, fps=fps, max_frames=max_frames, ffmpeg=ffmpeg)
+        frame_paths = _extract_frames(
+            video_path=video_path, fps=fps, max_frames=max_frames, ffmpeg=ffmpeg
+        )
         if not frame_paths:
             raise RuntimeError("no frames extracted")
         frames_dir = frame_paths[0].parent
@@ -227,7 +233,9 @@ def main() -> int:
     fake_videos = fake_videos[:max_per]
     print(f"[video-temporal] Using real={len(real_videos)} fake={len(fake_videos)} videos")
 
-    model, feature_extractor, transform, class_names, device = _load_vision_predictor(device=str(args.device))
+    model, feature_extractor, transform, class_names, device = _load_vision_predictor(
+        device=str(args.device)
+    )
 
     X_rows: list[np.ndarray] = []
     y_rows: list[int] = []
@@ -285,7 +293,9 @@ def main() -> int:
     metrics = {
         "accuracy": float(accuracy_score(y_test, pred)),
         "f1": float(f1_score(y_test, pred, zero_division=0)),
-        "roc_auc": float(roc_auc_score(y_test, proba)) if len(set(y_test.tolist())) > 1 else float("nan"),
+        "roc_auc": (
+            float(roc_auc_score(y_test, proba)) if len(set(y_test.tolist())) > 1 else float("nan")
+        ),
         "n_train": int(len(y_train)),
         "n_test": int(len(y_test)),
         "n_total": int(len(y_all)),
@@ -320,4 +330,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

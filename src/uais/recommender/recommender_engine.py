@@ -1,4 +1,5 @@
 """Core scoring and recommendation pipeline for the chatbot."""
+
 from __future__ import annotations
 
 from typing import Dict, Any, List
@@ -8,7 +9,7 @@ import numpy as np
 from .load_models import load_all_models
 from .preprocess import parse_text_to_event
 from .utils import align_features_for_model, sigmoid
-from .feature_engineering import build_meta_features, META_FEATURE_NAMES
+from .feature_engineering import build_meta_features
 from .explain import explain_recommendation
 
 
@@ -43,7 +44,9 @@ def _score_anomaly_model(model, features: Dict[str, Any]) -> float:
 def _fuse_scores(models: Dict[str, Any], scores: Dict[str, float]) -> float:
     fusion_model = models.get("fusion")
     if fusion_model is not None:
-        X = np.array([[scores.get("fraud", 0.0), scores.get("cyber", 0.0), scores.get("behavior", 0.0)]])
+        X = np.array(
+            [[scores.get("fraud", 0.0), scores.get("cyber", 0.0), scores.get("behavior", 0.0)]]
+        )
         if hasattr(fusion_model, "predict_proba"):
             proba = fusion_model.predict_proba(X)[0][1]
             return float(proba)
@@ -54,7 +57,9 @@ def _fuse_scores(models: Dict[str, Any], scores: Dict[str, float]) -> float:
     return float(np.mean(vals))
 
 
-def _recommend_action(models: Dict[str, Any], meta_features: np.ndarray, feature_names: List[str]) -> Dict[str, Any]:
+def _recommend_action(
+    models: Dict[str, Any], meta_features: np.ndarray, feature_names: List[str]
+) -> Dict[str, Any]:
     rec_model = models.get("recommender")
     features_vec = meta_features.reshape(1, -1)
     if rec_model is not None:
@@ -94,7 +99,9 @@ def _recommend_action(models: Dict[str, Any], meta_features: np.ndarray, feature
     }
 
 
-def recommend_from_scores(scores: Dict[str, float], event_features: Dict[str, Any] | None = None) -> Dict[str, Any]:
+def recommend_from_scores(
+    scores: Dict[str, float], event_features: Dict[str, Any] | None = None
+) -> Dict[str, Any]:
     models = load_all_models()
     event_features = event_features or {}
 
@@ -134,7 +141,9 @@ def recommend_from_text(text: str) -> Dict[str, Any]:
     models = load_all_models()
     event_features = parse_text_to_event(text)
     if not event_features:
-        raise ValueError("Could not parse any features from your input. Use key=value pairs or JSON-like input.")
+        raise ValueError(
+            "Could not parse any features from your input. Use key=value pairs or JSON-like input."
+        )
 
     fraud_score = _score_binary_model(models.get("fraud_model"), event_features)
     cyber_score = _score_binary_model(models.get("cyber_model"), event_features)

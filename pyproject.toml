@@ -30,3 +30,12 @@ dependencies = {file = ["requirements.txt"]}
 [tool.coverage.run]
 branch = true
 source = ["src/uais", "src/uais_v"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["notebooks"]

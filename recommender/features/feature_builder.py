@@ -3,6 +3,7 @@ Feature builder for MovieLens-style data.
 - Input: data/raw/recommendation/movielens.csv with columns userId,movieId,rating
 - Output: features dataframe with user/item stats and labels (rating>=4 -> 1)
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -32,11 +33,15 @@ def build_features(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, dict]:
     df = df.copy()
     df["label"] = (df["rating"] >= 4.0).astype(int)
 
-    user_stats = df.groupby("userId")["rating"].agg(["mean", "count"]).rename(
-        columns={"mean": "user_mean", "count": "user_count"}
+    user_stats = (
+        df.groupby("userId")["rating"]
+        .agg(["mean", "count"])
+        .rename(columns={"mean": "user_mean", "count": "user_count"})
     )
-    item_stats = df.groupby("movieId")["rating"].agg(["mean", "count"]).rename(
-        columns={"mean": "item_mean", "count": "item_count"}
+    item_stats = (
+        df.groupby("movieId")["rating"]
+        .agg(["mean", "count"])
+        .rename(columns={"mean": "item_mean", "count": "item_count"})
     )
     global_mean = df["rating"].mean()
 

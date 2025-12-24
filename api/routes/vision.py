@@ -30,8 +30,12 @@ class VisionRequest(BaseModel):
         description="Set to true to train a quick vision experiment using TensorFlow (may take longer).",
     )
     image_size: int = Field(128, gt=0, description="Height/width to resize images to.")
-    batch_size: int = Field(32, gt=0, description="Batch size used during training when running experiments.")
-    epochs: int = Field(1, gt=0, description="Number of epochs when running the optional experiment.")
+    batch_size: int = Field(
+        32, gt=0, description="Batch size used during training when running experiments."
+    )
+    epochs: int = Field(
+        1, gt=0, description="Number of epochs when running the optional experiment."
+    )
     validation_split: float = Field(
         0.2,
         gt=0.0,
@@ -105,7 +109,11 @@ VISION_DEFAULT_CLASS_DIR = Path("data/processed/vision/train")
 def _load_vision_class_names() -> list[str]:
     if VISION_CLASSES_PATH.exists():
         try:
-            names = [line.strip() for line in VISION_CLASSES_PATH.read_text(encoding="utf-8").splitlines() if line.strip()]
+            names = [
+                line.strip()
+                for line in VISION_CLASSES_PATH.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
             if names:
                 return names
         except Exception:
@@ -152,7 +160,9 @@ def _load_vision_predictor():
 
         # For inference we load our own checkpoint; disable torchvision pretrained weights
         # to avoid any network downloads and speed up cold starts.
-        model = build_resnet_classifier(ResNetCfg(num_classes=num_classes, pretrained=False)).to(device)
+        model = build_resnet_classifier(ResNetCfg(num_classes=num_classes, pretrained=False)).to(
+            device
+        )
         state = torch.load(VISION_MODEL_PATH, map_location=device)
         model.load_state_dict(state, strict=True)
         model.eval()
@@ -178,20 +188,29 @@ async def vision_predict(file: UploadFile = File(...), top_k: int = 3):
         from PIL import Image
         import torch
     except Exception as exc:  # pragma: no cover - optional dependency
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"Missing deps: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"Missing deps: {exc}"
+        ) from exc
 
     try:
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid image: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid image: {exc}"
+        ) from exc
 
     try:
         model, transform, class_names, device = _load_vision_predictor()
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Vision model load failed: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Vision model load failed: {exc}",
+        ) from exc
 
     try:
         tensor = transform(image).unsqueeze(0).to(device)
@@ -205,7 +224,9 @@ async def vision_predict(file: UploadFile = File(...), top_k: int = 3):
         best_idx, best_prob = ranked[0]
         return {
             "filename": file.filename,
-            "label": class_names[int(best_idx)] if int(best_idx) < len(class_names) else str(best_idx),
+            "label": (
+                class_names[int(best_idx)] if int(best_idx) < len(class_names) else str(best_idx)
+            ),
             "confidence": round(float(best_prob), 6),
             "top_k": [
                 {
@@ -220,7 +241,10 @@ async def vision_predict(file: UploadFile = File(...), top_k: int = 3):
     except HTTPException:
         raise
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Vision predict failed: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Vision predict failed: {exc}",
+        ) from exc
 
 
 @router.post("/face_emotion/predict")
@@ -229,18 +253,27 @@ async def face_emotion_predict(file: UploadFile = File(...), top_k: int = 3):
     try:
         image_bytes = await file.read()
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read upload: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read upload: {exc}"
+        ) from exc
 
     try:
-        from app.models.vision.face_emotion_predict import FaceEmotionModelNotTrainedError, predict_face_emotion
+        from app.models.vision.face_emotion_predict import (
+            FaceEmotionModelNotTrainedError,
+            predict_face_emotion,
+        )
 
         return predict_face_emotion(image_bytes=image_bytes, filename=file.filename, top_k=top_k)
     except FaceEmotionModelNotTrainedError as exc:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     except RuntimeError as exc:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -264,7 +297,9 @@ async def vision_video_predict(
         from PIL import Image, ImageChops
         import torch
     except Exception as exc:  # pragma: no cover - optional dependency
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"Missing deps: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"Missing deps: {exc}"
+        ) from exc
 
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
@@ -276,19 +311,28 @@ async def vision_video_predict(
     if fps <= 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="fps must be > 0")
     if max_frames < 0:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="max_frames must be >= 0")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="max_frames must be >= 0"
+        )
 
     try:
         model, transform, class_names, device = _load_vision_predictor()
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Vision model load failed: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Vision model load failed: {exc}",
+        ) from exc
 
     try:
         video_bytes = await file.read()
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read upload: {exc}") from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read upload: {exc}"
+        ) from exc
 
     with tempfile.TemporaryDirectory(prefix="omnichatx_video_") as tmp:
         tmp_dir = Path(tmp)
@@ -298,7 +342,10 @@ async def vision_video_predict(
         try:
             video_path.write_bytes(video_bytes)
         except Exception as exc:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Could not write temp file: {exc}") from exc
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Could not write temp file: {exc}",
+            ) from exc
 
         out_pattern = frames_dir / "frame_%06d.jpg"
         cmd = [
@@ -325,7 +372,9 @@ async def vision_video_predict(
 
         frame_paths = sorted(frames_dir.glob("frame_*.jpg"))
         if not frame_paths:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No frames extracted from video.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="No frames extracted from video."
+            )
 
         # --- Temporal signals (best-effort, heuristic) ---
         # We keep these lightweight and offline-friendly; this is not a dedicated temporal deepfake model.
@@ -463,7 +512,10 @@ async def vision_video_predict(
             temporal_label_model = None
             temporal_model_meta: dict[str, object] | None = None
             try:
-                from uais_v.models.video_temporal import build_temporal_feature_dict, predict_temporal_confidence
+                from uais_v.models.video_temporal import (
+                    build_temporal_feature_dict,
+                    predict_temporal_confidence,
+                )
 
                 feature_dict = build_temporal_feature_dict(
                     flip_rate=flip_rate,
@@ -478,7 +530,9 @@ async def vision_video_predict(
                 )
                 proba, meta = predict_temporal_confidence(feature_dict)
                 temporal_model_meta = meta
-                temporal["model_features"] = {k: round(float(v), 6) for k, v in feature_dict.items()}
+                temporal["model_features"] = {
+                    k: round(float(v), 6) for k, v in feature_dict.items()
+                }
                 temporal["model"] = meta
                 if proba is not None:
                     temporal_confidence_model = round(float(proba), 6)
@@ -489,8 +543,16 @@ async def vision_video_predict(
 
             return {
                 "filename": file.filename,
-                "prediction": class_names[int(best_idx)] if int(best_idx) < len(class_names) else str(best_idx),
-                "label": class_names[int(best_idx)] if int(best_idx) < len(class_names) else str(best_idx),
+                "prediction": (
+                    class_names[int(best_idx)]
+                    if int(best_idx) < len(class_names)
+                    else str(best_idx)
+                ),
+                "label": (
+                    class_names[int(best_idx)]
+                    if int(best_idx) < len(class_names)
+                    else str(best_idx)
+                ),
                 "confidence": round(float(best_prob), 6),
                 "aggregation": "mean_prob",
                 "frames_used": len(probs_list),

@@ -1,4 +1,5 @@
 """Central orchestrator for OmniChatX."""
+
 from __future__ import annotations
 
 import logging
@@ -30,7 +31,9 @@ class MemoryStore:
 
     def __init__(self, max_turns: int = _DEFAULT_MAX_TURNS) -> None:
         self.max_turns = int(max_turns)
-        self._store: dict[str, deque[dict[str, str]]] = defaultdict(lambda: deque(maxlen=self.max_turns))
+        self._store: dict[str, deque[dict[str, str]]] = defaultdict(
+            lambda: deque(maxlen=self.max_turns)
+        )
 
     def add_turn(self, user_id: str, user_text: str, assistant_text: str) -> None:
         self._store[user_id].append({"user": user_text, "assistant": assistant_text})
@@ -45,7 +48,9 @@ def _looks_like_numeric_vector(text: str) -> bool:
     if not stripped:
         return False
     # Remove common command words, then check if the remainder is a numeric-looking blob.
-    stripped = re.sub(r"\b(recommend|suggest|predict|score)\b", " ", stripped, flags=re.IGNORECASE).strip()
+    stripped = re.sub(
+        r"\b(recommend|suggest|predict|score)\b", " ", stripped, flags=re.IGNORECASE
+    ).strip()
     if not stripped:
         return False
     if not re.search(r"\d", stripped):
@@ -135,7 +140,6 @@ def _offline_assistant(message: str) -> str:
     if rag_answer:
         parts.append(rag_answer)
     return "\n\n".join(parts).strip()
-
 
 
 def _llm_call(message: str) -> str:
@@ -260,7 +264,11 @@ class OmniChatXOrchestrator:
             score = float(model.predict(df)[0])
 
         shap_res = shap_explain(model, df.values, cols, top_k=3, force_kernel=force_kernel)
-        top_txt = "; ".join([f"{n}:{v:+.3f}" for n, v in shap_res.top_features]) if shap_res.top_features else shap_res.note
+        top_txt = (
+            "; ".join([f"{n}:{v:+.3f}" for n, v in shap_res.top_features])
+            if shap_res.top_features
+            else shap_res.note
+        )
         answer = (
             f"Fraud probability: {score:.4f} (filled {len(nums)} numeric fields; rest set to 0). "
             f"Top features: {top_txt}"
@@ -274,7 +282,10 @@ class OmniChatXOrchestrator:
             "explain": {
                 "method": "shap" if shap_res.values is not None else "fallback",
                 "model_class": shap_res.model_class,
-                "top_features": [{"name": n, "value": round(float(v), 6)} for n, v in (shap_res.top_features or [])],
+                "top_features": [
+                    {"name": n, "value": round(float(v), 6)}
+                    for n, v in (shap_res.top_features or [])
+                ],
                 "note": shap_res.note,
             },
         }
@@ -293,7 +304,11 @@ class OmniChatXOrchestrator:
         if hasattr(model, "predict_proba"):
             score = float(model.predict_proba(arr)[0][1])
             shap_res = shap_explain(model, arr, feat_names, top_k=3, force_kernel=False)
-            top_txt = "; ".join([f"{n}:{v:+.3f}" for n, v in shap_res.top_features]) if shap_res.top_features else shap_res.note
+            top_txt = (
+                "; ".join([f"{n}:{v:+.3f}" for n, v in shap_res.top_features])
+                if shap_res.top_features
+                else shap_res.note
+            )
             answer = f"Cyber attack probability: {score:.4f} (filled {len(nums)} numeric fields; rest set to 0). Top: {top_txt}"
             meta = {
                 "available": True,
@@ -304,14 +319,24 @@ class OmniChatXOrchestrator:
                 "explain": {
                     "method": "shap" if shap_res.values is not None else "fallback",
                     "model_class": shap_res.model_class,
-                    "top_features": [{"name": n, "value": round(float(v), 6)} for n, v in (shap_res.top_features or [])],
+                    "top_features": [
+                        {"name": n, "value": round(float(v), 6)}
+                        for n, v in (shap_res.top_features or [])
+                    ],
                     "note": shap_res.note,
                 },
             }
             return answer, meta
         pred = model.predict(arr)[0]
-        answer = f"Cyber model prediction: {pred} (filled {len(nums)} numeric fields; rest set to 0)."
-        return answer, {"available": True, "prediction": str(pred), "filled_fields": len(nums), "expected_fields": int(n)}
+        answer = (
+            f"Cyber model prediction: {pred} (filled {len(nums)} numeric fields; rest set to 0)."
+        )
+        return answer, {
+            "available": True,
+            "prediction": str(pred),
+            "filled_fields": len(nums),
+            "expected_fields": int(n),
+        }
 
     def _behavior_score(self, message: str) -> tuple[str, dict[str, Any]]:
         scaler = self.models.behavior_scaler
@@ -352,8 +377,14 @@ class OmniChatXOrchestrator:
             top_idx = int(np.argmax(proba))
             top_label = classes[top_idx] if len(classes) > top_idx else "item"
             shap_res = shap_explain(model, arr, feat_names, top_k=3, force_kernel=False)
-            top_txt = "; ".join([f"{n}:{v:+.3f}" for n, v in shap_res.top_features]) if shap_res.top_features else shap_res.note
-            answer = f"Recommended action: {top_label} (p={proba[top_idx]:.3f}). Top features: {top_txt}"
+            top_txt = (
+                "; ".join([f"{n}:{v:+.3f}" for n, v in shap_res.top_features])
+                if shap_res.top_features
+                else shap_res.note
+            )
+            answer = (
+                f"Recommended action: {top_label} (p={proba[top_idx]:.3f}). Top features: {top_txt}"
+            )
             meta = {
                 "available": True,
                 "label": str(top_label),
@@ -364,13 +395,21 @@ class OmniChatXOrchestrator:
                 "explain": {
                     "method": "shap" if shap_res.values is not None else "fallback",
                     "model_class": shap_res.model_class,
-                    "top_features": [{"name": n, "value": round(float(v), 6)} for n, v in (shap_res.top_features or [])],
+                    "top_features": [
+                        {"name": n, "value": round(float(v), 6)}
+                        for n, v in (shap_res.top_features or [])
+                    ],
                     "note": shap_res.note,
                 },
             }
             return answer, meta
         pred = model.predict(arr)[0]
-        return f"Recommended action: {pred}.", {"available": True, "prediction": str(pred), "filled_fields": len(nums), "expected_fields": int(n)}
+        return f"Recommended action: {pred}.", {
+            "available": True,
+            "prediction": str(pred),
+            "filled_fields": len(nums),
+            "expected_fields": int(n),
+        }
 
     def _recommend_nl(self, message: str) -> tuple[str, dict[str, Any]]:
         """Natural-language recommendation helper for the agent chat (movies/electronics/places/news)."""
@@ -380,13 +419,19 @@ class OmniChatXOrchestrator:
             route_recommendation = None
 
         if route_recommendation is None:
-            return "Recommendation module not available (missing app/streamlit_chatbot).", {"available": False}
+            return "Recommendation module not available (missing app/streamlit_chatbot).", {
+                "available": False
+            }
 
         rec = route_recommendation(message)
         category = str(rec.get("category") or "Recommendations")
         items = rec.get("items") or []
         if not items:
-            return f"No {category} results right now.", {"available": True, "category": category, "items": []}
+            return f"No {category} results right now.", {
+                "available": True,
+                "category": category,
+                "items": [],
+            }
 
         lines = [f"Here are some {category.lower()} picks:"]
         for i, it in enumerate(items[:5], 1):
@@ -418,9 +463,13 @@ class OmniChatXOrchestrator:
         item_codes = meta.get("item_codes", {})
         feat_names = meta.get("feature_names", [])
 
-        u_mean = user_stats.loc[user_id]["user_mean"] if user_id in user_stats.index else global_mean
+        u_mean = (
+            user_stats.loc[user_id]["user_mean"] if user_id in user_stats.index else global_mean
+        )
         u_count = user_stats.loc[user_id]["user_count"] if user_id in user_stats.index else 0.0
-        i_mean = item_stats.loc[movie_id]["item_mean"] if movie_id in item_stats.index else global_mean
+        i_mean = (
+            item_stats.loc[movie_id]["item_mean"] if movie_id in item_stats.index else global_mean
+        )
         i_count = item_stats.loc[movie_id]["item_count"] if movie_id in item_stats.index else 0.0
         u_code = user_codes.get(user_id, 0)
         i_code = item_codes.get(movie_id, 0)
@@ -463,7 +512,10 @@ class OmniChatXOrchestrator:
 
         # If the caller already computed multimodal outputs, accept them as hints.
         if attachments:
-            meta["attachments"] = {k: ("<bytes>" if isinstance(v, (bytes, bytearray)) else v) for k, v in attachments.items()}
+            meta["attachments"] = {
+                k: ("<bytes>" if isinstance(v, (bytes, bytearray)) else v)
+                for k, v in attachments.items()
+            }
 
         try:
             if route == "fraud":
@@ -485,7 +537,12 @@ class OmniChatXOrchestrator:
                         user = int(m.group(1))
                         movie = int(m.group(2))
                         answer = self._recommend_movie(user, movie)
-                        route_meta = {"available": True, "mode": "movie_user_item", "user_id": user, "movie_id": movie}
+                        route_meta = {
+                            "available": True,
+                            "mode": "movie_user_item",
+                            "user_id": user,
+                            "movie_id": movie,
+                        }
                     else:
                         answer, route_meta = self._recommend_nl(message)
             elif route == "rag":
@@ -494,7 +551,9 @@ class OmniChatXOrchestrator:
                     from app.rag.retriever import retrieve_context as _retrieve_context
 
                     chunks = _retrieve_context(message, top_k=3)
-                    answer = "\n\n".join([str(c.get("text") or "") for c in chunks if c.get("text")]) or (
+                    answer = "\n\n".join(
+                        [str(c.get("text") or "") for c in chunks if c.get("text")]
+                    ) or (
                         "I could not find anything in your local docs. Add files under data/docs/ and run /api/rag/ingest."
                     )
                     route_meta = {
@@ -511,7 +570,10 @@ class OmniChatXOrchestrator:
                     }
                 except Exception:
                     result = rag_service.query(message, top_k=3)
-                    answer = result.best_text() or "I could not find anything in your local docs. Add files under data/docs/."
+                    answer = (
+                        result.best_text()
+                        or "I could not find anything in your local docs. Add files under data/docs/."
+                    )
                     route_meta = {
                         "passages": [
                             {

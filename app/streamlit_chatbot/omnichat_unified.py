@@ -9,32 +9,32 @@ Complete all-in-one chatbot with:
 - RAG document chat
 - Live agent interaction
 """
+
 from __future__ import annotations
 
 import os
 import sys
-import base64
 import uuid
 import html
 import logging
 import traceback
-import time
 from pathlib import Path
 from typing import Callable
 from datetime import datetime
 
 import requests
 import streamlit as st
-from PIL import Image
+
+from .utils import call_with_container_width
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # File size limits (in bytes)
-MAX_IMAGE_SIZE = 10 * 1024 * 1024   # 10MB
+MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 MAX_VIDEO_SIZE = 100 * 1024 * 1024  # 100MB
-MAX_AUDIO_SIZE = 20 * 1024 * 1024   # 20MB
+MAX_AUDIO_SIZE = 20 * 1024 * 1024  # 20MB
 MAX_MESSAGE_LENGTH = 5000
 
 # Setup paths
@@ -61,9 +61,10 @@ def render_omnichat_unified(
     auth_headers: Callable[[], dict[str, str]],
 ) -> None:
     """Render the unified OmniChat interface."""
-    
+
     # Custom CSS - ChatGPT-like with bluish-gray theme
-    st.markdown("""
+    st.markdown(
+        """
     <style>
     /* Global background and theme */
     .stApp {
@@ -390,18 +391,23 @@ def render_omnichat_unified(
         }
     }
     </style>
-    """, unsafe_allow_html=True)
-    
+    """,
+        unsafe_allow_html=True,
+    )
+
     # Header
-    st.markdown("""
+    st.markdown(
+        """
     <div class="omnichat-header">
         <h1 class="omnichat-title">🧠 OMNICHAT PRATIK</h1>
         <div class="omnichat-subtitle">
             FRAUD • CYBER • VISION • VOICE • BEHAVIOR • RECOMMENDATIONS
         </div>
     </div>
-    """, unsafe_allow_html=True)
-    
+    """,
+        unsafe_allow_html=True,
+    )
+
     # Initialize session state
     if "omni_messages" not in st.session_state:
         st.session_state.omni_messages = []
@@ -419,46 +425,54 @@ def render_omnichat_unified(
         st.session_state.omni_audio_name = None
     if "omni_video_name" not in st.session_state:
         st.session_state.omni_video_name = None
-    
+
     # Sidebar
     with st.sidebar:
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         st.markdown("### ⚙️ Settings")
-        
+
         use_rag = st.toggle("📚 Enable RAG", value=True, help="Use Retrieval-Augmented Generation")
         enable_vision = st.toggle("👁️ Vision Analysis", value=True, help="Analyze images and videos")
         enable_voice = st.toggle("🎤 Voice Emotion", value=True, help="Analyze audio emotion")
         enable_risk = st.toggle("🛡️ Risk Detection", value=True, help="Fraud/Cyber/Behavior scoring")
-        enable_recommendations = st.toggle("🎯 Recommendations", value=True, help="Movie/Product suggestions")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-        
+        enable_recommendations = st.toggle(
+            "🎯 Recommendations", value=True, help="Movie/Product suggestions"
+        )
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         st.markdown("### 📊 Statistics")
-        
+
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown(f"""
+            st.markdown(
+                f"""
             <div class="metric-card">
                 <div class="metric-value">{len(st.session_state.omni_messages)}</div>
                 <div class="metric-label">Messages</div>
             </div>
-            """, unsafe_allow_html=True)
-        
+            """,
+                unsafe_allow_html=True,
+            )
+
         with col2:
             user_msgs = sum(1 for m in st.session_state.omni_messages if m.get("role") == "user")
-            st.markdown(f"""
+            st.markdown(
+                f"""
             <div class="metric-card">
                 <div class="metric-value">{user_msgs}</div>
                 <div class="metric-label">Queries</div>
             </div>
-            """, unsafe_allow_html=True)
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-        
+            """,
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         st.markdown("### 🎨 Features")
-        
+
         features = [
             ("💳", "Fraud Detection"),
             ("🔐", "Cyber Threat Analysis"),
@@ -471,43 +485,44 @@ def render_omnichat_unified(
             ("📚", "Document Q&A"),
             ("🤖", "AI Agent Chat"),
         ]
-        
+
         for icon, feature in features:
             st.markdown(f"{icon} {feature}")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-        
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         st.markdown("### 🗑️ Actions")
-        
+
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("🗑️ Clear Chat", key="omni_clear_chat", use_container_width=True):
+            if call_with_container_width(st.button, "🗑️ Clear Chat", key="omni_clear_chat"):
                 st.session_state.omni_messages = []
                 st.session_state.omni_attached_image = None
                 st.session_state.omni_attached_audio = None
                 st.session_state.omni_attached_video = None
                 st.rerun()
-        
+
         with col2:
-            if st.button("🔄 New Session", key="omni_new_session", use_container_width=True):
+            if call_with_container_width(st.button, "🔄 New Session", key="omni_new_session"):
                 st.session_state.omni_session_id = str(uuid.uuid4())
                 st.session_state.omni_messages = []
                 st.rerun()
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-        
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         st.markdown(f"**Session ID:** `{st.session_state.omni_session_id[:8]}...`")
         st.markdown(f"**Time:** {datetime.now().strftime('%H:%M:%S')}")
-        st.markdown('</div>', unsafe_allow_html=True)
-    
+        st.markdown("</div>", unsafe_allow_html=True)
+
     # Main chat area
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-    
+
     # Display messages
     if not st.session_state.omni_messages:
-        st.markdown("""
+        st.markdown(
+            """
         <div style="text-align: center; padding: 60px 20px; color: #94a3b8;">
             <div style="font-size: 64px; margin-bottom: 20px;">👋</div>
             <h2 style="color: #e2e8f0; margin-bottom: 12px;">Welcome to OmniChat Pratik!</h2>
@@ -520,18 +535,21 @@ def render_omnichat_unified(
                 <span class="status-badge info">🚀 All Systems Online</span>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
     else:
         for idx, msg in enumerate(st.session_state.omni_messages):
             role = msg.get("role", "user")
             content = msg.get("content", "")
-            
+
             # Sanitize content to prevent XSS
             safe_content = html.escape(content)
-            
+
             if role == "user":
                 safe_badges = [html.escape(badge) for badge in msg.get("badges", [])]
-                st.markdown(f"""
+                st.markdown(
+                    f"""
                 <div class="message-row user">
                     <div class="message-content">
                         <strong style="color: #fbbf24;">👤 You</strong>
@@ -540,9 +558,12 @@ def render_omnichat_unified(
                     </div>
                     <div class="message-avatar user">👤</div>
                 </div>
-                """, unsafe_allow_html=True)
+                """,
+                    unsafe_allow_html=True,
+                )
             else:
-                st.markdown(f"""
+                st.markdown(
+                    f"""
                 <div class="message-row assistant">
                     <div class="message-avatar assistant">🤖</div>
                     <div class="message-content">
@@ -550,26 +571,30 @@ def render_omnichat_unified(
                         <div style="margin-top: 6px;">{safe_content}</div>
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
+                """,
+                    unsafe_allow_html=True,
+                )
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
     # Spacer
     st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
-    
+
     # Bottom input section
     st.markdown("---")
-    
+
     # Media attachments section
     with st.expander("📎 Attach Media", expanded=False):
         media_tabs = st.tabs(["📷 Camera/Image", "🎤 Audio/Voice", "🎥 Video"])
-        
+
         with media_tabs[0]:
             col1, col2 = st.columns(2)
-            
+
             with col1:
                 st.markdown("**📸 Take Photo**")
-                camera_input = st.camera_input("Capture", key="omni_camera", label_visibility="collapsed")
+                camera_input = st.camera_input(
+                    "Capture", key="omni_camera", label_visibility="collapsed"
+                )
                 if camera_input:
                     photo_bytes = camera_input.getvalue()
                     if len(photo_bytes) > MAX_IMAGE_SIZE:
@@ -578,14 +603,14 @@ def render_omnichat_unified(
                         st.session_state.omni_attached_image = photo_bytes
                         st.session_state.omni_image_name = "camera_photo.jpg"
                         st.success("✅ Photo captured!")
-            
+
             with col2:
                 st.markdown("**🖼️ Upload Image**")
                 uploaded_image = st.file_uploader(
                     "Upload",
                     type=["png", "jpg", "jpeg", "webp"],
                     key="omni_img_upload",
-                    label_visibility="collapsed"
+                    label_visibility="collapsed",
                 )
                 if uploaded_image:
                     img_bytes = uploaded_image.getvalue()
@@ -595,13 +620,15 @@ def render_omnichat_unified(
                         st.session_state.omni_attached_image = img_bytes
                         st.session_state.omni_image_name = uploaded_image.name
                         st.success(f"✅ {uploaded_image.name} uploaded!")
-        
+
         with media_tabs[1]:
             col1, col2 = st.columns(2)
-            
+
             with col1:
                 st.markdown("**🎙️ Record Audio**")
-                audio_recorder = st.audio_input("Record", key="omni_mic", label_visibility="collapsed")
+                audio_recorder = st.audio_input(
+                    "Record", key="omni_mic", label_visibility="collapsed"
+                )
                 if audio_recorder:
                     audio_bytes = audio_recorder.read()
                     if len(audio_bytes) > MAX_AUDIO_SIZE:
@@ -610,14 +637,14 @@ def render_omnichat_unified(
                         st.session_state.omni_attached_audio = audio_bytes
                         st.session_state.omni_audio_name = "recording.wav"
                         st.success("✅ Audio recorded!")
-            
+
             with col2:
                 st.markdown("**🎵 Upload Audio**")
                 uploaded_audio = st.file_uploader(
                     "Upload",
                     type=["wav", "mp3", "m4a", "ogg", "aac"],
                     key="omni_audio_upload",
-                    label_visibility="collapsed"
+                    label_visibility="collapsed",
                 )
                 if uploaded_audio:
                     audio_bytes = uploaded_audio.getvalue()
@@ -627,14 +654,14 @@ def render_omnichat_unified(
                         st.session_state.omni_attached_audio = audio_bytes
                         st.session_state.omni_audio_name = uploaded_audio.name
                         st.success(f"✅ {uploaded_audio.name} uploaded!")
-        
+
         with media_tabs[2]:
             st.markdown("**🎬 Upload Video**")
             uploaded_video = st.file_uploader(
                 "Upload video",
                 type=["mp4", "mov", "avi", "mkv"],
                 key="omni_video_upload",
-                label_visibility="collapsed"
+                label_visibility="collapsed",
             )
             if uploaded_video:
                 video_bytes = uploaded_video.getvalue()
@@ -644,67 +671,78 @@ def render_omnichat_unified(
                     st.session_state.omni_attached_video = video_bytes
                     st.session_state.omni_video_name = uploaded_video.name
                     st.success(f"✅ {uploaded_video.name} uploaded!")
-    
+
     # Show current attachments
-    if any([st.session_state.omni_attached_image, 
-            st.session_state.omni_attached_audio, 
-            st.session_state.omni_attached_video]):
+    if any(
+        [
+            st.session_state.omni_attached_image,
+            st.session_state.omni_attached_audio,
+            st.session_state.omni_attached_video,
+        ]
+    ):
         st.markdown("#### 📌 Current Attachments")
-        
+
         attach_cols = st.columns([2, 2, 2, 1])
-        
+
         with attach_cols[0]:
             if st.session_state.omni_attached_image:
-                st.image(st.session_state.omni_attached_image, width=150, caption=st.session_state.omni_image_name)
-        
+                st.image(
+                    st.session_state.omni_attached_image,
+                    width=150,
+                    caption=st.session_state.omni_image_name,
+                )
+
         with attach_cols[1]:
             if st.session_state.omni_attached_audio:
                 st.audio(st.session_state.omni_attached_audio)
                 st.caption(st.session_state.omni_audio_name)
-        
+
         with attach_cols[2]:
             if st.session_state.omni_attached_video:
                 st.video(st.session_state.omni_attached_video)
                 st.caption(st.session_state.omni_video_name)
-        
+
         with attach_cols[3]:
-            if st.button("🗑️ Clear All", use_container_width=True):
+            if call_with_container_width(st.button, "🗑️ Clear All"):
                 st.session_state.omni_attached_image = None
                 st.session_state.omni_attached_audio = None
                 st.session_state.omni_attached_video = None
                 st.rerun()
-    
+
     # Chat input
     st.markdown("#### 💬 Your Message")
-    
+
     input_col1, input_col2 = st.columns([6, 1])
-    
+
     with input_col1:
-        prompt = st.chat_input("Type your message here... Ask about fraud, cyber threats, vision analysis, or get recommendations!", key="omni_chat_input")
-    
+        prompt = st.chat_input(
+            "Type your message here... Ask about fraud, cyber threats, vision analysis, or get recommendations!",
+            key="omni_chat_input",
+        )
+
     with input_col2:
-        send_button = st.button("📤 Send", use_container_width=True, type="primary")
-    
+        send_button = call_with_container_width(st.button, "📤 Send", type="primary")
+
     # Process message
     if prompt or send_button:
         if not prompt:
             st.warning("⚠️ Please type a message first!")
             st.stop()
-        
+
         user_text = prompt.strip()
-        
+
         # Validate message
         if not user_text:
             st.warning("⚠️ Please enter a non-empty message!")
             st.stop()
-        
+
         if len(user_text) > MAX_MESSAGE_LENGTH:
             st.error(f"❌ Message too long! Maximum {MAX_MESSAGE_LENGTH} characters.")
             st.stop()
-        
+
         # Remove potentially harmful characters
-        user_text = user_text.replace('\0', '')  # Null bytes
-        
+        user_text = user_text.replace("\0", "")  # Null bytes
+
         # Build badges for attachments
         badges = []
         if st.session_state.omni_attached_image:
@@ -713,7 +751,7 @@ def render_omnichat_unified(
             badges.append("🎤 Audio")
         if st.session_state.omni_attached_video:
             badges.append("🎥 Video")
-        
+
         # Add user message
         user_msg = {
             "role": "user",
@@ -722,10 +760,11 @@ def render_omnichat_unified(
             "timestamp": datetime.now().isoformat(),
         }
         st.session_state.omni_messages.append(user_msg)
-        
+
         # Show typing indicator
         with st.spinner(""):
-            st.markdown("""
+            st.markdown(
+                """
             <div class="message-row assistant">
                 <div class="message-avatar assistant">🤖</div>
                 <div class="message-content">
@@ -736,36 +775,38 @@ def render_omnichat_unified(
                     </div>
                 </div>
             </div>
-            """, unsafe_allow_html=True)
-            
+            """,
+                unsafe_allow_html=True,
+            )
+
             # Prepare API call
             files: dict = {}
             has_media = False
-            
+
             if st.session_state.omni_attached_image:
                 files["image"] = (
                     st.session_state.omni_image_name or "image.jpg",
                     st.session_state.omni_attached_image,
-                    "image/jpeg"
+                    "image/jpeg",
                 )
                 has_media = True
-            
+
             if st.session_state.omni_attached_audio:
                 files["audio"] = (
                     st.session_state.omni_audio_name or "audio.wav",
                     st.session_state.omni_attached_audio,
-                    "audio/wav"
+                    "audio/wav",
                 )
                 has_media = True
-            
+
             if st.session_state.omni_attached_video:
                 files["video"] = (
                     st.session_state.omni_video_name or "video.mp4",
                     st.session_state.omni_attached_video,
-                    "video/mp4"
+                    "video/mp4",
                 )
                 has_media = True
-            
+
             # Make API call
             try:
                 if has_media:
@@ -790,48 +831,58 @@ def render_omnichat_unified(
                             "message": user_text,
                             "user_id": st.session_state.omni_session_id,
                             "use_rag": use_rag,
-                        }
+                        },
                     )
-                
+
                 # Process response
                 if isinstance(res, dict) and "error" not in res:
                     reply = res.get("reply") or res.get("answer") or res.get("response", "")
 
                     meta = res.get("meta") if isinstance(res.get("meta"), dict) else {}
-                    meta_attachments = meta.get("attachments") if isinstance(meta.get("attachments"), dict) else {}
-                    
+                    meta_attachments = (
+                        meta.get("attachments") if isinstance(meta.get("attachments"), dict) else {}
+                    )
+
                     # Add analysis results if available
                     analysis_parts = []
-                    
+
                     if enable_risk:
                         # Fraud detection
                         if res.get("fraud_score") is not None:
                             score = res["fraud_score"]
-                            risk_level = "🔴 HIGH" if score > 0.7 else "🟡 MEDIUM" if score > 0.4 else "🟢 LOW"
+                            risk_level = (
+                                "🔴 HIGH"
+                                if score > 0.7
+                                else "🟡 MEDIUM" if score > 0.4 else "🟢 LOW"
+                            )
                             analysis_parts.append(f"**Fraud Risk:** {risk_level} ({score:.2%})")
-                        
+
                         # Cyber threat
                         if res.get("cyber_score") is not None:
                             score = res["cyber_score"]
-                            risk_level = "🔴 HIGH" if score > 0.7 else "🟡 MEDIUM" if score > 0.4 else "🟢 LOW"
+                            risk_level = (
+                                "🔴 HIGH"
+                                if score > 0.7
+                                else "🟡 MEDIUM" if score > 0.4 else "🟢 LOW"
+                            )
                             analysis_parts.append(f"**Cyber Threat:** {risk_level} ({score:.2%})")
-                        
+
                         # Behavior anomaly
                         if res.get("behavior_score") is not None:
                             score = res["behavior_score"]
                             status = "⚠️ ANOMALOUS" if score > 0.6 else "✅ NORMAL"
                             analysis_parts.append(f"**Behavior:** {status} ({score:.2%})")
-                    
+
                     if enable_voice:
                         # Check multiple possible emotion field names and nested structures
                         emotion = None
                         confidence = 0
-                        
+
                         # Check top-level
                         if res.get("emotion"):
                             emotion = res.get("emotion")
                             confidence = res.get("emotion_confidence") or res.get("confidence") or 0
-                        
+
                         # Check in meta/attachments (multimodal response)
                         elif meta_attachments.get("voice"):
                             voice = meta_attachments["voice"]
@@ -843,25 +894,40 @@ def render_omnichat_unified(
                             voice = res["meta"]["voice"]
                             emotion = voice.get("emotion")
                             confidence = voice.get("confidence") or 0
-                        
+
                         # Check attachments directly
                         elif res.get("attachments", {}).get("voice"):
                             voice = res["attachments"]["voice"]
                             emotion = voice.get("emotion")
                             confidence = voice.get("confidence") or 0
-                        
+
                         if emotion:
                             # Capitalize emotion and add emoji
                             emotion_emoji = {
-                                "happy": "😊", "sad": "😢", "angry": "😠", "fear": "😨",
-                                "neutral": "😐", "surprise": "😲", "disgust": "🤢",
-                                "calm": "😌", "excited": "🤩", "anxious": "😰"
+                                "happy": "😊",
+                                "sad": "😢",
+                                "angry": "😠",
+                                "fear": "😨",
+                                "neutral": "😐",
+                                "surprise": "😲",
+                                "disgust": "🤢",
+                                "calm": "😌",
+                                "excited": "🤩",
+                                "anxious": "😰",
                             }
                             emoji = emotion_emoji.get(emotion.lower(), "🎭")
-                            emotion_display = emotion.capitalize() if isinstance(emotion, str) else emotion
-                            conf_display = f"{confidence:.1%}" if isinstance(confidence, (int, float)) else "N/A"
-                            analysis_parts.append(f"**Voice Emotion:** {emoji} {emotion_display} ({conf_display} confidence)")
-                        
+                            emotion_display = (
+                                emotion.capitalize() if isinstance(emotion, str) else emotion
+                            )
+                            conf_display = (
+                                f"{confidence:.1%}"
+                                if isinstance(confidence, (int, float))
+                                else "N/A"
+                            )
+                            analysis_parts.append(
+                                f"**Voice Emotion:** {emoji} {emotion_display} ({conf_display} confidence)"
+                            )
+
                         # Also check for audio transcription
                         transcript = None
                         if res.get("transcription"):
@@ -872,15 +938,15 @@ def render_omnichat_unified(
                             transcript = res["meta"]["stt"]["text"]
                         elif res.get("attachments", {}).get("stt", {}).get("text"):
                             transcript = res["attachments"]["stt"]["text"]
-                        
+
                         if transcript:
-                            analysis_parts.append(f"**Transcription:** \"{transcript}\"")
-                    
+                            analysis_parts.append(f'**Transcription:** "{transcript}"')
+
                     if enable_vision:
                         # Check for vision label/classification in various locations
                         vision_label = None
                         vision_conf = 0
-                        
+
                         # Check top-level
                         if res.get("vision_label"):
                             vision_label = res.get("vision_label")
@@ -888,7 +954,7 @@ def render_omnichat_unified(
                         elif res.get("label"):
                             vision_label = res.get("label")
                             vision_conf = res.get("confidence") or 0
-                        
+
                         # Check in meta/attachments (multimodal response)
                         elif meta_attachments.get("vision_image"):
                             vision = meta_attachments["vision_image"]
@@ -904,10 +970,16 @@ def render_omnichat_unified(
                             vision = res["attachments"]["vision_image"]
                             vision_label = vision.get("label")
                             vision_conf = vision.get("confidence") or 0
-                        
+
                         if vision_label:
-                            conf_display = f"{vision_conf:.1%}" if isinstance(vision_conf, (int, float)) else "N/A"
-                            analysis_parts.append(f"**Vision Classification:** 🔍 {vision_label} ({conf_display})")
+                            conf_display = (
+                                f"{vision_conf:.1%}"
+                                if isinstance(vision_conf, (int, float))
+                                else "N/A"
+                            )
+                            analysis_parts.append(
+                                f"**Vision Classification:** 🔍 {vision_label} ({conf_display})"
+                            )
 
                         # Face emotion (image-based, optional)
                         face_emotion = None
@@ -921,15 +993,21 @@ def render_omnichat_unified(
                         if isinstance(face_emotion, dict) and face_emotion.get("emotion"):
                             emo = face_emotion.get("emotion")
                             conf = face_emotion.get("confidence") or 0
-                            conf_display = f"{conf:.1%}" if isinstance(conf, (int, float)) else "N/A"
+                            conf_display = (
+                                f"{conf:.1%}" if isinstance(conf, (int, float)) else "N/A"
+                            )
                             analysis_parts.append(f"**Face Emotion:** 😊 {emo} ({conf_display})")
-                        
+
                         # Check for detected objects
-                        objects = res.get("objects_detected") or res.get("objects") or res.get("detections")
+                        objects = (
+                            res.get("objects_detected")
+                            or res.get("objects")
+                            or res.get("detections")
+                        )
                         if objects and isinstance(objects, list):
-                            obj_list = ', '.join([str(obj) for obj in objects[:10]])  # Limit to 10
+                            obj_list = ", ".join([str(obj) for obj in objects[:10]])  # Limit to 10
                             analysis_parts.append(f"**Objects Detected:** 🎯 {obj_list}")
-                        
+
                         # Check for video analysis
                         video_label = None
                         if meta_attachments.get("vision_video"):
@@ -941,15 +1019,15 @@ def render_omnichat_unified(
                         elif res.get("attachments", {}).get("vision_video"):
                             video = res["attachments"]["vision_video"]
                             video_label = video.get("label")
-                        
+
                         if video_label:
                             analysis_parts.append(f"**Video Analysis:** 🎬 {video_label}")
-                        
+
                         # Check for scene description
                         if res.get("scene_description") or res.get("description"):
                             desc = res.get("scene_description") or res.get("description")
                             analysis_parts.append(f"**Scene:** 🖼️ {desc}")
-                    
+
                     if enable_recommendations and res.get("recommendations"):
                         recs = res["recommendations"]
                         if isinstance(recs, list) and recs:
@@ -958,23 +1036,25 @@ def render_omnichat_unified(
                                 title = rec.get("title") or rec.get("name", "Item")
                                 rec_text += f"{i}. {title}\n"
                             analysis_parts.append(rec_text)
-                    
+
                     # Combine reply with analysis
                     if analysis_parts:
                         reply += "\n\n" + "\n\n".join(analysis_parts)
-                        
+
                     if not reply:
                         reply = "✅ I've processed your request successfully!"
-                    
+
                     # Add debug info in expander (only in development)
                     if os.getenv("DEBUG_MODE") == "true":
                         reply += "\n\n---\n**Debug Info:**"
                         reply += f"\n```json\n{str(res)[:500]}\n```"
-                
+
                 else:
-                    error_msg = res.get("error", "Unknown error") if isinstance(res, dict) else str(res)
+                    error_msg = (
+                        res.get("error", "Unknown error") if isinstance(res, dict) else str(res)
+                    )
                     reply = f"❌ **Error:** {error_msg}"
-            
+
             except requests.ConnectionError as e:
                 reply = "❌ **Connection Error:** Cannot reach the backend server. Please ensure the API is running."
                 logger.error(f"Backend connection failed: {e}")
@@ -998,7 +1078,7 @@ def render_omnichat_unified(
             except Exception as e:
                 reply = f"❌ **Unexpected Error:** {str(e)[:200]}"
                 logger.error(f"Unexpected error in chat handler: {traceback.format_exc()}")
-            
+
             # Add assistant message
             assistant_msg = {
                 "role": "assistant",
@@ -1006,7 +1086,7 @@ def render_omnichat_unified(
                 "timestamp": datetime.now().isoformat(),
             }
             st.session_state.omni_messages.append(assistant_msg)
-            
+
             # Clear attachments
             st.session_state.omni_attached_image = None
             st.session_state.omni_attached_audio = None
@@ -1014,7 +1094,7 @@ def render_omnichat_unified(
             st.session_state.omni_image_name = None
             st.session_state.omni_audio_name = None
             st.session_state.omni_video_name = None
-        
+
         st.rerun()
 
 
@@ -1026,9 +1106,9 @@ def main():
         layout="wide",
         initial_sidebar_state="expanded",
     )
-    
+
     backend_url = os.environ.get("OMNICHATX_BACKEND", "http://localhost:8000").strip().rstrip("/")
-    
+
     # Health check on startup
     try:
         health_resp = requests.get(f"{backend_url}/health", timeout=5)
@@ -1046,64 +1126,49 @@ def main():
     except Exception as e:
         st.warning(f"⚠️ Backend health check failed: {e}")
         logger.warning(f"Backend health check error: {e}")
-    
+
     def _auth_headers() -> dict[str, str]:
         headers: dict[str, str] = {}
         if os.getenv("AUTH_TOKEN"):
             headers["Authorization"] = f"Bearer {os.environ['AUTH_TOKEN']}"
         return headers
-    
+
     def call_model(path: str, payload: dict) -> dict:
         try:
             resp = requests.post(
-                f"{backend_url}{path}",
-                json=payload,
-                headers=_auth_headers(),
-                timeout=15.0
+                f"{backend_url}{path}", json=payload, headers=_auth_headers(), timeout=15.0
             )
             resp.raise_for_status()
             return resp.json()
         except Exception as exc:
             return {"error": str(exc)}
-    
-    def call_multipart(
-        path: str,
-        *,
-        data: dict,
-        files: dict | None,
-        timeout: float = 90.0
-    ) -> dict:
+
+    def call_multipart(path: str, *, data: dict, files: dict | None, timeout: float = 90.0) -> dict:
         try:
             resp = requests.post(
                 f"{backend_url}{path}",
                 data=data,
                 files=files,
                 headers=_auth_headers(),
-                timeout=timeout
+                timeout=timeout,
             )
             resp.raise_for_status()
             return resp.json()
         except Exception as exc:
             return {"error": str(exc)}
-    
+
     def call_get(
-        path: str,
-        *,
-        params: dict[str, str | int | float] | None = None,
-        timeout: float = 15.0
+        path: str, *, params: dict[str, str | int | float] | None = None, timeout: float = 15.0
     ) -> dict:
         try:
             resp = requests.get(
-                f"{backend_url}{path}",
-                params=params,
-                headers=_auth_headers(),
-                timeout=timeout
+                f"{backend_url}{path}", params=params, headers=_auth_headers(), timeout=timeout
             )
             resp.raise_for_status()
             return resp.json()
         except Exception as exc:
             return {"error": str(exc)}
-    
+
     render_omnichat_unified(
         backend_url=backend_url,
         call_model=call_model,

@@ -3,10 +3,11 @@
 Provides helpers to generate SHAP/LIME for tabular models, text LIME/SHAP (optional),
 and vision Grad-CAM is handled in vision flows.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -25,7 +26,11 @@ def shap_tabular(model, X: pd.DataFrame, out_dir: Path, class_index: int = 1) ->
         explainer = shap.TreeExplainer(model)
         shap_values = explainer.shap_values(X)
         plt.figure()
-        shap.summary_plot(shap_values[class_index] if isinstance(shap_values, list) else shap_values, X, show=False)
+        shap.summary_plot(
+            shap_values[class_index] if isinstance(shap_values, list) else shap_values,
+            X,
+            show=False,
+        )
         plt.tight_layout()
         out_path = out_dir / "shap_summary.png"
         plt.savefig(out_path, dpi=150)
@@ -36,7 +41,9 @@ def shap_tabular(model, X: pd.DataFrame, out_dir: Path, class_index: int = 1) ->
         return None
 
 
-def lime_tabular(model, X_train: pd.DataFrame, sample: pd.Series, out_dir: Path, class_names=None) -> Optional[Path]:
+def lime_tabular(
+    model, X_train: pd.DataFrame, sample: pd.Series, out_dir: Path, class_names=None
+) -> Optional[Path]:
     try:
         from lime.lime_tabular import LimeTabularExplainer
     except Exception as exc:  # pragma: no cover

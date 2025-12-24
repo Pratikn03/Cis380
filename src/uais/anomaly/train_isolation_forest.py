@@ -4,7 +4,7 @@ Unsupervised anomaly detection models for fraud (v1).
 This module implements a simple Isolation Forest wrapper for anomaly scores.
 """
 
-from typing import Dict, Tuple
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -64,7 +64,10 @@ def _prep_numeric_features(X: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series]:
     numeric = numeric.fillna(median_vals)
     return numeric, median_vals
 
-def compute_anomaly_score(model: IsolationForest, scaler: StandardScaler, X: pd.DataFrame) -> np.ndarray:
+
+def compute_anomaly_score(
+    model: IsolationForest, scaler: StandardScaler, X: pd.DataFrame
+) -> np.ndarray:
     """
     Compute anomaly scores from a trained Isolation Forest model.
 

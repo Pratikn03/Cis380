@@ -18,7 +18,9 @@ class WhisperSTT:
             try:
                 module = importlib.import_module("faster_whisper")
             except ImportError as exc:
-                raise RuntimeError("`faster_whisper` is not installed in this environment.") from exc
+                raise RuntimeError(
+                    "`faster_whisper` is not installed in this environment."
+                ) from exc
             cls._model_cls = getattr(module, "WhisperModel")
         return cls._model_cls
 
@@ -52,7 +54,9 @@ class WhisperSTT:
         }
 
     @classmethod
-    def transcribe_bytes(cls, audio_bytes: bytes, suffix: str = ".wav", language: Optional[str] = None) -> Dict[str, Any]:
+    def transcribe_bytes(
+        cls, audio_bytes: bytes, suffix: str = ".wav", language: Optional[str] = None
+    ) -> Dict[str, Any]:
         with tempfile.NamedTemporaryFile(delete=True, suffix=suffix) as tmp:
             tmp.write(audio_bytes)
             tmp.flush()

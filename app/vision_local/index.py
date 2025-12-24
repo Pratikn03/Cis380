@@ -62,10 +62,14 @@ class VectorIndex:
             for score, idx in zip(distances[0].tolist(), indices[0].tolist()):
                 if idx < 0:
                     continue
-                hits.append(SearchHit(index=int(idx), score=float(score), meta=self._meta[int(idx)]))
+                hits.append(
+                    SearchHit(index=int(idx), score=float(score), meta=self._meta[int(idx)])
+                )
             return hits
 
         scores = (q @ self._vectors.T).astype(np.float32)
         order = np.argsort(scores)[::-1][:top_k]
-        return [SearchHit(index=int(i), score=float(scores[int(i)]), meta=self._meta[int(i)]) for i in order.tolist()]
-
+        return [
+            SearchHit(index=int(i), score=float(scores[int(i)]), meta=self._meta[int(i)])
+            for i in order.tolist()
+        ]

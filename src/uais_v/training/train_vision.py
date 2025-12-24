@@ -16,6 +16,7 @@ The trainer will auto-detect option (2) and map it to train/val.
 
 Optionally saves the trained model to disk.
 """
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Tuple
@@ -41,7 +42,9 @@ class VisionTrainConfig:
     max_batches_per_epoch: int | None = None
 
 
-def build_dataloaders(data_dir: Path, batch_size: int, num_workers: int) -> Tuple[DataLoader, DataLoader]:
+def build_dataloaders(
+    data_dir: Path, batch_size: int, num_workers: int
+) -> Tuple[DataLoader, DataLoader]:
     transform = transforms.Compose(
         [
             transforms.Resize((224, 224)),
@@ -52,7 +55,9 @@ def build_dataloaders(data_dir: Path, batch_size: int, num_workers: int) -> Tupl
     train_root, val_root = resolve_imagefolder_splits(data_dir)
     train_ds = ImageFolder(train_root, transform=transform)
     val_ds = ImageFolder(val_root, transform=transform)
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    train_loader = DataLoader(
+        train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers
+    )
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers)
     return train_loader, val_loader
 
@@ -97,7 +102,9 @@ def train_resnet_classifier(
         device = torch.device("mps")
     else:
         device = torch.device("cpu")
-    train_loader, val_loader = build_dataloaders(data_dir, train_cfg.batch_size, train_cfg.num_workers)
+    train_loader, val_loader = build_dataloaders(
+        data_dir, train_cfg.batch_size, train_cfg.num_workers
+    )
 
     # Determine number of classes from the dataset itself (supports multi-class scenes)
     _, val_loader = build_dataloaders(data_dir, train_cfg.batch_size, train_cfg.num_workers)
@@ -107,7 +114,11 @@ def train_resnet_classifier(
 
     # Build model and ensure head matches class count.
     model = build_resnet_classifier(vision_cfg).to(device)
-    if hasattr(model, "fc") and isinstance(model.fc, nn.Linear) and model.fc.out_features != num_classes:
+    if (
+        hasattr(model, "fc")
+        and isinstance(model.fc, nn.Linear)
+        and model.fc.out_features != num_classes
+    ):
         model.fc = nn.Linear(model.fc.in_features, num_classes).to(device)
 
     criterion = nn.CrossEntropyLoss()
@@ -126,7 +137,10 @@ def train_resnet_classifier(
             optimizer.step()
             epoch_loss += loss.item() * len(labels)
             seen += len(labels)
-            if train_cfg.max_batches_per_epoch is not None and step >= train_cfg.max_batches_per_epoch:
+            if (
+                train_cfg.max_batches_per_epoch is not None
+                and step >= train_cfg.max_batches_per_epoch
+            ):
                 break
         # ImageFolder exposes `samples`; prefer that for a type-checker-friendly length.
         epoch_loss /= max(seen, 1)

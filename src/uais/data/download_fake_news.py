@@ -7,6 +7,7 @@ Requires:
     pip install kagglehub
     Kaggle credentials configured (if required by kagglehub)
 """
+
 from __future__ import annotations
 
 import shutil

@@ -1,4 +1,5 @@
 """Best-effort cyber pipeline wrapper."""
+
 from __future__ import annotations
 
 from uais.utils.logging_utils import setup_logging

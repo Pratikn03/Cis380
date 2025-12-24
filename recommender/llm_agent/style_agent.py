@@ -1,4 +1,5 @@
 """LLM style/personalization stub for recommendations."""
+
 from __future__ import annotations
 
 import os
@@ -26,4 +27,3 @@ def style_message(base_text: str, tone: str = "friendly") -> str:
         return data["choices"][0]["message"]["content"]
     except Exception:
         return base_text
-

@@ -93,7 +93,9 @@ def train_cyber_model(
     """Train a supervised cyber intrusion model and return model + validation metrics."""
     model = _build_model(config)
     if use_pipeline:
-        pre = build_tabular_pipeline(pd.concat([X_train, y_train], axis=1), target_col=y_train.name or "label")
+        pre = build_tabular_pipeline(
+            pd.concat([X_train, y_train], axis=1), target_col=y_train.name or "label"
+        )
         from sklearn.pipeline import Pipeline as SKPipeline
 
         pipe = SKPipeline([("preprocessor", pre), ("model", model)])
@@ -129,7 +131,11 @@ def cross_val_train_cyber(
         y_tr, y_val = y.iloc[train_idx], y.iloc[val_idx]
         model = _build_model(config)
         model.fit(X_tr, y_tr)
-        proba = model.predict_proba(X_val)[:, 1] if hasattr(model, "predict_proba") else model.predict(X_val)
+        proba = (
+            model.predict_proba(X_val)[:, 1]
+            if hasattr(model, "predict_proba")
+            else model.predict(X_val)
+        )
         aucs.append(compute_classification_metrics(y_val.values, proba, threshold=0.5)["roc_auc"])
         models.append(model)
     metrics = {"cv_roc_auc_mean": float(np.mean(aucs)) if aucs else float("nan"), "cv_scores": aucs}

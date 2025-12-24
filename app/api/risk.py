@@ -31,7 +31,11 @@ class RiskPayload(BaseModel):
 async def risk_analyze(payload: RiskPayload, explain: bool = True) -> dict[str, Any]:
     payload_data = payload.model_dump()
     scores = analyze_risk(payload_data)
-    decision = make_decision(scores.get("cyber_risk", 0.0), scores.get("behavior_risk", 0.0), scores.get("fraud_risk", 0.0))
+    decision = make_decision(
+        scores.get("cyber_risk", 0.0),
+        scores.get("behavior_risk", 0.0),
+        scores.get("fraud_risk", 0.0),
+    )
 
     out: dict[str, Any] = {
         "cyber_risk": float(scores.get("cyber_risk", 0.0)),
@@ -53,7 +57,11 @@ async def risk_analyze(payload: RiskPayload, explain: bool = True) -> dict[str, 
                 "fusion_risk": float(scores.get("fusion_risk", 0.0)),
             },
             decision=decision.decision,
-            context=[f"login_country={payload.login_country}", f"device_known={payload.device_known}", f"transaction_amount={payload.transaction_amount}"],
+            context=[
+                f"login_country={payload.login_country}",
+                f"device_known={payload.device_known}",
+                f"transaction_amount={payload.transaction_amount}",
+            ],
         )
 
     # Monitoring (best effort): keep logging even if shapes change.

@@ -7,7 +7,6 @@ Note: This module requires the `shap` package. Install via:
 
 from typing import Optional
 
-import numpy as np
 import pandas as pd
 
 try:
@@ -39,7 +38,9 @@ def compute_shap_values(model, X: pd.DataFrame):
     return explainer, shap_values
 
 
-def plot_shap_summary(model, X: pd.DataFrame, max_display: int = 20, class_index: Optional[int] = None):
+def plot_shap_summary(
+    model, X: pd.DataFrame, max_display: int = 20, class_index: Optional[int] = None
+):
     """
     Plot a SHAP summary plot for the given model and dataset.
 

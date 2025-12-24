@@ -14,7 +14,9 @@ try:  # pragma: no cover
 except Exception:  # pragma: no cover
     _mm = None
 
-router = APIRouter(prefix="/api/recommend", tags=["recommend"], dependencies=[Depends(require_auth)])
+router = APIRouter(
+    prefix="/api/recommend", tags=["recommend"], dependencies=[Depends(require_auth)]
+)
 
 
 class RecommendRequest(BaseModel):
@@ -244,7 +246,9 @@ async def recommend_multimodal(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     except Exception as exc:
         if _mm is not None and isinstance(exc, _mm.IndexNotBuiltError):
-            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+            ) from exc
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Multimodal recommendation failed: {exc}",
@@ -311,7 +315,9 @@ def recommend_topn(req: TopNRequest):
             # popularity backoff
             results = top_popular(top_k=req.top_k or 5)
 
-        results = sorted(results, key=lambda x: x.get("probability") or 0, reverse=True)[: req.top_k or 5]
+        results = sorted(results, key=lambda x: x.get("probability") or 0, reverse=True)[
+            : req.top_k or 5
+        ]
         return {"mode": "topn", "user_id": req.user_id, "results": results}
     except Exception as exc:
         raise HTTPException(

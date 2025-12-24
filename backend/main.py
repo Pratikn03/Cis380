@@ -16,6 +16,9 @@ from fastapi.staticfiles import StaticFiles
 from prometheus_client import Counter, Histogram
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 SRC_DIR = ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
@@ -28,8 +31,8 @@ try:  # pragma: no cover
 except Exception:
     pass
 
-from api.deps import require_auth
-from api.routes import chat, rag, recommend, behavior, fraud, cyber, vision
+from api.deps import require_auth  # noqa: E402
+from api.routes import behavior, chat, cyber, fraud, rag, recommend, vision  # noqa: E402
 
 _app_risk_router = None
 _app_monitor_router = None
@@ -88,7 +91,7 @@ try:  # pragma: no cover
 except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.core.health router unavailable: %s", exc)
     _health_router = None
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse  # noqa: E402
 
 logger = logging.getLogger("omnichatx")
 _log_level_name = (os.getenv("LOG_LEVEL") or "INFO").upper()
@@ -116,6 +119,7 @@ REQUEST_LATENCY = Histogram(
 
 
 app = FastAPI(title="OmniChatX API", version="0.2")
+
 
 def _parse_cors_origins() -> list[str]:
     raw = (os.getenv("CORS_ORIGINS") or "*").strip()
@@ -164,7 +168,9 @@ if _app_brand_router is not None:
 if _app_stt_router is not None:
     app.include_router(_app_stt_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_vision_temporal_router is not None:
-    app.include_router(_app_vision_temporal_router, prefix="/api", dependencies=[Depends(require_auth)])
+    app.include_router(
+        _app_vision_temporal_router, prefix="/api", dependencies=[Depends(require_auth)]
+    )
 
 
 @app.middleware("http")

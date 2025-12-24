@@ -1,4 +1,5 @@
 """Fusion model that learns from multiple domain embeddings/scores."""
+
 from typing import Dict, Tuple
 
 import joblib
@@ -28,7 +29,11 @@ def train_fusion_meta_model(
     X_meta = scaler.fit_transform(X_meta)
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X_meta, y, test_size=config.get("data", {}).get("test_size", 0.2), random_state=config.get("seed", 42), stratify=y
+        X_meta,
+        y,
+        test_size=config.get("data", {}).get("test_size", 0.2),
+        random_state=config.get("seed", 42),
+        stratify=y,
     )
 
     model = LogisticRegression(max_iter=200, class_weight="balanced")

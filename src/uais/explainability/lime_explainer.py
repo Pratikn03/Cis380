@@ -1,4 +1,5 @@
 """LIME helper functions."""
+
 from typing import Dict, List
 
 import numpy as np
@@ -9,7 +10,9 @@ from uais.utils.logging_utils import setup_logging
 logger = setup_logging(__name__)
 
 
-def explain_with_lime(model, X_train: pd.DataFrame, sample: pd.Series, class_names: List[str] | None = None) -> Dict:
+def explain_with_lime(
+    model, X_train: pd.DataFrame, sample: pd.Series, class_names: List[str] | None = None
+) -> Dict:
     try:
         from lime.lime_tabular import LimeTabularExplainer
     except ImportError as exc:  # pragma: no cover - optional dependency path

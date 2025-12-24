@@ -31,7 +31,9 @@ async def upload_doc(file: UploadFile = File(...)) -> Dict[str, Any]:
     """Upload a .txt/.md doc into `data/docs/` and rebuild the local RAG index."""
     filename = Path(file.filename or "upload.md").name
     if not filename.lower().endswith((".md", ".txt")):
-        raise HTTPException(status_code=400, detail="Only .md/.txt files are supported for RAG ingestion.")
+        raise HTTPException(
+            status_code=400, detail="Only .md/.txt files are supported for RAG ingestion."
+        )
     raw = await file.read()
     content = raw.decode("utf-8", errors="ignore")
     target = Path("data") / "docs" / filename

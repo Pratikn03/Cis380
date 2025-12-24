@@ -1,4 +1,5 @@
 """Centralized filesystem paths for UAIS-V."""
+
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]

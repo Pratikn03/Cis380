@@ -4,9 +4,9 @@ Takes raw texts/labels, tokenizes, trains for a few epochs, and optionally
 saves model/tokenizer to disk. Metrics are computed on the training set
 for quick feedback (not a full validation pipeline).
 """
-from dataclasses import dataclass
+
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 import numpy as np
 import torch
@@ -61,7 +61,9 @@ def train_distilbert(
     model = DistilBERTClassifier(cfg.model_name, cfg.num_labels).to(device)
     optimizer = AdamW(model.parameters(), lr=lr)
     total_steps = len(loader) * epochs
-    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=total_steps)
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer, num_warmup_steps=0, num_training_steps=total_steps
+    )
     if cfg.num_labels == 1:
         criterion = nn.BCEWithLogitsLoss()
     else:

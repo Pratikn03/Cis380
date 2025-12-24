@@ -105,14 +105,18 @@ def main() -> int:
         if candidate.exists():
             _run(["bash", str(candidate)])
         else:
-            print("\n[train_all] --with-vision requested, but scripts/run_train_vision.sh not found; skipping.")
+            print(
+                "\n[train_all] --with-vision requested, but scripts/run_train_vision.sh not found; skipping."
+            )
 
     if args.with_vision_full:
         candidate = REPO_ROOT / "scripts" / "train_all_vision_full.py"
         if candidate.exists():
             _run([sys.executable, str(candidate)])
         else:
-            print("\n[train_all] --with-vision-full requested, but scripts/train_all_vision_full.py not found; skipping.")
+            print(
+                "\n[train_all] --with-vision-full requested, but scripts/train_all_vision_full.py not found; skipping."
+            )
 
     if args.with_brand:
         # Prepare dataset (idempotent) and train YOLO detector.

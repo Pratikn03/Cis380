@@ -1,4 +1,5 @@
 """Place recommender handler with optional API, fallback static list."""
+
 from __future__ import annotations
 
 from typing import List, Dict
@@ -11,7 +12,9 @@ except ImportError:
     from static_fallbacks import places_fallback
 
 
-def recommend_places(query: str, places_api_key: str | None = None, city: str | None = None, top_n: int = 5) -> List[Dict]:
+def recommend_places(
+    query: str, places_api_key: str | None = None, city: str | None = None, top_n: int = 5
+) -> List[Dict]:
     """Return a list of places. If no API key, use fallback."""
     if not places_api_key:
         return places_fallback(query)

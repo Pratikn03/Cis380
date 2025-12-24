@@ -1,4 +1,5 @@
 """Sequence building utilities."""
+
 from typing import List, Tuple
 
 import numpy as np
@@ -24,7 +25,9 @@ def build_sequences(
     return sequences, labels
 
 
-def pad_sequences(sequences: List[np.ndarray], max_len: int | None = None) -> Tuple[np.ndarray, np.ndarray]:
+def pad_sequences(
+    sequences: List[np.ndarray], max_len: int | None = None
+) -> Tuple[np.ndarray, np.ndarray]:
     if not sequences:
         return np.array([]), np.array([])
     feature_dim = sequences[0].shape[1]

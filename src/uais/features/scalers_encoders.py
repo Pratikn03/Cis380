@@ -1,11 +1,14 @@
 """Reusable preprocessing pieces."""
+
 from typing import List
 
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 
-def build_preprocessor(numeric_features: List[str], categorical_features: List[str]) -> ColumnTransformer:
+def build_preprocessor(
+    numeric_features: List[str], categorical_features: List[str]
+) -> ColumnTransformer:
     numeric_features = numeric_features or []
     categorical_features = categorical_features or []
 

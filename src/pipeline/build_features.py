@@ -1,4 +1,5 @@
 """Build feature tables from lake parquet into processed feature store."""
+
 from pathlib import Path
 import json
 from typing import Any, Dict
@@ -33,18 +34,26 @@ def build_features(cfg_path: Path) -> Path:
     df = pd.read_parquet(lake_path)
 
     if domain == "fraud":
-        df_feats = build_fraud_feature_table(df, time_column="Time", amount_column="Amount", target_column="Class")
+        df_feats = build_fraud_feature_table(
+            df, time_column="Time", amount_column="Amount", target_column="Class"
+        )
     elif domain == "cyber":
         target_col = cfg.get("target_column", "label")
         drop_cols = [c for c in ["id", "attack_cat"] if c in df.columns]
-        df_feats = build_cyber_feature_table(df_raw=df, target_column=target_col, drop_columns=drop_cols)
+        df_feats = build_cyber_feature_table(
+            df_raw=df, target_column=target_col, drop_columns=drop_cols
+        )
     elif domain == "behavior":
         target_col = cfg.get("target_column", "Revenue")
-        df_feats = build_behavior_feature_table(df_raw=df, target_column=target_col, drop_columns=None)
+        df_feats = build_behavior_feature_table(
+            df_raw=df, target_column=target_col, drop_columns=None
+        )
     else:
         raise ValueError("domain must be fraud | cyber | behavior")
 
-    out_path = Path(cfg.get("features", {}).get("output", f"data/processed/{domain}/features.parquet"))
+    out_path = Path(
+        cfg.get("features", {}).get("output", f"data/processed/{domain}/features.parquet")
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df_feats.to_parquet(out_path, index=False)
     print(f"Saved features to {out_path} with shape {df_feats.shape}")

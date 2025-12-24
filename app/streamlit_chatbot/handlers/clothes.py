@@ -6,6 +6,7 @@ This supports the Streamlit chatbot image-upload flow:
 
 If no catalog file exists, we fall back to a simple age-based heuristic.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -47,7 +48,9 @@ def _load_catalog(path: Path = DEFAULT_CATALOG) -> list[ClothingItem]:
                     brand=str(obj.get("brand", "")),
                     tags=tuple(str(t).lower() for t in (obj.get("tags") or [])),
                     gender=(str(obj.get("gender")) if obj.get("gender") is not None else None),
-                    price_usd=(float(obj.get("price_usd")) if obj.get("price_usd") is not None else None),
+                    price_usd=(
+                        float(obj.get("price_usd")) if obj.get("price_usd") is not None else None
+                    ),
                 )
             )
         except Exception:
@@ -100,7 +103,9 @@ def recommend_clothes(
             price = f"${it.price_usd:.0f}" if it.price_usd is not None else ""
             reason_bits = []
             if tokens.intersection(set(it.tags)):
-                reason_bits.append(f"Matches: {', '.join(sorted(tokens.intersection(set(it.tags)))[:5])}")
+                reason_bits.append(
+                    f"Matches: {', '.join(sorted(tokens.intersection(set(it.tags)))[:5])}"
+                )
             if it.gender:
                 reason_bits.append(f"Fit: {it.gender}")
             if price:
@@ -112,26 +117,68 @@ def recommend_clothes(
                     "brand": it.brand,
                     "category": it.category,
                     "price_usd": it.price_usd,
-                    "reason": " • ".join(reason_bits) if reason_bits else "Recommended from your style tags.",
+                    "reason": (
+                        " • ".join(reason_bits)
+                        if reason_bits
+                        else "Recommended from your style tags."
+                    ),
                 }
             )
         return out
 
     # Fallback: original age heuristic if no catalog exists.
     if age is None:
-        return [{"title": "Classic casual", "brand": "(various)", "reason": "Jeans, tee, sneakers; works for most ages."}]
+        return [
+            {
+                "title": "Classic casual",
+                "brand": "(various)",
+                "reason": "Jeans, tee, sneakers; works for most ages.",
+            }
+        ]
     if age < 13:
-        return [{"title": "Kids activewear", "brand": "(various)", "reason": "Comfortable, durable fabrics; bright colors."}]
+        return [
+            {
+                "title": "Kids activewear",
+                "brand": "(various)",
+                "reason": "Comfortable, durable fabrics; bright colors.",
+            }
+        ]
     if age < 20:
-        return [{"title": "Youth streetwear", "brand": "(various)", "reason": "Hoodies, relaxed jeans/joggers, sneakers."}]
+        return [
+            {
+                "title": "Youth streetwear",
+                "brand": "(various)",
+                "reason": "Hoodies, relaxed jeans/joggers, sneakers.",
+            }
+        ]
     if age < 35:
         return [
-            {"title": "Smart casual", "brand": "(various)", "reason": "Chinos/jeans + polo/oxford, clean sneakers/loafers."},
-            {"title": "Athleisure", "brand": "(various)", "reason": "Comfortable technical fabrics for daily wear."},
+            {
+                "title": "Smart casual",
+                "brand": "(various)",
+                "reason": "Chinos/jeans + polo/oxford, clean sneakers/loafers.",
+            },
+            {
+                "title": "Athleisure",
+                "brand": "(various)",
+                "reason": "Comfortable technical fabrics for daily wear.",
+            },
         ]
     if age < 55:
-        return [{"title": "Business casual", "brand": "(various)", "reason": "Tailored trousers, button-downs, loafers; versatile layers."}]
-    return [{"title": "Comfort-first classic", "brand": "(various)", "reason": "Soft layers, cardigans, supportive footwear."}]
+        return [
+            {
+                "title": "Business casual",
+                "brand": "(various)",
+                "reason": "Tailored trousers, button-downs, loafers; versatile layers.",
+            }
+        ]
+    return [
+        {
+            "title": "Comfort-first classic",
+            "brand": "(various)",
+            "reason": "Soft layers, cardigans, supportive footwear.",
+        }
+    ]
 
 
 __all__ = ["recommend_clothes"]

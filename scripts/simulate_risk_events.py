@@ -11,8 +11,20 @@ OUTPUT = "reports/risk_simulation_log.jsonl"
 
 SCENARIOS = [
     {"name": "normal", "transaction_amount": 100.0, "clicks": 20, "files": 2, "device_known": True},
-    {"name": "step_up", "transaction_amount": 800.0, "clicks": 150, "files": 35, "device_known": False},
-    {"name": "block", "transaction_amount": 5000.0, "clicks": 400, "files": 120, "device_known": False},
+    {
+        "name": "step_up",
+        "transaction_amount": 800.0,
+        "clicks": 150,
+        "files": 35,
+        "device_known": False,
+    },
+    {
+        "name": "block",
+        "transaction_amount": 5000.0,
+        "clicks": 400,
+        "files": 120,
+        "device_known": False,
+    },
 ]
 
 COUNTRIES = ["US", "BR", "IN", "CN", "DE", "NG"]
@@ -42,7 +54,9 @@ def simulate(count: int = 10, pause: float = 0.5) -> None:
                 "response": resp.json(),
             }
             out.write(json.dumps(entry) + "\n")
-            print(f"[Simulate] #{i+1} {scenario['name']} -> decision {entry['response'].get('decision')}")
+            print(
+                f"[Simulate] #{i+1} {scenario['name']} -> decision {entry['response'].get('decision')}"
+            )
             time.sleep(pause)
 
 

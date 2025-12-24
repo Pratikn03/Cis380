@@ -1,8 +1,8 @@
 """Readers for documents stored in `data/docs/`."""
+
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable
 
 from .service import _read_pdf, _read_text
 

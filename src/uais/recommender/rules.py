@@ -1,4 +1,5 @@
 """Heuristic rules to map scores to recommended actions."""
+
 from __future__ import annotations
 
 from typing import Tuple

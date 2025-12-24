@@ -40,7 +40,9 @@ def main():
     print(f"Loaded raw fraud data with shape: {df_raw.shape}")
 
     # 2. Build features
-    df_feats = build_fraud_feature_table(df_raw, time_column="Time", amount_column="Amount", target_column="Class")
+    df_feats = build_fraud_feature_table(
+        df_raw, time_column="Time", amount_column="Amount", target_column="Class"
+    )
     print(f"Feature table shape: {df_feats.shape}")
 
     target_col = "Class"
@@ -84,17 +86,29 @@ def main():
     plots_dir = experiments_dir / "plots"
     plots_dir.mkdir(parents=True, exist_ok=True)
 
-    plot_roc_curve(y_test.values, y_test_prob, title="Fraud ROC (Supervised)", show=False,
-                   save_path=str(plots_dir / "roc_supervised.png"))
-    plot_pr_curve(y_test.values, y_test_prob, title="Fraud PR (Supervised)", show=False,
-                  save_path=str(plots_dir / "pr_supervised.png"))
+    plot_roc_curve(
+        y_test.values,
+        y_test_prob,
+        title="Fraud ROC (Supervised)",
+        show=False,
+        save_path=str(plots_dir / "roc_supervised.png"),
+    )
+    plot_pr_curve(
+        y_test.values,
+        y_test_prob,
+        title="Fraud PR (Supervised)",
+        show=False,
+        save_path=str(plots_dir / "pr_supervised.png"),
+    )
 
     # 5. Train Isolation Forest on training data for anomaly scores (v1: use same features)
     iso_model, scaler = train_isolation_forest(X_train, contamination=0.01)
     anomaly_scores_test = compute_anomaly_score(iso_model, scaler, X_test)
 
     # 6. Compute blended / hybrid score
-    hybrid_scores = blend_supervised_and_anomaly(y_test_prob, anomaly_scores_test, alpha=0.7, beta=0.3)
+    hybrid_scores = blend_supervised_and_anomaly(
+        y_test_prob, anomaly_scores_test, alpha=0.7, beta=0.3
+    )
 
     hybrid_metrics = compute_classification_metrics(y_test.values, hybrid_scores, threshold=0.5)
     print("Test metrics (hybrid supervised + anomaly):")
@@ -143,7 +157,9 @@ def main():
 
     scores_dir = paths["experiments"]
     scores_dir.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame({"score": y_test_prob, "label": y_test.values}).to_csv(scores_dir / "scores.csv", index=False)
+    pd.DataFrame({"score": y_test_prob, "label": y_test.values}).to_csv(
+        scores_dir / "scores.csv", index=False
+    )
 
     print("Experiment completed. Plots saved to:", plots_dir)
     print("Artifacts saved under:", paths["experiments"])

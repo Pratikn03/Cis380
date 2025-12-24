@@ -1,4 +1,5 @@
 """News/Health/Crime recommender handler with optional API, fallback static list."""
+
 from __future__ import annotations
 
 from typing import List, Dict
@@ -11,7 +12,9 @@ except ImportError:
     from static_fallbacks import news_fallback
 
 
-def recommend_news(query: str, topic: str | None = None, news_api_key: str | None = None, top_n: int = 5) -> List[Dict]:
+def recommend_news(
+    query: str, topic: str | None = None, news_api_key: str | None = None, top_n: int = 5
+) -> List[Dict]:
     """Return a list of news items. Topic can be 'health' or 'crime' etc."""
     topic = topic or query or "general"
     q_lower = (query or "").lower()
@@ -25,7 +28,14 @@ def recommend_news(query: str, topic: str | None = None, news_api_key: str | Non
         if "latest" in q_lower or "recent" in q_lower:
             params["q"] = topic if topic else None
         else:
-            if topic.lower() in {"business", "entertainment", "health", "science", "sports", "technology"}:
+            if topic.lower() in {
+                "business",
+                "entertainment",
+                "health",
+                "science",
+                "sports",
+                "technology",
+            }:
                 params["category"] = topic.lower()
             else:
                 params["q"] = topic

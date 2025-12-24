@@ -1,4 +1,5 @@
 """Build 30-sequence arrays from behavior data or synthetic fallback."""
+
 from dataclasses import dataclass
 from typing import Dict, Tuple
 
@@ -6,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from ..logging_utils import setup_logging
-from ..paths import PROCESSED_DIR, SEQUENCES_DIR
+from ..paths import SEQUENCES_DIR
 from ..utils.seed import set_global_seed
 from .load_datasets import load_behavior_events
 
@@ -42,7 +43,9 @@ def _coerce_feature_dim(x: np.ndarray, target_dim: int) -> np.ndarray:
     return np.hstack([x, pad])
 
 
-def _prepare_behavior_sequences(cfg: SequenceBuildConfig) -> Tuple[Dict[str, np.ndarray], np.ndarray]:
+def _prepare_behavior_sequences(
+    cfg: SequenceBuildConfig,
+) -> Tuple[Dict[str, np.ndarray], np.ndarray]:
     df = load_behavior_events()
 
     time_col = "date" if "date" in df.columns else "timestamp"
@@ -73,7 +76,11 @@ def _prepare_behavior_sequences(cfg: SequenceBuildConfig) -> Tuple[Dict[str, np.
     else:
         df["pc_code"] = 0
 
-    feature_cols = [c for c in ["hour", "dayofweek", "filename_len", "content_len", "pc_code"] if c in df.columns]
+    feature_cols = [
+        c
+        for c in ["hour", "dayofweek", "filename_len", "content_len", "pc_code"]
+        if c in df.columns
+    ]
     if not feature_cols:
         raise ValueError("No numeric behavior features available to build sequences.")
 
@@ -108,7 +115,9 @@ def _prepare_behavior_sequences(cfg: SequenceBuildConfig) -> Tuple[Dict[str, np.
     return X_dict, labels_arr
 
 
-def _synthetic_sequences(cfg: SequenceBuildConfig, n_samples: int = 400) -> Tuple[Dict[str, np.ndarray], np.ndarray]:
+def _synthetic_sequences(
+    cfg: SequenceBuildConfig, n_samples: int = 400
+) -> Tuple[Dict[str, np.ndarray], np.ndarray]:
     rng = np.random.default_rng(cfg.seed)
     base = rng.normal(0.0, 1.0, size=(n_samples, cfg.seq_len, cfg.n_features)).astype(np.float32)
     labels = (rng.random(n_samples) < cfg.anomaly_ratio).astype(np.int64)
@@ -121,7 +130,9 @@ def _synthetic_sequences(cfg: SequenceBuildConfig, n_samples: int = 400) -> Tupl
     return X_dict, labels
 
 
-def build_30seq_arrays(cfg: SequenceBuildConfig | None = None) -> Tuple[Dict[str, np.ndarray], np.ndarray]:
+def build_30seq_arrays(
+    cfg: SequenceBuildConfig | None = None,
+) -> Tuple[Dict[str, np.ndarray], np.ndarray]:
     cfg = cfg or SequenceBuildConfig()
     set_global_seed(cfg.seed)
 

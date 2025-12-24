@@ -1,4 +1,5 @@
 """Lightweight GRU classifier."""
+
 from typing import Dict, Tuple
 
 import numpy as np
@@ -73,7 +74,9 @@ def train_gru_classifier(
 def predict_gru(model: GRUClassifier, sequences: np.ndarray, mask: np.ndarray) -> np.ndarray:
     model.eval()
     with torch.no_grad():
-        logits = model(torch.tensor(sequences, dtype=torch.float32), torch.tensor(mask, dtype=torch.float32))
+        logits = model(
+            torch.tensor(sequences, dtype=torch.float32), torch.tensor(mask, dtype=torch.float32)
+        )
         probs = torch.sigmoid(logits).numpy()
     return probs
 

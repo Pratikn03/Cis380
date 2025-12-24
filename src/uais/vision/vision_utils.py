@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Tuple
 
 
 def ensure_vision_root(path: str | Path) -> Path:

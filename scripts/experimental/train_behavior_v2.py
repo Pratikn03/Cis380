@@ -15,7 +15,8 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 import warnings
-warnings.filterwarnings('ignore')
+
+warnings.filterwarnings("ignore")
 
 print("=" * 60)
 print("  TRAINING BEHAVIOR MODEL")
@@ -56,7 +57,7 @@ if df is None:
 print(f"\n📊 Columns: {list(df.columns)}")
 
 # Try common target columns
-target_cols = ['Revenue', 'label', 'Label', 'target', 'anomaly', 'class', 'insider']
+target_cols = ["Revenue", "label", "Label", "target", "anomaly", "class", "insider"]
 target_col = None
 for col in target_cols:
     if col in df.columns:
@@ -65,7 +66,7 @@ for col in target_cols:
 
 if target_col is None:
     # Use last column or create synthetic target
-    if df.columns[-1] in df.select_dtypes(include=['object', 'bool']).columns:
+    if df.columns[-1] in df.select_dtypes(include=["object", "bool"]).columns:
         target_col = df.columns[-1]
     else:
         print("⚠️ No target column found, creating synthetic anomaly labels")
@@ -74,17 +75,17 @@ if target_col is None:
         if len(numeric_df.columns) > 0:
             # Z-score based anomaly
             z_scores = np.abs((numeric_df - numeric_df.mean()) / numeric_df.std())
-            df['anomaly'] = (z_scores > 3).any(axis=1).astype(int)
-            target_col = 'anomaly'
+            df["anomaly"] = (z_scores > 3).any(axis=1).astype(int)
+            target_col = "anomaly"
 
 print(f"   Target column: {target_col}")
 
 # Prepare features
-X = df.drop(columns=[target_col], errors='ignore')
+X = df.drop(columns=[target_col], errors="ignore")
 y = df[target_col]
 
 # Handle categorical columns
-categorical_cols = X.select_dtypes(include=['object', 'category']).columns
+categorical_cols = X.select_dtypes(include=["object", "category"]).columns
 for col in categorical_cols:
     if X[col].nunique() < 50:  # Only encode if reasonable cardinality
         le = LabelEncoder()
@@ -96,7 +97,7 @@ for col in categorical_cols:
 X = X.fillna(0)
 
 # Convert target to numeric
-if y.dtype == 'object' or y.dtype == 'bool':
+if y.dtype == "object" or y.dtype == "bool":
     le_target = LabelEncoder()
     y = le_target.fit_transform(y.astype(str))
 else:
@@ -110,24 +111,25 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # Split data
-X_train, X_val, y_train, y_val = train_test_split(X_scaled, y, test_size=0.2, stratify=y, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X_scaled, y, test_size=0.2, stratify=y, random_state=42
+)
 print(f"   Train: {len(X_train)}, Val: {len(X_val)}")
 
 # PyTorch training
-device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
+device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 print(f"   Device: {device}")
 
 train_dataset = TensorDataset(
-    torch.tensor(X_train, dtype=torch.float32),
-    torch.tensor(y_train, dtype=torch.long)
+    torch.tensor(X_train, dtype=torch.float32), torch.tensor(y_train, dtype=torch.long)
 )
 val_dataset = TensorDataset(
-    torch.tensor(X_val, dtype=torch.float32),
-    torch.tensor(y_val, dtype=torch.long)
+    torch.tensor(X_val, dtype=torch.float32), torch.tensor(y_val, dtype=torch.long)
 )
 
 train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=256)
+
 
 # Neural Network Model
 class BehaviorNet(nn.Module):
@@ -146,11 +148,12 @@ class BehaviorNet(nn.Module):
             nn.BatchNorm1d(64),
             nn.ReLU(),
             nn.Dropout(0.1),
-            nn.Linear(64, num_classes)
+            nn.Linear(64, num_classes),
         )
-    
+
     def forward(self, x):
         return self.net(x)
+
 
 input_size = X_scaled.shape[1]
 num_classes = len(np.unique(y))
@@ -176,7 +179,7 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
-    
+
     # Validation
     model.eval()
     correct = 0
@@ -188,23 +191,28 @@ for epoch in range(epochs):
             _, predicted = torch.max(outputs, 1)
             total += y_batch.size(0)
             correct += (predicted == y_batch).sum().item()
-    
+
     val_acc = correct / total * 100
-    scheduler.step(1 - val_acc/100)
-    
+    scheduler.step(1 - val_acc / 100)
+
     if val_acc > best_acc:
         best_acc = val_acc
-        torch.save({
-            'model_state': model.state_dict(),
-            'scaler': scaler,
-            'input_size': input_size,
-            'num_classes': num_classes,
-            'feature_names': list(X.columns)
-        }, MODEL_DIR / "behavior_nn.pt")
-    
+        torch.save(
+            {
+                "model_state": model.state_dict(),
+                "scaler": scaler,
+                "input_size": input_size,
+                "num_classes": num_classes,
+                "feature_names": list(X.columns),
+            },
+            MODEL_DIR / "behavior_nn.pt",
+        )
+
     if (epoch + 1) % 10 == 0 or epoch == 0:
-        print(f"  Epoch {epoch+1}/{epochs} - Loss: {train_loss/len(train_loader):.4f}, Val Acc: {val_acc:.2f}%")
-    
+        print(
+            f"  Epoch {epoch+1}/{epochs} - Loss: {train_loss/len(train_loader):.4f}, Val Acc: {val_acc:.2f}%"
+        )
+
     # Early stopping if we hit target
     if best_acc >= 98.0:
         print(f"  🎯 Target accuracy reached at epoch {epoch+1}!")
@@ -232,17 +240,23 @@ print(f"  RandomForest Accuracy: {rf_acc:.2f}%")
 # Save best model
 best_model_acc = max(best_acc, gb_acc, rf_acc)
 if gb_acc == best_model_acc:
-    joblib.dump({'model': gb, 'scaler': scaler, 'feature_names': list(X.columns)}, MODEL_DIR / "behavior_best.pkl")
-    print(f"✅ Saved GradientBoosting as best model")
+    joblib.dump(
+        {"model": gb, "scaler": scaler, "feature_names": list(X.columns)},
+        MODEL_DIR / "behavior_best.pkl",
+    )
+    print("✅ Saved GradientBoosting as best model")
 elif rf_acc == best_model_acc:
-    joblib.dump({'model': rf, 'scaler': scaler, 'feature_names': list(X.columns)}, MODEL_DIR / "behavior_best.pkl")
-    print(f"✅ Saved RandomForest as best model")
+    joblib.dump(
+        {"model": rf, "scaler": scaler, "feature_names": list(X.columns)},
+        MODEL_DIR / "behavior_best.pkl",
+    )
+    print("✅ Saved RandomForest as best model")
 else:
-    print(f"✅ Neural Network is best model")
+    print("✅ Neural Network is best model")
 
 # Also save for backward compatibility
-joblib.dump({'model': gb, 'scaler': scaler}, MODEL_DIR / "behavior_gb.pkl")
-joblib.dump({'model': rf, 'scaler': scaler}, MODEL_DIR / "behavior_rf.pkl")
+joblib.dump({"model": gb, "scaler": scaler}, MODEL_DIR / "behavior_gb.pkl")
+joblib.dump({"model": rf, "scaler": scaler}, MODEL_DIR / "behavior_rf.pkl")
 
 print("\n" + "=" * 60)
 print("  BEHAVIOR MODEL TRAINING COMPLETE!")

@@ -6,6 +6,8 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from ..utils import call_with_container_width
+
 try:  # Optional charting
     import plotly.express as px
 except Exception:  # pragma: no cover
@@ -76,7 +78,9 @@ def _render_experiments() -> None:
     st.caption("Reads from `experiments/<domain>/metrics/metrics.csv` when available.")
 
     if not EXPERIMENTS_DIR.exists():
-        st.info("No `experiments/` directory found. Run training/experiment scripts to generate metrics.")
+        st.info(
+            "No `experiments/` directory found. Run training/experiment scripts to generate metrics."
+        )
         return
 
     option = st.selectbox(
@@ -107,10 +111,10 @@ def _render_experiments() -> None:
             return
         combined = pd.concat(frames, ignore_index=True)
         pivot = combined.pivot_table(index="Metric", columns="Domain", values="Value")
-        st.dataframe(pivot, use_container_width=True)
+        call_with_container_width(st.dataframe, pivot)
         if px is not None:
             fig = px.bar(combined, x="Metric", y="Value", color="Domain", barmode="group")
-            st.plotly_chart(fig, use_container_width=True)
+            call_with_container_width(st.plotly_chart, fig)
         if missing:
             st.caption(f"Missing: {', '.join(missing)}")
         return
@@ -122,10 +126,10 @@ def _render_experiments() -> None:
     if df is None:
         st.info(f"No metrics file found for `{dom}`.")
         return
-    st.dataframe(df, use_container_width=True)
+    call_with_container_width(st.dataframe, df)
     if px is not None and {"Metric", "Value"}.issubset(df.columns):
         fig = px.bar(df, x="Metric", y="Value", title=f"{option} metrics")
-        st.plotly_chart(fig, use_container_width=True)
+        call_with_container_width(st.plotly_chart, fig)
 
 
 def _collect_artifacts(domain: str) -> list[Path]:
@@ -148,10 +152,14 @@ def _render_explainability() -> None:
     st.caption("Previews files from `experiments/<domain>/{plots,explainability}` when available.")
 
     if not EXPERIMENTS_DIR.exists():
-        st.info("No `experiments/` directory found. Run training/experiment scripts to generate artifacts.")
+        st.info(
+            "No `experiments/` directory found. Run training/experiment scripts to generate artifacts."
+        )
         return
 
-    domain = st.selectbox("Domain", ["fraud", "cyber", "behavior", "vision", "fusion"], index=0, key="explain_domain")
+    domain = st.selectbox(
+        "Domain", ["fraud", "cyber", "behavior", "vision", "fusion"], index=0, key="explain_domain"
+    )
     artifacts = _collect_artifacts(domain)
     if not artifacts:
         st.info(f"No artifacts found for `{domain}` yet.")
@@ -164,7 +172,9 @@ def _render_explainability() -> None:
     if images:
         st.subheader("Images")
         for img in images:
-            st.image(str(img), caption=f"{img.name} • {_describe_file(img)}", use_container_width=True)
+            call_with_container_width(
+                st.image, str(img), caption=f"{img.name} • {_describe_file(img)}"
+            )
 
     if tables:
         st.subheader("Tables")
@@ -173,7 +183,7 @@ def _render_explainability() -> None:
             try:
                 df = pd.read_csv(tbl)
                 preview = df.head(200)
-                st.dataframe(preview, use_container_width=True)
+                call_with_container_width(st.dataframe, preview)
                 if len(df) > len(preview):
                     st.caption(f"Showing first {len(preview)} of {len(df)} rows.")
             except Exception as exc:

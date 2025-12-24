@@ -1,4 +1,5 @@
 """Explain recommendations with rule-based text and optional SHAP."""
+
 from __future__ import annotations
 
 from typing import Dict, Any, List, Optional

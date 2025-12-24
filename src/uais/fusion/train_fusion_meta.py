@@ -3,6 +3,7 @@
 This is a thin wrapper around `train_fusion_meta_model` in train_fusion_model.py
 so notebooks/scripts can easily load score CSVs and fit the stacker.
 """
+
 from pathlib import Path
 from typing import Dict, Tuple
 
@@ -14,7 +15,9 @@ from uais.fusion.train_fusion_model import train_fusion_meta_model
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 
-def build_fusion_dataset(score_paths: Dict[str, Path] | None = None) -> Tuple[Dict[str, np.ndarray], np.ndarray]:
+def build_fusion_dataset(
+    score_paths: Dict[str, Path] | None = None,
+) -> Tuple[Dict[str, np.ndarray], np.ndarray]:
     """Load per-domain score CSVs and align lengths.
 
     Expects each CSV to have at least a `score` column; `label` is optional.

@@ -1,4 +1,5 @@
 """CLI: end-to-end cyber intrusion run using in-repo components."""
+
 from __future__ import annotations
 
 import json
@@ -39,8 +40,12 @@ def main():
     X = df_feats.drop(columns=[target_col])
     y = df_feats[target_col].astype(int)
 
-    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, stratify=y, random_state=42)
-    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, stratify=y_temp, random_state=42)
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        X, y, test_size=0.4, stratify=y, random_state=42
+    )
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp, y_temp, test_size=0.5, stratify=y_temp, random_state=42
+    )
 
     train_cfg = cfg.get("training", {})
     model_cfg = CyberModelConfig(
@@ -52,7 +57,9 @@ def main():
         random_state=cfg.get("seed", 42),
     )
 
-    model, val_metrics = train_cyber_model(X_train, y_train, X_val, y_val, model_cfg, use_pipeline=False)
+    model, val_metrics = train_cyber_model(
+        X_train, y_train, X_val, y_val, model_cfg, use_pipeline=False
+    )
     logger.info("Validation metrics: %s", val_metrics)
 
     if hasattr(model, "predict_proba"):

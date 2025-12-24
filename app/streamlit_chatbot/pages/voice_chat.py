@@ -6,7 +6,9 @@ import requests
 import streamlit as st
 
 
-def _tts_playback(backend_url: str, text: str, auth_headers: Callable[[], dict[str, str]]) -> bytes | None:
+def _tts_playback(
+    backend_url: str, text: str, auth_headers: Callable[[], dict[str, str]]
+) -> bytes | None:
     try:
         resp = requests.post(
             f"{backend_url}/api/tts/speak",
@@ -64,7 +66,12 @@ def render_voice_chat_page(
                     audio_file.type or "audio/wav",
                 )
             }
-            res = call_multipart("/api/stt/transcribe", data={k: v for k, v in payload.items() if v}, files=files, timeout=120.0)
+            res = call_multipart(
+                "/api/stt/transcribe",
+                data={k: v for k, v in payload.items() if v},
+                files=files,
+                timeout=120.0,
+            )
             if "error" in res:
                 st.error(res["error"])
             else:
@@ -97,11 +104,13 @@ def render_voice_chat_page(
             st.session_state.voice_chat_response = dc
 
     if resp := st.session_state.get("voice_chat_response"):
-        st.success(resp.get("reply") or resp.get("answer") or resp.get("detail") or "Response received.")
+        st.success(
+            resp.get("reply") or resp.get("answer") or resp.get("detail") or "Response received."
+        )
         with st.expander("Full chat response", expanded=False):
             st.json(resp)
 
-        reply_text = (resp.get("reply") or resp.get("answer") or "")
+        reply_text = resp.get("reply") or resp.get("answer") or ""
         if reply_text:
             if st.button("Speak response", key="voice_chat_tts"):
                 tts_bytes = _tts_playback(backend_url, reply_text, auth_headers)

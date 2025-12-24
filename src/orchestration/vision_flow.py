@@ -1,4 +1,5 @@
 """Stub Vision pipeline wrapper."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -12,7 +13,11 @@ logger = setup_logging(__name__)
 def vision_pipeline(dataset_dir: str | None = None):
     """Run a small vision experiment (simple CNN by default)."""
     project_root = Path(__file__).resolve().parents[1]
-    data_dir = Path(dataset_dir) if dataset_dir else project_root / "data" / "raw" / "vision" / "document_forgery"
+    data_dir = (
+        Path(dataset_dir)
+        if dataset_dir
+        else project_root / "data" / "raw" / "vision" / "document_forgery"
+    )
     cfg = VisionConfig(dataset_dir=data_dir, epochs=1, batch_size=16, image_size=128)
     try:
         logger.info("Starting vision pipeline on %s", data_dir)

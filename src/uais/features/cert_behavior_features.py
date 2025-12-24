@@ -5,9 +5,11 @@ This module provides functions to extract and engineer features from CERT logon 
 """
 
 import pandas as pd
-import numpy as np
 
-def add_cert_behavior_features(df: pd.DataFrame, time_col: str = "date", user_col: str = "user") -> pd.DataFrame:
+
+def add_cert_behavior_features(
+    df: pd.DataFrame, time_col: str = "date", user_col: str = "user"
+) -> pd.DataFrame:
     """
     Add engineered features to CERT behavior data.
     Features include hour, dayofweek, and session statistics.

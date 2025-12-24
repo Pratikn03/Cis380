@@ -4,6 +4,8 @@ from typing import Callable
 
 import streamlit as st
 
+from ..utils import call_with_container_width
+
 
 def render_brand_page(*, call_upload: Callable[..., dict]) -> None:
     st.markdown("## Brand Recognition")
@@ -27,7 +29,7 @@ def render_brand_page(*, call_upload: Callable[..., dict]) -> None:
         st.info("Upload an image to detect logos.")
         return
 
-    st.image(brand_img, caption=brand_img.name, use_container_width=True)
+    call_with_container_width(st.image, brand_img, caption=brand_img.name)
     if st.button("Detect logos", key="brand_detect_page", type="primary"):
         result = call_upload(
             f"/api/vision/brand/predict?conf={conf}",

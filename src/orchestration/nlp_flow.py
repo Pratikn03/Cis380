@@ -1,4 +1,5 @@
 """Stub NLP pipeline wrapper."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -12,7 +13,11 @@ logger = setup_logging(__name__)
 def nlp_pipeline(dataset_path: str | None = None):
     """Run the baseline TF-IDF + logistic regression NLP experiment."""
     project_root = Path(__file__).resolve().parents[1]
-    csv_path = Path(dataset_path) if dataset_path else project_root / "data" / "raw" / "nlp" / "enron_emails.csv"
+    csv_path = (
+        Path(dataset_path)
+        if dataset_path
+        else project_root / "data" / "raw" / "nlp" / "enron_emails.csv"
+    )
     cfg = NLPConfig(
         dataset_path=csv_path,
         text_column="content",

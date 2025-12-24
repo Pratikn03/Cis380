@@ -15,7 +15,9 @@ from app.models.recommender.index import RecommenderIndex, default_index_paths  
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build recommender vector + FAISS index artifacts.")
+    parser = argparse.ArgumentParser(
+        description="Build recommender vector + FAISS index artifacts."
+    )
     parser.add_argument(
         "--max-items",
         type=int,

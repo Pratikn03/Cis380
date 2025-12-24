@@ -2,6 +2,7 @@
 OmniChatX Production Health Checks & Metrics
 Comprehensive health checks for all system components
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -13,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Awaitable
+from typing import Any
 
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
@@ -36,6 +37,7 @@ router = APIRouter(tags=["Health"])
 # Health Status Enums
 # ============================================
 
+
 class HealthStatus(str, Enum):
     HEALTHY = "healthy"
     DEGRADED = "degraded"
@@ -45,6 +47,7 @@ class HealthStatus(str, Enum):
 @dataclass
 class ComponentHealth:
     """Health status for a single component."""
+
     name: str
     status: HealthStatus
     latency_ms: float = 0.0
@@ -55,12 +58,13 @@ class ComponentHealth:
 @dataclass
 class SystemHealth:
     """Overall system health."""
+
     status: HealthStatus
     version: str
     uptime_seconds: float
     timestamp: str
     components: list[ComponentHealth]
-    
+
     def to_dict(self) -> dict:
         return {
             "status": self.status.value,
@@ -170,6 +174,7 @@ def get_uptime() -> float:
 # Health Check Functions
 # ============================================
 
+
 async def check_database() -> ComponentHealth:
     """Check database connectivity."""
     start = time.time()
@@ -178,7 +183,7 @@ async def check_database() -> ComponentHealth:
         data_dir = Path("./data")
         if not data_dir.exists():
             data_dir.mkdir(parents=True, exist_ok=True)
-        
+
         latency = (time.time() - start) * 1000
         return ComponentHealth(
             name="database",
@@ -210,10 +215,11 @@ async def check_redis() -> ComponentHealth:
                 message="Redis not configured (optional)",
                 details={"configured": False},
             )
-        
+
         # Try to import and ping Redis
         try:
             import redis
+
             client = redis.from_url(redis_url, socket_timeout=2)
             client.ping()
             latency = (time.time() - start) * 1000
@@ -249,22 +255,22 @@ async def check_models() -> ComponentHealth:
         models_dir = Path("./models")
         available_models = []
         missing_models = []
-        
+
         model_paths = {
             "fraud": models_dir / "fraud",
             "cyber": models_dir / "cyber",
             "behavior": models_dir / "behavior",
             "vision": models_dir / "vision",
         }
-        
+
         for name, path in model_paths.items():
             if path.exists() and any(path.iterdir()):
                 available_models.append(name)
             else:
                 missing_models.append(name)
-        
+
         latency = (time.time() - start) * 1000
-        
+
         if not missing_models:
             status = HealthStatus.HEALTHY
             message = "All models available"
@@ -274,7 +280,7 @@ async def check_models() -> ComponentHealth:
         else:
             status = HealthStatus.UNHEALTHY
             message = "No models available"
-        
+
         return ComponentHealth(
             name="models",
             status=status,
@@ -300,13 +306,14 @@ async def check_disk_space() -> ComponentHealth:
     start = time.time()
     try:
         import shutil
+
         total, used, free = shutil.disk_usage("/")
-        
-        free_gb = free / (1024 ** 3)
+
+        free_gb = free / (1024**3)
         used_percent = (used / total) * 100
-        
+
         latency = (time.time() - start) * 1000
-        
+
         if free_gb > 10:
             status = HealthStatus.HEALTHY
             message = f"Sufficient disk space: {free_gb:.1f}GB free"
@@ -316,15 +323,15 @@ async def check_disk_space() -> ComponentHealth:
         else:
             status = HealthStatus.UNHEALTHY
             message = f"Critical disk space: {free_gb:.1f}GB free"
-        
+
         return ComponentHealth(
             name="disk",
             status=status,
             latency_ms=latency,
             message=message,
             details={
-                "total_gb": round(total / (1024 ** 3), 2),
-                "used_gb": round(used / (1024 ** 3), 2),
+                "total_gb": round(total / (1024**3), 2),
+                "used_gb": round(used / (1024**3), 2),
                 "free_gb": round(free_gb, 2),
                 "used_percent": round(used_percent, 1),
             },
@@ -344,16 +351,17 @@ async def check_memory() -> ComponentHealth:
     start = time.time()
     try:
         import psutil
+
         memory = psutil.virtual_memory()
-        
+
         used_percent = memory.percent
-        available_gb = memory.available / (1024 ** 3)
-        
+        available_gb = memory.available / (1024**3)
+
         latency = (time.time() - start) * 1000
-        
+
         # Update Prometheus gauge
         MEMORY_USAGE.set(memory.used)
-        
+
         if used_percent < 80:
             status = HealthStatus.HEALTHY
             message = f"Memory usage: {used_percent:.1f}%"
@@ -363,14 +371,14 @@ async def check_memory() -> ComponentHealth:
         else:
             status = HealthStatus.UNHEALTHY
             message = f"Critical memory usage: {used_percent:.1f}%"
-        
+
         return ComponentHealth(
             name="memory",
             status=status,
             latency_ms=latency,
             message=message,
             details={
-                "total_gb": round(memory.total / (1024 ** 3), 2),
+                "total_gb": round(memory.total / (1024**3), 2),
                 "available_gb": round(available_gb, 2),
                 "used_percent": round(used_percent, 1),
             },
@@ -396,6 +404,7 @@ async def check_memory() -> ComponentHealth:
 # ============================================
 # API Routes
 # ============================================
+
 
 @router.get("/health")
 async def health_check() -> dict:
@@ -423,7 +432,7 @@ async def readiness_check() -> JSONResponse:
         check_disk_space(),
         return_exceptions=True,
     )
-    
+
     components = []
     for check in checks:
         if isinstance(check, ComponentHealth):
@@ -435,7 +444,7 @@ async def readiness_check() -> JSONResponse:
                 HealthStatus.UNHEALTHY: 0.0,
             }.get(check.status, 0.0)
             HEALTH_CHECK_STATUS.labels(component=check.name).set(status_value)
-    
+
     # Determine overall status
     if any(c.status == HealthStatus.UNHEALTHY for c in components):
         overall_status = HealthStatus.UNHEALTHY
@@ -446,7 +455,7 @@ async def readiness_check() -> JSONResponse:
     else:
         overall_status = HealthStatus.HEALTHY
         http_status = 200
-    
+
     health = SystemHealth(
         status=overall_status,
         version=_APP_VERSION,
@@ -454,7 +463,7 @@ async def readiness_check() -> JSONResponse:
         timestamp=datetime.utcnow().isoformat() + "Z",
         components=components,
     )
-    
+
     return JSONResponse(content=health.to_dict(), status_code=http_status)
 
 
@@ -470,18 +479,20 @@ async def detailed_health_check() -> JSONResponse:
         check_memory(),
         return_exceptions=True,
     )
-    
+
     components = []
     for check in checks:
         if isinstance(check, ComponentHealth):
             components.append(check)
         elif isinstance(check, Exception):
-            components.append(ComponentHealth(
-                name="unknown",
-                status=HealthStatus.UNHEALTHY,
-                message=str(check),
-            ))
-    
+            components.append(
+                ComponentHealth(
+                    name="unknown",
+                    status=HealthStatus.UNHEALTHY,
+                    message=str(check),
+                )
+            )
+
     # Determine overall status
     if any(c.status == HealthStatus.UNHEALTHY for c in components):
         overall_status = HealthStatus.UNHEALTHY
@@ -492,7 +503,7 @@ async def detailed_health_check() -> JSONResponse:
     else:
         overall_status = HealthStatus.HEALTHY
         http_status = 200
-    
+
     health = SystemHealth(
         status=overall_status,
         version=_APP_VERSION,
@@ -500,7 +511,7 @@ async def detailed_health_check() -> JSONResponse:
         timestamp=datetime.utcnow().isoformat() + "Z",
         components=components,
     )
-    
+
     # Add system info
     response = health.to_dict()
     response["system"] = {
@@ -508,7 +519,7 @@ async def detailed_health_check() -> JSONResponse:
         "platform": platform.platform(),
         "hostname": platform.node(),
     }
-    
+
     return JSONResponse(content=response, status_code=http_status)
 
 
@@ -516,12 +527,14 @@ async def detailed_health_check() -> JSONResponse:
 async def prometheus_metrics() -> Response:
     """Prometheus metrics endpoint."""
     # Update system info
-    SYSTEM_INFO.info({
-        "version": _APP_VERSION,
-        "python_version": platform.python_version(),
-        "platform": platform.system(),
-    })
-    
+    SYSTEM_INFO.info(
+        {
+            "version": _APP_VERSION,
+            "python_version": platform.python_version(),
+            "platform": platform.system(),
+        }
+    )
+
     return Response(
         content=generate_latest(REGISTRY),
         media_type=CONTENT_TYPE_LATEST,

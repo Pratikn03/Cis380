@@ -1,4 +1,5 @@
 """Parsing and sanitization for chatbot/recommender inputs."""
+
 from __future__ import annotations
 
 import re

@@ -1,6 +1,7 @@
 """
 Supervised fraud modeling with multiple model options.
 """
+
 from dataclasses import dataclass
 from typing import Any, Dict, Tuple
 

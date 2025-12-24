@@ -1,4 +1,5 @@
 """Thin wrappers around existing pipeline ingestion utilities."""
+
 from pathlib import Path
 from typing import Optional
 
@@ -10,7 +11,9 @@ except Exception:  # pragma: no cover - pipeline is optional
     pipeline_ingest = None
 
 
-def ingest_domain(domain: str, raw_dir: Optional[Path] = None, lake_dir: Optional[Path] = None) -> Path:
+def ingest_domain(
+    domain: str, raw_dir: Optional[Path] = None, lake_dir: Optional[Path] = None
+) -> Path:
     if pipeline_ingest is None:
         raise ImportError("pipeline.ingest is not available in this environment.")
 

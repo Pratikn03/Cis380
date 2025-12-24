@@ -20,7 +20,9 @@ def build_cyber_feature_table(
     df = df_raw.copy()
 
     if target_column not in df.columns:
-        raise KeyError(f"Target column '{target_column}' not found. Available: {df.columns.tolist()}")
+        raise KeyError(
+            f"Target column '{target_column}' not found. Available: {df.columns.tolist()}"
+        )
 
     if drop_columns:
         for col in drop_columns:
@@ -29,7 +31,9 @@ def build_cyber_feature_table(
 
     target_series = df[target_column]
     if not np.issubdtype(target_series.dtype, np.number):
-        target_series = pd.Series(LabelEncoder().fit_transform(target_series.astype(str)), index=df.index)
+        target_series = pd.Series(
+            LabelEncoder().fit_transform(target_series.astype(str)), index=df.index
+        )
     target_series = pd.to_numeric(target_series, errors="coerce")
     target_series = target_series.replace([np.inf, -np.inf], np.nan)
     df[target_column] = target_series

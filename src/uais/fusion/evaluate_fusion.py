@@ -1,4 +1,5 @@
 """Evaluation utilities for fusion models."""
+
 from typing import Dict
 
 import numpy as np

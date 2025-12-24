@@ -1,4 +1,5 @@
 """Recommendation helpers for consumer electronics domains."""
+
 from __future__ import annotations
 
 import csv
@@ -132,13 +133,10 @@ def recommend_electronics(
             if (str(it.get("brand") or "").strip().lower() in _SUSPICIOUS_BRANDS)
             or len(str(it.get("brand") or "").strip()) <= 2
         )
-        if (
-            suspicious / max(1, len(sample)) > 0.35
-            or (
-                not has_title_column
-                and asin_like / max(1, len(sample)) > 0.80
-                and model_asin / max(1, len(sample)) > 0.05
-            )
+        if suspicious / max(1, len(sample)) > 0.35 or (
+            not has_title_column
+            and asin_like / max(1, len(sample)) > 0.80
+            and model_asin / max(1, len(sample)) > 0.05
         ):
             data = []
     if not data:
@@ -155,7 +153,16 @@ def recommend_electronics(
 
     price_limit = price_limit if price_limit is not None else _extract_price(query)
     desired_tags = preferred_tags if preferred_tags else set(_extract_tags(query))
-    use_case_tags = {"programming", "gaming", "travel", "photo", "camera", "noise", "study", "budget"}
+    use_case_tags = {
+        "programming",
+        "gaming",
+        "travel",
+        "photo",
+        "camera",
+        "noise",
+        "study",
+        "budget",
+    }
     use_case = next((t for t in desired_tags if t in use_case_tags), None)
     brand_tags = _DOMAIN_BRANDS.get(domain, set())
 
@@ -199,11 +206,17 @@ def recommend_electronics(
     if not results:
         return results
     tradeoff = (
-        f"Budget <= ${price_limit:.0f}" if price_limit is not None else "No strict budget; focus on ratings/popularity."
+        f"Budget <= ${price_limit:.0f}"
+        if price_limit is not None
+        else "No strict budget; focus on ratings/popularity."
     )
     if use_case:
         tradeoff += f" Use case: {use_case}."
-    if ELECTRONICS_CATALOG.get(domain) and results and results[0].get("itemId", "").startswith(("phone_", "laptop_", "hp_")):
+    if (
+        ELECTRONICS_CATALOG.get(domain)
+        and results
+        and results[0].get("itemId", "").startswith(("phone_", "laptop_", "hp_"))
+    ):
         tradeoff += " (Using curated offline catalog.)"
     results[0]["tradeoff"] = tradeoff
     return results

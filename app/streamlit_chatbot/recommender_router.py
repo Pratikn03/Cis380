@@ -1,4 +1,5 @@
 """Intent routing for the chatbot recommender."""
+
 from __future__ import annotations
 
 import re
@@ -177,7 +178,9 @@ def route_recommendation(text: str, preference: dict | None = None) -> Dict[str,
         items = recommend_places(query=query, city=city, places_api_key=cfg.places_api_key)
         category = "Places"
     elif intent in {"phones", "laptops", "headphones"}:
-        items = recommend_electronics(domain=intent, query=query, price_limit=price_pref, preferred_tags=tag_pref)
+        items = recommend_electronics(
+            domain=intent, query=query, price_limit=price_pref, preferred_tags=tag_pref
+        )
         category = intent.capitalize()
     elif intent == "courses":
         items = recommend_courses(query=query)

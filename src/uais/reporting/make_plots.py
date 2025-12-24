@@ -1,4 +1,5 @@
 """Generate plots from experiment metrics with optional CI bars if available."""
+
 from __future__ import annotations
 
 from pathlib import Path

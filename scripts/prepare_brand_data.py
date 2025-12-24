@@ -3,19 +3,25 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 import json
-import os
 import random
 import shutil
 import sys
 from pathlib import Path
-from typing import Iterable, Iterator
+from typing import Iterator
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC_DIR = ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from vision.brand.data_utils import BoxXYXY, read_coco, read_voc, read_yolo, write_brands_yaml, write_yolo_label
+from vision.brand.data_utils import (  # noqa: E402
+    BoxXYXY,
+    read_coco,
+    read_voc,
+    read_yolo,
+    write_brands_yaml,
+    write_yolo_label,
+)
 
 
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
@@ -88,9 +94,15 @@ def _image_size(img_path: Path) -> tuple[int, int] | None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Prepare LogoDet-3K brand dataset into unified YOLO format")
+    ap = argparse.ArgumentParser(
+        description="Prepare LogoDet-3K brand dataset into unified YOLO format"
+    )
     # Keep backward compatibility with older docs that used "logodet3k".
-    default_src = "data/raw/brand/LogoDet-3K" if Path("data/raw/brand/LogoDet-3K").exists() else "data/raw/brand/logodet3k"
+    default_src = (
+        "data/raw/brand/LogoDet-3K"
+        if Path("data/raw/brand/LogoDet-3K").exists()
+        else "data/raw/brand/logodet3k"
+    )
     ap.add_argument("--src_root", type=str, default=default_src)
     ap.add_argument("--out_root", type=str, default="data/processed/brand_yolo")
     ap.add_argument("--seed", type=int, default=42)
@@ -152,7 +164,11 @@ def main() -> int:
             if img_rel is None:
                 continue
             # Try in same folder, then images_root
-            candidates = [xml_path.parent / img_rel, images_root / img_rel.name, images_root / img_rel]
+            candidates = [
+                xml_path.parent / img_rel,
+                images_root / img_rel.name,
+                images_root / img_rel,
+            ]
             img_path = next((c for c in candidates if c.exists()), None)
             if img_path is None:
                 print(f"[warn] missing VOC image for {xml_path}")
@@ -165,7 +181,9 @@ def main() -> int:
         if not labels_root.exists():
             labels_root = next((p for p in src_root.rglob("labels") if p.is_dir()), labels_root)
         if not labels_root.exists():
-            labels_root = next((p for p in src_root.rglob("annotations") if p.is_dir()), labels_root)
+            labels_root = next(
+                (p for p in src_root.rglob("annotations") if p.is_dir()), labels_root
+            )
         images_root = _resolve_images_root(src_root)
 
         # Try to load class names from dataset yaml if present
@@ -189,7 +207,11 @@ def main() -> int:
             txt_files = [
                 p
                 for p in src_root.rglob("*.txt")
-                if (p.with_suffix(".jpg").exists() or p.with_suffix(".jpeg").exists() or p.with_suffix(".png").exists())
+                if (
+                    p.with_suffix(".jpg").exists()
+                    or p.with_suffix(".jpeg").exists()
+                    or p.with_suffix(".png").exists()
+                )
             ]
 
         for txt in txt_files:
@@ -251,7 +273,11 @@ def main() -> int:
     # deterministic split
     indices = list(range(len(samples)))
     random.shuffle(indices)
-    val_n = max(1, int(len(indices) * float(args.val_ratio))) if len(indices) > 10 else max(0, int(len(indices) * float(args.val_ratio)))
+    val_n = (
+        max(1, int(len(indices) * float(args.val_ratio)))
+        if len(indices) > 10
+        else max(0, int(len(indices) * float(args.val_ratio)))
+    )
     val_idx = set(indices[:val_n])
 
     brand_counts_train: Counter[str] = Counter()
@@ -264,7 +290,9 @@ def main() -> int:
     for i, (img_path, boxes) in enumerate(samples):
         split = "val" if i in val_idx else "train"
         key = _safe_rel_stem(img_path)
-        out_img = (out_images_val if split == "val" else out_images_train) / f"{key}{img_path.suffix.lower()}"
+        out_img = (
+            out_images_val if split == "val" else out_images_train
+        ) / f"{key}{img_path.suffix.lower()}"
         out_lbl = (out_labels_val if split == "val" else out_labels_train) / f"{key}.txt"
 
         if not img_path.exists():
@@ -292,7 +320,12 @@ def main() -> int:
                 brand_counts_train[str(b.cls_name)] += 1
 
     yaml_path = out_root / "brands.yaml"
-    write_brands_yaml(yaml_path, train_images_dir=out_images_train, val_images_dir=out_images_val, class_list=class_list)
+    write_brands_yaml(
+        yaml_path,
+        train_images_dir=out_images_train,
+        val_images_dir=out_images_val,
+        class_list=class_list,
+    )
 
     print("\n[prepare_brand_data] Done")
     print(f"format: {fmt}")

@@ -1,4 +1,5 @@
 """Movie recommender handler with TMDB optional, fallback static list."""
+
 from __future__ import annotations
 
 import csv
@@ -302,6 +303,7 @@ def _recommend_movies_offline(query: str, top_n: int) -> list[dict]:
         filtered = items
 
     if genres:
+
         def _focus(it: dict) -> float:
             tag_str = it.get("tags") or ""
             parts = [p for p in tag_str.split("|") if p]

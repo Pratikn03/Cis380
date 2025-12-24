@@ -1,4 +1,5 @@
 """Meta-feature builder for the recommender."""
+
 from __future__ import annotations
 
 from typing import Dict, List, Tuple, Any
@@ -24,7 +25,9 @@ META_FEATURE_NAMES: List[str] = [
 ]
 
 
-def build_meta_features(scores: Dict[str, float], event_features: Dict[str, Any]) -> Tuple[np.ndarray, List[str]]:
+def build_meta_features(
+    scores: Dict[str, float], event_features: Dict[str, Any]
+) -> Tuple[np.ndarray, List[str]]:
     """Build a numeric meta-feature vector for the recommender model."""
     fraud = float(scores.get("fraud", 0.0))
     cyber = float(scores.get("cyber", 0.0))

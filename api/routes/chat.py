@@ -38,7 +38,9 @@ def _get_agent() -> OmniChatXOrchestrator:
 
 @router.post("")
 def chat(req: ChatRequest):
-    out = _get_agent().handle(req.resolved_text(), user_id=req.user_id, use_rag=req.use_rag, attachments=None)
+    out = _get_agent().handle(
+        req.resolved_text(), user_id=req.user_id, use_rag=req.use_rag, attachments=None
+    )
     # Keep "reply" for UI compatibility; expose structured fields for agent/module debugging.
     out["reply"] = out.get("answer", "")
     return out
@@ -113,7 +115,9 @@ async def chat_multimodal(
                 if not base_message:
                     base_message = stt_text
         except ModuleNotFoundError:
-            attachments["stt_error"] = "Speech-to-text unavailable: install `faster-whisper` to enable live voice chat."
+            attachments["stt_error"] = (
+                "Speech-to-text unavailable: install `faster-whisper` to enable live voice chat."
+            )
         except Exception as exc:
             attachments["stt_error"] = str(exc)
 
@@ -171,7 +175,9 @@ async def chat_multimodal(
         try:
             from api.routes.vision import vision_video_predict
 
-            video_res = await vision_video_predict(file=video, fps=float(fps), max_frames=int(max_frames), top_k=3)
+            video_res = await vision_video_predict(
+                file=video, fps=float(fps), max_frames=int(max_frames), top_k=3
+            )
             temporal = video_res.get("temporal") or {}
             vision_summary = {
                 "label": video_res.get("label"),
@@ -181,7 +187,11 @@ async def chat_multimodal(
                 "fps": video_res.get("fps"),
                 "temporal": {
                     "label_flip_rate": temporal.get("label_flip_rate"),
-                    "prob_entropy": temporal.get("prob_entropy", {}).get("mean") if isinstance(temporal, dict) else None,
+                    "prob_entropy": (
+                        temporal.get("prob_entropy", {}).get("mean")
+                        if isinstance(temporal, dict)
+                        else None
+                    ),
                     "anomaly_score_heuristic": temporal.get("anomaly_score_heuristic"),
                     "notes": temporal.get("notes"),
                 },
@@ -206,7 +216,9 @@ async def chat_multimodal(
     if instruction_text:
         full_message += "\n\nInstruction:\n" + instruction_text
 
-    out = _get_agent().handle(full_message, user_id=user_id, use_rag=use_rag, attachments=attachments or None)
+    out = _get_agent().handle(
+        full_message, user_id=user_id, use_rag=use_rag, attachments=attachments or None
+    )
     out["reply"] = out.get("answer", "")
 
     # Expose attachments at top-level meta for convenience.
@@ -235,9 +247,11 @@ async def chat_stream(message: str, token: str | None = None):
         # simple retry/backoff for 429
         for attempt in range(3):
             try:
-                with requests.post(url, headers=headers, json=payload, stream=True, timeout=30) as resp:
+                with requests.post(
+                    url, headers=headers, json=payload, stream=True, timeout=30
+                ) as resp:
                     if resp.status_code == 429 and attempt < 2:
-                        await asyncio.sleep(2 ** attempt)  # backoff
+                        await asyncio.sleep(2**attempt)  # backoff
                         continue
                     resp.raise_for_status()
                     for line in resp.iter_lines(decode_unicode=True):
@@ -257,14 +271,18 @@ async def chat_stream(message: str, token: str | None = None):
                 break
             except requests.HTTPError as exc:
                 if resp.status_code == 429 and attempt < 2:
-                    await asyncio.sleep(2 ** attempt)
+                    await asyncio.sleep(2**attempt)
                     continue
                 yield f"data: [ERROR] {exc}\\n\\n"
                 return
 
     async def event_gen_fallback():
         try:
-            reply = _get_agent().handle(message, user_id="anon", use_rag=True, attachments=None).get("answer", "")
+            reply = (
+                _get_agent()
+                .handle(message, user_id="anon", use_rag=True, attachments=None)
+                .get("answer", "")
+            )
             for word in reply.split():
                 yield f"data: {word}\\n\\n"
                 await asyncio.sleep(0.01)

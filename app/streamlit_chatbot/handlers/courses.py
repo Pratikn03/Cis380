@@ -1,4 +1,5 @@
 """Recommendation helpers for learning resources."""
+
 from __future__ import annotations
 
 import csv

@@ -1,4 +1,5 @@
 """Load and merge YAML configs."""
+
 from pathlib import Path
 from typing import Any, Dict
 

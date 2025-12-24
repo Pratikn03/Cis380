@@ -5,9 +5,9 @@ Prereqs:
 - kaggle installed (`pip install kaggle`)
 - Kaggle API token at ~/.kaggle/kaggle.json (or set KAGGLE_USERNAME/KAGGLE_KEY env vars)
 """
+
 from __future__ import annotations
 
-import os
 import shutil
 import zipfile
 from pathlib import Path
@@ -26,7 +26,9 @@ def main():
     zip_path = TMP_DIR / "movielens-20m-dataset.zip"
 
     print("Downloading MovieLens 20M via Kaggle API...")
-    kaggle.api.dataset_download_files("grouplens/movielens-20m-dataset", path=str(TMP_DIR), quiet=False, unzip=False)
+    kaggle.api.dataset_download_files(
+        "grouplens/movielens-20m-dataset", path=str(TMP_DIR), quiet=False, unzip=False
+    )
 
     if not zip_path.exists():
         # try to find the zip if named differently

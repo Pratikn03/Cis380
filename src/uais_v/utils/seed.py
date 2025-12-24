@@ -1,7 +1,7 @@
 """Seed helpers to make experiments reproducible."""
+
 import os
 import random
-from typing import Optional
 
 import numpy as np
 

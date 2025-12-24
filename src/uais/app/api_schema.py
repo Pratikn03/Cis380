@@ -1,4 +1,5 @@
 """Pydantic schemas for the UAIS local inference API."""
+
 from typing import Any, Dict, List
 
 from pydantic import BaseModel, Field

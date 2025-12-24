@@ -74,7 +74,9 @@ def _build_vae(input_dim: int, latent_dim: int) -> tf.keras.Model:
                 reconstruction = self.decoder(z_, training=True)
                 recon_loss = tf.reduce_mean(tf.reduce_sum(tf.square(x - reconstruction), axis=1))
                 kl_loss = -0.5 * tf.reduce_mean(
-                    tf.reduce_sum(1.0 + z_log_var_ - tf.square(z_mean_) - tf.exp(z_log_var_), axis=1)
+                    tf.reduce_sum(
+                        1.0 + z_log_var_ - tf.square(z_mean_) - tf.exp(z_log_var_), axis=1
+                    )
                 )
                 total_loss = recon_loss + kl_loss
             grads = tape.gradient(total_loss, self.trainable_weights)
@@ -147,7 +149,9 @@ def run_vae_pipeline(cfg: VAEConfig) -> Dict[str, float]:
         vae.reset_metrics()
         val_logs = vae.test_step(X_test)
         history_logs["val_loss"].append(float(val_logs["loss"].numpy()))
-        history_logs["val_reconstruction_loss"].append(float(val_logs["reconstruction_loss"].numpy()))
+        history_logs["val_reconstruction_loss"].append(
+            float(val_logs["reconstruction_loss"].numpy())
+        )
         history_logs["val_kl_loss"].append(float(val_logs["kl_loss"].numpy()))
         vae.reset_metrics()
 

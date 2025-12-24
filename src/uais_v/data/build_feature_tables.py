@@ -1,4 +1,5 @@
 """Feature table builders delegating to existing UAIS modules."""
+
 from pathlib import Path
 from typing import Optional
 
@@ -16,7 +17,9 @@ except Exception:  # pragma: no cover - fallback when uais not available
 from ..paths import LAKE_DIR, PROCESSED_DIR
 
 
-def build_behavior_features(raw_parquet: Optional[Path] = None, out_path: Optional[Path] = None) -> Path:
+def build_behavior_features(
+    raw_parquet: Optional[Path] = None, out_path: Optional[Path] = None
+) -> Path:
     if build_behavior_feature_table is None:
         raise ImportError("uais.features.behavior_features is not available.")
     raw_parquet = raw_parquet or (LAKE_DIR / "behavior" / "online_shoppers_intention.parquet")
@@ -28,7 +31,9 @@ def build_behavior_features(raw_parquet: Optional[Path] = None, out_path: Option
     return out_path
 
 
-def build_fraud_features_table(raw_parquet: Optional[Path] = None, out_path: Optional[Path] = None) -> Path:
+def build_fraud_features_table(
+    raw_parquet: Optional[Path] = None, out_path: Optional[Path] = None
+) -> Path:
     if build_fraud_features is None:
         raise ImportError("uais.features.fraud_features is not available.")
     raw_parquet = raw_parquet or (LAKE_DIR / "fraud" / "creditcard.parquet")
@@ -40,7 +45,9 @@ def build_fraud_features_table(raw_parquet: Optional[Path] = None, out_path: Opt
     return out_path
 
 
-def build_cyber_features_table(raw_parquet: Optional[Path] = None, out_path: Optional[Path] = None) -> Path:
+def build_cyber_features_table(
+    raw_parquet: Optional[Path] = None, out_path: Optional[Path] = None
+) -> Path:
     if build_cyber_features is None:
         raise ImportError("uais.features.cyber_features is not available.")
     raw_parquet = raw_parquet or (LAKE_DIR / "cyber" / "unsw_nb15.parquet")

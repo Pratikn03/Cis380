@@ -25,7 +25,9 @@ def ingest_from_paths(paths: Iterable[Path], chunk_size: int = 900, overlap: int
     all_chunks: List[dict] = []
     for path in paths:
         content = _read_file(path)
-        for chunk in chunk_with_metadata(content, source=str(path), chunk_size=chunk_size, overlap=overlap):
+        for chunk in chunk_with_metadata(
+            content, source=str(path), chunk_size=chunk_size, overlap=overlap
+        ):
             all_chunks.append(chunk)
     if not all_chunks:
         return 0

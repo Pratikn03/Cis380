@@ -126,7 +126,7 @@ def _parse_label_map(raw: str | None) -> dict[str, str] | None:
     try:
         obj = json.loads(raw)
     except json.JSONDecodeError as exc:
-        raise ValueError("--label-map must be valid JSON (a dict of {\"source\": \"label\"}).") from exc
+        raise ValueError('--label-map must be valid JSON (a dict of {"source": "label"}).') from exc
     if not isinstance(obj, dict) or not obj:
         raise ValueError("--label-map must be a non-empty JSON object.")
     out: dict[str, str] = {}
@@ -218,7 +218,9 @@ def _train_one_epoch(*, model, loader, device, optimizer, loss_fn) -> tuple[floa
     return avg_loss, acc
 
 
-def _evaluate(*, model, loader, device, loss_fn) -> tuple[float, float]:  # pragma: no cover - exercised via training
+def _evaluate(
+    *, model, loader, device, loss_fn
+) -> tuple[float, float]:  # pragma: no cover - exercised via training
     import torch
 
     model.eval()
@@ -245,7 +247,9 @@ def main() -> int:
     ap.add_argument("--data-dir", type=Path, default=Path("data/raw/vision/face_emotion"))
     ap.add_argument("--out-dir", type=Path, default=_DEFAULT_OUT_DIR)
     ap.add_argument("--arch", choices=["small_cnn", "resnet18"], default="small_cnn")
-    ap.add_argument("--pretrained", action="store_true", help="Use pretrained ImageNet weights (resnet18 only).")
+    ap.add_argument(
+        "--pretrained", action="store_true", help="Use pretrained ImageNet weights (resnet18 only)."
+    )
     ap.add_argument("--image-size", type=int, default=96, help="Resize images to NxN.")
     ap.add_argument("--epochs", type=int, default=5)
     ap.add_argument("--batch-size", type=int, default=64)
@@ -254,7 +258,9 @@ def main() -> int:
     ap.add_argument("--weight-decay", type=float, default=1e-4)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--device", type=str, default=os.getenv("UAIS_FACE_EMOTION_DEVICE", "auto"))
-    ap.add_argument("--val-split", type=float, default=0.15, help="Used only when val/ is not present.")
+    ap.add_argument(
+        "--val-split", type=float, default=0.15, help="Used only when val/ is not present."
+    )
     ap.add_argument(
         "--label-map",
         type=str,
@@ -382,7 +388,9 @@ def main() -> int:
     )
 
     device = torch.device(_resolve_device(str(args.device)))
-    model = _build_model(str(args.arch), num_classes=len(classes), pretrained=bool(args.pretrained)).to(device)
+    model = _build_model(
+        str(args.arch), num_classes=len(classes), pretrained=bool(args.pretrained)
+    ).to(device)
 
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(

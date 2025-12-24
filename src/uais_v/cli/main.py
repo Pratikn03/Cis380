@@ -1,4 +1,5 @@
 """CLI entrypoint for UAIS-V operations."""
+
 import argparse
 
 from ..data.build_30seq_dataset import build_30seq_arrays

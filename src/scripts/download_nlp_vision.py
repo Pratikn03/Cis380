@@ -66,6 +66,7 @@ def download_file(url: str, dest_path: Path, chunk_size: int = 1 << 20) -> None:
 # NLP: Enron email dataset
 # -------------------------
 
+
 def download_enron_via_kaggle() -> Path:
     """
     Download Enron email CSV from Kaggle using the Kaggle API.
@@ -78,8 +79,7 @@ def download_enron_via_kaggle() -> Path:
     """
     if not KAGGLE_AVAILABLE:
         raise RuntimeError(
-            "kaggle package not installed. Run: pip install kaggle\n"
-            "Then re-run this script."
+            "kaggle package not installed. Run: pip install kaggle\n" "Then re-run this script."
         )
 
     NLP_DIR.mkdir(parents=True, exist_ok=True)
@@ -102,9 +102,7 @@ def download_enron_via_kaggle() -> Path:
     # Find the downloaded zip file (Kaggle uses `enron-email-dataset.zip`)
     zip_files = list(NLP_DIR.glob("*.zip"))
     if not zip_files:
-        raise FileNotFoundError(
-            "No .zip file found after Kaggle download. Check output above."
-        )
+        raise FileNotFoundError("No .zip file found after Kaggle download. Check output above.")
 
     zip_path = zip_files[0]
     print(f"[info] Extracting {zip_path.name} ...")
@@ -116,9 +114,7 @@ def download_enron_via_kaggle() -> Path:
     # Kaggle version typically contains `enron_email.csv` or similar; normalize name
     candidates = list(NLP_DIR.glob("*.csv"))
     if not candidates:
-        raise FileNotFoundError(
-            "No CSV found in Enron zip. Check dataset structure in NLP_DIR."
-        )
+        raise FileNotFoundError("No CSV found in Enron zip. Check dataset structure in NLP_DIR.")
 
     # Take the first CSV and rename to enron_emails.csv
     src_csv = candidates[0]
@@ -206,6 +202,7 @@ def download_cifar10() -> Path:
 # -------------
 # CLI entry
 # -------------
+
 
 def main() -> None:
     import argparse

@@ -76,7 +76,9 @@ def _link_or_copy(src: Path, dst: Path, *, mode: str) -> str:
         return "copied"
 
 
-def _resolve_source_layout(src: Path, *, include_youtube_real: bool) -> tuple[list[Path], list[Path]]:
+def _resolve_source_layout(
+    src: Path, *, include_youtube_real: bool
+) -> tuple[list[Path], list[Path]]:
     """Return lists of real_dirs, fake_dirs when the expected layout exists."""
     real_dirs: list[Path] = []
     fake_dirs: list[Path] = []
@@ -138,7 +140,9 @@ def _extract_frames(
     out_dir.mkdir(parents=True, exist_ok=True)
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
-        raise RuntimeError("ffmpeg not found in PATH; install it or run with --fps 0 to skip extraction.")
+        raise RuntimeError(
+            "ffmpeg not found in PATH; install it or run with --fps 0 to skip extraction."
+        )
 
     for video in video_paths:
         stem = video.stem
@@ -253,7 +257,9 @@ def run(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Import Celeb-DF v2 videos into OmniChatX folders.")
+    parser = argparse.ArgumentParser(
+        description="Import Celeb-DF v2 videos into OmniChatX folders."
+    )
     parser.add_argument("--src", type=Path, default=Path("data/Video-2"))
     parser.add_argument(
         "--mode",

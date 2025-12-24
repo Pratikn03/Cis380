@@ -4,8 +4,15 @@ from typing import Callable
 
 import streamlit as st
 
+from ..utils import call_with_container_width
 
-def render_live_page(*, backend_url: str, call_multipart: Callable[..., dict], auth_headers: Callable[[], dict[str, str]]) -> None:
+
+def render_live_page(
+    *,
+    backend_url: str,
+    call_multipart: Callable[..., dict],
+    auth_headers: Callable[[], dict[str, str]],
+) -> None:
     """Live mic + webcam page.
 
     Design goals:
@@ -50,7 +57,9 @@ def render_live_page(*, backend_url: str, call_multipart: Callable[..., dict], a
         value=False,
         key="live_use_stt",
     )
-    stt_language = st.text_input("STT language (optional, e.g. en)", value="", key="live_stt_language")
+    stt_language = st.text_input(
+        "STT language (optional, e.g. en)", value="", key="live_stt_language"
+    )
 
     live_text = st.text_input(
         "Instruction (optional)" if use_stt else "Message",
@@ -211,7 +220,7 @@ def render_live_page(*, backend_url: str, call_multipart: Callable[..., dict], a
                 img_rgb = vf.to_ndarray(format="rgb24")
                 st.session_state.webrtc_last_frame = img_rgb
                 frame_preview = st.empty()
-                frame_preview.image(img_rgb, caption="Live preview", use_container_width=True)
+                call_with_container_width(frame_preview.image, img_rgb, caption="Live preview")
                 buf = io.BytesIO()
                 import PIL.Image  # type: ignore
 
@@ -226,7 +235,7 @@ def render_live_page(*, backend_url: str, call_multipart: Callable[..., dict], a
         if webrtc_ctx.audio_receiver:
             try:
                 audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
-                audio_frames = audio_frames[-int(max_audio_frames):]
+                audio_frames = audio_frames[-int(max_audio_frames) :]
                 if audio_frames:
                     pcm = []
                     sr = audio_frames[-1].sample_rate
@@ -284,7 +293,9 @@ def render_live_page(*, backend_url: str, call_multipart: Callable[..., dict], a
             with st.expander("Latest response", expanded=False):
                 st.json(res)
 
-        st.caption("Tip: Streamlit reruns drive the periodic sends. Keep this tab focused for best results.")
+        st.caption(
+            "Tip: Streamlit reruns drive the periodic sends. Keep this tab focused for best results."
+        )
 
     except Exception as exc:
         st.warning(

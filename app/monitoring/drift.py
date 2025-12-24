@@ -10,12 +10,16 @@ def psi(baseline: List[float], current: List[float], bins: int = 5) -> float:
 
     if not baseline or not current:
         return 0.0
-    edges = np.linspace(min(min(baseline), min(current)), max(max(baseline), max(current)), bins + 1)
+    edges = np.linspace(
+        min(min(baseline), min(current)), max(max(baseline), max(current)), bins + 1
+    )
+
     def freq(values):
         hist, _ = np.histogram(values, bins=edges)
         probs = hist / max(hist.sum(), 1)
         probs[probs == 0] = 1e-6
         return probs
+
     base = freq(baseline)
     curr = freq(current)
     return float(np.sum((base - curr) * np.log(base / curr)))
@@ -29,7 +33,9 @@ def classify_status(score: float) -> str:
     return "critical"
 
 
-def compute_drift(baseline: Dict[str, Dict[str, float]], live_events: List[Dict[str, float]], window: str) -> DriftReport:
+def compute_drift(
+    baseline: Dict[str, Dict[str, float]], live_events: List[Dict[str, float]], window: str
+) -> DriftReport:
     aggregated: Dict[str, List[float]] = {}
     for event in live_events:
         for feature, value in event.items():

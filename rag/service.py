@@ -1,4 +1,5 @@
 """Lightweight RAG service using TF-IDF over local docs."""
+
 from __future__ import annotations
 
 import logging

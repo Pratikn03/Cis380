@@ -46,7 +46,21 @@ def decide(message: str) -> str:
         )
     ):
         return "recommend"
-    if any(k in text for k in ["career", "careers", "skills", "role", "roles", "job", "jobs", "ml engineer", "data scientist", "skill map"]):
+    if any(
+        k in text
+        for k in [
+            "career",
+            "careers",
+            "skills",
+            "role",
+            "roles",
+            "job",
+            "jobs",
+            "ml engineer",
+            "data scientist",
+            "skill map",
+        ]
+    ):
         return "rag"
     if any(k in text for k in ["doc", "note", "pdf", "paper", "from docs", "rag"]):
         return "rag"

@@ -12,6 +12,7 @@ def test_generate_meta_features_and_train(tmp_path, monkeypatch):
     labels = (rng.random(50) < 0.3).astype(int)
 
     from uais.fusion.build_embeddings import generate_meta_features
+
     X = generate_meta_features(score_dict)
     assert X.shape == (50, 3)
 

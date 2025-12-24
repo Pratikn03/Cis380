@@ -28,4 +28,3 @@ def analyze_image(image_path: str | Path) -> dict[str, Any]:
     """
     path = Path(image_path)
     return analyze_image_bytes(path.read_bytes())
-

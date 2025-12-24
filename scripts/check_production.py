@@ -6,17 +6,17 @@ Verifies all production configuration files are in place
 import os
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import Tuple
 
 # Colors for output
-GREEN = '\033[92m'
-RED = '\033[91m'
-YELLOW = '\033[93m'
-BLUE = '\033[94m'
-RESET = '\033[0m'
-CHECK = '✓'
-CROSS = '✗'
-WARN = '⚠'
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+RESET = "\033[0m"
+CHECK = "✓"
+CROSS = "✗"
+WARN = "⚠"
 
 
 def print_header(text: str):
@@ -39,7 +39,7 @@ def print_result(name: str, exists: bool, required: bool = True):
 def check_files() -> Tuple[int, int, int]:
     """Check if all required files exist."""
     base = Path(__file__).parent.parent
-    
+
     # Required files for production
     required_files = [
         ("Dockerfile.production", True),
@@ -64,32 +64,32 @@ def check_files() -> Tuple[int, int, int]:
         ("setup.cfg", False),
         ("pyproject.toml", True),
     ]
-    
+
     print_header("Production Files Check")
-    
+
     passed = 0
     failed = 0
     warnings = 0
-    
+
     for file_path, required in required_files:
         full_path = base / file_path
         exists = full_path.exists()
         print_result(file_path, exists, required)
-        
+
         if exists:
             passed += 1
         elif required:
             failed += 1
         else:
             warnings += 1
-    
+
     return passed, failed, warnings
 
 
 def check_environment_variables():
     """Check for important environment variables."""
     print_header("Environment Variables Check")
-    
+
     env_vars = [
         ("APP_ENV", False),
         ("SECRET_KEY", True),
@@ -101,7 +101,7 @@ def check_environment_variables():
         ("LOG_LEVEL", False),
         ("DEBUG", False),
     ]
-    
+
     for var, sensitive in env_vars:
         value = os.environ.get(var)
         if value:
@@ -114,9 +114,9 @@ def check_environment_variables():
 def check_directories():
     """Check if required directories exist."""
     print_header("Directory Structure Check")
-    
+
     base = Path(__file__).parent.parent
-    
+
     required_dirs = [
         "app/core",
         "deploy/nginx",
@@ -129,7 +129,7 @@ def check_directories():
         "logs",
         "data",
     ]
-    
+
     for dir_path in required_dirs:
         full_path = base / dir_path
         exists = full_path.exists() and full_path.is_dir()
@@ -139,36 +139,26 @@ def check_directories():
 def check_docker():
     """Check Docker availability."""
     print_header("Docker Check")
-    
+
     import subprocess
-    
+
     try:
-        result = subprocess.run(
-            ["docker", "--version"],
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(["docker", "--version"], capture_output=True, text=True)
         if result.returncode == 0:
             print(f"  {GREEN}{CHECK}{RESET} Docker: {result.stdout.strip()}")
         else:
             print(f"  {RED}{CROSS}{RESET} Docker not working properly")
     except FileNotFoundError:
         print(f"  {RED}{CROSS}{RESET} Docker not installed")
-    
+
     try:
-        result = subprocess.run(
-            ["docker-compose", "--version"],
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(["docker-compose", "--version"], capture_output=True, text=True)
         if result.returncode == 0:
             print(f"  {GREEN}{CHECK}{RESET} Docker Compose: {result.stdout.strip()}")
         else:
             # Try docker compose (v2)
             result = subprocess.run(
-                ["docker", "compose", "version"],
-                capture_output=True,
-                text=True
+                ["docker", "compose", "version"], capture_output=True, text=True
             )
             if result.returncode == 0:
                 print(f"  {GREEN}{CHECK}{RESET} Docker Compose (v2): {result.stdout.strip()}")
@@ -181,7 +171,7 @@ def check_docker():
 def check_python_deps():
     """Check Python dependencies."""
     print_header("Python Dependencies Check")
-    
+
     critical_deps = [
         "fastapi",
         "uvicorn",
@@ -193,7 +183,7 @@ def check_python_deps():
         "httpx",
         "pytest",
     ]
-    
+
     for dep in critical_deps:
         try:
             __import__(dep.replace("-", "_"))
@@ -205,44 +195,44 @@ def check_python_deps():
 def generate_summary(passed: int, failed: int, warnings: int):
     """Generate summary report."""
     print_header("Summary")
-    
+
     total = passed + failed + warnings
-    
+
     print(f"  Total checks:  {total}")
     print(f"  {GREEN}Passed:        {passed}{RESET}")
     print(f"  {RED}Failed:        {failed}{RESET}")
     print(f"  {YELLOW}Warnings:      {warnings}{RESET}")
-    
+
     if failed == 0:
         print(f"\n  {GREEN}🎉 Production readiness check PASSED!{RESET}")
-        print(f"  Your project is ready for production deployment.")
+        print("  Your project is ready for production deployment.")
     else:
         print(f"\n  {RED}❌ Production readiness check FAILED!{RESET}")
         print(f"  Please address the {failed} missing required file(s).")
-    
+
     print(f"\n  {BLUE}Next Steps:{RESET}")
-    print(f"  1. Configure .env with your values (copy from .env.production.example)")
-    print(f"  2. Add SSL certificates to deploy/nginx/ssl/")
-    print(f"  3. Run: ./scripts/deploy.sh deploy")
-    print(f"  4. Access the app at https://your-domain.com")
-    
+    print("  1. Configure .env with your values (copy from .env.production.example)")
+    print("  2. Add SSL certificates to deploy/nginx/ssl/")
+    print("  3. Run: ./scripts/deploy.sh deploy")
+    print("  4. Access the app at https://your-domain.com")
+
     return failed == 0
 
 
 def main():
     """Run all checks."""
     print(f"\n{BLUE}╔══════════════════════════════════════════════════════════╗")
-    print(f"║       OmniChatX Production Readiness Checker             ║")
+    print("║       OmniChatX Production Readiness Checker             ║")
     print(f"╚══════════════════════════════════════════════════════════╝{RESET}")
-    
+
     passed, failed, warnings = check_files()
     check_directories()
     check_docker()
     check_python_deps()
     check_environment_variables()
-    
+
     success = generate_summary(passed, failed, warnings)
-    
+
     sys.exit(0 if success else 1)
 
 
