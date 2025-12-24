@@ -1,6 +1,7 @@
-# Clothing image dataset layout (for true image recognition)
+# Clothing image dataset layout (optional)
 
-This repo supports **true image-based recognition** (brand/category) using a labeled image dataset.
+This repo can be extended to support **image-based recognition** (brand/category) using a labeled ImageFolder dataset.
+This is optional and not part of the default demo runtime.
 
 ## Where to put images
 
@@ -49,4 +50,3 @@ If you only want **category**, you only need the `category/` subtree.
 - Keep the training artifacts under:
   - `models/vision_brand/` (brand classifier)
   - `models/vision_category/` (category classifier)
-

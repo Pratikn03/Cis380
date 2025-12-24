@@ -1,8 +1,10 @@
-# 🐛 Streamlit Common Runtime Errors & Solutions
+# Streamlit Runtime Errors (Common)
 
 **App:** OmniChat Unified Streamlit Interface  
 **File:** `app/streamlit_chatbot/omnichat_unified.py`  
 **Last Updated:** December 17, 2025
+
+> Note: This document is a historical troubleshooting list from the UI hardening phase.
 
 ---
 

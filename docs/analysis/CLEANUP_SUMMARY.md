@@ -1,4 +1,6 @@
-# ✅ Project Cleanup Completed - Summary Report
+# Project Cleanup Summary (Historical)
+
+> Note: This document is a historical cleanup log and is not required to run the current system.
 
 **Date:** December 17, 2025  
 **Project:** Universal Anomaly Intelligence v2  

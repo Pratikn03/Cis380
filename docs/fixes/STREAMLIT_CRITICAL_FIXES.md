@@ -1,9 +1,11 @@
-# 🔧 Streamlit Critical Fixes Applied & Pending
+# Streamlit Critical Fixes (Applied & Pending)
 
 **Date:** December 17, 2025  
 **File:** `app/streamlit_chatbot/omnichat_unified.py`
 
 ---
+
+> Note: This document is a historical checklist. Some items may already be resolved in the current codebase.
 
 ## ✅ FIXED (Applied)
 

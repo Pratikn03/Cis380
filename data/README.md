@@ -1,14 +1,16 @@
-# Data directory
+# Data Layout
 
-- `raw/`: place source CSVs per domain (`fraud/transactions.csv`, `cyber/events.csv`, `behavior/sessions.csv`).
-- `interim/`: intermediate cleaned outputs created during preprocessing.
-- `processed/`: feature tables ready for modeling.
+Large datasets and generated artifacts are intentionally kept under `data/` and are typically ignored by git.
 
-If no raw files are present, the loaders generate synthetic data so the pipeline and dashboard still run.
+## Directory Structure
+- `data/raw/` — raw datasets (domain-specific subfolders).
+- `data/interim/` — intermediate cleaned outputs created during preprocessing.
+- `data/processed/` — processed datasets and derived artifacts.
+- `data/docs/` — local RAG knowledge base (markdown/txt files).
+- `data/embeddings/` — local embedding/vector artifacts (RAG + recommender indexes).
+- `data/monitoring/` — monitoring logs (JSONL) and baselines.
 
-Suggested public datasets
-- Fraud: IEEE-CIS, Kaggle Credit Card Fraud, PaySim (mobile money)
-- Cyber: CIC-IDS, KDDCUP99/NSL-KDD, UNSW-NB15
-- Behavior: web/app telemetry, clickstream, or system audit logs
-- NLP: Enron emails (CSV) via Kaggle; save as `data/raw/nlp/enron_emails.csv` or use `python src/scripts/download_nlp_vision.py --enron`.
-- Vision: CIFAR-10 (Python version) under `data/raw/vision/cifar-10-python/`; pull with `python src/scripts/download_nlp_vision.py --cifar10`.
+## Notes
+- If some raw datasets are missing, parts of the system fall back to synthetic data to keep the demo runnable.
+- Brand/logo YOLO preparation writes a YOLO-style dataset under `data/processed/brand_yolo/`.
+

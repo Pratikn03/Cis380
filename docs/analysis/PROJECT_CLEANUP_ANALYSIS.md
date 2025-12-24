@@ -1,4 +1,6 @@
-# 🔍 Complete Project Analysis & Cleanup Report
+# Project Analysis & Cleanup Report (Historical)
+
+> Note: This document is a historical audit/cleanup analysis and is not required to run the current system.
 
 **Date:** December 17, 2025  
 **Project:** Universal Anomaly Intelligence v2  

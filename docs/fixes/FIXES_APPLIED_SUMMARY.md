@@ -1,4 +1,6 @@
-# ✅ Streamlit Fixes Applied - Summary
+# Streamlit Fixes Applied (Summary)
+
+> Note: This document is a historical record of the Streamlit hardening work.
 
 **Date:** December 17, 2025  
 **File:** `app/streamlit_chatbot/omnichat_unified.py`  

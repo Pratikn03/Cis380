@@ -1,30 +1,16 @@
-# UAIS-V API and Dashboard Notes
+# API + Streamlit Notes (Legacy)
 
-> ⚠️ Legacy note: this doc describes the older `deploy/api/main.py` + `dashboard/app_streamlit.py` stack.  
-> For the current demo/runtime, see `docs/demo.md` and `README.md` (FastAPI: `app.main:app`, UI: `app/streamlit_chatbot/app.py`).
+This file exists for historical context.
 
-## FastAPI (deploy/api/main.py)
-- Endpoints: `/`, `/predict_fraud`, `/predict_cyber`, `/predict_fusion`, `/predict_nlp`, `/predict_vision`
-- Models loaded if present:
-  - Fraud: `models/fraud/supervised/fraud_model.pkl`
-  - Cyber: `models/cyber/supervised/cyber_model.pkl`
-  - Fusion: `experiments/fusion/models/fusion_meta_model.pkl`
-  - NLP: `models/nlp/distilbert/` (tokenizer + model.pt)
-  - Vision: `models/vision/resnet/model.pt`
-- Fusion expects a dict of domain scores; keys are sorted before prediction.
+## Current Runtime (Recommended)
+- FastAPI: `uvicorn app.main:app --reload`
+- Streamlit: `streamlit run app/streamlit_chatbot/app.py`
+- Demo walkthrough: `docs/guides/demo.md`
 
-Run locally:
-```bash
-uvicorn deploy.api.main:app --reload --port 8000
-```
-NLP expects DistilBERT artifacts saved under `models/nlp/distilbert/`; Vision expects a `model.pt` under `models/vision/resnet/`.
-## Streamlit (dashboard/app_streamlit.py)
-- Shows metrics for Fraud/Cyber if CSVs exist under `experiments/<domain>/metrics/metrics.csv`
-- Behavior tab displays plot from `experiments/behavior/plots/heatmap.png` if present.
-- Fusion tab shows `experiments/fusion/fusion_scores.csv` (scatter if columns available).
-- Sidebar lists which model artifacts exist.
+## Legacy Stack (Reference Only)
+Some older documents and experiments reference:
+- `deploy/api/main.py` (legacy FastAPI app)
+- `dashboard/app_streamlit.py` (legacy Streamlit dashboard)
 
-Run locally:
-```bash
-streamlit run dashboard/app_streamlit.py
-```
+They are not the default runtime in OmniChatX v2.
+

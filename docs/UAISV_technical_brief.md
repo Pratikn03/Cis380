@@ -1,119 +1,36 @@
-# UAIS-V Technical Brief (Engineering Summary)
+# UAIS‑V2 Technical Brief (OmniChatX)
 
-## Overview
-Universal Anomaly Intelligence System (Vision-Enabled) is a multimodal AI stack for anomaly detection, explainability, and risk prediction across:
-- Fraud (tabular)
-- Cybersecurity (network intrusion)
-- Behavioral / Insider Threat (CERT r4.2)
-- Natural Language Processing (emails / text)
-- Computer Vision (deepfake / forgery detection)
+OmniChatX / Universal Anomaly Intelligence v2 is a multimodal AI agent platform that integrates multiple “applied AI” subsystems behind a single API and demo UI:
+- retrieval over local documents (RAG),
+- risk scoring (fraud/cyber/behavior + a fused decision),
+- recommendations (text + multimodal similarity),
+- voice emotion recognition (audio),
+- vision inference (image/video) + optional face emotion + brand/logo YOLO.
 
-## Core Architecture
-Layer | Purpose | Tools / Frameworks
---- | --- | ---
-Data Layer | Ingestion, storage, cleaning | pandas, pyarrow, fastparquet
-Feature Engineering | Domain-specific features/encodings | scikit-learn, category_encoders, numpy
-Modeling | Supervised + unsupervised + sequence + multimodal fusion | XGBoost, LightGBM, CatBoost, PyTorch, TensorFlow (PyTorch Lightning as alt)
-Explainability | Interpret predictions | SHAP, LIME, Grad-CAM (vision)
-Orchestration | Automate pipelines | Prefect, MLflow
-Deployment | Serve/visualize | FastAPI, Streamlit, Docker
-Evaluation / Drift | Continuous validation | Evidently AI, custom drift scripts
+## Design Goals
+- **One interface, many tools:** one request surface with routing + unified responses.
+- **Offline-first:** everything runs locally without external services; optional online LLM is additive.
+- **Production-minded:** clear entrypoints, health checks, metrics, and a Docker production stack.
 
-## Data & File Flow
-```
-data/raw/ -> data/interim/ -> data/processed/
-           -> src/uais/data/load_datasets.py
-                fraud     -> build_fraud_feature_table()
-                cyber     -> build_cyber_feature_table()
-                behavior  -> build_behavior_sequences()
-                nlp       -> preprocess_emails()
-                vision    -> preprocess_images()
-``` 
-Outputs feed into supervised, unsupervised, sequence, NLP, vision trainers, and then the fusion meta-model.
+## High-Level Architecture
 
-## Modeling Stack by Domain
-**Fraud (tabular)**
-- Data: creditcard.csv
-- Models: XGBoost, LightGBM, CatBoost, Logistic Regression baseline
-- Metrics: ROC-AUC, F1, PR, latency
-- Notes: tree ensembles preferred for speed/interpretability on structured data
+Components:
+- **API Gateway:** `app/main.py` → `backend/main.py`
+- **Routing layer:** rule-based orchestrator (default) under `agent/`
+- **Services:** modular code under `app/` (risk, monitoring, voice, RAG ingestion, brand, STT, health)
+- **UI:** Streamlit command center under `app/streamlit_chatbot/`
+- **Artifacts:** local models under `models/` and `artifacts/` (not committed)
 
-**Cybersecurity**
-- Data: UNSW-NB15
-- Models: HistGradientBoosting, RandomForest, Autoencoder
-- Frameworks: scikit-learn, LightGBM, Keras
+## Runtime Behavior
+- `/api/chat` routes text to the relevant subsystem and returns `{route, answer, meta}`.
+- `/api/chat/multimodal` accepts optional `audio`/`image`/`video` and attaches analysis outputs under `meta.attachments`.
+- Health and observability are provided via `/health/*` and `/metrics`.
 
-**Behavior / Insider Threat (CERT r4.2)**
-- Approach: sequence modeling with unsupervised LSTM autoencoders
-- Data: logon.csv, device.csv, email.csv
-- Current issue: slow TensorFlow CPU training
-- Fixes: smaller batch/epochs, PyTorch Lightning or TCN, or run on GPU (Colab/AWS); reduce sequence length/users for quick tests
+## Deployment
+- Dev: `uvicorn app.main:app --reload` + `streamlit run app/streamlit_chatbot/app.py`
+- Production: `docker-compose.production.yml` (API + UI + Redis + optional monitoring/nginx)
 
-**NLP (text anomaly)**
-- Data: Enron emails
-- Pipeline: preprocess -> DistilBERT embeddings -> fine-tuned classifier (suspicious vs normal)
-- Frameworks: transformers, torch, datasets
+## Known Constraints
+- Some features require trained local artifacts and will return `503` until trained.
+- On macOS (Apple Silicon), PyTorch uses `mps` (Metal). Validation in YOLO may be slower; disabling validation for smoke runs is recommended.
 
-**Vision (deepfake/forgery)**
-- Data: DFDC, CelebDF (or any ImageFolder-style real/fake dataset)
-- Models: ResNet18/ResNet-style baseline classifier.
-- Video inference (if used): sample frames with ffmpeg and **aggregate per-frame probabilities** (mean-prob baseline).
-- Explainability: Grad-CAM is explored in notebooks (e.g. `50_explainability.ipynb`), but it is not a required production feature.
-- Frameworks: torchvision (optional timm)
-
-## Fusion Meta-Model
-Combine risk scores from fraud, cyber, behavior, NLP, vision -> stacking/blending (e.g., sklearn StackingClassifier) or weighted fusion -> unified risk index / recommendations. Artifacts stored under `experiments/fusion/`.
-
-## Explainability & Drift
-Layer | Tool | Output
---- | --- | ---
-Tabular | SHAP | Feature contribution plots
-Cyber/NLP | LIME | Text explanations
-Vision | Grad-CAM | Image heatmaps
-Drift | Evidently | Dataset/model drift reports
-
-Outputs saved to `experiments/<domain>/plots/`.
-
-## Orchestration & Deployment
-- Prefect flows (ingest -> train -> eval -> log). Example: `python src/orchestration/fraud_flow.py`
-- MLflow tracking for metrics/params/artifacts
-- FastAPI + Docker for unified inference endpoint
-- Streamlit dashboard for metrics, explainability, and risk index
-
-## Performance Optimizations
-Problem | Fix
---- | ---
-TensorFlow slow on M-series | Use tensorflow-macos + tensorflow-metal, or switch to PyTorch
-CPU-only training | Prefer HistGradientBoosting / LightGBM over deep nets
-Slow CERT training | Limit rows/epochs, use TCN
-Memory issues | Process Parquet in chunks
-Slow explainability | Use approximate/fast SHAP mode
-
-## End-to-End Flow (high level)
-Raw data (fraud, cyber, behavior, NLP, vision)
- -> Ingestion -> Feature Engineering -> Model Training
- -> Per-domain models (supervised, unsupervised, sequence)
- -> Fusion meta-model (aggregate scores)
- -> Explainability + Drift analysis
- -> Orchestration (Prefect + MLflow)
- -> Deployment (FastAPI + Streamlit)
-
-## Example Tech Stack
-Type | Framework
---- | ---
-Programming | Python 3.11
-ML | scikit-learn 1.5, XGBoost 2.0, LightGBM 4.3
-DL | TensorFlow 2.16 (or PyTorch 2.4 for speed)
-NLP | Transformers 4.43
-Vision | TorchVision 0.19
-Orchestration | Prefect 3.x
-Tracking | MLflow 2.15
-Deployment | FastAPI 0.115, Docker 27
-Visualization | Streamlit 1.38, Plotly 5.23
-
-## Next Actions
-1) Replace slow TensorFlow sequence model (add train_tcn.py with PyTorch TCN autoencoder).
-2) Finish NLP & Vision modules (train_text_classifier.py, train_vision_model.py).
-3) Integrate Prefect flows end-to-end.
-4) Run fusion meta-model once domain scores are ready.
-5) Deploy Streamlit dashboard for real-time risk visualization.

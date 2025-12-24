@@ -1,39 +1,16 @@
-# Local Run Guide (API + Dashboard)
+# Local Run (Legacy Notes)
 
-> ⚠️ Legacy note: this guide references the older `deploy/api/main.py` + `dashboard/` stack.  
-> For the current demo/runtime, use `docs/demo.md` and run `uvicorn app.main:app --reload` + `streamlit run app/streamlit_chatbot/app.py`.
+This file is retained because older drafts referenced a separate API/UI stack under `deploy/` and `dashboard/`.
 
-## Prerequisites
-- Python 3.11
-- Install dependencies: `pip install -r requirements.txt`
-- Data in place (fraud/cyber/behavior, NLP/Vision as needed)
-- Models/artifacts generated (run flows or scripts to create `models/...` and `experiments/...`)
+## Recommended Local Run (Current)
 
-## Start FastAPI
-```
-uvicorn deploy.api.main:app --reload --host 0.0.0.0 --port 8000
-```
-- Health: http://localhost:8000/health
-- Root availability: http://localhost:8000/
-- Endpoints: `/predict_fraud`, `/predict_cyber`, `/predict_fusion`, `/predict_nlp`, `/predict_vision`
+- FastAPI: `uvicorn app.main:app --reload`
+- Streamlit: `streamlit run app/streamlit_chatbot/app.py`
+- Demo walkthrough: `docs/guides/demo.md`
 
-## Start Streamlit
-```
-streamlit run dashboard/app_streamlit.py --server.address 0.0.0.0 --server.port 8501
-```
-- Dashboard: http://localhost:8501
+## Legacy Entry Points (Reference Only)
+- FastAPI: `uvicorn deploy.api.main:app --reload --port 8000`
+- Streamlit: `streamlit run dashboard/app_streamlit.py`
 
-## Docker Compose (API + Streamlit + MLflow)
-From repo root:
-```
-docker-compose up --build
-```
-- API: http://localhost:8000
-- Streamlit: http://localhost:8501
-- MLflow: http://localhost:5000
+These legacy entrypoints are not the default for OmniChatX v2.
 
-## Generate artifacts quickly (best effort)
-```
-bash scripts/run_full_fusion.sh
-```
-This runs the flows and produces scores/plots/models for the dashboard/API to consume.

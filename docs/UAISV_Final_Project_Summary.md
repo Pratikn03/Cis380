@@ -1,334 +1,74 @@
-# UAIS-V (Universal Anomaly Intelligence System – Vision & Language Edition)
+# UAIS‑V2 (OmniChatX) — Project Summary
 
-**Comprehensive Project Summary & Implementation Guide**
+This repository implements **OmniChatX / Universal Anomaly Intelligence v2**: a multimodal AI agent platform that routes user requests to specialized subsystems (RAG, risk scoring, recommendations, voice emotion, vision) and returns a unified response.
 
-Author: Pratik Niroula
+## 1) What the System Does
 
----
+OmniChatX exposes a single “chat” surface (`/api/chat`) and a Streamlit UI that can:
+- answer questions using a **local document knowledge base** (RAG),
+- compute a **risk decision** from a simple “command center” payload (fraud/cyber/behavior + fused risk),
+- generate **recommendations** (text + multimodal similarity),
+- analyze **audio** for emotion (and optionally speech-to-text),
+- analyze **images/videos** (image classification, video frame sampling, face emotion, and a YOLO logo detector).
 
-## 1. Overview
+The system is designed to be usable **offline**: if `OPENAI_API_KEY` is not set, the orchestrator falls back to local behaviors and local RAG. Online LLM support is additive, not required.
 
-The UAIS-V Project (Universal Anomaly Intelligence System – Vision & Language Edition) is an advanced multimodal Artificial Intelligence research and engineering initiative designed to merge multiple domains of machine learning into a unified, real-world system. It combines Machine Learning (ML), Natural Language Processing (NLP), Computer Vision (CV), Generative AI, and Behavioral Analytics to detect complex anomalies across diverse environments — including finance, cybersecurity, human behavior, text communication, and image forgery detection.
+## 2) Key Features (Engineering)
+- **Unified routing:** one request → one chosen route → structured response (`route`, `answer`, `meta`).
+- **Multimodal handling:** optional `audio`/`image`/`video` uploads with results attached under `meta.attachments`.
+- **Observability:** production health checks (`/health/*`) and Prometheus metrics (`/metrics`).
+- **Reproducible scripts:** single-command trainers and deterministic “smoke runs” to validate the setup.
+- **Production-style deployment:** Docker Compose stack (API + UI + Redis + optional monitoring/nginx).
 
-UAIS-V represents a transition from traditional single-domain models to cross-domain anomaly intelligence, capable of detecting fraud, cyber threats, behavioral deviations, and synthetic media in a single, scalable platform. This document outlines the technical blueprint, datasets, tools, implementation roadmap, and research-level impact of this project.
+## 3) Architecture Overview
 
----
-
-## 2. Project Objectives
-1. Build a unified multimodal AI pipeline that ingests, preprocesses, and analyzes structured, textual, and visual data.
-2. Detect anomalies in financial transactions, user activity logs, network traffic, and document/media authenticity.
-3. Leverage boosting frameworks (LightGBM, XGBoost, CatBoost) to ensure high accuracy and interpretability.
-4. Integrate advanced deep learning models (LSTM, Transformer, ViT, GAN) for sequential, textual, and visual domains.
-5. Develop a Streamlit dashboard for real-time anomaly visualization and interpretability using SHAP and GradCAM.
-6. Implement MLOps practices (Prefect orchestration + MLflow tracking) to enable automated, reproducible experiments.
-7. Produce a 4000+ word IEEE-style research report summarizing methods, results, and future enhancements.
-
----
-
-## 3. Domains and Use Cases
-
-| Domain              | Objective                                 | Real-life Application           |
-|---------------------|-------------------------------------------|---------------------------------|
-| Fraud Detection     | Identify credit card and financial fraud   | Banking, eCommerce security     |
-| Cybersecurity       | Detect network intrusions and threats      | Network operations centers      |
-| Behavioral Analytics| Analyze insider threats using CERT logs    | Corporate IT monitoring         |
-| NLP (Text Intelligence) | Detect phishing and insider communication anomalies | Email systems, social engineering detection |
-| Computer Vision     | Detect document forgeries and fake media   | KYC verification, forensics     |
-| Generative Modeling | Create synthetic datasets for low-data domains | Data augmentation, simulation   |
-
----
-
-## 4. Frameworks and Libraries
-
-| Category         | Frameworks                                  | Purpose                                 |
-|------------------|---------------------------------------------|-----------------------------------------|
-| Machine Learning | scikit-learn, XGBoost, LightGBM, CatBoost   | Tabular modeling and baseline performance|
-| Deep Learning    | TensorFlow, PyTorch                         | LSTM, CNN, Transformer, and GAN architectures|
-| NLP              | Hugging Face Transformers                   | Pretrained models like DistilBERT for text classification|
-| Computer Vision  | OpenCV, torchvision, ViT                    | Image preprocessing and forgery detection|
-| Generative AI    | TensorFlow-GAN, PyTorch-VAE                 | Synthetic data generation               |
-| MLOps            | Prefect, MLflow                             | Workflow orchestration and experiment tracking|
-| Visualization    | Streamlit, SHAP, GradCAM                    | Dashboards and explainability tools      |
-
----
-
-## 5. Datasets Used
-
-| Domain      | Dataset                | Source      | Description                        | Size   |
-|-------------|------------------------|------------|------------------------------------|--------|
-| Fraud       | Credit Card Fraud      | Kaggle     | 284,807 transactions, labeled      | 150 MB |
-| Cybersecurity| UNSW-NB15             | UNSW       | Network traffic logs with attacks  | 2 GB   |
-| Behavior    | CERT r4.2             | CMU SEI    | Insider threat user logs           | 5–10GB |
-| NLP         | Enron Emails           | Kaggle     | Real corporate emails              | 400 MB |
-| Vision      | Document Forgery       | Kaggle     | Genuine and forged ID/passport     | 1 GB   |
-| Generative  | Synthetic CERT/Fraud   | Custom     | Generated using VAE/GAN            | Var.   |
-
----
-
-## 6. System Architecture
-
-**Data Flow:**
-Raw Data → Ingestion → Cleaning → Feature Engineering → Modeling (ML/DL) → Fusion → Explainability → Dashboard → Reports
-
-**Main Components:**
-1. Data Ingestion and Validation (via src/pipeline/ingest.py)
-2. Feature Engineering per domain (src/uais/features/)
-3. Model Training and Evaluation (src/uais/supervised/, src/uais/anomaly/)
-4. Sequence and NLP Modules (src/uais/sequence/, src/uais/nlp/)
-5. Vision and Generative Modules (src/uais/vision/, src/uais/generative/)
-6. Fusion Layer for unified anomaly scoring (src/uais/fusion/)
-7. Dashboard visualization (dashboard/app_streamlit.py)
-
----
-
-## 7. File Structure (Final)
-
-```
-universal-anomaly-intelligence/
-│
-├─ data/
-│   ├─ raw/
-│   │   ├─ fraud/creditcard.csv
-│   │   ├─ cyber/UNSW-NB15.csv
-│   │   ├─ behavior/r4.2/logon.csv
-│   │   ├─ nlp/enron_emails.csv
-│   │   └─ vision/document_forgery/
-│
-├─ notebooks/
-│   ├─ 00_data_overview.ipynb
-│   ├─ 01_eda_fraud.ipynb
-│   ├─ 10_supervised_fraud.ipynb
-│   ├─ 20_unsupervised_fraud.ipynb
-│   ├─ 30_sequence_models.ipynb
-│   ├─ 70_nlp_email_anomalies.ipynb
-│   ├─ 80_vision_forgery_detection.ipynb
-│   ├─ 90_generative_synthesis.ipynb
-│   └─ 100_fusion_and_dashboard.ipynb
-│
-├─ src/
-│   ├─ uais/
-│   │   ├─ data/, features/, supervised/, anomaly/, nlp/, vision/, generative/, fusion/, explainability/
-│   └─ scripts/
-│       ├─ run_fraud_experiment.py
-│       ├─ run_cyber_experiment.py
-│       ├─ run_behavior_experiment.py
-│       ├─ run_fusion_experiment.py
-│       └─ generate_reports.py
-│
-├─ dashboard/app_streamlit.py
-├─ configs/*.yaml
-├─ requirements.txt
-└─ README.md
+```text
+Streamlit UI  --->  FastAPI gateway  --->  Orchestrator  --->  Modules
+                         |                 (routing)         (RAG, risk, recs, voice, vision)
+                         |
+                         +--> monitoring logs + metrics
 ```
 
----
+Canonical entrypoints:
+- API: `app/main.py` → `backend/main.py`
+- UI: `app/streamlit_chatbot/app.py`
 
-## 8. Installation & Setup
+## 4) How to Run (Local)
 
-**Step 1: Create Virtual Environment**
-
-```sh
-python3 -m venv venv
-source venv/bin/activate
-```
-
-**Step 2: Install Dependencies**
-
-```sh
-pip install --upgrade pip
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+
+uvicorn app.main:app --reload
+OMNICHATX_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
 ```
 
-**Step 3: Kaggle credentials for NLP/Vision downloads**
-
-Download `kaggle.json` from your Kaggle account settings, then:
-
-```sh
-mkdir -p ~/.kaggle
-mv ~/Downloads/kaggle.json ~/.kaggle/
-chmod 600 ~/.kaggle/kaggle.json
+One-command demo:
+```bash
+bash scripts/run_demo.sh
 ```
 
-**Step 3: Verify GPU (Apple Metal Acceleration)**
+## 5) Training & Artifacts (Optional)
 
-```python
-import tensorflow as tf
-print(tf.config.list_physical_devices('GPU'))
+The repo works even without trained artifacts, but some endpoints will return `503` until the corresponding model is trained.
+
+Common entrypoints:
+- `python scripts/train_all.py` (core)
+- `python scripts/train_all.py --with-face-emotion`
+- `python scripts/train_all.py --with-brand`
+
+Brand/logo YOLO:
+- Prepare: `python scripts/prepare_brand_data.py`
+- Train: `python -m src.train.train_brand_logo_detector`
+
+## 6) Deployment (Docker)
+
+Use the production compose stack:
+```bash
+cp .env.production.example .env
+docker compose -f docker-compose.production.yml up -d --build
 ```
 
-✅ Output should include /device:GPU:0 for GPU acceleration.
+See `docs/PRODUCTION_DEPLOYMENT.md` for details and optional profiles (monitoring/nginx).
 
----
-
-## 9. How to Run the Project
-
-### A. Stage Data
-
-```sh
-# Download Enron + CIFAR-10 via helper (requires ~/.kaggle/kaggle.json)
-python scripts/download_data.py --all
-
-# Optional: ingest + engineered feature tables
-bash scripts/run_ingest.sh
-bash scripts/run_build_features.sh
-```
-
-If you cannot use Kaggle, place `data/raw/nlp/enron_emails.csv` manually and re-run with `--no-kaggle`.
-
-### B. Train Each Domain (Prefect-powered scripts)
-
-```sh
-# run what you need; artifacts saved under experiments/<domain>/
-bash scripts/run_train_fraud.sh
-bash scripts/run_train_cyber.sh
-bash scripts/run_train_behavior.sh
-bash scripts/run_train_nlp.sh
-bash scripts/run_train_vision.sh
-python src/uais/generative/train_vae.py --config config/base_config.yaml  # optional
-
-# fusion stacker after individual models finish
-bash scripts/run_fusion.sh
-
-# or trigger everything end-to-end
-bash scripts/run_full_fusion.sh
-```
-
-Each script wires into `src/orchestration/<domain>_flow.py`, which logs metrics to MLflow and exports models/plots into `experiments/` and `reports/metrics_*.csv`.
-
-### C. Step-by-Step Notebook Execution (for analysis)
-
-Use the notebooks to inspect data, reproduce plots, or validate outputs after training:
-1. 00_data_overview.ipynb – Data loading and validation
-2. 01_eda_fraud.ipynb – Fraud dataset analysis
-3. 10_supervised_fraud.ipynb – Fraud model training walkthrough
-4. 20_unsupervised_fraud.ipynb – Isolation Forest anomaly detection
-5. 30_sequence_models.ipynb – Behavior modeling (CERT LSTM autoencoder)
-6. 70_nlp_email_anomalies.ipynb – Enron email analysis (DistilBERT)
-7. 80_vision_forgery_detection.ipynb – Document forgery detection (ResNet/ViT)
-8. 90_generative_synthesis.ipynb – Data generation using GAN/VAE
-9. 100_fusion_and_dashboard.ipynb – Combined score and Streamlit integration
-
-### D. Launch Dashboard/API
-
-```sh
-streamlit run dashboard/app_streamlit.py
-```
-
----
-
-## 10. Training Time (Approximate)
-
-| Module    | Model         | Est. Runtime (Mac M5 GPU) | Notes                    |
-|-----------|--------------|---------------------------|--------------------------|
-| Fraud     | LightGBM     | 15–25 min                 | Fast on tabular data     |
-| Cyber     | CatBoost     | 40–60 min                 | Requires memory tuning   |
-| Behavior  | LSTM         | 1–1.5 hr                  | Sequential data processing|
-| NLP       | DistilBERT   | 40 min                    | GPU recommended          |
-| Vision    | ViT          | 1–2 hr                    | Train on subset first    |
-| Generative| GAN/VAE      | 1 hr                      | Optional augmentation    |
-| Fusion    | Meta LightGBM| 20 min                    | Final combination layer  |
-
-Times assume Apple Silicon or similar with GPU acceleration. Running `bash scripts/run_full_fusion.sh` executes these sequentially (≈4 hrs).
-
----
-
-## 11. Example Code Snippets
-
-**LightGBM Model (Fraud)**
-
-```python
-from lightgbm import LGBMClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import roc_auc_score
-import pandas as pd
-
-# Load dataset
-df = pd.read_csv('data/raw/fraud/creditcard.csv')
-X = df.drop('Class', axis=1)
-y = df['Class']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Train model
-model = LGBMClassifier(n_estimators=500, learning_rate=0.05, max_depth=8)
-model.fit(X_train, y_train)
-
-# Evaluate
-preds = model.predict_proba(X_test)[:,1]
-print('ROC-AUC:', roc_auc_score(y_test, preds))
-```
-
-**LSTM Autoencoder (Behavior)**
-
-```python
-from tensorflow.keras import layers, models
-
-input_shape = (10, 2)  # sequence length, features
-model = models.Sequential([
-    layers.Input(shape=input_shape),
-    layers.LSTM(32, activation='relu', return_sequences=True),
-    layers.LSTM(16, activation='relu', return_sequences=False),
-    layers.RepeatVector(10),
-    layers.LSTM(16, activation='relu', return_sequences=True),
-    layers.TimeDistributed(layers.Dense(2))
-])
-
-model.compile(optimizer='adam', loss='mse')
-model.fit(X_train, X_train, epochs=10, batch_size=64)
-```
-
-**DistilBERT (NLP)**
-
-```python
-from transformers import DistilBertTokenizer, TFDistilBertForSequenceClassification
-import tensorflow as tf
-
-tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-model = TFDistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased')
-
-train_encodings = tokenizer(list(texts), truncation=True, padding=True)
-model.fit(dict(train_encodings), labels, epochs=2, batch_size=16)
-```
-
----
-
-## 12. Real-World Applications
-
-| Sector      | Use Case                  | Benefit                    |
-|-------------|---------------------------|----------------------------|
-| Banking     | Fraud prevention          | Reduced financial losses   |
-| Cybersecurity| Insider threat detection  | Early intervention         |
-| Government  | Document verification     | Identity protection        |
-| Enterprise  | Email phishing monitoring | Reduced attack surface     |
-| Research    | Data synthesis            | Enables reproducible studies|
-
----
-
-## 13. Future Enhancements
-1. Integrate cross-modal transformers (e.g., CLIP, FLAVA) for multimodal learning.
-2. Apply reinforcement learning for adaptive anomaly thresholding.
-3. Introduce federated learning for privacy-preserving AI.
-4. Extend generative models with diffusion architectures.
-5. Deploy complete system via Docker + FastAPI microservices.
-
----
-
-## 14. Research Impact and Internship Value
-- For internships: Demonstrates strong applied ML, DL, and MLOps integration skills.
-- For research: Meets IEEE publication criteria for multimodal AI innovation.
-- For career: Highlights advanced hands-on capabilities across AI domains.
-
-**Expected Academic Grade (Undergraduate Level): 95–100 / 100**
-**Practical Value: High (Research + Industry ready)**
-
----
-
-## 15. Conclusion
-
-UAIS-V represents a flagship multimodal AI ecosystem capable of fusing structured, textual, and visual data into a unified intelligence platform. Through modular ML, NLP, and CV subsystems, explainability layers, and orchestration frameworks, it provides a reproducible and scalable foundation for both enterprise applications and academic research.
-
-The system’s adaptability — powered by boosting models and neural networks — ensures both precision and efficiency across multiple domains. Once fully trained and deployed, UAIS-V stands as an industry-grade portfolio and publication-worthy project, marking the culmination of Pratik Niroula’s data science and AI research journey.
-
----
-
-End of UAISV_Final_Project_Summary.md

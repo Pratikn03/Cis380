@@ -4,6 +4,8 @@
 **File:** `app/streamlit_chatbot/omnichat_unified.py`  
 **Status:** Active Streamlit instance running on port 8502
 
+> Note: This document is a historical debugging log from the UI hardening phase.
+
 ---
 
 ## 🔴 CRITICAL ERRORS

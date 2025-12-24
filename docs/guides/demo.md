@@ -1,20 +1,20 @@
-# OmniNex Chat / OmniChatX Demo Script
+# OmniChatX Demo (5 Minutes)
 
-Run this script when you want to show OmniNex Chat in under five minutes (perfect for recruiters, teammates, or interviews).
+Use this walkthrough when you want to demo OmniChatX quickly (API + UI).
 
 ## 1. Start the backend
 
 ```bash
-source .venv-macos/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-pip install -e .
 uvicorn app.main:app --reload
 ```
 
 Leave this running; it serves (highlights):
 
-* `/api/chat` + `/api/chat/multimodal`
-* `/api/recommend` + `/api/recommend/multimodal`
+* `/api/chat` + `/api/chat/multimodal` (+ `/api/chat/stream`)
+* `/api/recommend` + `/api/recommend/multimodal` (+ `/api/recommend/explain`)
 * `/api/fraud`, `/api/cyber`, `/api/behavior`
 * `/api/risk/analyze`
 * `/api/monitor/summary` + `/api/monitor/drift`
@@ -37,6 +37,7 @@ The UI has four main tabs (top bar):
 4. **Fraud/Cyber/Behavior** – Risk Command Center simulator, direct scoring, and monitoring/log viewer.
 
 The UI respects `OMNICHATX_BACKEND` if your FastAPI server runs somewhere other than `http://localhost:8000`.
+If `AUTH_TOKEN` is set, the UI sends it as a bearer token.
 
 ## 3. Demo walkthrough
 

@@ -1,19 +1,29 @@
-# Legacy Modules (Read-only reference)
+# Legacy Modules (Why They Exist)
 
-These folders are retained for historical context, experimentation, or documentation purposes. The actively maintained production system lives under `app/`.
+This repository contains both “current” modules and older (but still runnable) code paths.
 
-## Legacy components
+The goal is to keep the demo working end-to-end while migrating toward a cleaner single-stack layout.
 
-- `agent/` — Legacy orchestrator used by the demo gateway (`backend/main.py`) for `/api/chat` routing.
-- `rag/` — Older TF-IDF retriever used by the legacy orchestrator.
-- `api/routes/` — Legacy FastAPI routes (chat/rag/recommend/fraud/cyber/behavior/vision) still mounted by `backend/main.py`.
-- `recommender/` — Research recommender experiments (LightFM, NCF, hybrid ranking) kept for reference and model artifacts.
-- `src/uais/` — Research-oriented fusion, drift, NLP, and vision pipelines (UAIS core codebase) retained for insights and prototypes.
+## Canonical Runtime Today
 
-**Important:** The project currently runs as a **hybrid gateway**:
-- Canonical entrypoint: `app/main.py` (re-exports `backend/main.py`)
-- Gateway mounts both:
-  - legacy `api/routes/*` (chat/recs/vision/etc.)
-  - newer `app/api/*` (risk, monitor, voice, RAG ingest/query, brand, STT)
+- FastAPI entrypoint: `app/main.py` (re-exports `backend/main.py`)
+- Streamlit entrypoint: `app/streamlit_chatbot/app.py`
 
-Migration goal: consolidate the legacy routes/orchestrator into `app/api/*` + `app/agent/*` so the runtime is fully `app/` without duplication.
+The FastAPI gateway (`backend/main.py`) mounts:
+- legacy routers under `api/routes/*` (chat, rag query, recommend, fraud, cyber, behavior, vision), and
+- selected “newer” routers under `app/api/*` (risk, monitor, voice, rag ingest/upload, brand/logo YOLO, STT, vision-temporal),
+- production health + metrics router from `app/core/health.py`.
+
+## “Legacy” Directories
+
+These are kept for reference and compatibility:
+- `agent/` — legacy orchestrator used by `/api/chat` (rule-based routing; offline fallback if `OPENAI_API_KEY` is unset).
+- `api/` — legacy FastAPI routers (`api/routes/*`) that the gateway still mounts.
+- `rag/` — lightweight TF‑IDF RAG used as a fallback.
+- `recommender/` — older recommender experiments and artifacts kept for comparison.
+- `deploy/` + `dashboard/` — older API/UI experiments referenced by historical docs.
+
+## Migration Direction
+
+Long-term, the intent is to converge on one primary stack under `app/` (routers + orchestrator + services) and keep the top-level legacy folders as read-only archives.
+

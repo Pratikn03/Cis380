@@ -1,26 +1,30 @@
+# Architecture
+
+This project is organized as a single FastAPI “gateway” plus modular AI subsystems and a Streamlit demo UI.
+
+## Data Flow (High Level)
+
 ```mermaid
 flowchart TD
-    UI[UAIS-V UI<br/>(Streamlit Command Center)]
-    API[FastAPI Gateway<br/>(app.main:app)]
-    ORCH[Agent Orchestrator<br/>(rule-based routing)]
+    UI[Streamlit UI] --> API[FastAPI Gateway]
+    API --> ORCH[Orchestrator]
 
-    UI --> API
-    API --> ORCH
+    ORCH --> CHAT[Chat (offline-first, OpenAI optional)]
+    ORCH --> RAG[RAG (data/docs + embeddings)]
+    ORCH --> ML[Risk + Recs + Voice + Vision]
 
-    ORCH --> CHAT[Chat / LLM<br/>(OpenAI optional, offline fallback)]
-    ORCH --> RAG[Local RAG<br/>(docs + TF-IDF / local embeddings)]
-    ORCH --> ML[ML Modules<br/>(Fraud • Cyber • Behavior • Recsys • Voice • Vision)]
-
-    API --> MON[Monitoring Logger<br/>(JSONL events)]
+    API --> MON[Monitoring + Metrics]
     ML --> MON
-
-    MON --> SUM[/api/monitor/summary<br/>/api/monitor/drift/]
 ```
 
-**Legend:**
-- **UAIS-V UI**: Streamlit demo UI (`app/streamlit_chatbot/app.py`)
-- **FastAPI Gateway**: canonical server entrypoint (`app/main.py` → `backend/main.py`)
-- **Agent Orchestrator**: routes requests to the right module (chat/RAG/risk/recs/voice/vision)
-- **Local RAG**: document-grounded answers from local files (`data/docs/`, `data/embeddings/`)
-- **ML Modules**: fraud/cyber/behavior/recommender/voice/vision inference endpoints
-- **Monitoring Logger**: writes events under `data/monitoring/logs/*.jsonl` and summarizes them via `/api/monitor/*`
+## Key Entry Points
+- FastAPI: `app/main.py` (re-exports `backend/main.py`)
+- Streamlit UI: `app/streamlit_chatbot/app.py`
+
+## Notes on “Legacy”
+The gateway intentionally mounts both:
+- `api/routes/*` (legacy endpoints that are still used by the Streamlit UI), and
+- selected `app/api/*` routers (risk/monitor/voice/rag ingestion/brand/stt/health).
+
+See `docs/LEGACY.md` for details.
+
