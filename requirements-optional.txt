@@ -1,33 +1,14 @@
-# Optional heavy/UX dependencies. Install as needed:
-# pip install -r requirements-optional.txt
-
-# UI / Dashboard
-streamlit>=1.28.0
-plotly>=5.23.0
-
-# Explainability
-shap>=0.44.0
-lime>=0.2.0.1
-
-# Deep learning (CPU wheels by default; swap for GPU-specific wheels on your platform)
-torch>=2.1.0 --index-url https://download.pytorch.org/whl/cpu
-torchvision>=0.15.0 --index-url https://download.pytorch.org/whl/cpu
-torchaudio>=2.1.0 --index-url https://download.pytorch.org/whl/cpu
-# TensorFlow:
-# - Linux/Windows: `tensorflow-cpu` works via pip.
-# - macOS: prefer conda (`conda install -c apple tensorflow-deps` + pip `tensorflow-macos`) or skip.
-tensorflow-cpu>=2.11.0; platform_system != "Darwin" and python_version < "3.13"
-
-# NLP
-transformers>=4.43.0
-
-# Recsys
-lightfm>=1.17
-
-# Vision
-pillow>=9.0.0
-opencv-python>=4.8.0
+# Optional dependencies (install only if you need the feature):
+#   pip install -r requirements-optional.txt
 
 # Real-time mic/webcam streaming in Streamlit (optional).
-# Note: On some platforms this is easiest to install in a Python 3.11+ venv.
 streamlit-webrtc>=0.47.0
+
+# Audio extras (optional; useful for some voice pipelines).
+torchaudio>=2.1.0
+
+# Optional recommender alternative.
+lightfm>=1.17
+
+# Prefer full OpenCV instead of headless wheels (optional).
+opencv-python>=4.8.0
