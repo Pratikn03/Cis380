@@ -31,16 +31,23 @@ def apply_partik_theme(
             letter-spacing: 0.01em;
         }
         section.main > div { padding-top: 1.5rem; position: relative; }
-        div[data-testid="stSidebar"], section[data-testid="stSidebar"] {
-            width: 0 !important;
-            min-width: 0 !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            border: none !important;
-            visibility: hidden !important;
+        section[data-testid="stSidebar"] {
+            background: rgba(2, 6, 23, 0.88);
+            border-right: 1px solid rgba(255,255,255,0.08);
         }
-        .css-1d391kg, .css-1dq8tca {
-            display: none !important;
+        section[data-testid="stSidebar"] > div {
+            padding-top: 1.25rem;
+        }
+        div[data-testid="stSidebarNav"] { display: none; }
+        section[data-testid="stSidebar"] .stButton > button {
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04);
+            color: #f8fafc;
+        }
+        section[data-testid="stSidebar"] .stButton > button:hover {
+            border-color: rgba(99,102,241,0.35);
+            background: rgba(99,102,241,0.10);
         }
         .block-container {
             padding-left: 0 !important;

@@ -4,6 +4,8 @@ from typing import Callable
 
 import streamlit as st
 
+from ..utils import call_with_container_width
+
 
 def render_tools_page(*, call_upload: Callable[..., dict]) -> None:
     st.markdown("## Tools")
@@ -33,7 +35,7 @@ def render_tools_page(*, call_upload: Callable[..., dict]) -> None:
         key="tools_vision_upload",
     )
     if img is not None:
-        st.image(img, use_container_width=True)
+        call_with_container_width(st.image, img)
         if st.button("Predict image", key="tools_vision_run", type="primary"):
             result = call_upload(
                 "/api/vision/predict",
@@ -53,7 +55,7 @@ def render_tools_page(*, call_upload: Callable[..., dict]) -> None:
         key="tools_face_emotion_upload",
     )
     if face_img is not None:
-        st.image(face_img, use_container_width=True)
+        call_with_container_width(st.image, face_img)
         if st.button("Predict face emotion", key="tools_face_emotion_run", type="primary"):
             result = call_upload(
                 "/api/vision/face_emotion/predict",

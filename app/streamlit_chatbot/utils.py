@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 import json
 from pathlib import Path
-from typing import Any, List, ParamSpec, TypeVar
+from typing import Any, Callable, List
 
 
 def load_sample_inputs(path: str | Path) -> List[str]:
@@ -21,13 +20,10 @@ def load_sample_inputs(path: str | Path) -> List[str]:
     except Exception:
         return []
 
-P = ParamSpec("P")
-R = TypeVar("R")
-
 
 def call_with_container_width(
-    fn: Callable[P, R], /, *args: P.args, stretch: bool = True, **kwargs: P.kwargs
-) -> R:
+    fn: Callable[..., Any], /, *args: Any, stretch: bool = True, **kwargs: Any
+) -> Any:
     """Call a Streamlit element using the non-deprecated width API when available.
 
     Streamlit is deprecating `use_container_width` in favor of `width='stretch'`.
