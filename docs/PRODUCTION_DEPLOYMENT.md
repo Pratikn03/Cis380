@@ -51,38 +51,40 @@ git clone <your-repo-url>
 cd universal-anomaly-intelligence-v2
 
 # Create environment file
-cp .env.production.example .env.production
+cp .env.production.example .env
 
 # Edit configuration
-nano .env.production
+nano .env
 ```
 
 ### 2. Configure Environment Variables
 
-Edit `.env.production` with your values:
+Edit `.env` with your values:
 
 ```bash
 # Core Settings
-ENVIRONMENT=production
+APP_ENV=production
 DEBUG=false
+LOG_LEVEL=INFO
 SECRET_KEY=your-super-secret-key-min-32-chars
-API_KEY=your-api-key-for-external-services
+AUTH_TOKEN=your-api-auth-token-min-32-chars
 
-# Security
-ALLOWED_HOSTS=your-domain.com,api.your-domain.com
+# CORS (comma-separated origins)
 CORS_ORIGINS=https://your-domain.com
 
 # OpenAI (for ChatGPT integration)
 OPENAI_API_KEY=sk-your-openai-api-key
 
+# Database
+DATABASE_URL=sqlite:///./data/omnichatx.db
+
 # Redis
-REDIS_HOST=redis
-REDIS_PORT=6379
-REDIS_PASSWORD=your-redis-password
+REDIS_URL=redis://redis:6379/0
+REDIS_PASSWORD=
 
 # Monitoring
 PROMETHEUS_ENABLED=true
-GRAFANA_ADMIN_PASSWORD=your-grafana-password
+GRAFANA_PASSWORD=your-grafana-password
 
 # Rate Limiting
 RATE_LIMIT_REQUESTS=100
@@ -126,15 +128,17 @@ docker-compose -f docker-compose.production.yml up -d
 
 ## 🔒 Security Configuration
 
-### API Key Authentication
+### Bearer Token Authentication (AUTH_TOKEN)
 
-Add API key validation in your requests:
+If `AUTH_TOKEN` is set, all `/api/*` routes require:
+
+`Authorization: Bearer <AUTH_TOKEN>`
 
 ```python
 import requests
 
 headers = {
-    "Authorization": "Bearer your-api-key",
+    "Authorization": "Bearer your-auth-token",
     "Content-Type": "application/json"
 }
 
@@ -212,17 +216,17 @@ curl https://your-domain.com/health/detailed
 docker-compose -f docker-compose.production.yml logs -f
 
 # Specific service
-docker-compose -f docker-compose.production.yml logs -f api
+docker-compose -f docker-compose.production.yml logs -f omnichatx-api
 
 # Last 100 lines
-docker-compose -f docker-compose.production.yml logs --tail=100 api
+docker-compose -f docker-compose.production.yml logs --tail=100 omnichatx-api
 ```
 
 ### Scaling Services
 
 ```bash
 # Scale API to 3 instances
-docker-compose -f docker-compose.production.yml up -d --scale api=3
+docker-compose -f docker-compose.production.yml up -d --scale omnichatx-api=3
 
 # Note: Ensure load balancing is configured in nginx
 ```
@@ -247,11 +251,11 @@ git pull origin main
 docker-compose -f docker-compose.production.yml exec redis redis-cli BGSAVE
 
 # Backup volumes
-docker run --rm -v omnichatx_redis_data:/data -v $(pwd):/backup alpine \
+docker run --rm -v omnichatx-redis-data:/data -v $(pwd):/backup alpine \
   tar czf /backup/redis_backup.tar.gz /data
 
 # Restore
-docker run --rm -v omnichatx_redis_data:/data -v $(pwd):/backup alpine \
+docker run --rm -v omnichatx-redis-data:/data -v $(pwd):/backup alpine \
   tar xzf /backup/redis_backup.tar.gz -C /
 ```
 
@@ -263,14 +267,14 @@ docker run --rm -v omnichatx_redis_data:/data -v $(pwd):/backup alpine \
 
 ```bash
 # Check logs
-docker-compose -f docker-compose.production.yml logs api
+docker-compose -f docker-compose.production.yml logs omnichatx-api
 
 # Check resource usage
 docker stats
 
 # Verify network
 docker network ls
-docker network inspect omnichatx_network
+docker network inspect omnichatx-network
 ```
 
 #### High memory usage
@@ -310,7 +314,7 @@ For temporary debugging (NOT for production):
 
 ```bash
 # Enable debug mode
-docker-compose -f docker-compose.production.yml exec api \
+docker-compose -f docker-compose.production.yml exec omnichatx-api \
   /bin/bash -c "DEBUG=true python -m app.main"
 ```
 
@@ -321,7 +325,7 @@ docker-compose -f docker-compose.production.yml exec api \
 Edit `docker-compose.production.yml`:
 
 ```yaml
-api:
+omnichatx-api:
   environment:
     - WORKERS=4  # CPU cores * 2 + 1
     - TIMEOUT=120

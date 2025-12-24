@@ -121,6 +121,11 @@ async def chat_multimodal(
         try:
             from api.routes.vision import vision_predict
 
+            image_bytes = await image.read()
+            try:
+                image.file.seek(0)  # type: ignore[attr-defined]
+            except Exception:
+                pass
             vision_res = await vision_predict(file=image, top_k=3)
             vision_summary = {
                 "label": vision_res.get("label"),
@@ -132,6 +137,33 @@ async def chat_multimodal(
                 context_lines.append(
                     f"[vision] label={vision_summary.get('label')} confidence={vision_summary.get('confidence')}"
                 )
+
+            # Optional face emotion classifier (requires trained artifact).
+            try:
+                from app.models.vision.face_emotion_predict import (
+                    FaceEmotionModelNotTrainedError,
+                    predict_face_emotion,
+                )
+
+                face_res = predict_face_emotion(
+                    image_bytes=image_bytes,
+                    filename=image.filename,
+                    top_k=3,
+                )
+                face_summary = {
+                    "emotion": face_res.get("emotion"),
+                    "confidence": face_res.get("confidence"),
+                    "top_k": face_res.get("top_k"),
+                }
+                attachments["face_emotion"] = face_summary
+                if face_summary.get("emotion") is not None:
+                    context_lines.append(
+                        f"[face] emotion={face_summary.get('emotion')} confidence={face_summary.get('confidence')}"
+                    )
+            except FaceEmotionModelNotTrainedError as exc:
+                attachments["face_emotion_error"] = str(exc)
+            except Exception as exc:
+                attachments["face_emotion_error"] = str(exc)
         except Exception as exc:
             attachments["vision_image_error"] = str(exc)
 

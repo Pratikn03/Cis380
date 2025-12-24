@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -13,7 +15,30 @@ from app.models.recommender.index import RecommenderIndex, default_index_paths  
 
 
 def main() -> None:
-    embeddings = build_embeddings()
+    parser = argparse.ArgumentParser(description="Build recommender vector + FAISS index artifacts.")
+    parser.add_argument(
+        "--max-items",
+        type=int,
+        default=0,
+        help="Cap number of catalog items embedded (0 uses all). Useful for quick smoke tests.",
+    )
+    parser.add_argument(
+        "--embed-backend",
+        choices=["auto", "fallback"],
+        default="auto",
+        help="Embedding backend for semantic vectors. 'fallback' is fast and fully offline.",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Sampling seed used when --max-items is set.",
+    )
+    args = parser.parse_args()
+
+    os.environ.setdefault("UAIS_EMBEDDINGS_BACKEND", str(args.embed_backend))
+    max_items = int(args.max_items) if int(args.max_items) > 0 else None
+    embeddings = build_embeddings(max_items=max_items, seed=int(args.seed))
     meta = catalog_metadata(embeddings.df)
     paths = default_index_paths()
     index = RecommenderIndex(embeddings.vectors, meta, paths=paths)

@@ -17,6 +17,7 @@ import pandas as pd
 from agent.policy import decide
 from rag.service import rag_service
 from agent.utils.shap_explainer import explain as shap_explain
+from agent.chat_responses import get_enhanced_response, get_fallback_response
 
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 logger = logging.getLogger(__name__)
@@ -73,34 +74,68 @@ def _extract_multimodal_context(message: str) -> list[str]:
     if m_vis:
         lines.append(f"Vision label: {m_vis.group(1)} (confidence {m_vis.group(2)})")
 
+    m_face = re.search(
+        r"\[face\]\s*emotion\s*=\s*([^\s]+)\s+confidence\s*=\s*([0-9.]+)",
+        text,
+        re.IGNORECASE,
+    )
+    if m_face:
+        lines.append(f"Face emotion: {m_face.group(1)} (confidence {m_face.group(2)})")
+
     return lines
 
 
 def _offline_assistant(message: str) -> str:
     """Best-effort offline reply (no OpenAI key)."""
-    m = (message or "").strip()
-    if not m:
-        return "Say something and I’ll help."
+    full_message = (message or "").strip()
 
-    lower = m.lower()
+    # Strip the appended Context/Instruction blocks so intent matching + RAG behave as expected.
+    base_message = full_message
+    for marker in ("\n\nContext:\n", "\n\nInstruction:\n"):
+        if marker in base_message:
+            base_message = base_message.split(marker, 1)[0]
+    base_message = base_message.strip()
 
-    # Provide actionable guidance for common project questions.
-    if any(k in lower for k in ("next step", "next steps", "what are we doing", "what to do", "train", "training", "demo")):
-        return (
-            "Offline mode is enabled (no OPENAI_API_KEY).\n\n"
-            "Next steps:\n"
-            "1) Train everything: `python scripts/train_all.py --with-vision --voice-limit-per-class 0`\n"
-            "2) Run the demo: `bash scripts/run_demo.sh`\n"
-            "3) Verify end-to-end: `bash scripts/codex_test_all.sh`\n\n"
-            "Tip: In Streamlit, use the **Voice & Vision** tab for uploads, and **OmniChatX Agent** for chat + attachments."
+    # Try enhanced responses first (greeting/help/about/training).
+    enhanced = get_enhanced_response(base_message)
+    if enhanced:
+        return enhanced
+
+    # Handle multimodal context (voice/vision). If present, keep it but also answer the user's question.
+    context_lines = _extract_multimodal_context(full_message)
+    has_voice = any(line.lower().startswith("voice emotion:") for line in context_lines)
+    has_vision = any(line.lower().startswith("vision label:") for line in context_lines)
+    has_face = any(line.lower().startswith("face emotion:") for line in context_lines)
+
+    # Prefer local docs (RAG) for the base message.
+    rag_answer = rag_service.answer(base_message) if base_message else ""
+
+    # If user is asking for "emotion" but only an image was attached, explain the difference.
+    base_lower = base_message.lower()
+    extra_hint = ""
+    if "emotion" in base_lower and has_vision and not has_voice and not has_face:
+        extra_hint = (
+            "Note: **emotion detection** is supported for **audio** (voice emotion). "
+            "For images, the vision model returns an image label (e.g., real/fake/class). "
+            "To get emotion from a face image, train the face-emotion model (`python -m src.train.train_face_emotion`). "
+            "Attach an audio clip to get a voice-emotion result."
         )
 
-    context_lines = _extract_multimodal_context(m)
-    if context_lines:
-        return "Offline multimodal summary:\n- " + "\n- ".join(context_lines)
+    # If RAG returns empty or default response, provide helpful fallback
+    if not rag_answer or "could not find" in rag_answer.lower() or len(rag_answer.strip()) < 20:
+        rag_answer = get_fallback_response()
+    else:
+        rag_answer = "From my knowledge base:\n\n" + rag_answer
 
-    # Fall back to local docs (RAG).
-    return rag_service.answer(m)
+    parts: list[str] = []
+    if context_lines:
+        parts.append("Multimodal Analysis Results:\n- " + "\n- ".join(context_lines))
+    if extra_hint:
+        parts.append(extra_hint)
+    if rag_answer:
+        parts.append(rag_answer)
+    return "\n\n".join(parts).strip()
+
 
 
 def _llm_call(message: str) -> str:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import functools
 import hashlib
 import io
@@ -51,6 +52,10 @@ def _fallback_image_embedding(image_bytes: bytes, *, bins: int = 8) -> np.ndarra
     return _l2_normalize(hist)
 
 
+def _embedding_backend() -> str:
+    return os.getenv("UAIS_EMBEDDINGS_BACKEND", "auto").strip().lower()
+
+
 @functools.lru_cache(maxsize=1)
 def _load_clip() -> tuple[Any, Any, str]:
     """Load CLIP lazily.
@@ -63,7 +68,9 @@ def _load_clip() -> tuple[Any, Any, str]:
     except Exception as exc:  # pragma: no cover
         raise OptionalDependencyError("CLIP embedding requires 'torch' and 'transformers'.") from exc
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cuda"
+    if not torch.cuda.is_available():
+        device = "mps" if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available() else "cpu"
     try:
         model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32", local_files_only=True).to(device)
         processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32", local_files_only=True)
@@ -77,6 +84,8 @@ def _load_clip() -> tuple[Any, Any, str]:
 
 
 def clip_available() -> bool:
+    if _embedding_backend() == "fallback":
+        return False
     try:
         _load_clip()
         return True
@@ -85,6 +94,8 @@ def clip_available() -> bool:
 
 
 def embed_text(text: str) -> np.ndarray:
+    if _embedding_backend() == "fallback":
+        return _fallback_text_embedding(text)
     try:
         model, processor, device = _load_clip()
         import torch
@@ -105,6 +116,9 @@ def embed_image_bytes(image_bytes: bytes) -> np.ndarray:
     except Exception as exc:  # pragma: no cover
         raise OptionalDependencyError("Image embedding requires 'pillow'.") from exc
 
+    if _embedding_backend() == "fallback":
+        return _fallback_image_embedding(image_bytes)
+
     try:
         model, processor, device = _load_clip()
         import torch
@@ -118,4 +132,3 @@ def embed_image_bytes(image_bytes: bytes) -> np.ndarray:
         return _l2_normalize(vec)
     except OptionalDependencyError:
         return _fallback_image_embedding(image_bytes)
-

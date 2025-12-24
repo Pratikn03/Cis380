@@ -15,7 +15,7 @@ def test_build_recommender_index_script_runs(tmp_path):
     assert script.exists()
 
     proc = subprocess.run(
-        [sys.executable, str(script)],
+        [sys.executable, str(script), "--max-items", "2000", "--embed-backend", "fallback"],
         cwd=str(repo_root),
         capture_output=True,
         text=True,

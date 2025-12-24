@@ -91,10 +91,14 @@ def check_environment_variables():
     print_header("Environment Variables Check")
     
     env_vars = [
-        ("ENVIRONMENT", False),
+        ("APP_ENV", False),
         ("SECRET_KEY", True),
+        ("AUTH_TOKEN", True),
         ("OPENAI_API_KEY", True),
-        ("REDIS_HOST", False),
+        ("DATABASE_URL", False),
+        ("REDIS_URL", False),
+        ("CORS_ORIGINS", False),
+        ("LOG_LEVEL", False),
         ("DEBUG", False),
     ]
     
@@ -217,7 +221,7 @@ def generate_summary(passed: int, failed: int, warnings: int):
         print(f"  Please address the {failed} missing required file(s).")
     
     print(f"\n  {BLUE}Next Steps:{RESET}")
-    print(f"  1. Configure .env.production with your values")
+    print(f"  1. Configure .env with your values (copy from .env.production.example)")
     print(f"  2. Add SSL certificates to deploy/nginx/ssl/")
     print(f"  3. Run: ./scripts/deploy.sh deploy")
     print(f"  4. Access the app at https://your-domain.com")

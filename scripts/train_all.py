@@ -46,6 +46,11 @@ def main() -> int:
         help="Also run vision training (may be slow / require GPU / dataset layout).",
     )
     parser.add_argument(
+        "--with-vision-full",
+        action="store_true",
+        help="Train full deepfake + real/fake vision models (requires local datasets; can be very slow).",
+    )
+    parser.add_argument(
         "--with-brand",
         action="store_true",
         help="Also train the brand/logo detector (requires ultralytics + data/raw/brand).",
@@ -54,6 +59,16 @@ def main() -> int:
         "--with-video-temporal",
         action="store_true",
         help="Also train the video temporal deepfake model (requires data/raw/vision/video/{real,fake} + ffmpeg).",
+    )
+    parser.add_argument(
+        "--with-face-emotion",
+        action="store_true",
+        help="Also train the 7-class face emotion model (requires data/raw/vision/face_emotion).",
+    )
+    parser.add_argument(
+        "--face-emotion-data-dir",
+        default=str(REPO_ROOT / "data" / "raw" / "vision" / "face_emotion"),
+        help="Dataset root for face emotion training (ImageFolder-style).",
     )
     parser.add_argument(
         "--voice-limit-per-class",
@@ -92,14 +107,41 @@ def main() -> int:
         else:
             print("\n[train_all] --with-vision requested, but scripts/run_train_vision.sh not found; skipping.")
 
+    if args.with_vision_full:
+        candidate = REPO_ROOT / "scripts" / "train_all_vision_full.py"
+        if candidate.exists():
+            _run([sys.executable, str(candidate)])
+        else:
+            print("\n[train_all] --with-vision-full requested, but scripts/train_all_vision_full.py not found; skipping.")
+
     if args.with_brand:
         # Prepare dataset (idempotent) and train YOLO detector.
+        # Default to a fast local smoke-run (override via env vars for full training).
+        os.environ.setdefault("BRAND_YOLO_MODEL", "yolov8n.pt")
+        os.environ.setdefault("BRAND_EPOCHS", "1")
+        os.environ.setdefault("BRAND_IMGSZ", "320")
+        os.environ.setdefault("BRAND_BATCH", "16")
+        os.environ.setdefault("BRAND_FRACTION", "0.1")
+        os.environ.setdefault("BRAND_VAL", "false")
+        os.environ.setdefault("BRAND_CACHE", "disk")
         _run([sys.executable, "scripts/prepare_brand_data.py"])
         _run([sys.executable, "-m", "src.train.train_brand_logo_detector"])
 
     if args.with_video_temporal:
         # Trains a lightweight sklearn temporal model used by /api/vision/video/predict.
         _run([sys.executable, "src/train/train_video_temporal.py"])
+
+    if args.with_face_emotion:
+        # Trains a 7-class facial emotion classifier used by /api/vision/face_emotion/predict.
+        _run(
+            [
+                sys.executable,
+                "-m",
+                "src.train.train_face_emotion",
+                "--data-dir",
+                str(args.face_emotion_data_dir),
+            ]
+        )
 
     print("\n✅ Training complete. Check experiments/*/metrics and models/* outputs.")
     return 0

@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import re
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -28,6 +29,7 @@ class CatalogItem:
 
 
 _NON_ALNUM = re.compile(r"[^a-z0-9]+")
+_URL_PREFIXES = ("http://", "https://", "s3://", "gs://", "data:")
 
 # When electronics CSVs are generated from review summaries (common in Kaggle exports),
 # they often contain non-product "brands" like "great"/"works" and model phrases like
@@ -109,10 +111,24 @@ def _pick_first(row: dict[str, str], keys: list[str]) -> str | None:
 
 
 def _load_csv_rows(path: Path) -> Iterable[dict[str, str]]:
-    with path.open("r", encoding="utf-8") as handle:
+    with path.open("r", encoding="utf-8", errors="replace") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
             yield {str(k): ("" if v is None else str(v)) for k, v in row.items()}
+
+
+def _normalize_item_key(image_path: str) -> str:
+    """Normalize an image identifier so catalog keys match index/meta values.
+
+    - URLs are kept as-is.
+    - File paths are normalized via Path() (OS-native separators).
+    """
+    raw = (image_path or "").strip()
+    if not raw:
+        return ""
+    if raw.lower().startswith(_URL_PREFIXES):
+        return raw
+    return str(Path(raw))
 
 
 def _image_key_for_item(domain: str, item_id: str, title: str) -> str:
@@ -143,7 +159,8 @@ def _looks_like_review_summary_catalog(rows: list[dict[str, str]]) -> bool:
     return ratio >= 0.25
 
 
-def load_unified_catalog() -> dict[str, CatalogItem]:
+@lru_cache(maxsize=1)
+def _load_unified_catalog_cached() -> dict[str, CatalogItem]:
     """Load Movies + Electronics + Courses into one catalog.
 
     Output: dict keyed by *image key*.
@@ -165,7 +182,7 @@ def load_unified_catalog() -> dict[str, CatalogItem]:
             if not item_id or not title:
                 continue
             image_path = _pick_first(row, ["image_path", "image", "path", "img", "imageUrl"])
-            key = str(Path(image_path)) if image_path else _image_key_for_item("movies", item_id, title)
+            key = _normalize_item_key(image_path) if image_path else _image_key_for_item("movies", item_id, title)
             mapping[key] = CatalogItem(item_id=str(item_id), title=str(title), category="movies", image_path=image_path)
 
     # Courses
@@ -177,7 +194,7 @@ def load_unified_catalog() -> dict[str, CatalogItem]:
             if not item_id or not title:
                 continue
             image_path = _pick_first(row, ["image_path", "image", "path", "img", "imageUrl"])
-            key = str(Path(image_path)) if image_path else _image_key_for_item("courses", item_id, title)
+            key = _normalize_item_key(image_path) if image_path else _image_key_for_item("courses", item_id, title)
             mapping[key] = CatalogItem(item_id=str(item_id), title=str(title), category="courses", image_path=image_path)
 
     # Electronics domains already used in Streamlit (phones/laptops/headphones)
@@ -195,7 +212,7 @@ def load_unified_catalog() -> dict[str, CatalogItem]:
                         continue
                     price = _coerce_float(_pick_first(row, ["price"]))
                     image_path = _pick_first(row, ["image_path", "image", "path", "img", "imageUrl"])
-                    key = str(Path(image_path)) if image_path else _image_key_for_item(domain_name, item_id, title)
+                    key = _normalize_item_key(image_path) if image_path else _image_key_for_item(domain_name, item_id, title)
                     mapping[key] = CatalogItem(
                         item_id=str(item_id),
                         title=str(title),
@@ -212,6 +229,11 @@ def load_unified_catalog() -> dict[str, CatalogItem]:
             mapping[key] = item
 
     return mapping
+
+
+def load_unified_catalog() -> dict[str, CatalogItem]:
+    """Load the unified catalog (cached) and return a copy for safe callers."""
+    return dict(_load_unified_catalog_cached())
 
 
 def load_default_catalog() -> dict[str, CatalogItem]:

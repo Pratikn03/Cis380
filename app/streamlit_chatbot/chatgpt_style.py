@@ -145,19 +145,20 @@ def render_chatgpt_style(
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("🗑️ Clear Chat", use_container_width=True):
+            if st.button("🗑️ Clear Chat", key="chatgpt_clear_chat", use_container_width=True):
                 st.session_state.chatgpt_messages = []
                 st.session_state.captured_image = None
                 st.session_state.captured_audio = None
                 st.rerun()
         
         with col2:
-            if st.button("📥 Export", use_container_width=True):
+            if st.button("📥 Export", key="chatgpt_export_chat", use_container_width=True):
                 st.download_button(
                     "💾 Download",
                     data=str(st.session_state.chatgpt_messages),
                     file_name="chat_history.txt",
-                    mime="text/plain"
+                    mime="text/plain",
+                    key="chatgpt_export_download",
                 )
         
         st.divider()

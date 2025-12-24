@@ -119,6 +119,26 @@ OMNICHATX_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.
 pytest -q
 ```
 
+5) (Optional) Train models (writes to `models/` + `experiments/`).
+```bash
+# Core tabular + voice + recommender (fast-ish)
+python scripts/train_all.py
+
+# Brand/logo detector (requires ultralytics + LogoDet-3K prepared data)
+python scripts/train_all.py --with-brand
+
+# Full vision stack (deepfake + real/fake + video temporal; requires local datasets)
+python scripts/train_all_vision.py
+
+# Face emotion (7-class; requires an ImageFolder-style dataset)
+# Expected: data/raw/vision/face_emotion/{train,val}/{angry,disgust,fear,happy,sad,surprise,neutral}/*
+python -m src.train.train_face_emotion --data-dir data/raw/vision/face_emotion --epochs 5 --device auto
+```
+
+Notes:
+- Canonical scripts are documented in `scripts/README.md`.
+- Extra research scripts live under `scripts/experimental/`.
+
 ## Brand Recognition (LogoDet-3K → YOLOv8) Quickstart
 
 This project supports **true brand recognition** via **logo detection** (YOLOv8) trained on datasets like **LogoDet-3K** and exported to `artifacts/brand/yolo_logo_det.pt`.
@@ -156,7 +176,15 @@ Environment variables (optional):
 - `BRAND_EPOCHS` (default `50`)
 - `BRAND_IMGSZ` (default `640`)
 - `BRAND_BATCH` (default `16`)
-- `BRAND_DEVICE` (default `cpu`)
+- `BRAND_DEVICE` (default `auto` → `mps`/`cuda:0`/`cpu`)
+- `BRAND_WORKERS` (default `4`)
+- `BRAND_CACHE` (default `false`; set `disk` or `ram` to speed up dataloading)
+- `BRAND_FRACTION` (default `1.0`; set `0.1` to train on 10% for a quick demo)
+- `BRAND_PATIENCE` (default `100`)
+- `BRAND_VAL` (default `true`; set `false` to skip validation during training — useful on macOS when NMS is slow)
+- `BRAND_VAL_MAX_IMAGES` (default `0`; cap validation images for faster epochs, e.g. `2000`)
+- `BRAND_TRAIN_MAX_IMAGES` (default `0`; cap training images for a quick smoke-run, e.g. `5000`)
+- `BRAND_SEED` (default `42`; controls subset sampling when using `*_MAX_IMAGES`)
 
 ### 4) Predict via API
 
@@ -253,4 +281,3 @@ All documentation is organized under [`docs/`](docs/README.md):
 - [Local Setup](docs/setup/local_run.md)
 - [OmniChat Guide](docs/guides/OMNICHAT_COMPLETE.md)
 - [Architecture](docs/architecture.md)
-

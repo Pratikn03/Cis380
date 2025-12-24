@@ -45,6 +45,26 @@ def render_tools_page(*, call_upload: Callable[..., dict]) -> None:
 
     st.divider()
 
+    st.markdown("### Face Emotion (Image)")
+    st.caption("Requires a trained face emotion model under `models/vision/face_emotion/`.")
+    face_img = st.file_uploader(
+        "Face image (selfie/crop)",
+        type=["png", "jpg", "jpeg", "webp"],
+        key="tools_face_emotion_upload",
+    )
+    if face_img is not None:
+        st.image(face_img, use_container_width=True)
+        if st.button("Predict face emotion", key="tools_face_emotion_run", type="primary"):
+            result = call_upload(
+                "/api/vision/face_emotion/predict",
+                filename=face_img.name,
+                content=face_img.getvalue(),
+                content_type=face_img.type or "image/jpeg",
+            )
+            (st.error if "error" in result else st.json)(result)
+
+    st.divider()
+
     st.markdown("### Vision (Video) Prediction")
     vid = st.file_uploader(
         "Video file",

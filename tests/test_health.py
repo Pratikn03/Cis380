@@ -8,5 +8,6 @@ def test_health_endpoint():
     response = client.get("/health")
     assert response.status_code == 200
     payload = response.json()
-    assert payload["status"] == "ok"
-    assert payload["service"] == "omnichatx"
+    assert payload["status"] == "healthy"
+    assert "timestamp" in payload
+    assert "version" in payload

@@ -72,8 +72,12 @@ services:
     environment:
       - OMNICHATX_BACKEND=http://omnichatx-api:8000
       - AUTH_TOKEN=${AUTH_TOKEN:-}
+    volumes:
+      - ./models:/app/models:ro
+      - ./artifacts:/app/artifacts:ro
+      - ./experiments:/app/experiments:ro
     command: >
-      streamlit run app/streamlit_chatbot/omnichat_unified.py
+      streamlit run app/streamlit_chatbot/app.py
       --server.port=8501
       --server.address=0.0.0.0
       --server.headless=true

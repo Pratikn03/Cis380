@@ -5,14 +5,15 @@ from __future__ import annotations
 from pathlib import Path
 import importlib.util
 import logging
+import os
 import platform
 import sys
 import time
 
-from fastapi import FastAPI, Request, Response, Depends
+from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from prometheus_client import Counter, Histogram, CONTENT_TYPE_LATEST, generate_latest
+from prometheus_client import Counter, Histogram
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC_DIR = ROOT / "src"
@@ -81,18 +82,26 @@ try:  # pragma: no cover
 except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.api.vision_temporal router unavailable: %s", exc)
     _app_vision_temporal_router = None
+
+try:  # pragma: no cover
+    from app.core import health_router as _health_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.core.health router unavailable: %s", exc)
+    _health_router = None
 from fastapi.responses import RedirectResponse
 
 logger = logging.getLogger("omnichatx")
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler()
-handler.setFormatter(
-    logging.Formatter(
-        "%(asctime)s %(levelname)s %(name)s %(message)s",
-        "%Y-%m-%dT%H:%M:%S",
+_log_level_name = (os.getenv("LOG_LEVEL") or "INFO").upper()
+logger.setLevel(getattr(logging, _log_level_name, logging.INFO))
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        logging.Formatter(
+            "%(asctime)s %(levelname)s %(name)s %(message)s",
+            "%Y-%m-%dT%H:%M:%S",
+        )
     )
-)
-logger.addHandler(handler)
+    logger.addHandler(handler)
 
 REQUEST_COUNTER = Counter(
     "omnichatx_http_requests_total",
@@ -108,11 +117,19 @@ REQUEST_LATENCY = Histogram(
 
 app = FastAPI(title="OmniChatX API", version="0.2")
 
-# CORS: allow all for demo; tighten for production
+def _parse_cors_origins() -> list[str]:
+    raw = (os.getenv("CORS_ORIGINS") or "*").strip()
+    if not raw or raw == "*":
+        return ["*"]
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
+
+# CORS: allow all for demo; configure via CORS_ORIGINS in production (comma-separated).
+_cors_origins = _parse_cors_origins()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_cors_origins,
+    allow_credentials=_cors_origins != ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -130,6 +147,10 @@ app.include_router(behavior.router)
 app.include_router(fraud.router)
 app.include_router(cyber.router)
 app.include_router(vision.router)
+if _health_router is not None:
+    # Production-grade health + readiness + metrics endpoints:
+    #   /health, /health/live, /health/ready, /health/detailed, /metrics, /ready
+    app.include_router(_health_router)
 if _app_risk_router is not None:
     app.include_router(_app_risk_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_monitor_router is not None:
@@ -155,27 +176,13 @@ async def log_requests(request: Request, call_next):
     REQUEST_COUNTER.labels(request.method, path, response.status_code).inc()
     REQUEST_LATENCY.labels(request.method, path).observe(duration)
     logger.info(
-        "HTTP request",
-        extra={
-            "method": request.method,
-            "path": path,
-            "status": response.status_code,
-            "duration": duration,
-        },
+        "%s %s -> %s (%.3fs)",
+        request.method,
+        path,
+        response.status_code,
+        duration,
     )
     return response
-
-
-@app.get("/metrics")
-def metrics():
-    payload = generate_latest()
-    return Response(content=payload, media_type=CONTENT_TYPE_LATEST)
-
-
-@app.get("/health")
-def health():
-    # Backward-compatible minimal health endpoint.
-    return {"status": "ok", "service": "omnichatx", "version": app.version}
 
 
 def _module_available(module_name: str) -> bool:

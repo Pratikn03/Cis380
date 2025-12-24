@@ -223,6 +223,31 @@ async def vision_predict(file: UploadFile = File(...), top_k: int = 3):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Vision predict failed: {exc}") from exc
 
 
+@router.post("/face_emotion/predict")
+async def face_emotion_predict(file: UploadFile = File(...), top_k: int = 3):
+    """Predict a 7-class facial emotion label from an uploaded image."""
+    try:
+        image_bytes = await file.read()
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read upload: {exc}") from exc
+
+    try:
+        from app.models.vision.face_emotion_predict import FaceEmotionModelNotTrainedError, predict_face_emotion
+
+        return predict_face_emotion(image_bytes=image_bytes, filename=file.filename, top_k=top_k)
+    except FaceEmotionModelNotTrainedError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Face emotion predict failed: {exc}",
+        ) from exc
+
+
 @router.post("/video/predict")
 async def vision_video_predict(
     file: UploadFile = File(...),

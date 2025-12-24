@@ -72,10 +72,12 @@ def _embed_semantic(image_path: str, metadata: str) -> np.ndarray:
     return embed_text(metadata or "")
 
 
-def build_embeddings() -> CatalogEmbeddingResult:
+def build_embeddings(*, max_items: int | None = None, seed: int = 42) -> CatalogEmbeddingResult:
     df = build_catalog_dataframe()
     if df.empty:
         raise RuntimeError("No recommendation catalog data available.")
+    if max_items is not None and max_items > 0 and len(df) > max_items:
+        df = df.sample(n=int(max_items), random_state=int(seed)).reset_index(drop=True)
     vectorizer = TfidfVectorizer(stop_words="english", max_features=2048)
     text_matrix = vectorizer.fit_transform(df["metadata"]).toarray().astype(np.float32)
     semantic_vectors = np.stack(

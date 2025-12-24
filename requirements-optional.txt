@@ -13,7 +13,10 @@ lime>=0.2.0.1
 torch>=2.1.0 --index-url https://download.pytorch.org/whl/cpu
 torchvision>=0.15.0 --index-url https://download.pytorch.org/whl/cpu
 torchaudio>=2.1.0 --index-url https://download.pytorch.org/whl/cpu
-tensorflow-cpu>=2.11.0
+# TensorFlow:
+# - Linux/Windows: `tensorflow-cpu` works via pip.
+# - macOS: prefer conda (`conda install -c apple tensorflow-deps` + pip `tensorflow-macos`) or skip.
+tensorflow-cpu>=2.11.0; platform_system != "Darwin" and python_version < "3.13"
 
 # NLP
 transformers>=4.43.0

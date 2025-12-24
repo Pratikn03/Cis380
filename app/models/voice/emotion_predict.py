@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable, Sequence
 
 import joblib
 import numpy as np
@@ -22,6 +22,67 @@ _MODEL = None
 SUPPORTED_EMOTIONS: tuple[str, ...] = ("happy", "sad", "angry", "neutral", "fearful")
 # Enhanced feature count: 26 MFCC + 5 additional features
 FEATURE_COUNT = 31
+
+
+def _coerce_label_list(values: Iterable[object]) -> list[str]:
+    return [str(v) for v in values]
+
+
+def _decode_classes(
+    classes: Sequence[object] | None,
+    *,
+    label_encoder: Any | None = None,
+) -> list[str]:
+    if classes is None:
+        return []
+    try:
+        if len(classes) == 0:  # type: ignore[arg-type]
+            return []
+    except Exception:
+        return []
+    if label_encoder is not None and hasattr(label_encoder, "inverse_transform"):
+        try:
+            decoded = label_encoder.inverse_transform(list(classes))
+            return _coerce_label_list(decoded)
+        except Exception:
+            pass
+    return _coerce_label_list(classes)
+
+
+def _get_model_classes(model: Any) -> list[str]:
+    """Return model class labels as strings (supports legacy dict artifacts)."""
+    if isinstance(model, dict):
+        inner = model.get("model")
+        label_encoder = model.get("label_encoder")
+        return _decode_classes(getattr(inner, "classes_", None), label_encoder=label_encoder)
+    return _decode_classes(getattr(model, "classes_", None))
+
+
+def _transform_features(model: Any, feature: np.ndarray) -> np.ndarray:
+    """Apply legacy scaler transforms if present."""
+    if isinstance(model, dict):
+        scaler = model.get("scaler")
+        if scaler is not None and hasattr(scaler, "transform"):
+            try:
+                return np.asarray(scaler.transform([feature])[0], dtype=np.float64)
+            except Exception:
+                return feature
+    return feature
+
+
+def _expected_feature_count(model: Any) -> int | None:
+    """Return the model's expected feature count if discoverable."""
+    candidates: list[Any] = []
+    if isinstance(model, dict):
+        candidates.extend([model.get("model"), model.get("scaler")])
+    else:
+        candidates.append(model)
+
+    for obj in candidates:
+        n = getattr(obj, "n_features_in_", None)
+        if isinstance(n, (int, np.integer)) and int(n) > 0:
+            return int(n)
+    return None
 
 
 def _extract_enhanced_features(audio: np.ndarray, sr: int) -> np.ndarray:
@@ -77,13 +138,12 @@ def _load_model():
                 # Guarantee stable class support for downstream UI/API consumers.
                 # If a legacy artifact is missing a supported emotion, switch to a
                 # best-effort fallback model that includes all `SUPPORTED_EMOTIONS`.
-                model_classes = (
-                    [str(c) for c in getattr(_MODEL, "classes_", [])]
-                    if getattr(_MODEL, "classes_", None) is not None
-                    else []
-                )
+                model_classes = _get_model_classes(_MODEL)
                 missing = [emo for emo in SUPPORTED_EMOTIONS if emo not in model_classes] if model_classes else []
-                if missing:
+                expected = _expected_feature_count(_MODEL)
+                if expected is not None and expected != FEATURE_COUNT:
+                    _MODEL = _create_fallback_model(persist=False)
+                elif missing:
                     _MODEL = _create_fallback_model(persist=False)
         else:
             _MODEL = _create_fallback_model(persist=True)
@@ -91,21 +151,49 @@ def _load_model():
 
 
 def _predict_single(model: Any, feature: np.ndarray) -> tuple[str, float, dict[str, float] | None]:
+    transformed = _transform_features(model, feature)
+
+    if isinstance(model, dict):
+        inner = model.get("model")
+        if inner is None:
+            return "neutral", 0.0, None
+        label_encoder = model.get("label_encoder")
+        if hasattr(inner, "predict_proba"):
+            probas = inner.predict_proba([transformed])[0]
+            classes = _decode_classes(getattr(inner, "classes_", None), label_encoder=label_encoder)
+            vector = {classes[i]: float(probas[i]) for i in range(min(len(classes), len(probas)))} if classes else None
+            if vector is not None:
+                for emo in SUPPORTED_EMOTIONS:
+                    vector.setdefault(emo, 0.0)
+            idx = int(np.argmax(probas))
+            label = classes[idx] if classes and idx < len(classes) else str(idx)
+            confidence = float(probas[idx])
+            return label, confidence, vector
+
+        pred = inner.predict([transformed])[0]
+        label = str(pred)
+        if label_encoder is not None and hasattr(label_encoder, "inverse_transform"):
+            try:
+                label = str(label_encoder.inverse_transform([pred])[0])
+            except Exception:
+                pass
+        return label, 0.5, None
+
     if hasattr(model, "predict_proba"):
-        probas = model.predict_proba([feature])[0]
-        classes = [str(c) for c in getattr(model, "classes_", [])]
+        probas = model.predict_proba([transformed])[0]
+        classes = _decode_classes(getattr(model, "classes_", None))
         if classes and len(classes) == len(probas):
             vector = {classes[i]: float(probas[i]) for i in range(len(classes))}
-            # Ensure stable keys for downstream consumers (even if a legacy model is missing a class).
             for emo in SUPPORTED_EMOTIONS:
                 vector.setdefault(emo, 0.0)
         else:
             vector = None
         idx = int(np.argmax(probas))
-        label = str(model.classes_[idx]) if hasattr(model, "classes_") else str(idx)
+        label = classes[idx] if classes and idx < len(classes) else str(idx)
         confidence = float(probas[idx])
         return label, confidence, vector
-    label = str(model.predict([feature])[0])
+
+    label = str(model.predict([transformed])[0])
     return label, 0.5, None
 
 
@@ -153,7 +241,7 @@ def predict_emotion(*, audio_bytes: bytes, filename: str | None = None) -> dict[
     label, confidence, vector = _predict_single(model, feature)
     signals = extract_audio_signals(audio, sr)
     segments = _segment_predictions(audio, sr, model, max_segments=5)
-    model_classes = [str(c) for c in getattr(model, "classes_", [])] if getattr(model, "classes_", None) is not None else []
+    model_classes = _get_model_classes(model)
     missing = [emo for emo in SUPPORTED_EMOTIONS if emo not in model_classes] if model_classes else []
 
     payload: dict[str, Any] = {

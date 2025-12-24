@@ -1,7 +1,7 @@
 #!/bin/bash
-# Launch OmniChat Pratik Unified Interface
+# Launch OmniChatX Streamlit UI (Command Center)
 
-echo "🧠 Starting OmniChat Pratik - Unified AI Assistant"
+echo "🧠 Starting OmniChatX - Streamlit Command Center"
 echo "=================================================="
 echo ""
 
@@ -26,7 +26,7 @@ echo ""
 echo "Press Ctrl+C to stop the server"
 echo ""
 
-streamlit run app/streamlit_chatbot/omnichat_unified.py \
+streamlit run app/streamlit_chatbot/app.py \
     --server.port=8501 \
     --server.headless=true \
     --browser.serverAddress=localhost \

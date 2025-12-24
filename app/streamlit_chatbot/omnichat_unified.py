@@ -41,13 +41,15 @@ MAX_MESSAGE_LENGTH = 5000
 THIS_DIR = Path(__file__).resolve().parent
 APP_ROOT = THIS_DIR.parent
 REPO_ROOT = THIS_DIR.parents[1]
+SRC_DIR = REPO_ROOT / "src"
 
-desired_sys_path = [str(REPO_ROOT), str(APP_ROOT)]
+desired_sys_path = [str(REPO_ROOT), str(SRC_DIR), str(APP_ROOT)]
 for p in desired_sys_path:
     while p in sys.path:
         sys.path.remove(p)
 sys.path.insert(0, desired_sys_path[0])
 sys.path.insert(1, desired_sys_path[1])
+sys.path.insert(2, desired_sys_path[2])
 
 
 def render_omnichat_unified(
@@ -480,7 +482,7 @@ def render_omnichat_unified(
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("🗑️ Clear Chat", use_container_width=True):
+            if st.button("🗑️ Clear Chat", key="omni_clear_chat", use_container_width=True):
                 st.session_state.omni_messages = []
                 st.session_state.omni_attached_image = None
                 st.session_state.omni_attached_audio = None
@@ -488,7 +490,7 @@ def render_omnichat_unified(
                 st.rerun()
         
         with col2:
-            if st.button("🔄 New Session", use_container_width=True):
+            if st.button("🔄 New Session", key="omni_new_session", use_container_width=True):
                 st.session_state.omni_session_id = str(uuid.uuid4())
                 st.session_state.omni_messages = []
                 st.rerun()
@@ -794,6 +796,9 @@ def render_omnichat_unified(
                 # Process response
                 if isinstance(res, dict) and "error" not in res:
                     reply = res.get("reply") or res.get("answer") or res.get("response", "")
+
+                    meta = res.get("meta") if isinstance(res.get("meta"), dict) else {}
+                    meta_attachments = meta.get("attachments") if isinstance(meta.get("attachments"), dict) else {}
                     
                     # Add analysis results if available
                     analysis_parts = []
@@ -828,6 +833,12 @@ def render_omnichat_unified(
                             confidence = res.get("emotion_confidence") or res.get("confidence") or 0
                         
                         # Check in meta/attachments (multimodal response)
+                        elif meta_attachments.get("voice"):
+                            voice = meta_attachments["voice"]
+                            emotion = voice.get("emotion")
+                            confidence = voice.get("confidence") or 0
+
+                        # Legacy locations (older responses)
                         elif res.get("meta", {}).get("voice"):
                             voice = res["meta"]["voice"]
                             emotion = voice.get("emotion")
@@ -855,6 +866,8 @@ def render_omnichat_unified(
                         transcript = None
                         if res.get("transcription"):
                             transcript = res.get("transcription")
+                        elif meta_attachments.get("stt", {}).get("text"):
+                            transcript = meta_attachments["stt"]["text"]
                         elif res.get("meta", {}).get("stt", {}).get("text"):
                             transcript = res["meta"]["stt"]["text"]
                         elif res.get("attachments", {}).get("stt", {}).get("text"):
@@ -877,6 +890,12 @@ def render_omnichat_unified(
                             vision_conf = res.get("confidence") or 0
                         
                         # Check in meta/attachments (multimodal response)
+                        elif meta_attachments.get("vision_image"):
+                            vision = meta_attachments["vision_image"]
+                            vision_label = vision.get("label")
+                            vision_conf = vision.get("confidence") or 0
+
+                        # Legacy locations (older responses)
                         elif res.get("meta", {}).get("vision_image"):
                             vision = res["meta"]["vision_image"]
                             vision_label = vision.get("label")
@@ -889,6 +908,21 @@ def render_omnichat_unified(
                         if vision_label:
                             conf_display = f"{vision_conf:.1%}" if isinstance(vision_conf, (int, float)) else "N/A"
                             analysis_parts.append(f"**Vision Classification:** 🔍 {vision_label} ({conf_display})")
+
+                        # Face emotion (image-based, optional)
+                        face_emotion = None
+                        if meta_attachments.get("face_emotion"):
+                            face_emotion = meta_attachments.get("face_emotion")
+                        elif res.get("meta", {}).get("face_emotion"):
+                            face_emotion = res.get("meta", {}).get("face_emotion")
+                        elif res.get("attachments", {}).get("face_emotion"):
+                            face_emotion = res.get("attachments", {}).get("face_emotion")
+
+                        if isinstance(face_emotion, dict) and face_emotion.get("emotion"):
+                            emo = face_emotion.get("emotion")
+                            conf = face_emotion.get("confidence") or 0
+                            conf_display = f"{conf:.1%}" if isinstance(conf, (int, float)) else "N/A"
+                            analysis_parts.append(f"**Face Emotion:** 😊 {emo} ({conf_display})")
                         
                         # Check for detected objects
                         objects = res.get("objects_detected") or res.get("objects") or res.get("detections")
@@ -898,7 +932,10 @@ def render_omnichat_unified(
                         
                         # Check for video analysis
                         video_label = None
-                        if res.get("meta", {}).get("vision_video"):
+                        if meta_attachments.get("vision_video"):
+                            video = meta_attachments.get("vision_video")
+                            video_label = video.get("label") if isinstance(video, dict) else None
+                        elif res.get("meta", {}).get("vision_video"):
                             video = res["meta"]["vision_video"]
                             video_label = video.get("label")
                         elif res.get("attachments", {}).get("vision_video"):

@@ -10,11 +10,13 @@ import os
 from fastapi import Header, HTTPException, status
 
 
-AUTH_TOKEN = os.getenv("AUTH_TOKEN")
+def _auth_token() -> str | None:
+    return os.getenv("AUTH_TOKEN") or None
 
 
 async def require_auth(authorization: str | None = Header(default=None)):
-    if not AUTH_TOKEN:
+    auth_token = _auth_token()
+    if not auth_token:
         return  # auth disabled
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(
@@ -22,18 +24,19 @@ async def require_auth(authorization: str | None = Header(default=None)):
             detail="Missing bearer token",
         )
     token = authorization.split(" ", 1)[1].strip()
-    if token != AUTH_TOKEN:
+    if token != auth_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid token",
-    )
+            detail="Invalid token",
+        )
     return
 
 
 def check_token_query(token: str | None):
-    if not AUTH_TOKEN:
+    auth_token = _auth_token()
+    if not auth_token:
         return
-    if token != AUTH_TOKEN:
+    if token != auth_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",

@@ -340,7 +340,11 @@ def train_brand_model():
     print(f"📂 Using data: {yaml_path}")
     os.environ.setdefault("BRAND_EPOCHS", "1")
     os.environ.setdefault("BRAND_YOLO_MODEL", "yolov8n.pt")
-    os.environ.setdefault("BRAND_DEVICE", "cpu")
+    # Fast, local-friendly defaults. Override with env vars for full training.
+    os.environ.setdefault("BRAND_DEVICE", "auto")
+    os.environ.setdefault("BRAND_IMGSZ", "320")
+    os.environ.setdefault("BRAND_FRACTION", "0.1")
+    os.environ.setdefault("BRAND_VAL", "false")
     try:
         _train_brand()
         return True
