@@ -5,7 +5,7 @@ This repository includes notebooks, prototypes, and one-off scripts that were us
 They are not required for the default API/UI runtime, but they are kept for transparency and future reference.
 
 ## Notebooks
-- Location: `notebooks/`
+- Location: `notebooks/` (see `notebooks/README.md` for folders)
 - Purpose: EDA, model prototyping, and architecture notes.
 
 ## Experimental Scripts
@@ -15,4 +15,3 @@ They are not required for the default API/UI runtime, but they are kept for tran
 If you are trying to run the system end-to-end, prefer:
 - `README.md` (run commands)
 - `scripts/README.md` (training entrypoints)
-

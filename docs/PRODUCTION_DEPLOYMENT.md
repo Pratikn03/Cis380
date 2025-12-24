@@ -96,6 +96,12 @@ If you enable features that require trained artifacts, ensure the corresponding 
 - Face emotion: `models/vision/face_emotion/model.pt`
 - Vision classifier: `models/vision/resnet/model.pt`
 
+If you deploy from a git checkout, make sure LFS artifacts are actually present (not pointer files):
+```bash
+git lfs install
+git lfs pull
+```
+
 When artifacts are missing, affected endpoints return `503` with instructions.
 
 ## Operations
@@ -137,4 +143,3 @@ If you prefer a wrapper around compose commands:
 ### UI can’t reach API
 - Confirm the UI container uses `OMNICHATX_BACKEND=http://omnichatx-api:8000` (it does by default).
 - Check `docker compose ps` and `docker compose logs omnichatx-api`.
-

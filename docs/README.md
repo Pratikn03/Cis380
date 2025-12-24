@@ -18,6 +18,8 @@ If you’re new here, start with the repository overview in `README.md`, then us
 - `scripts/README.md` — canonical training entrypoints.
 - `data/README.md` — dataset folder conventions and where to put raw data.
 - `docs/clothing_image_dataset.md` — optional ImageFolder layout for clothing brand/category experiments.
+- `artifacts/README.md` — runtime artifacts (weights) and Git LFS notes.
+- `notebooks/README.md` — notebook index (EDA/training/evaluation/overview).
 
 ## Troubleshooting & Postmortems
 - `docs/fixes/FIXES_APPLIED_SUMMARY.md` — summary of fixes applied to the UI/runtime.
@@ -36,4 +38,3 @@ This repository contains some older stacks and experiments that are kept for con
 - `docs/PROJECT_STATUS.md`
 - `reports/demo_ready_20251214_081017.md`
 - `reports/benchmarks.md`
-

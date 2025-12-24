@@ -1,8 +1,9 @@
-# Git LFS (Optional)
+# Git LFS (Recommended)
 
-OmniChatX is designed to keep large datasets and trained model artifacts **out of git** (see `.gitignore`).
+OmniChatX keeps **datasets** and most **training outputs** out of git (see `.gitignore`).
+Some small, runtime-critical artifacts may be versioned via **Git LFS** (see `.gitattributes`).
 
-If you plan to version large binary artifacts (e.g., `.pt`, `.pkl`, `.onnx`) in the repository, use **Git LFS**.
+If you want to use any included LFS-tracked artifacts, install Git LFS and pull the files.
 
 ## Install Git LFS
 
@@ -19,18 +20,12 @@ sudo apt-get install git-lfs
 git lfs install
 ```
 
-## Track Model Artifacts
+## Download LFS Artifacts
 
-Example patterns:
 ```bash
-git lfs track "*.pt"
-git lfs track "*.pth"
-git lfs track "*.pkl"
-git lfs track "*.onnx"
-git add .gitattributes
+git lfs pull
 ```
 
 ## Notes
-- Prefer distributing large trained weights via **GitHub Releases** or external artifact storage when possible.
-- If you enable LFS, set it up before committing large binaries so history stays clean.
-
+- This repo already tracks common model formats in `.gitattributes`; you should not need to run `git lfs track` unless you add new patterns.
+- Prefer distributing large, frequently-updated weights via **GitHub Releases** or external artifact storage when possible.

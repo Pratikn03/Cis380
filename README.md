@@ -42,6 +42,12 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+If you plan to use included LFS-tracked artifacts (e.g., `artifacts/brand/yolo_logo_det.pt`):
+```bash
+git lfs install
+git lfs pull
+```
+
 ### 2) Run API
 ```bash
 uvicorn app.main:app --reload
