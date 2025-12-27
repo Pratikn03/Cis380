@@ -1,7 +1,7 @@
-# Streamlit OmniChat Error & Bug Analysis
+# Streamlit Sentinel Error & Bug Analysis
 
 **Date:** December 17, 2025  
-**File:** `app/streamlit_chatbot/omnichat_unified.py`  
+**File:** `app/streamlit_chatbot/unified_chat.py`  
 **Status:** Active Streamlit instance running on port 8502
 
 > Note: This document is a historical debugging log from the UI hardening phase.
@@ -400,7 +400,7 @@ if prompt:
 
 **Issues:**
 ```python
-backend_url = os.environ.get("OMNICHATX_BACKEND", "http://localhost:8000")
+backend_url = os.environ.get("SENTINELFORGE_BACKEND", "http://localhost:8000")
 ```
 
 **Problems:**
@@ -412,7 +412,7 @@ backend_url = os.environ.get("OMNICHATX_BACKEND", "http://localhost:8000")
 ```python
 import validators
 
-backend_url = os.environ.get("OMNICHATX_BACKEND", "http://localhost:8000").strip().rstrip("/")
+backend_url = os.environ.get("SENTINELFORGE_BACKEND", "http://localhost:8000").strip().rstrip("/")
 
 if not validators.url(backend_url):
     st.error(f"❌ Invalid backend URL: {backend_url}")

@@ -1,4 +1,4 @@
-"""Universal Anomaly Intelligence System (UAIS)."""
+"""SentinelForge core package."""
 
 __all__ = [
     "config",

@@ -1,1 +1,1 @@
-"""Preprocessing utilities for UAIS."""
+"""Preprocessing utilities for SentinelForge."""

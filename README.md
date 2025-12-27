@@ -1,6 +1,6 @@
-# OmniChatX (Universal Anomaly Intelligence v2)
+# SentinelForge
 
-OmniChatX is a **multimodal AI agent platform** that routes a single user request to the right subsystem (RAG, fraud/cyber/behavior scoring, recommendations, voice emotion, vision) and returns a **single structured response**: `{"route", "answer", "meta"}`.
+SentinelForge is a **multimodal AI agent platform** that routes a single user request to the right subsystem (RAG, fraud/cyber/behavior scoring, recommendations, voice emotion, vision) and returns a **single structured response**: `{"route", "answer", "meta"}`.
 
 The goal of this repository is not “a chatbot in a notebook”, but an end-to-end system that looks and feels like a service: **API, UI, training, monitoring, and a repeatable test gate**.
 
@@ -26,7 +26,7 @@ flowchart TD
 ```
 
 Key entrypoints:
-- **API**: `app/main.py` (re-exports `backend/main.py`)
+- **API**: `app/main.py`
 - **UI**: `app/streamlit_chatbot/app.py`
 
 For legacy modules and why they still exist, see `docs/LEGACY.md`.
@@ -55,9 +55,9 @@ uvicorn app.main:app --reload
 
 ### 3) Run UI
 ```bash
-OMNICHATX_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
+SENTINELFORGE_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
 ```
-Use the left sidebar for navigation. The recommended chat view is **"✨ OmniChatX (ChatGPT×Gemini)"** (legacy chat UIs are still available from the Chat page).
+Use the left sidebar for navigation. The recommended chat view is **"✨ SentinelForge (Unified Chat)"** (legacy chat UIs are still available from the Chat page).
 
 ### One-command demo (backend + UI)
 ```bash

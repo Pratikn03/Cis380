@@ -76,7 +76,7 @@ def _load_vision_predictor(*, device: str = "cpu"):
 
 
 def _extract_frames(*, video_path: Path, fps: float, max_frames: int, ffmpeg: str) -> list[Path]:
-    frames_dir = Path(tempfile.mkdtemp(prefix="omnichatx_video_frames_"))
+    frames_dir = Path(tempfile.mkdtemp(prefix="sentinelforge_video_frames_"))
     out_pattern = frames_dir / "frame_%06d.jpg"
 
     cmd = [
@@ -211,7 +211,15 @@ def main() -> int:
     parser.add_argument("--max-frames", type=int, default=30)
     parser.add_argument("--max-per-class", type=int, default=200)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--device", type=str, default=os.getenv("UAIS_VISION_DEVICE", "cpu"))
+    parser.add_argument(
+        "--device",
+        type=str,
+        default=(
+            os.getenv("SENTINELFORGE_VISION_DEVICE")
+            or os.getenv("UAIS_VISION_DEVICE")
+            or "cpu"
+        ),
+    )
     parser.add_argument("--out", type=Path, default=VIDEO_TEMPORAL_MODEL_PATH)
     args = parser.parse_args()
 

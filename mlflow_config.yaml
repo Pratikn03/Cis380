@@ -1,4 +1,4 @@
 mlflow:
   tracking_uri: http://localhost:5000
-  experiment_name: UAISV_Experiments
+  experiment_name: SentinelForge_Experiments
   model_registry: true

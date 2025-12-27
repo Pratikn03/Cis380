@@ -8,9 +8,5 @@ This file exists for historical context.
 - Demo walkthrough: `docs/guides/demo.md`
 
 ## Legacy Stack (Reference Only)
-Some older documents and experiments reference:
-- `deploy/api/main.py` (legacy FastAPI app)
-- `dashboard/app_streamlit.py` (legacy Streamlit dashboard)
-
-They are not the default runtime in OmniChatX v2.
-
+Some older documents and experiments referenced a separate `deploy/` API. The legacy
+`dashboard/` Streamlit app has been removed in favor of `app/streamlit_chatbot/app.py`.

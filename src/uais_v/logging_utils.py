@@ -1,4 +1,4 @@
-"""Lightweight logging setup shared across UAIS-V."""
+"""Lightweight logging setup shared across SentinelForge."""
 
 import logging
 from typing import Optional

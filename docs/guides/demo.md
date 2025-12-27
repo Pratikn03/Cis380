@@ -1,6 +1,6 @@
-# OmniChatX Demo (5 Minutes)
+# SentinelForge Demo (5 Minutes)
 
-Use this walkthrough when you want to demo OmniChatX quickly (API + UI).
+Use this walkthrough when you want to demo SentinelForge quickly (API + UI).
 
 ## 1. Start the backend
 
@@ -36,7 +36,7 @@ The UI has four main tabs (top bar):
 3. **Audio/Video/Vision** – mic/webcam snapshot + optional WebRTC loop, plus uploads (voice/image/video), plus brand recognition.
 4. **Fraud/Cyber/Behavior** – Risk Command Center simulator, direct scoring, and monitoring/log viewer.
 
-The UI respects `OMNICHATX_BACKEND` if your FastAPI server runs somewhere other than `http://localhost:8000`.
+The UI respects `SENTINELFORGE_BACKEND` if your FastAPI server runs somewhere other than `http://localhost:8000`.
 If `AUTH_TOKEN` is set, the UI sends it as a bearer token.
 
 ## 3. Demo walkthrough
@@ -62,4 +62,4 @@ If `AUTH_TOKEN` is set, the UI sends it as a bearer token.
 ## 4. Optional polish
 
 * Drop hand-crafted `.txt`/`.md` documents into `data/docs/`, restart uvicorn, and repeat the RAG query to show new knowledge.  
-* Change `OMNICHATX_BACKEND` to the production host before demos that hit deployed APIs.  
+* Change `SENTINELFORGE_BACKEND` to the production host before demos that hit deployed APIs.  

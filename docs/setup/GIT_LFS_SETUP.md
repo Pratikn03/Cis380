@@ -1,6 +1,6 @@
 # Git LFS (Recommended)
 
-OmniChatX keeps **datasets** and most **training outputs** out of git (see `.gitignore`).
+SentinelForge keeps **datasets** and most **training outputs** out of git (see `.gitignore`).
 Some small, runtime-critical artifacts may be versioned via **Git LFS** (see `.gitattributes`).
 
 If you want to use any included LFS-tracked artifacts, install Git LFS and pull the files.

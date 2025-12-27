@@ -1,11 +1,11 @@
 """
-OmniChatX Core Module
+SentinelForge Core Module
 Configuration, middleware, and health checks for production deployment
 """
 
 from app.core.config import Settings, get_settings, settings
 from app.core.middleware import (
-    OmniChatXException,
+    SentinelForgeException,
     ValidationError,
     AuthenticationError,
     AuthorizationError,
@@ -22,7 +22,7 @@ __all__ = [
     "get_settings",
     "settings",
     # Exceptions
-    "OmniChatXException",
+    "SentinelForgeException",
     "ValidationError",
     "AuthenticationError",
     "AuthorizationError",

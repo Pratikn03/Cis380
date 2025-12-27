@@ -1,4 +1,4 @@
-"""Configuration loaders for UAIS-V."""
+"""Configuration loaders for SentinelForge."""
 
 from dataclasses import dataclass
 from pathlib import Path

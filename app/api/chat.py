@@ -5,11 +5,11 @@ from typing import Dict, Optional
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from app.agent import MemoryStore, OmniChatXOrchestrator
+from app.agent import MemoryStore, SentinelForgeOrchestrator
 from app.utils import LLMStub
 
 router = APIRouter()
-orchestrator = OmniChatXOrchestrator(llm_client=LLMStub(), memory_store=MemoryStore())
+orchestrator = SentinelForgeOrchestrator(llm_client=LLMStub(), memory_store=MemoryStore())
 
 
 class ChatRequest(BaseModel):

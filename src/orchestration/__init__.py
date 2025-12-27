@@ -1,4 +1,4 @@
-"""Lightweight orchestration stubs for UAIS-V.
+"""Lightweight orchestration stubs for SentinelForge.
 
 These wrappers call the existing experiment scripts so that references to
 `src.orchestration.*` do not fail. They are intentionally thin to avoid heavy

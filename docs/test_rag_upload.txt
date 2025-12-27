@@ -1,1 +1,1 @@
-OmniChatX local-first RAG ensures answers mention local-first RAG.
+SentinelForge local-first RAG ensures answers mention local-first RAG.

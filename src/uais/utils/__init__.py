@@ -1,1 +1,1 @@
-"""Utility helpers shared across UAIS."""
+"""Utility helpers shared across SentinelForge."""

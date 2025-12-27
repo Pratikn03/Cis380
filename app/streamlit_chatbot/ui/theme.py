@@ -17,7 +17,7 @@ def apply_partik_theme(
 ) -> None:
     """Apply global CSS theme + render the top header."""
 
-    st.set_page_config(page_title="UAIS-V Command Center", page_icon="🧠", layout="wide")
+    st.set_page_config(page_title="SentinelForge Command Center", page_icon="🧠", layout="wide")
 
     st.markdown(
         """
@@ -196,7 +196,7 @@ def apply_partik_theme(
 
     st.markdown(
         """
-        <div class="watermark">OmniChatX</div>
+        <div class="watermark">SentinelForge</div>
         """,
         unsafe_allow_html=True,
     )
@@ -208,7 +208,7 @@ def apply_partik_theme(
                 <div style="display:flex;align-items:center;gap:12px;">
                     <div style="font-size:30px;">🧠</div>
                     <div>
-                        <div style="font-size:26px;font-weight:600;letter-spacing:0.04em;">OmniChatX</div>
+                        <div style="font-size:26px;font-weight:600;letter-spacing:0.04em;">SentinelForge</div>
                         <div class="muted" style="font-size:13px;">Universal AI Intelligence</div>
                     </div>
                 </div>
@@ -223,7 +223,7 @@ def apply_partik_theme(
     )
 
     st.markdown(
-        '<div class="footer-note">Built with local-first AI · OmniChatX</div>',
+        '<div class="footer-note">Built with local-first AI · SentinelForge</div>',
         unsafe_allow_html=True,
     )
 
@@ -280,7 +280,7 @@ def sidebar_panel(*, backend_url: str) -> str:
             """
             - **Recommendations**: movies/electronics/news + image/text similarity.
             - **Live Agent**: GPT-like chat (uses `OPENAI_API_KEY` if set).
-            - **Voice Chat**: upload speech, transcribe via STT, and ask OmniChatX hands-free.
+            - **Voice Chat**: upload speech, transcribe via STT, and ask SentinelForge hands-free.
             - **Audio/Video/Vision**: mic/webcam + uploads (voice + image + video).
             - **Fraud/Cyber/Behavior**: risk command center + direct scoring.
             """

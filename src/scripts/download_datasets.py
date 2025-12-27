@@ -1,5 +1,5 @@
 """
-Auto-download datasets for the UAIS project using kagglehub.
+Auto-download datasets for the SentinelForge project using kagglehub.
 
 Datasets:
 1) Fraud (credit card fraud)

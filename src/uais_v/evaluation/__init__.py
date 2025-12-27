@@ -1,1 +1,1 @@
-"""UAIS-V package."""
+"""SentinelForge package."""

@@ -53,7 +53,11 @@ def _fallback_image_embedding(image_bytes: bytes, *, bins: int = 8) -> np.ndarra
 
 
 def _embedding_backend() -> str:
-    return os.getenv("UAIS_EMBEDDINGS_BACKEND", "auto").strip().lower()
+    return (
+        os.getenv("SENTINELFORGE_EMBEDDINGS_BACKEND")
+        or os.getenv("UAIS_EMBEDDINGS_BACKEND")
+        or "auto"
+    ).strip().lower()
 
 
 @functools.lru_cache(maxsize=1)

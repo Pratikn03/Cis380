@@ -1,1 +1,1 @@
-"""Supervised baselines for UAIS."""
+"""Supervised baselines for SentinelForge."""

@@ -17,7 +17,7 @@ from app.utils.logger import get_logger
 from app.utils.llm_stub import LLMStub
 
 
-class OmniChatXOrchestrator:
+class SentinelForgeOrchestrator:
     """Orchestrator routing requests to the appropriate AI module."""
 
     def __init__(

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start FastAPI for OmniChatX (pure HTTP).
+# Start FastAPI for SentinelForge (pure HTTP).
 
 set -euo pipefail
 

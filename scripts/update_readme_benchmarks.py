@@ -12,7 +12,7 @@ END = "<!-- BENCHMARKS:END -->"
 
 def _ensure_readme_markers(readme_path: Path) -> str:
     if not readme_path.exists():
-        readme_path.write_text("# OmniChatX\n", encoding="utf-8")
+        readme_path.write_text("# SentinelForge\n", encoding="utf-8")
     text = readme_path.read_text(encoding="utf-8")
     if START in text and END in text:
         return text

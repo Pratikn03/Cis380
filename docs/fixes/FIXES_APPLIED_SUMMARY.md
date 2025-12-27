@@ -3,7 +3,7 @@
 > Note: This document is a historical record of the Streamlit hardening work.
 
 **Date:** December 17, 2025  
-**File:** `app/streamlit_chatbot/omnichat_unified.py`  
+**File:** `app/streamlit_chatbot/unified_chat.py`  
 **Status:** ALL CRITICAL FIXES APPLIED ✅
 
 ---
@@ -262,13 +262,13 @@ logger = logging.getLogger(__name__)
 ### 1. Restart Streamlit
 ```bash
 # Find and kill existing Streamlit process
-pkill -f "streamlit run.*omnichat_unified"
+pkill -f "streamlit run.*unified_chat"
 
 # Or specific PID
 # kill -9 <PID>
 
 # Restart with proper command
-streamlit run app/streamlit_chatbot/omnichat_unified.py \
+streamlit run app/streamlit_chatbot/unified_chat.py \
   --server.port=8502 \
   --server.headless=true
 ```
@@ -279,13 +279,13 @@ streamlit run app/streamlit_chatbot/omnichat_unified.py \
 curl http://localhost:8000/health
 
 # If not, start it
-python -m uvicorn backend.main:app --reload --port 8000
+python -m uvicorn app.main:app --reload --port 8000
 ```
 
 ### 3. Check Environment Variables
 ```bash
 # Set backend URL if needed
-export OMNICHATX_BACKEND="http://localhost:8000"
+export SENTINELFORGE_BACKEND="http://localhost:8000"
 
 # Optional: Enable debug mode
 export DEBUG_MODE="true"
@@ -297,7 +297,7 @@ export AUTH_TOKEN="your-token-here"
 ### 4. Monitor Logs
 ```bash
 # Watch Streamlit logs
-streamlit run app/streamlit_chatbot/omnichat_unified.py --log_level=info
+streamlit run app/streamlit_chatbot/unified_chat.py --log_level=info
 
 # In separate terminal, watch Python logs
 tail -f logs/streamlit.log  # if logging to file
@@ -393,7 +393,7 @@ tail -f logs/streamlit.log  # if logging to file
 4. **Enable Debug Mode:**
    ```bash
    export DEBUG_MODE="true"
-   streamlit run app/streamlit_chatbot/omnichat_unified.py
+   streamlit run app/streamlit_chatbot/unified_chat.py
    ```
 
 5. **Review Documentation:**

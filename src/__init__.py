@@ -1,1 +1,1 @@
-"""Source namespace for UAIS."""
+"""Source namespace for SentinelForge."""

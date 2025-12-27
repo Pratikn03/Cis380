@@ -3,7 +3,7 @@
 > Note: This document is a historical cleanup log and is not required to run the current system.
 
 **Date:** December 17, 2025  
-**Project:** Universal Anomaly Intelligence v2  
+**Project:** SentinelForge  
 **Status:** Phase 1 Complete ✅
 
 ---
@@ -45,10 +45,10 @@ docs/
 │   ├── STREAMLIT_ERROR_ANALYSIS.md
 │   └── STREAMLIT_RUNTIME_ERRORS.md
 ├── guides/                   # User guides
-│   ├── OMNICHAT_COMPLETE.md
-│   └── OMNICHAT_INSTALLATION.md
+│   ├── STREAMLIT_COMPLETE.md
+│   └── STREAMLIT_INSTALLATION.md
 ├── PROJECT_STATUS.md
-├── UAISV_Final_Project_Summary.md
+├── project_summary.md
 └── [other docs]
 ```
 
@@ -80,15 +80,15 @@ docs/
 ### Space Analysis
 **Virtual Environments Found:**
 ```
-72 KB    .venv-omnichatx      # Nearly empty
+72 KB    .venv-sentinelforge      # Nearly empty
 522 MB   .venv-full           # Full install
 2.3 GB   .venv                # Old version
 2.4 GB   venv                 # Another copy
-2.6 GB   .venv-macos          # Currently active (KEEP)
+2.6 GB   .venv          # Currently active (KEEP)
 ```
 
 **Total Wasted Space:** ~5.2 GB in duplicate venvs  
-**Recommendation:** Remove all except `.venv-macos/`  
+**Recommendation:** Remove all except `.venv/`  
 **Potential Savings:** ~5.2 GB
 
 ### Files Cleaned
@@ -108,10 +108,10 @@ docs/
 # BE CAREFUL - Make sure you're not in one of these venvs!
 deactivate  # If in a venv
 
-# Remove duplicates (KEEP .venv-macos/)
+# Remove duplicates (KEEP .venv/)
 rm -rf .venv/
 rm -rf .venv-full/
-rm -rf .venv-omnichatx/
+rm -rf .venv-sentinelforge/
 rm -rf venv/
 
 # Verify only one remains
@@ -120,16 +120,8 @@ ls -ld .venv* venv 2>/dev/null
 
 ### PRIORITY 2: Review Duplicate Directories
 
-#### Option A: Remove backend/ (Recommended)
-`backend/main.py` just re-exports `app.main:app`. It's redundant.
-
-```bash
-# Check what it does
-cat backend/main.py | head -20
-
-# If comfortable, remove it
-git rm -r backend/
-```
+#### Option A: Remove backend/ (Completed)
+`backend/` was removed in the refactor. Use `app.main:app` as the single backend entrypoint.
 
 #### Option B: Consolidate Duplicate API/Agent/RAG Folders
 You have duplicate structures:
@@ -206,7 +198,7 @@ M scripts/train_production.py          # Previous changes
 ### Deleted Files (Moved)
 ```
 D PROJECT_STATUS.md                    # → docs/
-D UAISV_Final_Project_Summary.md       # → docs/
+D project_summary.md       # → docs/
 D Untitled.ipynb                       # Removed (temp file)
 ```
 
@@ -223,9 +215,9 @@ New features:
 ?? Dockerfile.production               # Production Docker
 ?? docker-compose.production.yml       # Production compose
 ?? app/core/                           # Core modules
-?? app/streamlit_chatbot/omnichat_unified.py  # New UI
+?? app/streamlit_chatbot/unified_chat.py  # New UI
 ?? deploy/                             # Deployment configs
-?? launch_omnichat.sh                  # Launch script
+?? launch_sentinelforge.sh                  # Launch script
 ```
 
 ---
@@ -273,10 +265,10 @@ New features:
 ### Test Commands
 ```bash
 # Test backend
-python -m uvicorn backend.main:app --reload
+python -m uvicorn app.main:app --reload
 
 # Test Streamlit
-streamlit run app/streamlit_chatbot/omnichat_unified.py --server.port=8502
+streamlit run app/streamlit_chatbot/unified_chat.py --server.port=8502
 
 # Test imports (in Python)
 python -c "from app.main import app; print('✅ Imports work')"
@@ -315,7 +307,7 @@ pytest tests/
 3. **Commit changes** - Save organized structure
 
 ### Best Practices Going Forward
-1. **Use one venv** - Stick with `.venv-macos/`
+1. **Use one venv** - Stick with `.venv/`
 2. **Keep .gitignore updated** - As project grows
 3. **Organize as you go** - Don't let files pile up
 4. **Document structure** - Update README with new layout

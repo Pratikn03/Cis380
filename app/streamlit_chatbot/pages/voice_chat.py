@@ -31,14 +31,14 @@ def render_voice_chat_page(
     auth_headers: Callable[[], dict[str, str]],
 ) -> None:
     st.markdown("## Voice Chat (STT → /api/chat)")
-    st.caption("Upload audio, transcribe via STT, and send the transcript to OmniChatX.")
+    st.caption("Upload audio, transcribe via STT, and send the transcript to SentinelForge.")
 
     st.markdown(
         """
         <div class="glass-card">
             <p class="muted">
                 Use any speech (wav/mp3/m4a). We stream the audio to `/api/stt/transcribe`,
-                display the transcript, and let you ask OmniChatX without typing.
+                display the transcript, and let you ask SentinelForge without typing.
             </p>
         </div>
         """,
@@ -95,7 +95,7 @@ def render_voice_chat_page(
                 text = seg.get("text", "")
                 st.markdown(f"- {start:.2f}s → {end:.2f}s: {text}")
 
-    if st.button("Ask OmniChatX (voice)", key="voice_chat_send"):
+    if st.button("Ask SentinelForge (voice)", key="voice_chat_send"):
         message = (st.session_state.voice_transcript or "").strip()
         if not message:
             st.warning("Transcript is empty. Upload audio and transcribe first.")

@@ -1,4 +1,4 @@
-"""Binary/softmax metric helpers for UAIS-V models."""
+"""Binary/softmax metric helpers for SentinelForge models."""
 
 from typing import Dict
 

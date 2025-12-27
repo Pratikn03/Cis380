@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# OmniChatX Production Deployment Script
+# SentinelForge Production Deployment Script
 # ============================================
 
 set -e  # Exit on error
@@ -45,7 +45,7 @@ log_error() {
 
 usage() {
     cat << EOF
-OmniChatX Deployment Script
+SentinelForge Deployment Script
 
 Usage: $0 [OPTIONS] COMMAND
 
@@ -117,7 +117,7 @@ build_images() {
 }
 
 deploy() {
-    log_info "Deploying OmniChatX with profile: $PROFILE"
+    log_info "Deploying SentinelForge with profile: $PROFILE"
     
     cd "$PROJECT_ROOT"
     
@@ -226,7 +226,7 @@ backup_data() {
     cp "${PROJECT_ROOT}/.env" "${backup_path}/.env" 2>/dev/null || true
     
     # Export Docker volumes
-    for volume in $(docker volume ls -q | grep omnichatx); do
+    for volume in $(docker volume ls -q | grep sentinelforge); do
         log_info "Backing up volume: $volume"
         docker run --rm -v $volume:/data -v ${backup_path}:/backup alpine \
             tar czf /backup/${volume}.tar.gz -C /data .
@@ -243,7 +243,7 @@ backup_data() {
 check_health() {
     log_info "Checking service health..."
     
-    local api_url="${OMNICHATX_BACKEND:-http://localhost:8000}"
+    local api_url="${SENTINELFORGE_BACKEND:-http://localhost:8000}"
     local max_retries=30
     local retry=0
     

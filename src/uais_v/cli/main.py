@@ -1,4 +1,4 @@
-"""CLI entrypoint for UAIS-V operations."""
+"""CLI entrypoint for SentinelForge operations."""
 
 import argparse
 
@@ -7,7 +7,7 @@ from ..training.train_30seq import main as train_30seq_main
 
 
 def get_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="UAIS-V command line")
+    parser = argparse.ArgumentParser(description="SentinelForge command line")
     sub = parser.add_subparsers(dest="command")
 
     sub.add_parser("build-30seq", help="Build 30-sequence dataset (behavior or synthetic fallback)")

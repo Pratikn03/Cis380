@@ -1,4 +1,4 @@
-"""Feature table builders delegating to existing UAIS modules."""
+"""Feature table builders delegating to existing SentinelForge modules."""
 
 from pathlib import Path
 from typing import Optional

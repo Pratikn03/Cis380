@@ -21,6 +21,7 @@ try:
     from .handlers.news import recommend_news
     from .handlers.clothes import recommend_clothes
     from .handlers.electronics import recommend_electronics
+    from .handlers.cars import recommend_cars
     from .handlers.courses import recommend_courses
 except ImportError:
     from config import load_config
@@ -29,6 +30,7 @@ except ImportError:
     from handlers.news import recommend_news
     from handlers.clothes import recommend_clothes
     from handlers.electronics import recommend_electronics
+    from handlers.cars import recommend_cars
     from handlers.courses import recommend_courses
 
 
@@ -84,6 +86,23 @@ def _detect_intent(text: str) -> Tuple[str, str]:
         if tokens.intersection(phone_terms):
             return "phones", text
         return "headphones", text
+
+    car_terms = {
+        "car",
+        "cars",
+        "vehicle",
+        "vehicles",
+        "suv",
+        "sedan",
+        "hatchback",
+        "tesla",
+        "bmw",
+        "audi",
+        "toyota",
+        "honda",
+    }
+    if tokens.intersection(car_terms):
+        return "cars", text
 
     # "Recommend something like Titanic" (no explicit 'movie' token) should still route to movies,
     # but only if the query isn't clearly about electronics/courses/etc.
@@ -202,6 +221,9 @@ def route_recommendation(text: str, preference: dict | None = None) -> Dict[str,
             preferred_tags=sorted([str(t) for t in (tag_pref or set())]),
         )
         category = "Clothes"
+    elif intent == "cars":
+        items = recommend_cars(query=query)
+        category = "Cars"
     elif intent == "news_health":
         items = recommend_news(query=query, topic="health", news_api_key=cfg.news_api_key)
         category = "Health News"
@@ -213,6 +235,7 @@ def route_recommendation(text: str, preference: dict | None = None) -> Dict[str,
         category = "News"
 
     return {
+        "route": "recommend",
         "category": category,
         "items": items,
         "intent": intent,

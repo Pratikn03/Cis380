@@ -9,13 +9,13 @@ def test_rag_ingest_and_chat():
         "/api/rag/ingest",
         json={
             "filename": "test_rag_upload.txt",
-            "content": "OmniChatX local-first RAG ensures answers mention local-first RAG.",
+            "content": "SentinelForge local-first RAG ensures answers mention local-first RAG.",
         },
     )
     assert ingest_resp.status_code == 200
     chat_resp = client.post(
         "/api/chat",
-        json={"text": "According to the document, what is OmniChatX?", "user_id": "rag-user"},
+        json={"text": "According to the document, what is SentinelForge?", "user_id": "rag-user"},
     )
     assert chat_resp.status_code == 200
     payload = chat_resp.json()

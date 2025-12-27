@@ -1,4 +1,4 @@
-"""Convenience loaders for processed/raw datasets used by UAIS-V."""
+"""Convenience loaders for processed/raw datasets used by SentinelForge."""
 
 from pathlib import Path
 from typing import Optional

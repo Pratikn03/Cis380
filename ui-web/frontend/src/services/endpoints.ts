@@ -1,0 +1,62 @@
+import { api } from "./api";
+
+export const chat = (payload: { message: string }) => api.post("/api/chat", payload);
+
+export const multimodalChat = (payload: FormData) =>
+  api.post("/api/chat/multimodal", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+export const riskAnalyze = (payload: {
+  login_country: string;
+  device_known: boolean;
+  login_time: number;
+  clicks_per_minute: number;
+  files_accessed: number;
+  transaction_amount: number;
+}) => api.post("/api/risk/analyze", payload);
+
+export const brandPredict = (payload: FormData) =>
+  api.post("/api/vision/brand/predict", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+export const voiceEmotion = (payload: FormData) =>
+  api.post("/api/voice/emotion", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+export const fraudScore = (payload: { features: number[] }) => api.post("/api/fraud", payload);
+
+export const cyberScore = (payload: { features: number[] }) => api.post("/api/cyber", payload);
+
+export const behaviorScore = (payload: { features: number[] }) =>
+  api.post("/api/behavior", payload);
+
+export const behaviorLogs = (payload: FormData) =>
+  api.post("/api/behavior/logs", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+export const visionPredict = (payload: FormData) =>
+  api.post("/api/vision/predict", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+export const recommendMultimodal = (payload: FormData) =>
+  api.post("/api/recommend/multimodal", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+export const ragQuery = (payload: { query: string; top_k?: number }) =>
+  api.post("/api/rag/query", payload);
+
+export const ragUpload = (payload: FormData) =>
+  api.post("/api/rag/upload", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+export const visionVideoPredict = (payload: FormData) =>
+  api.post("/api/vision/video/predict", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });

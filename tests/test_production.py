@@ -1,5 +1,5 @@
 """
-OmniChatX Production Test Suite
+SentinelForge Production Test Suite
 Comprehensive tests for API endpoints, models, and integrations
 """
 
@@ -437,7 +437,7 @@ class TestMetrics:
         # Should be text/plain with Prometheus metrics
         content = response.text
         # Basic check for Prometheus format
-        assert "omnichatx" in content or "python" in content or "process" in content
+        assert "sentinelforge" in content or "python" in content or "process" in content
 
 
 # ============================================
@@ -454,7 +454,7 @@ class TestConfiguration:
 
         settings = get_settings()
         assert settings is not None
-        assert settings.app_name == "OmniChatX"
+        assert settings.app_name == "SentinelForge"
 
     def test_settings_cached(self):
         """Test settings are cached."""

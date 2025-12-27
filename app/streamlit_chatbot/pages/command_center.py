@@ -43,8 +43,8 @@ def domain_source_label(intent: str | None) -> str:
         "clothes": "Clothes handler",
     }
     if not intent:
-        return "OmniChatX knowledge sources"
-    return mapping.get(intent, "OmniChatX knowledge sources")
+        return "SentinelForge knowledge sources"
+    return mapping.get(intent, "SentinelForge knowledge sources")
 
 
 def format_items(category: str, items: list[dict]) -> str:

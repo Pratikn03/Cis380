@@ -1,4 +1,4 @@
-"""Recommender layer for UAIS-V.
+"""Recommender layer for SentinelForge.
 
 This package provides helpers to turn domain/fusion scores into
 actionable recommendations with lightweight explanations.

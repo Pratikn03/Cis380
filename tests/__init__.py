@@ -1,1 +1,1 @@
-"""Test suite for UAIS-V additions."""
+"""Test suite for SentinelForge additions."""

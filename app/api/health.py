@@ -12,7 +12,7 @@ async def health() -> dict[str, object]:
     uptime = time() - _START
     return {
         "status": "ok",
-        "service": "omnichatx",
+        "service": "sentinelforge",
         "version": "0.1.0",
         "uptime_seconds": round(uptime, 2),
     }

@@ -88,7 +88,7 @@ def render_chat_page(
     call_multipart: Callable[..., dict],
     auth_headers: Callable[[], dict[str, str]],
 ) -> None:
-    """ChatGPT×Gemini-inspired chat UI (session-based)."""
+    """Session-based unified chat UI."""
 
     _ensure_chat_state()
 
@@ -125,8 +125,8 @@ def render_chat_page(
     messages: list[dict] = active_chat.get("messages") or []
 
     # ---- Header ----
-    st.markdown("## ✨ OmniChatX Chat")
-    st.caption("ChatGPT-like sessions with Gemini-style quick prompts. Runs fully local via FastAPI.")
+    st.markdown("## ✨ SentinelForge Chat")
+    st.caption("Session-based chat with quick prompts. Runs fully local via FastAPI.")
 
     # ---- Right rail (controls + attachments) ----
     chat_col, rail_col = st.columns([3, 1])
@@ -186,7 +186,7 @@ def render_chat_page(
         st.download_button(
             "⬇️ Export chat (JSON)",
             data=export_payload,
-            file_name=f"omnichatx_{active_id[:8]}.json",
+            file_name=f"sentinelforge_{active_id[:8]}.json",
             mime="application/json",
             key="ocx_export_chat",
         )
@@ -222,7 +222,7 @@ def render_chat_page(
                     with st.expander("Details", expanded=False):
                         st.json(meta)
 
-        prompt = st.chat_input("Message OmniChatX…", key="ocx_chat_input")
+        prompt = st.chat_input("Message SentinelForge…", key="ocx_chat_input")
         if not prompt:
             return
 

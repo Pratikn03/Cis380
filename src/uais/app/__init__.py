@@ -1,1 +1,1 @@
-"""Local inference utilities for UAIS."""
+"""Local inference utilities for SentinelForge."""

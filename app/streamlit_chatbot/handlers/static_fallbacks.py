@@ -29,4 +29,12 @@ def news_fallback(query: str, topic: str | None = None) -> List[Dict]:
     ]
 
 
-__all__ = ["movies_fallback", "places_fallback", "news_fallback"]
+def cars_fallback(query: str) -> List[Dict]:
+    return [
+        {"title": "Tesla Model 3", "reason": "Popular EV sedan; strong range and safety"},
+        {"title": "Toyota RAV4", "reason": "Reliable compact SUV; great resale value"},
+        {"title": "Honda Civic", "reason": "Efficient daily driver; affordable maintenance"},
+    ]
+
+
+__all__ = ["movies_fallback", "places_fallback", "news_fallback", "cars_fallback"]

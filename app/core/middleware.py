@@ -1,5 +1,5 @@
 """
-OmniChatX Production Middleware & Error Handling
+SentinelForge Production Middleware & Error Handling
 Rate limiting, security headers, logging, and error handling
 """
 
@@ -17,7 +17,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-logger = logging.getLogger("omnichatx.middleware")
+logger = logging.getLogger("sentinelforge.middleware")
 
 
 # ============================================
@@ -25,8 +25,8 @@ logger = logging.getLogger("omnichatx.middleware")
 # ============================================
 
 
-class OmniChatXException(Exception):
-    """Base exception for OmniChatX."""
+class SentinelForgeException(Exception):
+    """Base exception for SentinelForge."""
 
     def __init__(
         self,
@@ -42,7 +42,7 @@ class OmniChatXException(Exception):
         super().__init__(self.message)
 
 
-class ValidationError(OmniChatXException):
+class ValidationError(SentinelForgeException):
     """Validation error."""
 
     def __init__(self, message: str, details: dict | None = None):
@@ -54,7 +54,7 @@ class ValidationError(OmniChatXException):
         )
 
 
-class AuthenticationError(OmniChatXException):
+class AuthenticationError(SentinelForgeException):
     """Authentication error."""
 
     def __init__(self, message: str = "Authentication required"):
@@ -65,7 +65,7 @@ class AuthenticationError(OmniChatXException):
         )
 
 
-class AuthorizationError(OmniChatXException):
+class AuthorizationError(SentinelForgeException):
     """Authorization error."""
 
     def __init__(self, message: str = "Insufficient permissions"):
@@ -76,7 +76,7 @@ class AuthorizationError(OmniChatXException):
         )
 
 
-class RateLimitError(OmniChatXException):
+class RateLimitError(SentinelForgeException):
     """Rate limit exceeded error."""
 
     def __init__(self, retry_after: int = 60):
@@ -88,7 +88,7 @@ class RateLimitError(OmniChatXException):
         )
 
 
-class ModelError(OmniChatXException):
+class ModelError(SentinelForgeException):
     """ML model error."""
 
     def __init__(self, message: str, model_name: str | None = None):
@@ -100,7 +100,7 @@ class ModelError(OmniChatXException):
         )
 
 
-class NotFoundError(OmniChatXException):
+class NotFoundError(SentinelForgeException):
     """Resource not found error."""
 
     def __init__(self, resource: str, resource_id: str | None = None):
@@ -147,13 +147,13 @@ def create_error_response(
 def register_exception_handlers(app: FastAPI) -> None:
     """Register all exception handlers."""
 
-    @app.exception_handler(OmniChatXException)
-    async def omnichatx_exception_handler(
-        request: Request, exc: OmniChatXException
+    @app.exception_handler(SentinelForgeException)
+    async def sentinelforge_exception_handler(
+        request: Request, exc: SentinelForgeException
     ) -> JSONResponse:
         request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
         logger.warning(
-            "OmniChatX exception: %s [%s] request_id=%s",
+            "SentinelForge exception: %s [%s] request_id=%s",
             exc.message,
             exc.error_code,
             request_id,

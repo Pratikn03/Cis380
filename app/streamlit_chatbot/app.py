@@ -1,4 +1,4 @@
-"""UAIS-V Streamlit Command Center.
+"""SentinelForge Streamlit Command Center.
 
 Top-level layout:
 - Recommendations (text + multimodal)
@@ -44,16 +44,17 @@ from streamlit_chatbot.pages.metrics import render_metrics_page  # noqa: E402
 from streamlit_chatbot.pages.tools import render_tools_page  # noqa: E402
 from streamlit_chatbot.pages.voice_chat import render_voice_chat_page  # noqa: E402
 from streamlit_chatbot.risk_dashboard import render_risk_command_center  # noqa: E402
-from streamlit_chatbot.chatgpt_style import render_chatgpt_style  # noqa: E402
-from streamlit_chatbot.omnichat_unified import render_omnichat_unified  # noqa: E402
+from streamlit_chatbot.classic_chat import render_classic_chat  # noqa: E402
+from streamlit_chatbot.unified_chat import render_unified_chat  # noqa: E402
 
 
 def main():
     # Backward-compatible backend URL env var.
-    # README uses OMNICHATX_BACKEND; older docs used OMNINEX_BACKEND.
+    # Preferred: SENTINELFORGE_BACKEND; legacy: OMNICHATX_BACKEND / OMNINEX_BACKEND.
     backend_url = (
         (
-            os.environ.get("OMNICHATX_BACKEND")
+            os.environ.get("SENTINELFORGE_BACKEND")
+            or os.environ.get("OMNICHATX_BACKEND")
             or os.environ.get("OMNINEX_BACKEND")
             or "http://localhost:8000"
         )
@@ -135,7 +136,7 @@ def main():
     if nav == "💬 Chat":
         view = st.selectbox(
             "Chat UI",
-            ["✨ OmniChatX (ChatGPT×Gemini)", "🧠 OmniChat Pratik (legacy)", "💬 ChatGPT Style (legacy)"],
+            ["✨ SentinelForge (Unified Chat)", "🧠 Sentinel (legacy)", "💬 Classic Chat (legacy)"],
             index=0,
             key="ocx_chat_view",
             label_visibility="collapsed",
@@ -145,7 +146,7 @@ def main():
                 call_model=call_model, call_multipart=call_multipart, auth_headers=_auth_headers
             )
         elif view.startswith("🧠"):
-            render_omnichat_unified(
+            render_unified_chat(
                 backend_url=backend_url,
                 call_model=call_model,
                 call_multipart=call_multipart,
@@ -153,7 +154,7 @@ def main():
                 auth_headers=_auth_headers,
             )
         else:
-            render_chatgpt_style(
+            render_classic_chat(
                 backend_url=backend_url,
                 call_model=call_model,
                 call_multipart=call_multipart,

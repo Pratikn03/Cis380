@@ -1,4 +1,4 @@
-"""Wrappers around existing UAIS fraud feature builders."""
+"""Wrappers around existing SentinelForge fraud feature builders."""
 
 try:
     from uais.features.fraud_features import build_fraud_features as _core_build

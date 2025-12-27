@@ -1,5 +1,5 @@
 # ============================================
-# OmniChatX Production Dockerfile
+# SentinelForge Production Dockerfile
 # Multi-stage build for optimized image size
 # ============================================
 
@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir --upgrade pip wheel setuptools && \
 FROM python:3.11-slim as production
 
 # Security: Create non-root user
-RUN groupadd -r omnichat && useradd -r -g omnichat omnichat
+RUN groupadd -r sentinelforge && useradd -r -g sentinelforge sentinelforge
 
 WORKDIR /app
 
@@ -49,11 +49,11 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application code
-COPY --chown=omnichat:omnichat . .
+COPY --chown=sentinelforge:sentinelforge . .
 
 # Create necessary directories with proper permissions
 RUN mkdir -p /app/logs /app/data/monitoring /app/artifacts \
-    && chown -R omnichat:omnichat /app
+    && chown -R sentinelforge:sentinelforge /app
 
 # Environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -71,7 +71,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 EXPOSE ${PORT}
 
 # Switch to non-root user
-USER omnichat
+USER sentinelforge
 
 # Production command with Gunicorn
 CMD ["gunicorn", "app.main:app", \

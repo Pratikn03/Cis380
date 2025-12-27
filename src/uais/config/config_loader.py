@@ -6,7 +6,8 @@ from typing import Any, Dict
 import yaml
 
 # repo_root/src/uais/config/config_loader.py -> parents[3] is repo_root
-CONFIG_DIR = Path(__file__).resolve().parents[3] / "config"
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+CONFIG_DIR = (_REPO_ROOT / "configs") if (_REPO_ROOT / "configs").exists() else (_REPO_ROOT / "config")
 
 
 def _load_yaml(path: Path) -> Dict[str, Any]:

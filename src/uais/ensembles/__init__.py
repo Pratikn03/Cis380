@@ -1,1 +1,1 @@
-"""Ensembling helpers for UAIS."""
+"""Ensembling helpers for SentinelForge."""

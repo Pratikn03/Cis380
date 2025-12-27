@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OmniChatX Production Readiness Check
+SentinelForge Production Readiness Check
 Verifies all production configuration files are in place
 """
 import os
@@ -222,7 +222,7 @@ def generate_summary(passed: int, failed: int, warnings: int):
 def main():
     """Run all checks."""
     print(f"\n{BLUE}╔══════════════════════════════════════════════════════════╗")
-    print("║       OmniChatX Production Readiness Checker             ║")
+    print("║       SentinelForge Production Readiness Checker             ║")
     print(f"╚══════════════════════════════════════════════════════════╝{RESET}")
 
     passed, failed, warnings = check_files()

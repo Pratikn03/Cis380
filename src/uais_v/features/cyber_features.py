@@ -1,4 +1,4 @@
-"""Wrappers around existing UAIS cyber feature builders."""
+"""Wrappers around existing SentinelForge cyber feature builders."""
 
 try:
     from uais.features.cyber_features import build_cyber_features as _core_build

@@ -1,4 +1,4 @@
-"""One-command trainer for UAIS/OmniChatX artifacts.
+"""One-command trainer for SentinelForge artifacts.
 
 This script re-runs the core experiment pipelines and refreshes the artifacts
 under `models/` and `experiments/`.
@@ -39,7 +39,7 @@ def _run(args: list[str]) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Train all core UAIS/OmniChatX models")
+    parser = argparse.ArgumentParser(description="Train all core SentinelForge models")
     parser.add_argument(
         "--with-vision",
         action="store_true",
@@ -99,7 +99,7 @@ def main() -> int:
 
     # Vision is optional/heavy.
     if args.with_vision:
-        # UAIS-V vision training entrypoints can vary by dataset. If you have
+        # SentinelForge vision training entrypoints can vary by dataset. If you have
         # a dedicated script, wire it here.
         candidate = REPO_ROOT / "scripts" / "run_train_vision.sh"
         if candidate.exists():

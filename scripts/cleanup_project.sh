@@ -37,9 +37,9 @@ mkdir -p docs/fixes docs/guides
 [ -f "STREAMLIT_CRITICAL_FIXES.md" ] && mv STREAMLIT_CRITICAL_FIXES.md docs/fixes/
 [ -f "STREAMLIT_ERROR_ANALYSIS.md" ] && mv STREAMLIT_ERROR_ANALYSIS.md docs/fixes/
 [ -f "STREAMLIT_RUNTIME_ERRORS.md" ] && mv STREAMLIT_RUNTIME_ERRORS.md docs/fixes/
-[ -f "OMNICHAT_COMPLETE.md" ] && mv OMNICHAT_COMPLETE.md docs/guides/
-[ -f "OMNICHAT_INSTALLATION.md" ] && mv OMNICHAT_INSTALLATION.md docs/guides/
-[ -f "UAISV_Final_Project_Summary.md" ] && mv UAISV_Final_Project_Summary.md docs/
+[ -f "STREAMLIT_COMPLETE.md" ] && mv STREAMLIT_COMPLETE.md docs/guides/
+[ -f "STREAMLIT_INSTALLATION.md" ] && mv STREAMLIT_INSTALLATION.md docs/guides/
+[ -f "project_summary.md" ] && mv project_summary.md docs/
 [ -f "PROJECT_STATUS.md" ] && mv PROJECT_STATUS.md docs/
 
 echo "✅ Organized documentation into docs/"
@@ -73,9 +73,9 @@ echo "⚠️  Manual Actions Required:"
 echo "  1. Review extra virtual environments:"
 echo "     - .venv/"
 echo "     - .venv-full/"
-echo "     - .venv-omnichatx/"
+echo "     - .venv-sentinelforge/"
 echo "     - venv/"
-echo "     Consider removing all except .venv-macos/"
+echo "     Consider removing all except .venv/"
 echo ""
 echo "  2. Review duplicate directories:"
 echo "     - backend/ (re-exports app/main.py)"

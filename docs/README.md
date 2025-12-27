@@ -1,6 +1,6 @@
 # Documentation
 
-This directory contains the project documentation for OmniChatX / UAIS-v2.
+This directory contains the project documentation for SentinelForge.
 
 If you’re new here, start with the repository overview in `README.md`, then use the links below to go deeper.
 
@@ -11,8 +11,8 @@ If you’re new here, start with the repository overview in `README.md`, then us
 
 ## How To Run
 - `README.md` — local quickstart + Docker commands.
-- `docs/guides/OMNICHAT_INSTALLATION.md` — UI setup notes (Streamlit).
-- `docs/omnichat_unified_guide.md` — “all-in-one” Streamlit UI guide.
+- `docs/guides/STREAMLIT_INSTALLATION.md` — UI setup notes (Streamlit).
+- `docs/unified_chat_guide.md` — “all-in-one” Streamlit UI guide.
 
 ## Training & Data
 - `scripts/README.md` — canonical training entrypoints.
@@ -36,5 +36,7 @@ This repository contains some older stacks and experiments that are kept for con
 
 ## Project Status
 - `docs/PROJECT_STATUS.md`
+- `docs/project_summary.md`
+- `docs/technical_brief.md`
 - `reports/demo_ready_20251214_081017.md`
 - `reports/benchmarks.md`

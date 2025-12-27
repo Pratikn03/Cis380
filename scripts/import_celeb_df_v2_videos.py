@@ -1,4 +1,4 @@
-"""Import Celeb-DF v2 videos into OmniChatX vision folders.
+"""Import Celeb-DF v2 videos into SentinelForge vision folders.
 
 This script keeps the original dataset intact and *copies or hardlinks* videos into:
 
@@ -258,7 +258,7 @@ def run(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Import Celeb-DF v2 videos into OmniChatX folders."
+        description="Import Celeb-DF v2 videos into SentinelForge folders."
     )
     parser.add_argument("--src", type=Path, default=Path("data/Video-2"))
     parser.add_argument(

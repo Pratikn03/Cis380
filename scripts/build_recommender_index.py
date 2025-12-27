@@ -38,7 +38,10 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    os.environ.setdefault("UAIS_EMBEDDINGS_BACKEND", str(args.embed_backend))
+    os.environ.setdefault("SENTINELFORGE_EMBEDDINGS_BACKEND", str(args.embed_backend))
+    os.environ.setdefault(
+        "UAIS_EMBEDDINGS_BACKEND", os.environ["SENTINELFORGE_EMBEDDINGS_BACKEND"]
+    )
     max_items = int(args.max_items) if int(args.max_items) > 0 else None
     embeddings = build_embeddings(max_items=max_items, seed=int(args.seed))
     meta = catalog_metadata(embeddings.df)

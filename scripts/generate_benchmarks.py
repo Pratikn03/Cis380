@@ -128,7 +128,7 @@ def generate_rows() -> list[Row]:
                 )
             )
 
-    # Core UAIS domain metrics (tracked, stable).
+    # Core SentinelForge domain metrics (tracked, stable).
     add_report_rows(
         module="Fraud",
         dataset="fraud_features.parquet",
@@ -217,7 +217,7 @@ def generate_rows() -> list[Row]:
                 dataset="movielens.csv",
                 metric=label,
                 value=_fmt_float(xgb_metrics.get(key)),
-                artifact="recommender/models/recommender.pkl",
+                artifact="models/recommender/recommender_model.pkl",
             )
         )
 
@@ -229,7 +229,7 @@ def generate_rows() -> list[Row]:
             dataset="movielens.csv",
             metric="Val-Acc (last)",
             value=_fmt_float(_extract_ncf_last_val_acc(ncf_payload)),
-            artifact="recommender/models/recommender_ncf.pt",
+            artifact="models/recommender/recommender_ncf.pt",
         )
     )
 

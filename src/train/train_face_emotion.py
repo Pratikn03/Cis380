@@ -257,14 +257,26 @@ def main() -> int:
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--weight-decay", type=float, default=1e-4)
     ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--device", type=str, default=os.getenv("UAIS_FACE_EMOTION_DEVICE", "auto"))
+    ap.add_argument(
+        "--device",
+        type=str,
+        default=(
+            os.getenv("SENTINELFORGE_FACE_EMOTION_DEVICE")
+            or os.getenv("UAIS_FACE_EMOTION_DEVICE")
+            or "auto"
+        ),
+    )
     ap.add_argument(
         "--val-split", type=float, default=0.15, help="Used only when val/ is not present."
     )
     ap.add_argument(
         "--label-map",
         type=str,
-        default=os.getenv("UAIS_FACE_EMOTION_LABEL_MAP", ""),
+        default=(
+            os.getenv("SENTINELFORGE_FACE_EMOTION_LABEL_MAP")
+            or os.getenv("UAIS_FACE_EMOTION_LABEL_MAP")
+            or ""
+        ),
         help="Optional JSON mapping from dataset folder names to emotion labels.",
     )
     ap.add_argument("--max-train", type=int, default=0, help="Cap training samples (0 = no cap).")

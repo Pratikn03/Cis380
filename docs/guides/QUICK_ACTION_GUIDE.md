@@ -10,7 +10,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 uvicorn app.main:app --reload
-OMNICHATX_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
+SENTINELFORGE_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
 ```
 
 ## Test Gate

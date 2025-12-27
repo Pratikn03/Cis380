@@ -3,7 +3,7 @@
 > Note: This document is a historical audit/cleanup analysis and is not required to run the current system.
 
 **Date:** December 17, 2025  
-**Project:** Universal Anomaly Intelligence v2  
+**Project:** SentinelForge  
 **Analysis Type:** Full Project Audit
 
 ---
@@ -28,8 +28,8 @@
 ```
 .venv/
 .venv-full/
-.venv-macos/
-.venv-omnichatx/
+.venv/
+.venv-sentinelforge/
 venv/
 ```
 
@@ -43,9 +43,9 @@ venv/
 # Keep only one (venv-macos seems most used)
 rm -rf .venv/
 rm -rf .venv-full/
-rm -rf .venv-omnichatx/
+rm -rf .venv-sentinelforge/
 rm -rf venv/
-# Keep: .venv-macos/
+# Keep: .venv/
 ```
 
 ---
@@ -131,14 +131,14 @@ Proposed Structure:
 Root Documentation:
 EMOTION_DETECTION_FIX.md
 FIXES_APPLIED_SUMMARY.md
-OMNICHAT_COMPLETE.md
-OMNICHAT_INSTALLATION.md
+STREAMLIT_COMPLETE.md
+STREAMLIT_INSTALLATION.md
 PROJECT_STATUS.md
 README.md
 STREAMLIT_CRITICAL_FIXES.md
 STREAMLIT_ERROR_ANALYSIS.md
 STREAMLIT_RUNTIME_ERRORS.md
-UAISV_Final_Project_Summary.md
+project_summary.md
 LICENSE
 ```
 
@@ -148,8 +148,8 @@ mkdir -p docs/fixes docs/guides
 mv EMOTION_DETECTION_FIX.md docs/fixes/
 mv FIXES_APPLIED_SUMMARY.md docs/fixes/
 mv STREAMLIT_*.md docs/fixes/
-mv OMNICHAT_*.md docs/guides/
-mv UAISV_Final_Project_Summary.md PROJECT_STATUS.md docs/
+mv STREAMLIT_*.md docs/guides/
+mv project_summary.md PROJECT_STATUS.md docs/
 # Keep README.md and LICENSE at root
 ```
 
@@ -256,7 +256,7 @@ Untracked (20+ files):
 ?? Dockerfile.production
 ?? EMOTION_DETECTION_FIX.md
 ?? FIXES_APPLIED_SUMMARY.md
-?? OMNICHAT_COMPLETE.md
+?? STREAMLIT_COMPLETE.md
 ... and more
 ```
 
@@ -550,8 +550,8 @@ echo "🧹 Starting Project Cleanup..."
 
 # 1. Remove extra virtual environments
 echo "Removing extra virtual environments..."
-rm -rf .venv/ .venv-full/ .venv-omnichatx/ venv/
-echo "✅ Kept only .venv-macos/"
+rm -rf .venv/ .venv-full/ .venv-sentinelforge/ venv/
+echo "✅ Kept only .venv/"
 
 # 2. Remove .pyc and __pycache__
 echo "Removing Python cache files..."
@@ -575,8 +575,8 @@ mkdir -p docs/fixes docs/guides
 mv EMOTION_DETECTION_FIX.md docs/fixes/ 2>/dev/null || true
 mv FIXES_APPLIED_SUMMARY.md docs/fixes/ 2>/dev/null || true
 mv STREAMLIT_*.md docs/fixes/ 2>/dev/null || true
-mv OMNICHAT_*.md docs/guides/ 2>/dev/null || true
-mv UAISV_Final_Project_Summary.md docs/ 2>/dev/null || true
+mv STREAMLIT_*.md docs/guides/ 2>/dev/null || true
+mv project_summary.md docs/ 2>/dev/null || true
 mv PROJECT_STATUS.md docs/ 2>/dev/null || true
 echo "✅ Organized documentation"
 
@@ -600,8 +600,7 @@ find runs/detect -type d -name "weights" -empty -delete 2>/dev/null || true
 echo "✅ Cleaned runs directory"
 
 # 9. Remove duplicate backend
-echo "Note: Manual review needed for backend/ directory"
-echo "⚠️  backend/main.py just re-exports app.main - consider removing"
+echo "✅ backend/ removed; app.main:app is the single entrypoint"
 
 echo ""
 echo "🎉 Cleanup Complete!"
@@ -630,7 +629,7 @@ echo "  5. Push large model files to Git LFS"
 universal-anomaly-intelligence-v2/
 ├── .github/
 │   └── workflows/              # CI/CD configs
-├── .venv-macos/               # Single virtual environment
+├── .venv/               # Single virtual environment
 ├── app/                       # FastAPI application
 │   ├── api/                  # All API routes (merged)
 │   ├── models/               # Model wrappers
@@ -669,7 +668,7 @@ universal-anomaly-intelligence-v2/
 
 ### Phase 1: Immediate (Do Now)
 1. ✅ **Update .gitignore** - Replace with enhanced version
-2. ✅ **Remove extra venvs** - Keep only .venv-macos
+2. ✅ **Remove extra venvs** - Keep only .venv
 3. ✅ **Clean cache files** - Remove all __pycache__ and .pyc
 4. ✅ **Remove .DS_Store** - Clean macOS artifacts
 5. ✅ **Organize docs** - Move to docs/ folder
@@ -722,7 +721,7 @@ universal-anomaly-intelligence-v2/
 
 ### Don't Delete:
 - ❌ .git/ directory
-- ❌ .venv-macos/ (if it's your active venv)
+- ❌ .venv/ (if it's your active venv)
 - ❌ Any files with uncommitted changes
 - ❌ README.md or LICENSE
 

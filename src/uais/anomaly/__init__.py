@@ -1,1 +1,1 @@
-"""Anomaly detection models for UAIS."""
+"""Anomaly detection models for SentinelForge."""

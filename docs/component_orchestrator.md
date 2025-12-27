@@ -1,6 +1,6 @@
 # Orchestrator (Routing Layer)
 
-OmniChatX is structured around an “orchestrator”: a component that decides which subsystem should answer a given request and returns one unified response.
+SentinelForge is structured around an “orchestrator”: a component that decides which subsystem should answer a given request and returns one unified response.
 
 ## What It Does
 - **Classifies intent** (chat vs RAG vs fraud/cyber/behavior vs recommendations).

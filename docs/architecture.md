@@ -18,7 +18,7 @@ flowchart TD
 ```
 
 ## Key Entry Points
-- FastAPI: `app/main.py` (re-exports `backend/main.py`)
+- FastAPI: `app/main.py`
 - Streamlit UI: `app/streamlit_chatbot/app.py`
 
 ## Notes on “Legacy”
@@ -27,4 +27,3 @@ The gateway intentionally mounts both:
 - selected `app/api/*` routers (risk/monitor/voice/rag ingestion/brand/stt/health).
 
 See `docs/LEGACY.md` for details.
-

@@ -1,6 +1,6 @@
 # Local Run (Legacy Notes)
 
-This file is retained because older drafts referenced a separate API/UI stack under `deploy/` and `dashboard/`.
+This file is retained because older drafts referenced a separate API stack under `deploy/`.
 
 ## Recommended Local Run (Current)
 
@@ -10,7 +10,5 @@ This file is retained because older drafts referenced a separate API/UI stack un
 
 ## Legacy Entry Points (Reference Only)
 - FastAPI: `uvicorn deploy.api.main:app --reload --port 8000`
-- Streamlit: `streamlit run dashboard/app_streamlit.py`
 
-These legacy entrypoints are not the default for OmniChatX v2.
-
+The legacy `dashboard/` Streamlit app has been removed; use `app/streamlit_chatbot/app.py` instead.

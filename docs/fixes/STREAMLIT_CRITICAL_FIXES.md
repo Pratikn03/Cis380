@@ -1,7 +1,7 @@
 # Streamlit Critical Fixes (Applied & Pending)
 
 **Date:** December 17, 2025  
-**File:** `app/streamlit_chatbot/omnichat_unified.py`
+**File:** `app/streamlit_chatbot/unified_chat.py`
 
 ---
 
@@ -223,7 +223,7 @@ res = call_multipart(..., timeout=timeout)
 
 **Add after backend_url definition:**
 ```python
-backend_url = os.environ.get("OMNICHATX_BACKEND", "http://localhost:8000").strip().rstrip("/")
+backend_url = os.environ.get("SENTINELFORGE_BACKEND", "http://localhost:8000").strip().rstrip("/")
 
 # Health check
 try:

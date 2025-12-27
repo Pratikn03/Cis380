@@ -1,1 +1,1 @@
-"""Streamlit pages for UAIS-V Command Center."""
+"""Streamlit pages for SentinelForge Command Center."""

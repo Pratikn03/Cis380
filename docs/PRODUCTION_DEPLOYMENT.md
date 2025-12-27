@@ -1,10 +1,10 @@
 # Production Deployment
 
-This guide describes how to run OmniChatX as a production-style service using the included Docker Compose stack.
+This guide describes how to run SentinelForge as a production-style service using the included Docker Compose stack.
 
 The production stack is defined in `docker-compose.production.yml` and includes:
-- `omnichatx-api` (FastAPI)
-- `omnichatx-ui` (Streamlit)
+- `sentinelforge-api` (FastAPI)
+- `sentinelforge-ui` (Streamlit)
 - `redis` (optional cache/session store)
 - optional: `prometheus` + `grafana` (profile `monitoring`)
 - optional: `nginx` reverse proxy (profile `production`)
@@ -108,13 +108,13 @@ When artifacts are missing, affected endpoints return `503` with instructions.
 
 Logs:
 ```bash
-docker compose -f docker-compose.production.yml logs -f omnichatx-api
-docker compose -f docker-compose.production.yml logs -f omnichatx-ui
+docker compose -f docker-compose.production.yml logs -f sentinelforge-api
+docker compose -f docker-compose.production.yml logs -f sentinelforge-ui
 ```
 
 Restart:
 ```bash
-docker compose -f docker-compose.production.yml restart omnichatx-api
+docker compose -f docker-compose.production.yml restart sentinelforge-api
 ```
 
 Stop (all profiles):
@@ -141,5 +141,5 @@ If you prefer a wrapper around compose commands:
 - Train the missing model (see `scripts/README.md`) and re-run the containers.
 
 ### UI can’t reach API
-- Confirm the UI container uses `OMNICHATX_BACKEND=http://omnichatx-api:8000` (it does by default).
-- Check `docker compose ps` and `docker compose logs omnichatx-api`.
+- Confirm the UI container uses `SENTINELFORGE_BACKEND=http://sentinelforge-api:8000` (it does by default).
+- Check `docker compose ps` and `docker compose logs sentinelforge-api`.

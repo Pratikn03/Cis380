@@ -15,17 +15,17 @@ def load_mlflow_settings(config_path: str | Path | None = None) -> Dict[str, str
     """Load tracking URI and experiment name from YAML."""
     path = Path(config_path) if config_path else PROJECT_ROOT / "mlflow_config.yaml"
     if not path.exists():
-        return {"tracking_uri": "http://localhost:5000", "experiment_name": "UAISV_Experiments"}
+        return {"tracking_uri": "http://localhost:5000", "experiment_name": "SentinelForge_Experiments"}
     cfg = yaml.safe_load(path.read_text())
     ml_cfg = cfg.get("mlflow", {}) if isinstance(cfg, dict) else {}
     return {
         "tracking_uri": ml_cfg.get("tracking_uri", "http://localhost:5000"),
-        "experiment_name": ml_cfg.get("experiment_name", "UAISV_Experiments"),
+        "experiment_name": ml_cfg.get("experiment_name", "SentinelForge_Experiments"),
     }
 
 
 def setup_mlflow(
-    experiment_name: str = "UAISV_Experiments", tracking_uri: str | None = None
+    experiment_name: str = "SentinelForge_Experiments", tracking_uri: str | None = None
 ) -> None:
     """Configure the MLflow tracking URI and experiment name."""
     uri = tracking_uri or "http://localhost:5000"

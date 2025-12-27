@@ -33,7 +33,7 @@ Common algorithms used:
 5. Train staff on fraud indicators
 6. Keep fraud models updated regularly
 
-## OmniChatX Fraud Features
+## SentinelForge Fraud Features
 - Real-time fraud scoring (0-1 probability)
 - SHAP explainability (top feature contributions)
 - Historical pattern analysis

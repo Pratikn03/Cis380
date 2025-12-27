@@ -6,12 +6,12 @@ PORT="${PORT:-8000}"
 BASE="http://$HOST:$PORT"
 
 echo "===================="
-echo "OmniChatX TEST SUITE"
+echo "SentinelForge TEST SUITE"
 echo "===================="
 
 # ---------- 1) Basic structure checks ----------
 echo "[1/7] Repo structure checks"
-[ -f "backend/main.py" ] || { echo "❌ Missing backend/main.py (canonical entrypoint)"; exit 1; }
+[ -f "app/main.py" ] || { echo "❌ Missing app/main.py (canonical entrypoint)"; exit 1; }
 [ -d "models" ] || { echo "❌ Missing models/ directory"; exit 1; }
 [ -d "data" ] || { echo "❌ Missing data/ directory"; exit 1; }
 echo "✅ Structure OK"
@@ -75,7 +75,7 @@ fi
 
 # ---------- 5) Start backend and test endpoints ----------
 echo "[5/7] Backend smoke test"
-uvicorn app.main:app --host "$HOST" --port "$PORT" >/tmp/omnichatx_uvicorn.log 2>&1 &
+uvicorn app.main:app --host "$HOST" --port "$PORT" >/tmp/sentinelforge_uvicorn.log 2>&1 &
 PID=$!
 
 cleanup() {
@@ -105,7 +105,7 @@ check_200() {
   if [ "$c" != "200" ]; then
     echo "❌ Expected 200 but got $c for $url"
     echo "---- backend log (tail) ----"
-    tail -n 60 /tmp/omnichatx_uvicorn.log || true
+    tail -n 60 /tmp/sentinelforge_uvicorn.log || true
     exit 1
   fi
   echo "✅ 200 $url"

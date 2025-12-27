@@ -1,0 +1,13 @@
+# User/session behavior domain override (CERT r4.2 LDAP)
+project_name: "SentinelForge - Behavior (CERT)"
+
+data:
+  # CERT LDAP is unlabeled; the pipeline will create a placeholder 0/1 label if needed.
+  target: Revenue
+  path: data/raw/behavior/r4.2/LDAP
+  drop_columns: []
+
+training:
+  model_type: autoencoder
+  learning_rate: 0.001
+  anomaly_contamination: 0.05

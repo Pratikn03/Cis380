@@ -10,7 +10,7 @@ def test_api_health_contract():
     body = resp.json()
 
     assert body.get("status") == "ok"
-    assert body.get("service") == "omnichatx"
+    assert body.get("service") == "sentinelforge"
     assert "version" in body
     assert "optional_features" in body
     assert isinstance(body["optional_features"], dict)

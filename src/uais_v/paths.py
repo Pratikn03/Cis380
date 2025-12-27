@@ -1,4 +1,4 @@
-"""Centralized filesystem paths for UAIS-V."""
+"""Centralized filesystem paths for SentinelForge."""
 
 from pathlib import Path
 

@@ -1,4 +1,4 @@
-"""Tabular Variational Autoencoder utilities for UAIS generative experiments."""
+"""Tabular Variational Autoencoder utilities for SentinelForge generative experiments."""
 
 from __future__ import annotations
 

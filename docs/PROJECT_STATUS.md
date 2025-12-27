@@ -3,7 +3,7 @@
 This file is a lightweight status snapshot (high level, no guarantees). For how to run the demo, see `README.md` and `docs/guides/demo.md`.
 
 ## Current (Works End-to-End)
-- FastAPI gateway (`app/main.py` → `backend/main.py`) with auth + CORS + health + metrics
+- FastAPI gateway (`app/main.py`) with auth + CORS + health + metrics
 - Streamlit UI (`app/streamlit_chatbot/app.py`)
 - Orchestrated chat (`/api/chat`, `/api/chat/multimodal`)
 - Local RAG (ingest/query) and offline fallback behavior

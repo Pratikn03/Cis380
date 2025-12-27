@@ -1,5 +1,5 @@
 """
-OmniChatX Production Logging Configuration
+SentinelForge Production Logging Configuration
 Structured logging with JSON output for production environments
 """
 
@@ -21,7 +21,7 @@ class CustomJsonFormatter(logging.Formatter):
         datefmt: Optional[str] = None,
         style: str = "%",
         include_extra: bool = True,
-        app_name: str = "omnichatx",
+        app_name: str = "sentinelforge",
     ):
         super().__init__(fmt=fmt, datefmt=datefmt, style=style)
         self.include_extra = include_extra

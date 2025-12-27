@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from typing import List
+from pathlib import Path
+import os
 
 try:
     import torch
@@ -21,9 +23,28 @@ def _load_clip_model():
     return model, preprocess, device
 
 
+def _tags_enabled() -> bool:
+    mode = (os.getenv("SENTINELFORGE_IMAGE_TAGS") or "auto").strip().lower()
+    if mode in {"0", "false", "off", "no"}:
+        return False
+    if mode in {"1", "true", "on", "yes"}:
+        return True
+    # auto: only run if checkpoint already cached to avoid long downloads/timeouts
+    try:
+        if not _TORCH_AVAILABLE:
+            return False
+        import torch
+
+        hub_dir = Path(torch.hub.get_dir())
+        checkpoint = hub_dir / "checkpoints" / "clip_vit_b32.pt"
+        return checkpoint.exists()
+    except Exception:
+        return False
+
+
 def extract_tags_from_image(image, top_k: int = 5) -> List[str]:
     """Return a list of top-k tags for the image. Returns [] on any failure."""
-    if not _TORCH_AVAILABLE:
+    if not _TORCH_AVAILABLE or not _tags_enabled():
         print("[image_tags] torch/torchvision not available; skipping tag extraction.")
         return []
 

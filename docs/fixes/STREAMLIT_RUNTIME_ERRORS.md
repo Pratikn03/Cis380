@@ -1,7 +1,7 @@
 # Streamlit Runtime Errors (Common)
 
-**App:** OmniChat Unified Streamlit Interface  
-**File:** `app/streamlit_chatbot/omnichat_unified.py`  
+**App:** Sentinel Unified Streamlit Interface  
+**File:** `app/streamlit_chatbot/unified_chat.py`  
 **Last Updated:** December 17, 2025
 
 > Note: This document is a historical troubleshooting list from the UI hardening phase.
@@ -30,13 +30,13 @@ ps aux | grep python | grep main.py
 
 # Start backend if not running
 cd /path/to/project
-python -m uvicorn backend.main:app --reload
+python -m uvicorn app.main:app --reload
 
 # Check backend URL
-echo $OMNICHATX_BACKEND
+echo $SENTINELFORGE_BACKEND
 
 # Set correct URL
-export OMNICHATX_BACKEND="http://localhost:8000"
+export SENTINELFORGE_BACKEND="http://localhost:8000"
 
 # Test backend directly
 curl http://localhost:8000/health
@@ -66,7 +66,7 @@ ls -lh video.mp4
 ffmpeg -i input.mp4 -vcodec h264 -acodec aac output.mp4
 
 # Increase timeout in code (temporary)
-# In omnichat_unified.py line 730:
+# In unified_chat.py line 730:
 # timeout=240.0  # 4 minutes instead of 2
 
 # Check backend performance
@@ -125,7 +125,7 @@ lsof -i :8502
 kill -9 <PID>
 
 # Or use different port
-streamlit run app/streamlit_chatbot/omnichat_unified.py --server.port=8503
+streamlit run app/streamlit_chatbot/unified_chat.py --server.port=8503
 
 # Find all streamlit processes
 ps aux | grep streamlit
@@ -154,7 +154,7 @@ ModuleNotFoundError: No module named 'streamlit'
 python --version  # Should be 3.11+
 
 # Activate virtual environment
-source .venv-macos/bin/activate
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -219,7 +219,7 @@ import streamlit.components.v1 as components
 
 components.html(f"""
 <script>
-localStorage.setItem('omnichat_session', '{st.session_state.omni_session_id}');
+localStorage.setItem('sentinelforge_session', '{st.session_state.omni_session_id}');
 </script>
 """)
 
@@ -382,7 +382,7 @@ python --version
 pip list
 
 # Environment variables
-env | grep OMNICHAT
+env | grep -E 'SENTINELFORGE|OMNICHAT'
 
 # Network connectivity
 ping localhost
@@ -391,7 +391,7 @@ curl -v http://localhost:8000
 
 ### Step 4: Enable Debug Mode
 ```python
-# Add to omnichat_unified.py
+# Add to unified_chat.py
 import os
 os.environ['DEBUG_MODE'] = 'true'
 
@@ -441,10 +441,10 @@ location.reload();
 # Restart everything
 pkill -f streamlit
 pkill -f uvicorn
-source .venv-macos/bin/activate
-python -m uvicorn backend.main:app --reload &
+source .venv/bin/activate
+python -m uvicorn app.main:app --reload &
 sleep 5
-streamlit run app/streamlit_chatbot/omnichat_unified.py --server.port=8502
+streamlit run app/streamlit_chatbot/unified_chat.py --server.port=8502
 
 # Clear all caches
 rm -rf ~/.streamlit/
@@ -453,9 +453,9 @@ find . -type d -name "__pycache__" -exec rm -r {} +
 
 # Reset virtual environment
 deactivate
-rm -rf .venv-macos
-python3 -m venv .venv-macos
-source .venv-macos/bin/activate
+rm -rf .venv
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 
 # Check ports

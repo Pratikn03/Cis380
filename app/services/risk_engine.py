@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, Mapping
+import os
 
 import joblib
 import numpy as np
@@ -24,6 +25,16 @@ FEATURE_KEYS = [
     "device_known",
     "login_time",
 ]
+
+# Demo-only fallback: used when models are noisy or poorly aligned to payloads.
+_HEURISTIC_ENABLED = os.getenv("RISK_HEURISTIC_FALLBACK", "true").lower() not in {
+    "0",
+    "false",
+    "no",
+}
+
+# Demo-only geo list to make scenarios visibly different. This is not a production signal.
+_DEMO_COUNTRY_RISK = {"NG", "BR", "AE"}
 
 
 def _load_models() -> Dict[str, Any]:
@@ -66,6 +77,39 @@ def _build_feature_vector(payload: Mapping[str, Any]) -> np.ndarray:
             except Exception:
                 vector.append(0.0)
     return np.array(vector, dtype=float).reshape(1, -1)
+
+
+def _heuristic_risk(payload: Mapping[str, Any]) -> dict[str, float]:
+    def _to_float(val: Any, default: float = 0.0) -> float:
+        try:
+            return float(val)
+        except Exception:
+            return default
+
+    amount = _to_float(payload.get("transaction_amount"))
+    clicks = _to_float(payload.get("clicks_per_minute"))
+    files = _to_float(payload.get("files_accessed"))
+    login_time = _to_float(payload.get("login_time"))
+    device_known = bool(payload.get("device_known", True))
+    login_country = str(payload.get("login_country") or "").upper()
+
+    amount_score = min(amount / 10000.0, 1.0)
+    clicks_score = min(clicks / 200.0, 1.0)
+    files_score = min(files / 200.0, 1.0)
+    after_hours = 1.0 if (login_time < 6 or login_time > 22) else 0.0
+    device_score = 1.0 if not device_known else 0.0
+    country_score = 1.0 if login_country in _DEMO_COUNTRY_RISK else 0.0
+
+    cyber = 0.5 * clicks_score + 0.4 * files_score + 0.1 * after_hours
+    behavior = 0.4 * after_hours + 0.4 * device_score + 0.2 * clicks_score
+    fraud = 0.6 * amount_score + 0.3 * device_score + 0.1 * country_score
+
+    clamp = lambda x: float(min(max(x, 0.0), 1.0))
+    return {
+        "cyber_risk": clamp(cyber),
+        "behavior_risk": clamp(behavior),
+        "fraud_risk": clamp(fraud),
+    }
 
 
 def _score_model(model: Any, features: np.ndarray) -> float:
@@ -233,6 +277,12 @@ def analyze_risk(payload: Mapping[str, Any]) -> Dict[str, Any]:
     cyber_risk = _score("cyber")
     behavior_risk = _score_behavior()
     fraud_risk = _score("fraud")
+
+    if _HEURISTIC_ENABLED:
+        heuristic = _heuristic_risk(payload)
+        cyber_risk = max(cyber_risk, heuristic["cyber_risk"])
+        behavior_risk = max(behavior_risk, heuristic["behavior_risk"])
+        fraud_risk = max(fraud_risk, heuristic["fraud_risk"])
 
     fusion_risk, fusion_meta = _fusion_score(
         cyber_risk=cyber_risk, behavior_risk=behavior_risk, fraud_risk=fraud_risk
