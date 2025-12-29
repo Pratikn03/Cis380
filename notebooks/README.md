@@ -9,3 +9,12 @@ This folder contains exploratory and research notebooks. It is organized into:
 
 The production entrypoints live under `scripts/` and `src/`.
 
+## Key training notebooks
+
+- `notebooks/training/81_face_emotion.ipynb`: 7-class face emotion training (vision).
+- `notebooks/training/82_brand_logo_yolo.ipynb`: Brand/logo YOLOv8 detector training.
+- `notebooks/training/83_voice_emotion.ipynb`: Voice emotion classifier training.
+- `notebooks/training/84_recommender_movielens.ipynb`: MovieLens recommender baseline.
+- `notebooks/training/85_recommender_multimodal_index.ipynb`: Build multimodal index.
+- `notebooks/training/86_rag_ingest_query.ipynb`: RAG ingest + retrieval test.
+- `notebooks/training/87_video_temporal.ipynb`: Video temporal deepfake model.
