@@ -139,8 +139,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve static UI under /ui (optional)
-ui_dir = Path(__file__).resolve().parents[1] / "ui"
+# Serve static UI under /ui (optional). Build UI in ui-web/frontend first.
+ui_dir = Path(__file__).resolve().parents[1] / "ui-web" / "frontend" / "dist"
 if ui_dir.exists():
     app.mount("/ui", StaticFiles(directory=ui_dir, html=True), name="ui")
 
@@ -248,7 +248,12 @@ def api_health():
 def root_redirect():
     if ui_dir.exists():
         return RedirectResponse(url="/ui/")
-    return {"message": "SentinelForge API. UI not found; ensure ui/ directory exists."}
+    return {
+        "message": (
+            "SentinelForge API. UI not found; build ui-web/frontend "
+            "(`npm run build`) to serve /ui."
+        )
+    }
 
 
 if __name__ == "__main__":

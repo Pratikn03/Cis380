@@ -19,7 +19,7 @@ Leave this running; it serves (highlights):
 * `/api/risk/analyze`
 * `/api/monitor/summary` + `/api/monitor/drift`
 * `/metrics`
-* the optional `/ui/` static site under `/ui/index.html`
+* the optional `/ui/` static site (built from `ui-web/frontend/dist`)
 
 ## 2. Launch the Streamlit UI
 
