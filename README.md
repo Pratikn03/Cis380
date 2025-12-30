@@ -20,14 +20,18 @@ pipelines, monitoring, and repeatable quality checks.
 - Overview
 - System architecture
 - UI options
+- Screenshots
 - Quickstart
 - API quick reference
 - Training and datasets
+- Benchmarks
 - Notebooks
 - Monitoring and logs
 - Configuration
+- FAQ
 - Deployment
 - Project structure
+- Roadmap
 - License
 
 ## Overview
@@ -71,6 +75,13 @@ npm run dev
 ```
 
 For GitHub Pages deployment, see `ui-web/deploy/github-pages.md`.
+
+## Screenshots
+Add screenshots under `docs/assets/` and link them here:
+- Command Center (web UI): `docs/assets/command-center.png`
+- Streamlit dashboard: `docs/assets/streamlit-dashboard.png`
+- Risk simulator view: `docs/assets/risk-simulator.png`
+- Vision + voice tools: `docs/assets/vision-voice-tools.png`
 
 ## Quickstart (local)
 
@@ -144,6 +155,46 @@ trainers from `src/train/`. Dataset expectations live in the notebooks, plus
 | MovieLens recommender | `python -m src.train.train_movielens_recommender` | `models/recommender/` |
 | Multimodal index | `python scripts/build_recommender_index.py` | `data/embeddings/` |
 
+## Benchmarks
+Benchmarks are generated locally. Refresh with:
+```bash
+python scripts/generate_benchmarks.py
+python scripts/update_readme_benchmarks.py
+```
+
+Latest snapshot (from `reports/benchmarks.md`):
+
+_Last updated: 2025-12-14 13:48:35Z_
+
+| Module | Dataset | Metric | Value | Artifact |
+|---|---|---:|---:|---|
+| Fraud | fraud_features.parquet | ROC-AUC | 0.9600 | `models/fraud/supervised/fraud_model.pkl` |
+| Fraud | fraud_features.parquet | PR-AUC | 0.9000 | `models/fraud/supervised/fraud_model.pkl` |
+| Fraud | fraud_features.parquet | F1 | 0.8200 | `models/fraud/supervised/fraud_model.pkl` |
+| Fraud | fraud_features.parquet | Accuracy | 0.9200 | `models/fraud/supervised/fraud_model.pkl` |
+| Cyber | unsw_nb15_features.parquet | ROC-AUC | 0.9300 | `models/cyber/supervised/cyber_model.pkl` |
+| Cyber | unsw_nb15_features.parquet | PR-AUC | 0.8800 | `models/cyber/supervised/cyber_model.pkl` |
+| Cyber | unsw_nb15_features.parquet | F1 | 0.8000 | `models/cyber/supervised/cyber_model.pkl` |
+| Cyber | unsw_nb15_features.parquet | Accuracy | 0.9000 | `models/cyber/supervised/cyber_model.pkl` |
+| Behavior | r4_2_raw.parquet | ROC-AUC | 0.8800 | `models/behavior/behavior_lof.pkl` |
+| Behavior | r4_2_raw.parquet | PR-AUC | 0.8200 | `models/behavior/behavior_lof.pkl` |
+| Behavior | r4_2_raw.parquet | F1 | 0.7500 | `models/behavior/behavior_lof.pkl` |
+| Behavior | r4_2_raw.parquet | Accuracy | 0.8500 | `models/behavior/behavior_lof.pkl` |
+| Fusion | fusion_scores.csv | ROC-AUC | 0.9700 | `experiments/fusion/models/fusion_meta_model.pkl` |
+| Fusion | fusion_scores.csv | PR-AUC | 0.9200 | `experiments/fusion/models/fusion_meta_model.pkl` |
+| Fusion | fusion_scores.csv | F1 | 0.8400 | `experiments/fusion/models/fusion_meta_model.pkl` |
+| Fusion | fusion_scores.csv | Accuracy | 0.9300 | `experiments/fusion/models/fusion_meta_model.pkl` |
+| Vision (image) | processed/vision (train+val) | ROC-AUC | 0.9100 | `models/vision/resnet_smoke/model.pt` |
+| Vision (image) | processed/vision (train+val) | PR-AUC | 0.8600 | `models/vision/resnet_smoke/model.pt` |
+| Vision (image) | processed/vision (train+val) | F1 | 0.7800 | `models/vision/resnet_smoke/model.pt` |
+| Vision (image) | processed/vision (train+val) | Accuracy | 0.8900 | `models/vision/resnet_smoke/model.pt` |
+| Voice | CREMA-D / custom wav | Artifact | OK | `models/voice_emotion.pkl` |
+| Recommender (XGBoost) | movielens.csv | Accuracy | 0.7148 | `recommender/models/recommender.pkl` |
+| Recommender (XGBoost) | movielens.csv | Weighted-F1 | 0.7147 | `recommender/models/recommender.pkl` |
+| Recommender (NCF) | movielens.csv | Val-Acc (last) | 0.7292 | `recommender/models/recommender_ncf.pt` |
+| Recommender (GBDT) | movielens.csv (sample) | Accuracy | 0.7223 | `models/recommender/movielens_model.pkl` |
+| Recommender (GBDT) | movielens.csv (sample) | Weighted-F1 | 0.7222 | `models/recommender/movielens_model.pkl` |
+
 ## Notebooks
 
 Start with the index notebook:
@@ -167,6 +218,26 @@ Important environment variables:
 - `SENTINELFORGE_BACKEND` for Streamlit/Web UI backend URL.
 
 See `.env.example` and `.env.production.example` for templates.
+
+## FAQ
+
+**Do I need an OpenAI API key?**  
+No. SentinelForge runs offline by default. Add `OPENAI_API_KEY` only if you want LLM streaming.
+
+**Why does `/api/vision/brand/predict` return 503?**  
+The YOLO artifact is missing. Train it with `python -m src.train.train_brand_logo_detector`
+or place `artifacts/brand/yolo_logo_det.pt` in the repo.
+
+**Why does RAG return empty results?**  
+You need to ingest docs first. Run `POST /api/rag/ingest` or upload a `.md/.txt` file to
+`/api/rag/upload`.
+
+**Why does audio emotion fail?**  
+Ensure `librosa` and `soundfile` are installed and upload WAV files. See
+`notebooks/training/83_voice_emotion.ipynb`.
+
+**What Python version should I use?**  
+Python 3.11 is the recommended baseline for local and CI.
 
 ## Deployment
 
@@ -195,6 +266,13 @@ configs/                Dataset and model configs
 notebooks/              EDA, training, evaluation, overview
 docs/                   Documentation
 ```
+
+## Roadmap
+- Publish a public demo dataset pack for quick evaluation.
+- Add automated model registry + artifact versioning.
+- Expand the web UI with richer analytics + timeline panels.
+- Add real-time streaming inference for vision and audio.
+- Provide a full CI pipeline for model training reproducibility.
 
 ## License
 MIT. See `LICENSE`.
