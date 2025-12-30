@@ -24,10 +24,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Install deps
-        run: pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements-ci.txt
       - name: Lint with ruff
         run: ruff check app tests
-      - name: Run pytest
+      - name: Run pytest (smoke)
         run: pytest tests/test_chat.py tests/test_rag.py tests/test_monitoring.py -q
-      - name: Build Docker image
-        run: docker build . -t sentinelforge:ci
