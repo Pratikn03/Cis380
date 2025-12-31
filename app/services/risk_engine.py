@@ -104,7 +104,8 @@ def _heuristic_risk(payload: Mapping[str, Any]) -> dict[str, float]:
     behavior = 0.4 * after_hours + 0.4 * device_score + 0.2 * clicks_score
     fraud = 0.6 * amount_score + 0.3 * device_score + 0.1 * country_score
 
-    clamp = lambda x: float(min(max(x, 0.0), 1.0))
+    def clamp(value: float) -> float:
+        return float(min(max(value, 0.0), 1.0))
     return {
         "cyber_risk": clamp(cyber),
         "behavior_risk": clamp(behavior),

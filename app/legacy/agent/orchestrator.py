@@ -159,17 +159,17 @@ def _offline_assistant(message: str) -> str:
         summary = "Multimodal Analysis Results:\n- " + "\n- ".join(context_lines)
         narrative_parts: list[str] = []
         if image_tags:
-            narrative_parts.append(f\"Visual cues suggest: {image_tags}.\")
+            narrative_parts.append(f"Visual cues suggest: {image_tags}.")
         if has_face and "face" in base_lower:
-            narrative_parts.append(\"Face emotion is detected directly from the image.\")
+            narrative_parts.append("Face emotion is detected directly from the image.")
         if has_voice and ("voice" in base_lower or "audio" in base_lower):
-            narrative_parts.append(\"Voice emotion is detected from the attached audio.\")
+            narrative_parts.append("Voice emotion is detected from the attached audio.")
         if "logo" in base_lower or "brand" in base_lower:
             narrative_parts.append(
-                \"For precise logo detection with bounding boxes, run Brand Vision (`/api/vision/brand/predict`).\"
+                "For precise logo detection with bounding boxes, run Brand Vision (`/api/vision/brand/predict`)."
             )
         if narrative_parts:
-            summary += \"\\n\\n\" + \" \".join(narrative_parts)
+            summary += "\n\n" + " ".join(narrative_parts)
         return summary.strip()
 
     # If RAG returns empty or default response, provide helpful fallback
