@@ -8,7 +8,7 @@ export const architectureLayers = [
     description: "Routing, policy checks, and risk aggregation logic.",
   },
   {
-    title: "AI Engines",
+    title: "Analytics Engines",
     description: "Fraud, cyber, behavior, vision, voice, and recommender models.",
   },
   {

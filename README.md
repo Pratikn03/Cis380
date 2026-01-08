@@ -1,278 +1,251 @@
-# SentinelForge
+# SentinelForge# SentinelForge
 
-SentinelForge is a production-ready multimodal AI command center that routes a
-single user request to the right subsystem (risk, RAG, recommender, vision,
-voice) and returns a structured response.
 
-It is built to look and behave like a real service: API gateway, UI, training
-pipelines, monitoring, and repeatable quality checks.
 
-## What it can do
-- Unified chat with text + image + audio + video attachments.
-- Fraud, cyber, and behavior risk scoring with fused decisions.
-- Brand/logo detection (YOLOv8) and face emotion analysis.
-- Voice emotion classification from audio clips.
-- Recommendations (numeric + MovieLens + multimodal similarity).
-- RAG over local docs with offline-first embeddings.
-- Monitoring logs and Prometheus metrics for production diagnostics.
+**SentinelForge** is a comprehensive risk intelligence platform for fraud detection, cybersecurity monitoring, and behavioral analytics.SentinelForge is a **multimodal AI agent platform** that routes a single user request to the right subsystem (RAG, fraud/cyber/behavior scoring, recommendations, voice emotion, vision) and returns a **single structured response**: `{"route", "answer", "meta"}`.
 
-## Table of contents
-- Overview
-- System architecture
-- UI options
-- Screenshots
-- Quickstart
-- API quick reference
-- Training and datasets
-- Benchmarks
-- Notebooks
-- Monitoring and logs
-- Configuration
-- FAQ
-- Deployment
-- Project structure
-- Roadmap
-- License
 
-## Overview
-SentinelForge is designed as a local-first AI platform that can run without any
-external API keys. If you provide an `OPENAI_API_KEY`, streaming LLM responses
-are enabled, but the default path stays fully offline.
 
-Key entrypoints:
-- API: `app/main.py`
-- Streamlit UI: `app/streamlit_chatbot/app.py`
-- Web UI: `ui-web/frontend`
+## 🌐 Live DemoThe goal of this repository is not “a chatbot in a notebook”, but an end-to-end system that looks and feels like a service: **API, UI, training, monitoring, and a repeatable test gate**.
 
-## System architecture
+
+
+**[View Live Demo →](https://pratikn03.github.io/Cis380/)**## What You Get
+
+- **FastAPI gateway** (`uvicorn app.main:app`) that mounts chat + RAG + risk + recommender + vision + monitoring endpoints.
+
+## Features- **Streamlit command center UI** (`streamlit run app/streamlit_chatbot/app.py`) with chat, multimodal uploads, and dashboards.
+
+- **Offline-first behavior** by default (local models + local RAG). Add `OPENAI_API_KEY` to enable LLM chat/streaming.
+
+- **Risk Analysis** - Real-time fraud and cyber threat detection- **Training entrypoints** for core models + optional vision/YOLO/face-emotion (`scripts/train_all.py`, `src/train/*`).
+
+- **Behavioral Monitoring** - User behavior pattern analysis- **Monitoring + drift summaries** with Prometheus metrics (`/metrics`) and JSONL event logs under `data/monitoring/logs/`.
+
+- **Voice Analytics** - Emotion detection from audio
+
+- **Vision Processing** - Image and video analysis for security## Architecture (At a Glance)
+
+- **Dashboard** - Interactive command center UI
 
 ```mermaid
-flowchart TD
+
+## Architectureflowchart TD
+
   UI[Streamlit UI] --> API[FastAPI Gateway]
-  WEB[Web UI] --> API
-  API --> ORCH[Orchestrator]
-  ORCH --> RAG[RAG (data/docs + embeddings)]
-  ORCH --> RISK[Fraud/Cyber/Behavior + Fusion Risk]
-  ORCH --> RECS[Recommender (text + multimodal)]
-  ORCH --> VOICE[Voice Emotion + STT (optional)]
-  ORCH --> VISION[Vision (image/video) + Face Emotion + Brand/Logo YOLO]
-  API --> MON[Monitoring + Metrics]
+
+```  API --> ORCH[Orchestrator]
+
+┌─────────────────────────────────────────────────────────────┐  ORCH --> RAG[RAG (data/docs + embeddings)]
+
+│                    SentinelForge Platform                    │  ORCH --> RISK[Fraud/Cyber/Behavior + Fusion Risk]
+
+├─────────────────────────────────────────────────────────────┤  ORCH --> RECS[Recommender (text + multimodal)]
+
+│  Frontend         │  React + TypeScript + Tailwind CSS      │  ORCH --> VOICE[Voice Emotion + STT (optional)]
+
+├───────────────────┼─────────────────────────────────────────┤  ORCH --> VISION[Vision (image/video) + Face Emotion + Brand/Logo YOLO]
+
+│  Backend          │  FastAPI + Python                       │  API --> MON[Monitoring + Metrics]
+
+├───────────────────┼─────────────────────────────────────────┤```
+
+│  Models           │  Fraud, Cyber, Behavior, Voice, Vision  │
+
+├───────────────────┼─────────────────────────────────────────┤Key entrypoints:
+
+│  Database         │  Vector Store + Document Index          │- **API**: `app/main.py`
+
+└───────────────────┴─────────────────────────────────────────┘- **UI**: `app/streamlit_chatbot/app.py`
+
 ```
 
-## UI options
+For legacy modules and why they still exist, see `docs/LEGACY.md`.
 
-### 1) Streamlit Command Center
-```bash
-SENTINELFORGE_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
-```
+## Quick Start
 
-### 2) SentinelForge Web UI (React + Tailwind)
-```bash
-cd ui-web/frontend
-cp .env.example .env
-npm install
-npm run dev
-```
+## Quickstart (Local)
 
-For GitHub Pages deployment, see `ui-web/deploy/github-pages.md`.
+### Prerequisites
 
-## Screenshots
-Add screenshots under `docs/assets/` and link them here:
-- Command Center (web UI): `docs/assets/command-center.png`
-- Streamlit dashboard: `docs/assets/streamlit-dashboard.png`
-- Risk simulator view: `docs/assets/risk-simulator.png`
-- Vision + voice tools: `docs/assets/vision-voice-tools.png`
+- Python 3.11+### 1) Install
 
-## Quickstart (local)
+- Node.js 18+Recommended: Python **3.11** (matches CI).
 
-### 1) Install
-Recommended: Python 3.11.
-```bash
+
+
+### Installation```bash
+
 python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+
+```bashsource .venv/bin/activate
+
+# Clone repositorypip install -r requirements.txt
+
+git clone https://github.com/Pratikn03/Cis380.git```
+
+cd Cis380
+
+If you plan to use included LFS-tracked artifacts (e.g., `artifacts/brand/yolo_logo_det.pt`):
+
+# Setup Python environment```bash
+
+python3 -m venv .venvgit lfs install
+
+source .venv/bin/activategit lfs pull
+
+pip install -r requirements.txt```
+
+
+
+# Start backend### 2) Run API
+
+uvicorn app.main:app --reload --port 8000```bash
+
+```uvicorn app.main:app --reload
+
 ```
 
-If you plan to use LFS artifacts (for example, brand YOLO weights):
-```bash
-git lfs install
-git lfs pull
+### Frontend Development
+
+### 3) Run UI
+
+```bash```bash
+
+cd ui-web/frontendSENTINELFORGE_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
+
+npm install```
+
+npm run devUse the left sidebar for navigation. The recommended chat view is **"✨ SentinelForge (Unified Chat)"** (legacy chat UIs are still available from the Chat page).
+
 ```
 
-### 2) Run API
-```bash
-uvicorn app.main:app --reload
-```
+### One-command demo (backend + UI)
 
-### 3) Run UI (choose one)
-- Streamlit UI: `streamlit run app/streamlit_chatbot/app.py`
-- Web UI: `npm run dev` in `ui-web/frontend`
+## API Endpoints```bash
 
-### One-command demo (backend + Streamlit UI)
-```bash
 bash scripts/run_demo.sh
+
+| Endpoint | Description |```
+
+|----------|-------------|
+
+| `POST /api/risk/analyze` | Risk assessment scoring |## Docker
+
+| `POST /api/fraud` | Fraud detection |
+
+| `POST /api/cyber` | Cybersecurity analysis |### Dev compose (single container)
+
+| `POST /api/behavior` | Behavioral pattern analysis |```bash
+
+| `POST /api/voice/emotion` | Voice emotion detection |docker compose up --build
+
+| `GET /health` | System health check |```
+
+
+
+## Project Structure### Production compose (API + UI + Redis; optional monitoring/nginx)
+
+```bash
+
+```cp .env.production.example .env
+
+├── app/                    # Backend application# edit .env (AUTH_TOKEN, CORS, ports, etc)
+
+│   ├── api/               # API routes
+
+│   ├── models/            # ML model interfacesdocker compose -f docker-compose.production.yml up -d --build
+
+│   └── services/          # Business logic
+
+├── ui-web/frontend/       # React frontend# Optional: monitoring (Prometheus/Grafana)
+
+├── models/                # Trained model artifactsdocker compose -f docker-compose.production.yml --profile monitoring up -d
+
+├── data/                  # Datasets and embeddings
+
+└── docs/                  # Documentation# Optional: nginx reverse proxy (requires deploy/nginx/ssl certs)
+
+```docker compose -f docker-compose.production.yml --profile production up -d
+
 ```
 
-## API quick reference
+## Technology Stack
 
-Most routes live under `/api/*`. If `AUTH_TOKEN` is set, send
-`Authorization: Bearer $AUTH_TOKEN`.
+See `docs/PRODUCTION_DEPLOYMENT.md` for a full deployment checklist.
 
-| Endpoint | What it does |
+- **Frontend**: React 18, TypeScript, Tailwind CSS, Vite
+
+- **Backend**: FastAPI, Python 3.11, Pydantic## API (Quick Reference)
+
+- **ML**: scikit-learn, PyTorch, XGBoost
+
+- **Infrastructure**: Docker, GitHub ActionsMost routes live under `/api/*`. If `AUTH_TOKEN` is set, send `Authorization: Bearer $AUTH_TOKEN`.
+
+
+
+## Deployment| Endpoint | What it does |
+
 | --- | --- |
-| `POST /api/chat` | Orchestrated chat with `{route, answer, meta}`. |
-| `POST /api/chat/multimodal` | Chat with optional audio/image/video; attaches voice/vision results. |
-| `GET /api/chat/stream?message=...` | SSE streaming (uses OpenAI if `OPENAI_API_KEY` is set). |
-| `POST /api/rag/query` | Retrieve passages from local docs. |
-| `POST /api/rag/ingest` / `POST /api/rag/upload` | Ingest docs into `data/docs/` and rebuild embeddings. |
-| `POST /api/risk/analyze` | Fused fraud/cyber/behavior scoring + decision. |
-| `POST /api/fraud` / `POST /api/cyber` / `POST /api/behavior` | Domain scoring endpoints. |
-| `POST /api/recommend` | Recommendations from the baseline model. |
-| `POST /api/recommend/multimodal` | Multimodal similarity (image/text). |
-| `POST /api/voice/emotion` | Voice emotion prediction from audio upload. |
+
+The frontend automatically deploys to GitHub Pages on push to `main`.| `POST /api/chat` | Orchestrated chat (`message`/`text`) → `{route, answer, meta}` (+ `reply` for UI compatibility). |
+
+| `POST /api/chat/multimodal` | Chat with optional `audio`/`image`/`video`; returns `meta.attachments` (voice/vision/face/STT). |
+
+```bash| `GET /api/chat/stream?message=...` | SSE streaming; uses OpenAI when `OPENAI_API_KEY` is set, otherwise streams the offline reply. |
+
+# Manual deployment| `POST /api/rag/query` | Retrieve passages from local docs (vector-store if available, TF-IDF fallback). |
+
+cd ui-web/frontend| `POST /api/rag/ingest` / `POST /api/rag/upload` | Add docs to `data/docs/` and rebuild the local RAG index. |
+
+npm run build| `POST /api/risk/analyze` | Risk “command center” scoring + decision + optional explanation + monitoring log. |
+
+npm run deploy| `GET /api/monitor/summary` / `GET /api/monitor/drift` | Monitoring summaries + drift report (JSONL logs under `data/monitoring/logs/`). |
+
+```| `POST /api/recommend` | Recommendations (items) + MovieLens-style scoring + numeric-vector fallback. |
+
+| `POST /api/recommend/multimodal` | Multimodal similarity (image/text). Falls back to an offline index on macOS if FAISS isn’t available. |
+
+## License| `POST /api/voice/emotion` | Voice emotion label + confidence from an uploaded audio file. |
+
 | `POST /api/stt/transcribe` | Speech-to-text (requires `faster-whisper`). |
-| `POST /api/vision/predict` | Image classification (requires trained artifact). |
-| `POST /api/vision/face_emotion/predict` | Face emotion prediction. |
-| `POST /api/vision/video/predict` | Video inference (requires `ffmpeg`). |
-| `POST /api/vision/brand/predict` | Brand/logo YOLO detector. |
-| `GET /health` / `GET /health/detailed` / `GET /metrics` | Production health/readiness + Prometheus metrics. |
 
-## Training and datasets
+MIT License - see [LICENSE](LICENSE)| `POST /api/vision/predict` | Image classification (requires trained ResNet artifact). |
 
-Use `scripts/train_all.py` for the core training bundle, or run individual
-trainers from `src/train/`. Dataset expectations live in the notebooks, plus
-`configs/data_*.yaml`.
+| `POST /api/vision/face_emotion/predict` | 7-class facial emotion (requires trained artifact). |
 
-| Module | Training entrypoint | Artifact |
-| --- | --- | --- |
-| Fraud | `python -m src.train.train_fraud` | `models/fraud/*.pkl` |
-| Cyber | `python -m src.train.train_cyber` | `models/cyber/*.pkl` |
-| Behavior | `python -m src.train.train_behavior` | `models/behavior/*.pkl` |
-| Face emotion | `python -m src.train.train_face_emotion` | `models/vision/face_emotion/` |
-| Brand/logo YOLO | `python -m src.train.train_brand_logo_detector` | `artifacts/brand/yolo_logo_det.pt` |
-| Voice emotion | `python app/models/voice/emotion_train.py` | `models/voice_emotion.pkl` |
-| Video temporal | `python -m src.train.train_video_temporal` | `models/vision/video_temporal_model.pkl` |
-| MovieLens recommender | `python -m src.train.train_movielens_recommender` | `models/recommender/` |
-| Multimodal index | `python scripts/build_recommender_index.py` | `data/embeddings/` |
+---| `POST /api/vision/video/predict` | Video inference via sampled frames + temporal heuristics (requires `ffmpeg`). |
 
-## Benchmarks
-Benchmarks are generated locally. Refresh with:
+| `POST /api/vision/brand/predict` | YOLO logo/brand detector (requires `artifacts/brand/yolo_logo_det.pt`). |
+
+**Developed for CIS 380** | University Project| `GET /health` / `GET /health/detailed` / `GET /metrics` | Production health/readiness + Prometheus metrics. |
+
+
+## Training (Practical)
+
+Canonical entrypoints:
+- `python scripts/train_all.py` (fraud/cyber/behavior/fusion + voice + recommender)
+- `python scripts/train_all.py --with-brand` (brand/logo YOLO smoke-run by default; override env vars for full training)
+- `python scripts/train_all.py --with-face-emotion` (7-class face emotion)
+- `python scripts/train_all_vision.py` (vision wrapper; can be heavy depending on datasets)
+
+Brand/logo YOLO (full control via env vars):
+- Prepare dataset: `python scripts/prepare_brand_data.py`
+- Train: `python -m src.train.train_brand_logo_detector`
+- Tip for macOS: validation can be slow; set `BRAND_VAL=false` and/or `BRAND_VAL_MAX_IMAGES=2000`.
+
+See `scripts/README.md` for the complete list.
+
+## Testing / Quality
 ```bash
-python scripts/generate_benchmarks.py
-python scripts/update_readme_benchmarks.py
+pytest -q
+ruff check app tests
 ```
 
-Latest snapshot (from `reports/benchmarks.md`):
+The CI workflow (`.github/workflows/ci.yml`) runs lint + a focused test set and builds the Docker image.
 
-_Last updated: 2025-12-14 13:48:35Z_
-
-| Module | Dataset | Metric | Value | Artifact |
-|---|---|---:|---:|---|
-| Fraud | fraud_features.parquet | ROC-AUC | 0.9600 | `models/fraud/supervised/fraud_model.pkl` |
-| Fraud | fraud_features.parquet | PR-AUC | 0.9000 | `models/fraud/supervised/fraud_model.pkl` |
-| Fraud | fraud_features.parquet | F1 | 0.8200 | `models/fraud/supervised/fraud_model.pkl` |
-| Fraud | fraud_features.parquet | Accuracy | 0.9200 | `models/fraud/supervised/fraud_model.pkl` |
-| Cyber | unsw_nb15_features.parquet | ROC-AUC | 0.9300 | `models/cyber/supervised/cyber_model.pkl` |
-| Cyber | unsw_nb15_features.parquet | PR-AUC | 0.8800 | `models/cyber/supervised/cyber_model.pkl` |
-| Cyber | unsw_nb15_features.parquet | F1 | 0.8000 | `models/cyber/supervised/cyber_model.pkl` |
-| Cyber | unsw_nb15_features.parquet | Accuracy | 0.9000 | `models/cyber/supervised/cyber_model.pkl` |
-| Behavior | r4_2_raw.parquet | ROC-AUC | 0.8800 | `models/behavior/behavior_lof.pkl` |
-| Behavior | r4_2_raw.parquet | PR-AUC | 0.8200 | `models/behavior/behavior_lof.pkl` |
-| Behavior | r4_2_raw.parquet | F1 | 0.7500 | `models/behavior/behavior_lof.pkl` |
-| Behavior | r4_2_raw.parquet | Accuracy | 0.8500 | `models/behavior/behavior_lof.pkl` |
-| Fusion | fusion_scores.csv | ROC-AUC | 0.9700 | `experiments/fusion/models/fusion_meta_model.pkl` |
-| Fusion | fusion_scores.csv | PR-AUC | 0.9200 | `experiments/fusion/models/fusion_meta_model.pkl` |
-| Fusion | fusion_scores.csv | F1 | 0.8400 | `experiments/fusion/models/fusion_meta_model.pkl` |
-| Fusion | fusion_scores.csv | Accuracy | 0.9300 | `experiments/fusion/models/fusion_meta_model.pkl` |
-| Vision (image) | processed/vision (train+val) | ROC-AUC | 0.9100 | `models/vision/resnet_smoke/model.pt` |
-| Vision (image) | processed/vision (train+val) | PR-AUC | 0.8600 | `models/vision/resnet_smoke/model.pt` |
-| Vision (image) | processed/vision (train+val) | F1 | 0.7800 | `models/vision/resnet_smoke/model.pt` |
-| Vision (image) | processed/vision (train+val) | Accuracy | 0.8900 | `models/vision/resnet_smoke/model.pt` |
-| Voice | CREMA-D / custom wav | Artifact | OK | `models/voice_emotion.pkl` |
-| Recommender (XGBoost) | movielens.csv | Accuracy | 0.7148 | `recommender/models/recommender.pkl` |
-| Recommender (XGBoost) | movielens.csv | Weighted-F1 | 0.7147 | `recommender/models/recommender.pkl` |
-| Recommender (NCF) | movielens.csv | Val-Acc (last) | 0.7292 | `recommender/models/recommender_ncf.pt` |
-| Recommender (GBDT) | movielens.csv (sample) | Accuracy | 0.7223 | `models/recommender/movielens_model.pkl` |
-| Recommender (GBDT) | movielens.csv (sample) | Weighted-F1 | 0.7222 | `models/recommender/movielens_model.pkl` |
-
-## Notebooks
-
-Start with the index notebook:
-- `notebooks/overview/00_notebook_index.ipynb`
-
-It links every training, EDA, and evaluation notebook and provides a map of the
-full project. New training notebooks (81-88) include dataset inventory, code
-links, and visuals.
-
-## Monitoring and logs
-- Prometheus metrics: `/metrics`
-- Health endpoints: `/health`, `/health/live`, `/health/ready`, `/health/detailed`
-- Event logs: `data/monitoring/logs/*.jsonl`
-
-## Configuration
-
-Important environment variables:
-- `AUTH_TOKEN` for API auth (Bearer token).
-- `OPENAI_API_KEY` to enable LLM streaming.
-- `CORS_ORIGINS` for production CORS configuration.
-- `SENTINELFORGE_BACKEND` for Streamlit/Web UI backend URL.
-
-See `.env.example` and `.env.production.example` for templates.
-
-## FAQ
-
-**Do I need an OpenAI API key?**  
-No. SentinelForge runs offline by default. Add `OPENAI_API_KEY` only if you want LLM streaming.
-
-**Why does `/api/vision/brand/predict` return 503?**  
-The YOLO artifact is missing. Train it with `python -m src.train.train_brand_logo_detector`
-or place `artifacts/brand/yolo_logo_det.pt` in the repo.
-
-**Why does RAG return empty results?**  
-You need to ingest docs first. Run `POST /api/rag/ingest` or upload a `.md/.txt` file to
-`/api/rag/upload`.
-
-**Why does audio emotion fail?**  
-Ensure `librosa` and `soundfile` are installed and upload WAV files. See
-`notebooks/training/83_voice_emotion.ipynb`.
-
-**What Python version should I use?**  
-Python 3.11 is the recommended baseline for local and CI.
-
-## Deployment
-
-Docker:
-```bash
-docker compose up --build
-```
-
-Production compose (API + UI + optional monitoring):
-```bash
-cp .env.production.example .env
-docker compose -f docker-compose.production.yml up -d --build
-```
-
-See `docs/PRODUCTION_DEPLOYMENT.md` for deployment details.
-
-## Project structure
-
-```
-app/                    FastAPI + Streamlit UI
-app/legacy/             Legacy API modules used by app/main.py
-ui-web/                 React + Tailwind web UI
-src/                    Training and model code
-scripts/                Data prep + training entrypoints
-configs/                Dataset and model configs
-notebooks/              EDA, training, evaluation, overview
-docs/                   Documentation
-```
-
-## Roadmap
-- Publish a public demo dataset pack for quick evaluation.
-- Add automated model registry + artifact versioning.
-- Expand the web UI with richer analytics + timeline panels.
-- Add real-time streaming inference for vision and audio.
-- Provide a full CI pipeline for model training reproducibility.
+## Documentation
+Start here: `docs/README.md`
 
 ## License
-MIT. See `LICENSE`.
+MIT (see `LICENSE`).

@@ -18,7 +18,7 @@ export default function Home() {
               SentinelForge Command Center
             </h1>
             <p className="mt-4 text-base text-slate-200">
-              A production-grade AI platform that unifies risk intelligence, multimodal inference,
+              A production-grade platform that unifies risk intelligence, multimodal inference,
               and monitoring into one operational surface. Built to be API-first and audit-ready.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -86,7 +86,7 @@ export default function Home() {
         <SectionHeader
           eyebrow="Skill Stack"
           title="Engineering focus"
-          description="Showcase-ready technologies and systems thinking aligned to modern AI product delivery."
+          description="Showcase-ready technologies and systems thinking aligned to modern product delivery."
         />
         <div className="grid gap-4 md:grid-cols-2">
           <div className="card-panel px-6 py-6">
