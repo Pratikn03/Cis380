@@ -477,10 +477,12 @@ def setup_production_middleware(
     app.add_middleware(RequestIDMiddleware)
 
     # 6. CORS (always last - first executed)
+    resolved_origins = cors_origins or ["*"]
+    allow_credentials = resolved_origins != ["*"]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=cors_origins or ["*"],
-        allow_credentials=True,
+        allow_origins=resolved_origins,
+        allow_credentials=allow_credentials,
         allow_methods=["*"],
         allow_headers=["*"],
         expose_headers=["X-Request-ID", "X-Response-Time"],

@@ -26,6 +26,8 @@ def _ensure_resources():
 
 
 def recommend(user_id: str = "anon", top_k: int = 5) -> list[dict[str, Any]]:
+    import random
+    
     features, index = _ensure_resources()
     candidates = []
     for idx, row in features.df.iterrows():
@@ -38,6 +40,11 @@ def recommend(user_id: str = "anon", top_k: int = 5) -> list[dict[str, Any]]:
                 "tags": row.get("tags", ""),
             }
         )
+    
+    # Randomize: pick from larger pool to give varied results
+    pool_size = min(50, len(candidates))
+    if pool_size > top_k:
+        return random.sample(candidates[:pool_size], top_k)
     return candidates[:top_k]
 
 

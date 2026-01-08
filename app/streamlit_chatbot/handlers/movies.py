@@ -276,6 +276,8 @@ def _extract_title_terms(query: str) -> list[str]:
 
 
 def _recommend_movies_offline(query: str, top_n: int) -> list[dict]:
+    import random
+    
     items = _load_movielens_items()
     if not items:
         return movies_fallback(query)
@@ -323,8 +325,15 @@ def _recommend_movies_offline(query: str, top_n: int) -> list[dict]:
     else:
         filtered.sort(key=lambda it: int(it.get("popularity") or 0), reverse=True)
 
+    # Add randomization: pick from top 50 popular movies randomly
+    pool_size = min(50, len(filtered))
+    if pool_size > top_n:
+        selected = random.sample(filtered[:pool_size], top_n)
+    else:
+        selected = filtered[:top_n]
+
     out: list[dict] = []
-    for it in filtered[:top_n]:
+    for it in selected:
         tags = it.get("tags") or ""
         pop = int(it.get("popularity") or 0)
         reason_parts = []
