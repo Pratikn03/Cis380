@@ -20,3 +20,7 @@ The production entrypoints live under `scripts/` and `src/`.
 - `notebooks/training/86_rag_ingest_query.ipynb`: RAG ingest + retrieval test.
 - `notebooks/training/87_video_temporal.ipynb`: Video temporal deepfake model.
 - `notebooks/training/88_action_recommender.ipynb`: Risk-action recommender (ALLOW/BLOCK, etc.).
+
+## Key evaluation notebooks
+
+- `notebooks/evaluation/98_metrics_audit.ipynb`: Readiness audit for metrics (95% threshold, includes YOLO runs).
