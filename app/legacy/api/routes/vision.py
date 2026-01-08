@@ -1,3 +1,75 @@
+"""
+==============================================================================
+VISION API ROUTE - Image Classification & Real/Fake Detection
+==============================================================================
+Author: Pratik Niroula
+Project: Universal Anomaly Intelligence System (UAIS)
+
+WHAT THIS FILE DOES:
+--------------------
+This file provides API endpoints for computer vision tasks:
+
+1. /api/vision/train - Train image classification models
+2. /api/vision/predict - Classify single images (real vs fake)
+3. /api/vision/classify-image - Alternative classification endpoint
+4. /api/vision/classify-video - Analyze video frames
+5. /api/vision/batch - Batch process multiple images
+
+MAIN USE CASE:
+--------------
+Detecting FAKE (manipulated/AI-generated) vs REAL images.
+This is useful for:
+- Identifying deepfakes
+- Detecting AI-generated images
+- Verifying authentic photographs
+
+HOW IMAGE CLASSIFICATION WORKS:
+-------------------------------
+    Input Image (e.g., photo.jpg)
+           │
+           ▼
+    ┌─────────────────────────────────────┐
+    │  Preprocessing                       │
+    │  - Resize to 224x224 pixels         │
+    │  - Normalize RGB values (0-1)       │
+    │  - Apply ImageNet normalization     │
+    └─────────────────────────────────────┘
+           │
+           ▼
+    ┌─────────────────────────────────────┐
+    │  CNN Model (ResNet18)               │
+    │  - Extract visual features          │
+    │  - Convolution layers detect edges, │
+    │    textures, patterns               │
+    │  - Fully connected layer outputs    │
+    │    class probabilities              │
+    └─────────────────────────────────────┘
+           │
+           ▼
+    Output: {"label": "REAL", "confidence": 0.92}
+
+MODEL FILES:
+------------
+    models/vision/resnet/model.pt     - Trained PyTorch model weights
+    models/vision/resnet/classes.txt  - Class names (e.g., "FAKE", "REAL")
+
+SUPPORTED IMAGE FORMATS:
+------------------------
+    .jpg, .jpeg, .png, .bmp, .gif, .tiff, .webp
+
+API EXAMPLES:
+-------------
+    # Classify single image
+    curl -X POST http://localhost:8000/api/vision/predict \\
+         -F "file=@photo.jpg"
+    
+    # Train new model
+    curl -X POST http://localhost:8000/api/vision/train \\
+         -H "Content-Type: application/json" \\
+         -d '{"dataset_dir": "data/raw/images", "epochs": 10}'
+==============================================================================
+"""
+
 from __future__ import annotations
 
 from collections import Counter
@@ -13,8 +85,12 @@ from pydantic import BaseModel, Field
 from ..deps import require_auth
 from uais.vision.train_vision_model import IMAGE_EXTENSIONS, VisionConfig, run_vision_experiment
 
+# ==============================================================================
+# ROUTER SETUP
+# ==============================================================================
 router = APIRouter(prefix="/api/vision", tags=["vision"], dependencies=[Depends(require_auth)])
 
+# Default path to training dataset (Intel Image Classification dataset)
 DEFAULT_DATASET = (
     "data/raw/vision/datasets/puneet6060/intel-image-classification/versions/2/seg_train/seg_train"
 )

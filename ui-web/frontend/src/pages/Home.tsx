@@ -1,7 +1,60 @@
-import { Link } from "react-router-dom";
+/**
+ * ==============================================================================
+ * HOME PAGE - Main Landing Page for Portfolio Website
+ * ==============================================================================
+ * Author: Pratik Niroula
+ * Project: Universal Anomaly Intelligence System (UAIS)
+ *
+ * WHAT THIS FILE DOES:
+ * --------------------
+ * This is the main landing page of the portfolio website. It displays:
+ * 1. Hero section with name and introduction
+ * 2. Statistics showing project achievements
+ * 3. Core capabilities (the 6 ML modules)
+ * 4. Technology stack used in the project
+ * 5. Call-to-action to view the live demo
+ *
+ * REACT CONCEPTS USED:
+ * --------------------
+ * - Functional Component: `export default function Home()`
+ * - JSX: HTML-like syntax in JavaScript
+ * - Props: Not used here (static content)
+ * - Array.map(): To render lists of items (stats, features, tech stack)
+ * - Link: React Router component for navigation without page reload
+ *
+ * TAILWIND CSS:
+ * -------------
+ * This file uses Tailwind CSS utility classes for styling:
+ * - bg-slate-900: Dark background color
+ * - text-emerald-400: Green text color
+ * - grid md:grid-cols-3: 3-column grid on medium+ screens
+ * - hover:bg-emerald-400: Color change on mouse hover
+ *
+ * FILE STRUCTURE:
+ * ---------------
+ *   Home.tsx (this file)
+ *       │
+ *       ├── Hero Section (name, title, description, buttons)
+ *       ├── Stats Section (Images Processed, ML Models, etc.)
+ *       ├── Features Section (Fraud, Vision, Cyber, NLP, Behavior, Fusion)
+ *       ├── Tech Stack Section (Python, React, PyTorch, etc.)
+ *       └── CTA Section (Launch Command Center button)
+ * ==============================================================================
+ */
 
+import { Link } from "react-router-dom"; // React Router for navigation
+
+/**
+ * Home Component
+ *
+ * The main landing page of the portfolio website.
+ * This is a "functional component" - a JavaScript function that returns JSX.
+ *
+ * @returns JSX.Element - The rendered HTML-like content
+ */
 export default function Home() {
   return (
+    // Main container - full screen height with gradient background
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-20 pb-32 px-6">
@@ -11,7 +64,7 @@ export default function Home() {
             Full-Stack Developer & ML Engineer
           </p>
           <h1 className="mt-6 text-5xl md:text-7xl font-bold bg-gradient-to-r from-white via-emerald-100 to-emerald-300 bg-clip-text text-transparent leading-tight">
-            Pratik Narwadkar
+            Pratik Niroula
           </h1>
           <p className="mt-8 text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
             Building intelligent systems that detect anomalies, prevent fraud, and secure digital infrastructure through advanced machine learning.

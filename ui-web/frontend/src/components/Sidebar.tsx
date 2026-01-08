@@ -11,7 +11,7 @@ export default function Sidebar() {
           PN
         </div>
         <div>
-          <p className="text-lg font-bold text-white">Pratik N.</p>
+          <p className="text-lg font-bold text-white">Pratik Niroula</p>
           <p className="text-xs text-slate-400">ML Engineer</p>
         </div>
       </div>
