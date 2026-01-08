@@ -45,9 +45,10 @@ import time
 
 # FastAPI - Modern web framework for building APIs
 from fastapi import Depends, FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware  # Allows web browsers to access API
 from fastapi.staticfiles import StaticFiles  # Serves React frontend files
 from prometheus_client import Counter, Histogram  # Metrics for monitoring
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 # ==============================================================================
 # PATH SETUP - Ensure Python can find our project modules
@@ -76,6 +77,7 @@ except Exception:
 # ==============================================================================
 # IMPORT API ROUTES - Each route handles a specific ML service
 # ==============================================================================
+from app.core import settings, setup_production_middleware  # noqa: E402
 from app.legacy.api.deps import require_auth  # noqa: E402
 from app.legacy.api.routes import behavior, chat, cyber, fraud, rag, recommend, vision  # noqa: E402
 
@@ -193,38 +195,27 @@ REQUEST_LATENCY = Histogram(
 # ==============================================================================
 app = FastAPI(
     title="OmniChatX API",  # Shown in API docs at /docs
-    version="0.2"           # API version
+    version="0.2",          # API version
 )
 
-
-def _parse_cors_origins() -> list[str]:
-    """
-    Parse CORS origins from environment variable.
-    
-    CORS (Cross-Origin Resource Sharing) controls which websites can access this API.
-    - "*" means any website can access (good for development)
-    - For production, set CORS_ORIGINS="https://yourdomain.com,https://app.yourdomain.com"
-    
-    Returns:
-        list[str]: List of allowed origins, or ["*"] for all
-    """
-    raw = (os.getenv("CORS_ORIGINS") or "*").strip()
-    if not raw or raw == "*":
-        return ["*"]
-    return [o.strip() for o in raw.split(",") if o.strip()]
-
-
 # ==============================================================================
-# CORS MIDDLEWARE - Allow web browsers to access this API
+# PRODUCTION MIDDLEWARE - Security headers, rate limits, CORS, request IDs
 # ==============================================================================
-_cors_origins = _parse_cors_origins()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=_cors_origins,                      # Which domains can access
-    allow_credentials=_cors_origins != ["*"],         # Allow cookies if not wildcard
-    allow_methods=["*"],                              # Allow all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],                              # Allow all headers
+setup_production_middleware(
+    app,
+    cors_origins=settings.security.cors_origins,
+    rate_limit_enabled=settings.security.rate_limit_enabled,
+    rate_limit_requests=settings.security.rate_limit_requests,
+    rate_limit_window=settings.security.rate_limit_window,
+    max_request_size=settings.max_request_size,
 )
+
+# Optional hardening: host validation + HTTPS redirect in production.
+_allowed_hosts = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "*").split(",") if h.strip()]
+if _allowed_hosts != ["*"]:
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=_allowed_hosts)
+if os.getenv("FORCE_HTTPS", "false").lower() == "true":
+    app.add_middleware(HTTPSRedirectMiddleware)
 
 # ==============================================================================
 # STATIC FILES - Serve the React frontend
@@ -298,14 +289,15 @@ async def log_requests(request: Request, call_next):
     REQUEST_COUNTER.labels(request.method, path, response.status_code).inc()
     REQUEST_LATENCY.labels(request.method, path).observe(duration)
     
-    # Log the request
-    logger.info(
-        "%s %s -> %s (%.3fs)",    # Format string
-        request.method,           # GET, POST, etc.
-        path,                     # /api/fraud
-        response.status_code,     # 200, 404, etc.
-        duration,                 # Time in seconds
-    )
+    # Log the request (optional; set LOG_REQUESTS=true to enable)
+    if os.getenv("LOG_REQUESTS", "false").lower() == "true":
+        logger.info(
+            "%s %s -> %s (%.3fs)",    # Format string
+            request.method,           # GET, POST, etc.
+            path,                     # /api/fraud
+            response.status_code,     # 200, 404, etc.
+            duration,                 # Time in seconds
+        )
     return response
 
 

@@ -84,6 +84,16 @@ from pydantic import BaseModel, Field
 
 from ..deps import require_auth
 from uais.vision.train_vision_model import IMAGE_EXTENSIONS, VisionConfig, run_vision_experiment
+from app.utils.uploads import (
+    IMAGE_EXTENSIONS as SAFE_IMAGE_EXTENSIONS,
+    IMAGE_MIME_TYPES,
+    MAX_IMAGE_BYTES,
+    MAX_VIDEO_BYTES,
+    VIDEO_EXTENSIONS,
+    VIDEO_MIME_TYPES,
+    read_upload_bytes,
+    validate_upload,
+)
 
 # ==============================================================================
 # ROUTER SETUP
@@ -270,9 +280,18 @@ async def vision_predict(file: UploadFile = File(...), top_k: int = 3):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"Missing deps: {exc}"
         ) from exc
 
+    validate_upload(
+        file,
+        allowed_exts=SAFE_IMAGE_EXTENSIONS,
+        allowed_mimes=IMAGE_MIME_TYPES,
+        max_bytes=MAX_IMAGE_BYTES,
+        kind="image",
+    )
     try:
-        image_bytes = await file.read()
+        image_bytes = await read_upload_bytes(file, max_bytes=MAX_IMAGE_BYTES, kind="image")
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid image: {exc}"
@@ -328,8 +347,17 @@ async def vision_predict(file: UploadFile = File(...), top_k: int = 3):
 @router.post("/face_emotion/predict")
 async def face_emotion_predict(file: UploadFile = File(...), top_k: int = 3):
     """Predict a 7-class facial emotion label from an uploaded image."""
+    validate_upload(
+        file,
+        allowed_exts=SAFE_IMAGE_EXTENSIONS,
+        allowed_mimes=IMAGE_MIME_TYPES,
+        max_bytes=MAX_IMAGE_BYTES,
+        kind="image",
+    )
     try:
-        image_bytes = await file.read()
+        image_bytes = await read_upload_bytes(file, max_bytes=MAX_IMAGE_BYTES, kind="image")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read upload: {exc}"
@@ -405,8 +433,17 @@ async def vision_video_predict(
             detail=f"Vision model load failed: {exc}",
         ) from exc
 
+    validate_upload(
+        file,
+        allowed_exts=VIDEO_EXTENSIONS,
+        allowed_mimes=VIDEO_MIME_TYPES,
+        max_bytes=MAX_VIDEO_BYTES,
+        kind="video",
+    )
     try:
-        video_bytes = await file.read()
+        video_bytes = await read_upload_bytes(file, max_bytes=MAX_VIDEO_BYTES, kind="video")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read upload: {exc}"

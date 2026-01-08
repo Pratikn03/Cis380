@@ -10,6 +10,13 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.logger import logger
 
 from app.models.vision.temporal.model import TemporalDeepfakeLSTM
+from app.utils.uploads import (
+    MAX_VIDEO_BYTES,
+    VIDEO_EXTENSIONS,
+    VIDEO_MIME_TYPES,
+    read_upload_bytes,
+    validate_upload,
+)
 
 router = APIRouter(prefix="/vision/video_temporal", tags=["vision-temporal"])
 
@@ -58,9 +65,14 @@ def _sample_clip(path: str, clip_len: int, size: int) -> torch.Tensor:
 
 @router.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    data = await file.read()
-    if not data:
-        raise HTTPException(status_code=400, detail="Uploaded video is empty.")
+    validate_upload(
+        file,
+        allowed_exts=VIDEO_EXTENSIONS,
+        allowed_mimes=VIDEO_MIME_TYPES,
+        max_bytes=MAX_VIDEO_BYTES,
+        kind="video",
+    )
+    data = await read_upload_bytes(file, max_bytes=MAX_VIDEO_BYTES, kind="video")
 
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
     tmp.write(data)

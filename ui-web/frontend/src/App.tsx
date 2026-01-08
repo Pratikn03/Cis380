@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import CommandCenter from "./pages/CommandCenter";
+import Chat from "./pages/Chat";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/command-center" element={<CommandCenter />} />
+              <Route path="/chat" element={<Chat />} />
             </Routes>
           </div>
           <Footer />

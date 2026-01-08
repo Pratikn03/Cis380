@@ -9,6 +9,7 @@ from fastapi import File, UploadFile
 from pydantic import BaseModel
 
 from ..deps import require_auth
+from app.utils.uploads import CSV_EXTENSIONS, MAX_CSV_BYTES, read_upload_bytes, validate_upload
 
 router = APIRouter(prefix="/api/behavior", tags=["behavior"], dependencies=[Depends(require_auth)])
 
@@ -204,8 +205,17 @@ async def predict_behavior_logs(
             detail = f"Behavior model failed to load: {_behavior_error}"
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=detail)
 
+    validate_upload(
+        file,
+        allowed_exts=CSV_EXTENSIONS,
+        allowed_mimes=None,
+        max_bytes=MAX_CSV_BYTES,
+        kind="csv",
+    )
     try:
-        raw = await file.read()
+        raw = await read_upload_bytes(file, max_bytes=MAX_CSV_BYTES, kind="csv")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read upload: {exc}"

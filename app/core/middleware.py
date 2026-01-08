@@ -290,6 +290,66 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 
 # ============================================
+# Request Size Limit Middleware
+# ============================================
+
+
+def _parse_size_to_bytes(raw: str) -> int:
+    """Parse size strings like '50MB' or '2GB' into bytes."""
+    value = raw.strip().lower()
+    if not value:
+        return 0
+    if value.isdigit():
+        return int(value)
+    units = {
+        "kb": 1024,
+        "mb": 1024 * 1024,
+        "gb": 1024 * 1024 * 1024,
+        "b": 1,
+    }
+    for suffix, multiplier in units.items():
+        if value.endswith(suffix):
+            number = value[: -len(suffix)].strip()
+            return int(float(number) * multiplier)
+    raise ValueError(f"Invalid size format: {raw}")
+
+
+class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
+    """Reject requests with Content-Length larger than the configured limit."""
+
+    def __init__(self, app: FastAPI, max_bytes: int = 0, enabled: bool = True):
+        super().__init__(app)
+        self.max_bytes = max_bytes
+        self.enabled = enabled and max_bytes > 0
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        if not self.enabled:
+            return await call_next(request)
+
+        if request.method in {"POST", "PUT", "PATCH"}:
+            length = request.headers.get("content-length")
+            if length:
+                try:
+                    size = int(length)
+                except ValueError:
+                    size = -1
+                if size > self.max_bytes:
+                    request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
+                    return JSONResponse(
+                        status_code=413,
+                        content=create_error_response(
+                            request_id=request_id,
+                            status_code=413,
+                            error_code="REQUEST_TOO_LARGE",
+                            message="Request payload too large",
+                            details={"max_bytes": self.max_bytes, "received_bytes": size},
+                            path=str(request.url.path),
+                        ),
+                    )
+        return await call_next(request)
+
+
+# ============================================
 # Request ID Middleware
 # ============================================
 
@@ -382,6 +442,7 @@ def setup_production_middleware(
     rate_limit_enabled: bool = True,
     rate_limit_requests: int = 100,
     rate_limit_window: int = 60,
+    max_request_size: str | None = None,
 ) -> None:
     """Setup all production middleware and error handlers."""
 
@@ -404,10 +465,18 @@ def setup_production_middleware(
         enabled=rate_limit_enabled,
     )
 
-    # 4. Request ID
+    # 4. Request size limit
+    if max_request_size:
+        try:
+            max_bytes = _parse_size_to_bytes(max_request_size)
+        except ValueError:
+            max_bytes = 0
+        app.add_middleware(RequestSizeLimitMiddleware, max_bytes=max_bytes, enabled=True)
+
+    # 5. Request ID
     app.add_middleware(RequestIDMiddleware)
 
-    # 5. CORS (always last - first executed)
+    # 6. CORS (always last - first executed)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins or ["*"],

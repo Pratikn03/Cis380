@@ -5,6 +5,13 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 
 from app.services.stt.whisper_stt import WhisperSTT
+from app.utils.uploads import (
+    AUDIO_EXTENSIONS,
+    AUDIO_MIME_TYPES,
+    MAX_AUDIO_BYTES,
+    read_upload_bytes,
+    validate_upload,
+)
 
 router = APIRouter(prefix="/stt", tags=["stt"])
 
@@ -14,9 +21,14 @@ async def transcribe_audio(
     file: UploadFile = File(...),
     language: Optional[str] = Form(default=None),
 ) -> Dict[str, Any]:
-    audio_bytes = await file.read()
-    if not audio_bytes:
-        raise HTTPException(status_code=400, detail="Uploaded audio file was empty.")
+    validate_upload(
+        file,
+        allowed_exts=AUDIO_EXTENSIONS,
+        allowed_mimes=AUDIO_MIME_TYPES,
+        max_bytes=MAX_AUDIO_BYTES,
+        kind="audio",
+    )
+    audio_bytes = await read_upload_bytes(file, max_bytes=MAX_AUDIO_BYTES, kind="audio")
 
     suffix = ".wav"
     if file.filename and "." in file.filename:

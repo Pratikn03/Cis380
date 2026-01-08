@@ -2,6 +2,14 @@ from __future__ import annotations
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
+from app.utils.uploads import (
+    IMAGE_EXTENSIONS,
+    IMAGE_MIME_TYPES,
+    MAX_IMAGE_BYTES,
+    read_upload_bytes,
+    validate_upload,
+)
+
 router = APIRouter(prefix="/api/vision/brand", tags=["vision", "brand"])
 
 
@@ -11,8 +19,17 @@ async def predict_brand(file: UploadFile = File(...), conf: float = 0.25):
 
     Returns a list of detections: {brand, confidence, bbox:[x1,y1,x2,y2]}.
     """
+    validate_upload(
+        file,
+        allowed_exts=IMAGE_EXTENSIONS,
+        allowed_mimes=IMAGE_MIME_TYPES,
+        max_bytes=MAX_IMAGE_BYTES,
+        kind="image",
+    )
     try:
-        image_bytes = await file.read()
+        image_bytes = await read_upload_bytes(file, max_bytes=MAX_IMAGE_BYTES, kind="image")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=400, detail=f"Could not read upload: {exc}") from exc
 
