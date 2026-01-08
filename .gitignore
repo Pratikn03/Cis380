@@ -94,9 +94,6 @@ wheels/
 # Node / Frontend
 # ============================================
 node_modules/
-*.tsbuildinfo
-ui-web/frontend/vite.config.js
-ui-web/frontend/vite.config.d.ts
 
 # ============================================
 # ML/AI Specific

@@ -4,10 +4,15 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable
 
+import os
+
 import joblib
 import numpy as np
 
-MODEL_PATH = Path("models/fusion/fusion_meta_model.pkl")
+MODEL_CANDIDATES = [
+    Path(os.getenv("FUSION_MODEL_PATH", "models/fusion/fusion_meta_model.pkl")),
+    Path("experiments/fusion/models/fusion_meta_model.pkl"),
+]
 DEFAULT_KEYS = ["behavior", "cyber", "fraud", "vision", "voice"]
 
 
@@ -17,10 +22,15 @@ def _normalize_keys(keys: Iterable[str]) -> list[str]:
 
 @lru_cache(maxsize=1)
 def _load_model() -> dict[str, Any]:
-    if not MODEL_PATH.exists():
-        raise FileNotFoundError(f"Fusion model not found at {MODEL_PATH}")
+    model_path = None
+    for candidate in MODEL_CANDIDATES:
+        if candidate.exists():
+            model_path = candidate
+            break
+    if model_path is None:
+        raise FileNotFoundError("Fusion model not found in known locations.")
 
-    obj = joblib.load(MODEL_PATH)
+    obj = joblib.load(model_path)
     if isinstance(obj, dict):
         model = obj.get("model") or obj.get("estimator") or obj.get("clf")
         scaler = obj.get("scaler")
@@ -41,7 +51,7 @@ def _load_model() -> dict[str, Any]:
         # Pad with extra keys if the model expects more inputs.
         keys = keys + [f"feature_{i}" for i in range(len(keys), expected)]
 
-    return {"model": model, "scaler": scaler, "keys": keys}
+    return {"model": model, "scaler": scaler, "keys": keys, "model_path": str(model_path)}
 
 
 def _build_vector(signals: dict[str, Any], keys: list[str]) -> np.ndarray:
@@ -60,6 +70,7 @@ def predict_fusion(signals: dict[str, Any], threshold: float = 0.8) -> dict[str,
     model = payload["model"]
     scaler = payload["scaler"]
     keys: list[str] = payload["keys"]
+    model_path = payload.get("model_path")
 
     X = _build_vector(signals, keys)
     if scaler is not None:
@@ -79,5 +90,5 @@ def predict_fusion(signals: dict[str, Any], threshold: float = 0.8) -> dict[str,
         "decision": decision,
         "threshold": threshold,
         "feature_order": keys,
-        "model_path": str(MODEL_PATH),
+        "model_path": model_path,
     }

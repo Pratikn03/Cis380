@@ -7,6 +7,8 @@ import os
 import joblib
 import numpy as np
 
+from app.fusion.engine import predict_fusion
+
 MODEL_PATHS = {
     "cyber": Path("models/cyber/supervised/cyber_model.pkl"),
     "behavior": Path("models/behavior/behavior_lof.pkl"),
@@ -14,7 +16,6 @@ MODEL_PATHS = {
 }
 
 _MODELS: Dict[str, Any] | None = None
-_FUSION: dict[str, Any] | None = None
 
 # A small, stable set of generic risk features. If the deployed models expect many
 # more features, we pad with zeros so inference doesn't crash.
