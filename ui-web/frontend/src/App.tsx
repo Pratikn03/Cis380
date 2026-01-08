@@ -3,8 +3,6 @@ import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import CommandCenter from "./pages/CommandCenter";
-import Architecture from "./pages/Architecture";
-import Operations from "./pages/Operations";
 
 export default function App() {
   return (
@@ -15,9 +13,7 @@ export default function App() {
           <div className="flex-1">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/command" element={<CommandCenter />} />
-              <Route path="/architecture" element={<Architecture />} />
-              <Route path="/operations" element={<Operations />} />
+              <Route path="/command-center" element={<CommandCenter />} />
             </Routes>
           </div>
           <Footer />
