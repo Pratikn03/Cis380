@@ -3,10 +3,15 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "homepage": "https://pratikn03.github.io/Cis380",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "build:local": "VITE_BASE_PATH=/ui/ tsc -b && vite build",
+    "build:github": "tsc -b && vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build:github",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "axios": "^1.7.5",
@@ -21,6 +26,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
+    "gh-pages": "^6.1.1",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
     "typescript": "^5.5.4",

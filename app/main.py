@@ -1,4 +1,4 @@
-"""FastAPI gateway for SentinelForge (pure HTTP, no Streamlit)."""
+"""FastAPI gateway for OmniChatX (pure HTTP, no Streamlit)."""
 
 from __future__ import annotations
 
@@ -47,54 +47,54 @@ _app_vision_temporal_router = None
 try:  # pragma: no cover
     from app.api.risk import router as _app_risk_router
 except Exception as exc:  # pragma: no cover
-    logging.getLogger("sentinelforge").warning("app.api.risk router unavailable: %s", exc)
+    logging.getLogger("omnichatx").warning("app.api.risk router unavailable: %s", exc)
     _app_risk_router = None
 
 try:  # pragma: no cover
     from app.api.monitor import router as _app_monitor_router
 except Exception as exc:  # pragma: no cover
-    logging.getLogger("sentinelforge").warning("app.api.monitor router unavailable: %s", exc)
+    logging.getLogger("omnichatx").warning("app.api.monitor router unavailable: %s", exc)
     _app_monitor_router = None
 
 try:  # pragma: no cover
     from app.api.voice import router as _app_voice_router
 except Exception as exc:  # pragma: no cover
-    logging.getLogger("sentinelforge").warning("app.api.voice router unavailable: %s", exc)
+    logging.getLogger("omnichatx").warning("app.api.voice router unavailable: %s", exc)
     _app_voice_router = None
 
 try:  # pragma: no cover
     from app.api.rag import router as _app_rag_router
 except Exception as exc:  # pragma: no cover
-    logging.getLogger("sentinelforge").warning("app.api.rag router unavailable: %s", exc)
+    logging.getLogger("omnichatx").warning("app.api.rag router unavailable: %s", exc)
     _app_rag_router = None
 
 try:  # pragma: no cover
     from app.api.brand import router as _app_brand_router
 except Exception as exc:  # pragma: no cover
-    logging.getLogger("sentinelforge").warning("app.api.brand router unavailable: %s", exc)
+    logging.getLogger("omnichatx").warning("app.api.brand router unavailable: %s", exc)
     _app_brand_router = None
 
 try:  # pragma: no cover
     from app.api.stt import router as _app_stt_router
 except Exception as exc:  # pragma: no cover
-    logging.getLogger("sentinelforge").warning("app.api.stt router unavailable: %s", exc)
+    logging.getLogger("omnichatx").warning("app.api.stt router unavailable: %s", exc)
     _app_stt_router = None
 
 try:  # pragma: no cover
     from app.api.vision_temporal import router as _app_vision_temporal_router
 except Exception as exc:  # pragma: no cover
-    logging.getLogger("sentinelforge").warning("app.api.vision_temporal router unavailable: %s", exc)
+    logging.getLogger("omnichatx").warning("app.api.vision_temporal router unavailable: %s", exc)
     _app_vision_temporal_router = None
 
 try:  # pragma: no cover
     from app.core import health_router as _health_router
 except Exception as exc:  # pragma: no cover
-    logging.getLogger("sentinelforge").warning("app.core.health router unavailable: %s", exc)
+    logging.getLogger("omnichatx").warning("app.core.health router unavailable: %s", exc)
     _health_router = None
 
 from fastapi.responses import RedirectResponse  # noqa: E402
 
-logger = logging.getLogger("sentinelforge")
+logger = logging.getLogger("omnichatx")
 _log_level_name = (os.getenv("LOG_LEVEL") or "INFO").upper()
 logger.setLevel(getattr(logging, _log_level_name, logging.INFO))
 if not logger.handlers:
@@ -108,18 +108,18 @@ if not logger.handlers:
     logger.addHandler(handler)
 
 REQUEST_COUNTER = Counter(
-    "sentinelforge_http_requests_total",
-    "Total HTTP requests handled by SentinelForge API",
+    "omnichatx_http_requests_total",
+    "Total HTTP requests handled by OmniChatX API",
     ["method", "path", "status"],
 )
 REQUEST_LATENCY = Histogram(
-    "sentinelforge_http_request_latency_seconds",
-    "Latency of HTTP requests handled by SentinelForge API",
+    "omnichatx_http_request_latency_seconds",
+    "Latency of HTTP requests handled by OmniChatX API",
     ["method", "path"],
 )
 
 
-app = FastAPI(title="SentinelForge API", version="0.2")
+app = FastAPI(title="OmniChatX API", version="0.2")
 
 
 def _parse_cors_origins() -> list[str]:
@@ -229,7 +229,7 @@ def api_health():
 
     return {
         "status": "ok",
-        "service": "sentinelforge",
+        "service": "omnichatx",
         "version": app.version,
         "python": {
             "version": platform.python_version(),
@@ -248,12 +248,7 @@ def api_health():
 def root_redirect():
     if ui_dir.exists():
         return RedirectResponse(url="/ui/")
-    return {
-        "message": (
-            "SentinelForge API. UI not found; build ui-web/frontend "
-            "(`npm run build`) to serve /ui."
-        )
-    }
+    return {"message": "OmniChatX API. UI not found; ensure ui/ directory exists."}
 
 
 if __name__ == "__main__":
