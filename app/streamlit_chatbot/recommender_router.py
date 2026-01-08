@@ -234,11 +234,35 @@ def route_recommendation(text: str, preference: dict | None = None) -> Dict[str,
         items = recommend_news(query=query, topic=None, news_api_key=cfg.news_api_key)
         category = "News"
 
+    # Generate varied answer text
+    import random
+    intros = [
+        f"Here are some {category.lower()} picks:",
+        f"I found these great {category.lower()} for you:",
+        f"Check out these {category.lower()} recommendations:",
+        f"Based on your request, here are some {category.lower()}:",
+        f"You might enjoy these {category.lower()}:",
+    ]
+    
+    answer_lines = [random.choice(intros)]
+    for i, item in enumerate(items[:5], 1):
+        title = item.get("title", "Unknown")
+        reason = item.get("reason", "")
+        if reason:
+            answer_lines.append(f"{i}. {title} — {reason}")
+        else:
+            answer_lines.append(f"{i}. {title}")
+    
+    answer = "\n".join(answer_lines)
+
     return {
         "route": "recommend",
+        "answer": answer,
+        "reply": answer,
         "category": category,
         "items": items,
         "intent": intent,
+        "available": True,
     }
 
 

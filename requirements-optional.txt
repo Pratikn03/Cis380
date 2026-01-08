@@ -12,3 +12,7 @@ lightfm>=1.17
 
 # Prefer full OpenCV instead of headless wheels (optional).
 opencv-python>=4.8.0
+
+# MLOps extras.
+mlflow>=2.9.0
+celery>=5.3.6

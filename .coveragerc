@@ -1,5 +1,14 @@
 [run]
-source = app/
+# Measure all source directories
+source = 
+    app/
+    src/
+    agent/
+    api/
+    backend/
+    dashboard/
+    rag/
+    recommender/
 branch = true
 omit =
     */tests/*
@@ -10,6 +19,9 @@ omit =
     */venv/*
     */.venv/*
     */site-packages/*
+
+# Fail if coverage drops below threshold (enable in CI)
+# fail_under = 60
 
 [report]
 exclude_lines =

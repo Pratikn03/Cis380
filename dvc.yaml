@@ -1,0 +1,180 @@
+# DVC Pipeline Configuration
+# ==========================
+# Defines the ML pipeline stages for reproducibility
+
+stages:
+  # ===================
+  # Data Preparation
+  # ===================
+  prepare_fraud_data:
+    cmd: python -m src.uais.data.load_fraud_data
+    deps:
+      - src/uais/data/load_fraud_data.py
+      - data/raw/fraud/
+    outs:
+      - data/processed/fraud/fraud_features.parquet
+    params:
+      - configs/data_fraud.yaml:
+          - sample_size
+          - random_seed
+
+  prepare_cyber_data:
+    cmd: python -m src.uais.data.load_cyber_data
+    deps:
+      - src/uais/data/load_cyber_data.py
+      - data/raw/cyber/
+    outs:
+      - data/processed/cyber/unsw_nb15_features.parquet
+    params:
+      - configs/data_cyber.yaml:
+          - sample_size
+
+  prepare_behavior_data:
+    cmd: python -m src.uais.data.load_behavior_data
+    deps:
+      - src/uais/data/load_behavior_data.py
+      - data/raw/behavior/
+    outs:
+      - data/processed/behavior/behavior_features.parquet
+
+  # ===================
+  # Feature Engineering
+  # ===================
+  engineer_fraud_features:
+    cmd: python -m src.uais.features.fraud_features
+    deps:
+      - src/uais/features/fraud_features.py
+      - data/processed/fraud/fraud_features.parquet
+    outs:
+      - data/processed/fraud/fraud_engineered.parquet
+    params:
+      - configs/fraud_baseline.yaml
+
+  engineer_cyber_features:
+    cmd: python -m src.uais.features.cyber_features
+    deps:
+      - src/uais/features/cyber_features.py
+      - data/processed/cyber/unsw_nb15_features.parquet
+    outs:
+      - data/processed/cyber/cyber_engineered.parquet
+    params:
+      - configs/cyber_baseline.yaml
+
+  # ===================
+  # Model Training
+  # ===================
+  train_fraud_model:
+    cmd: python -m src.uais.train.train_fraud
+    deps:
+      - src/uais/train/train_fraud.py
+      - data/processed/fraud/fraud_engineered.parquet
+    outs:
+      - models/fraud/supervised/fraud_model.pkl
+    params:
+      - configs/fraud_baseline.yaml:
+          - model_type
+          - hyperparameters
+    metrics:
+      - reports/fraud_metrics.json:
+          cache: false
+    plots:
+      - reports/fraud_roc.json:
+          x: fpr
+          y: tpr
+
+  train_cyber_model:
+    cmd: python -m src.uais.train.train_cyber
+    deps:
+      - src/uais/train/train_cyber.py
+      - data/processed/cyber/cyber_engineered.parquet
+    outs:
+      - models/cyber/supervised/cyber_model.pkl
+    params:
+      - configs/cyber_baseline.yaml
+    metrics:
+      - reports/cyber_metrics.json:
+          cache: false
+
+  train_behavior_model:
+    cmd: python -m src.uais.train.train_behavior
+    deps:
+      - src/uais/train/train_behavior.py
+      - data/processed/behavior/behavior_features.parquet
+    outs:
+      - models/behavior/unsupervised/behavior_model.pkl
+      - models/behavior/unsupervised/behavior_scaler.pkl
+    params:
+      - configs/behavior_baseline.yaml
+    metrics:
+      - reports/behavior_metrics.json:
+          cache: false
+
+  train_vision_model:
+    cmd: python -m src.uais.train.train_vision
+    deps:
+      - src/uais/train/train_vision.py
+      - data/processed/vision/
+    outs:
+      - models/vision/resnet/model.pt
+      - models/vision/resnet/classes.txt
+    params:
+      - configs/vision_baseline.yaml
+    metrics:
+      - reports/vision_metrics.json:
+          cache: false
+
+  train_recommender:
+    cmd: python -m src.uais.train.train_recommender
+    deps:
+      - src/uais/train/train_recommender.py
+      - data/processed/recommender/
+    outs:
+      - models/recommender/model.pkl
+    params:
+      - configs/base.yaml
+    metrics:
+      - reports/recommender_metrics.json:
+          cache: false
+
+  # ===================
+  # Evaluation
+  # ===================
+  evaluate_all:
+    cmd: python -m src.uais.evaluation.evaluate_all
+    deps:
+      - src/uais/evaluation/evaluate_all.py
+      - models/fraud/supervised/fraud_model.pkl
+      - models/cyber/supervised/cyber_model.pkl
+      - models/behavior/unsupervised/behavior_model.pkl
+      - models/vision/resnet/model.pt
+    outs:
+      - reports/evaluation_summary.json
+    plots:
+      - reports/model_comparison.json:
+          template: bar
+          x: model
+          y: accuracy
+
+# ===================
+# Parameters
+# ===================
+params:
+  - configs/base.yaml
+  - configs/fraud_baseline.yaml
+  - configs/cyber_baseline.yaml
+  - configs/behavior_baseline.yaml
+  - configs/vision_baseline.yaml
+
+# ===================
+# Plots Configuration
+# ===================
+plots:
+  - reports/fraud_roc.json:
+      x: fpr
+      y: tpr
+      title: "Fraud Detection ROC Curve"
+  - reports/model_comparison.json:
+      template: bar
+      x: model
+      y: accuracy
+      title: "Model Accuracy Comparison"
