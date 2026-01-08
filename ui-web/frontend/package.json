@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:local": "VITE_BASE_PATH=/ui/ tsc -b && vite build",
+    "build:local": "VITE_BASE_PATH=/ui/ tsc -b && VITE_BASE_PATH=/ui/ vite build",
     "build:github": "tsc -b && vite build",
     "preview": "vite preview",
     "predeploy": "npm run build:github",

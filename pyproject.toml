@@ -6,7 +6,6 @@ build-backend = "setuptools.build_meta"
 name = "sentinelforge"
 version = "0.1.0"
 description = "SentinelForge multimodal AI platform."
-readme = "README.md"
 requires-python = ">=3.9"
 authors = [{ name = "SentinelForge Team" }]
 keywords = ["anomaly detection", "fraud", "cyber", "mlops", "streamlit"]
