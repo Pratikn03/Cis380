@@ -135,110 +135,26 @@ def _pad_features(features: np.ndarray, expected: int) -> np.ndarray:
     return np.concatenate([features, pad], axis=1)
 
 
-def _load_fusion() -> dict[str, Any]:
-    global _FUSION
-    if _FUSION is not None:
-        return _FUSION
-
-    candidates = [
-        Path("models/fusion/fusion_meta_model.pkl"),
-        Path("experiments/fusion/models/fusion_meta_model.pkl"),
-    ]
-    for path in candidates:
-        if not path.exists():
-            continue
-        try:
-            obj = joblib.load(path)
-        except Exception as exc:  # pragma: no cover
-            _FUSION = {
-                "available": False,
-                "path": str(path),
-                "error": str(exc),
-                "model": None,
-                "scaler": None,
-            }
-            return _FUSION
-
-        if isinstance(obj, dict):
-            model = obj.get("model")
-            scaler = obj.get("scaler")
-        else:
-            model = obj
-            scaler = None
-
-        _FUSION = {
-            "available": model is not None,
-            "path": str(path),
-            "error": None,
-            "model": model,
-            "scaler": scaler,
-        }
-        return _FUSION
-
-    _FUSION = {
-        "available": False,
-        "path": None,
-        "error": "fusion model not found",
-        "model": None,
-        "scaler": None,
-    }
-    return _FUSION
-
-
 def _fusion_score(
     *, cyber_risk: float, behavior_risk: float, fraud_risk: float
 ) -> tuple[float, dict[str, Any]]:
-    fusion = _load_fusion()
-    if not fusion.get("available") or fusion.get("model") is None:
-        return 0.0, {"available": False, "path": fusion.get("path"), "error": fusion.get("error")}
-
-    score_dict = {
+    inputs = {
         "behavior": float(behavior_risk),
         "cyber": float(cyber_risk),
         "fraud": float(fraud_risk),
     }
-    keys = sorted(score_dict)
-    X = np.array([[score_dict[k] for k in keys]], dtype=float)
-    scaler = fusion.get("scaler")
-    if scaler is not None:
-        try:
-            X = scaler.transform(X)
-        except Exception as exc:  # pragma: no cover
-            return 0.0, {
-                "available": False,
-                "path": fusion.get("path"),
-                "error": f"scaler transform failed: {exc}",
-            }
-
-    model = fusion.get("model")
-    if model is None:
-        return 0.0, {
-            "available": False,
-            "path": fusion.get("path"),
-            "error": "fusion model not loaded",
-        }
     try:
-        if hasattr(model, "predict_proba"):
-            score = float(model.predict_proba(X)[0][1])
-        elif hasattr(model, "decision_function"):
-            raw = float(model.decision_function(X)[0])
-            score = float(1.0 / (1.0 + np.exp(-raw)))
-        else:
-            score = float(model.predict(X)[0])
-    except Exception as exc:  # pragma: no cover
-        return 0.0, {
-            "available": False,
-            "path": fusion.get("path"),
-            "error": f"fusion predict failed: {exc}",
+        result = predict_fusion(inputs)
+        return float(result.get("fusion_risk", 0.0)), {
+            "available": True,
+            "path": result.get("model_path"),
+            "decision": result.get("decision"),
+            "threshold": result.get("threshold"),
+            "feature_order": result.get("feature_order"),
+            "inputs": inputs,
         }
-
-    score = float(min(max(score, 0.0), 1.0))
-    return score, {
-        "available": True,
-        "path": fusion.get("path"),
-        "inputs": score_dict,
-        "feature_order": keys,
-    }
+    except Exception as exc:
+        return 0.0, {"available": False, "path": None, "error": str(exc), "inputs": inputs}
 
 
 def analyze_risk(payload: Mapping[str, Any]) -> Dict[str, Any]:
