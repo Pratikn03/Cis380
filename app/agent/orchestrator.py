@@ -204,10 +204,33 @@ class SentinelForgeOrchestrator:
 
     def _run_recommend(self, text: str, user_id: str) -> tuple[str, Dict[str, Any]]:
         import random
+        import re
+        
+        text_lower = text.lower()
+        
+        # Detect recommendation category from query
+        category = self._detect_recommend_category(text_lower)
+        
+        # Route to appropriate handler
+        if category == "clothes":
+            return self._recommend_clothes(text)
+        elif category == "movies":
+            return self._recommend_movies(text)
+        elif category == "news":
+            return self._recommend_news(text)
+        elif category == "courses":
+            return self._recommend_courses(text)
+        elif category == "cars":
+            return self._recommend_cars(text)
+        elif category == "electronics":
+            return self._recommend_electronics(text)
+        elif category == "places":
+            return self._recommend_places(text)
+        
+        # Default: generic recommendations
         items = recommend(user_id=user_id, top_k=5)
         titles = [item["title"] for item in items]
         
-        # Varied response templates
         templates = [
             "Here are some great picks for you:",
             "Based on your request, I recommend:",
@@ -223,6 +246,165 @@ class SentinelForgeOrchestrator:
             for item in items
         ]
         return answer, {"items": items, "explanations": explanations}
+    
+    def _detect_recommend_category(self, text: str) -> str:
+        """Detect what category of recommendation the user wants."""
+        # Clothing keywords
+        if any(kw in text for kw in ["cloth", "fashion", "wear", "outfit", "dress", "shirt", "pants", "jacket", "summer wear", "winter wear", "style"]):
+            return "clothes"
+        # Movie keywords
+        if any(kw in text for kw in ["movie", "film", "watch", "cinema", "show", "series", "netflix", "streaming"]):
+            return "movies"
+        # News keywords
+        if any(kw in text for kw in ["news", "article", "headline", "breaking", "current events", "latest"]):
+            return "news"
+        # Course keywords
+        if any(kw in text for kw in ["course", "learn", "tutorial", "class", "training", "education", "study"]):
+            return "courses"
+        # Car keywords
+        if any(kw in text for kw in ["car", "vehicle", "suv", "sedan", "truck", "automobile", "drive"]):
+            return "cars"
+        # Electronics keywords
+        if any(kw in text for kw in ["laptop", "phone", "computer", "tablet", "electronic", "gadget", "tech", "device"]):
+            return "electronics"
+        # Travel/Places keywords
+        if any(kw in text for kw in ["travel", "vacation", "destination", "place", "visit", "trip", "hotel", "flight"]):
+            return "places"
+        return "generic"
+    
+    def _recommend_clothes(self, text: str) -> tuple[str, Dict[str, Any]]:
+        """Clothing recommendations."""
+        try:
+            from app.streamlit_chatbot.handlers.clothes import recommend_clothes
+            items = recommend_clothes(age=None, query=text, top_k=5)
+            if items:
+                answer = "👕 **Clothing Recommendations:**\n\n"
+                for item in items:
+                    brand = item.get("brand", "")
+                    title = item.get("title", "")
+                    reason = item.get("reason", "")
+                    price = item.get("price_usd")
+                    price_str = f" - ${price:.0f}" if price else ""
+                    answer += f"• **{title}** by {brand}{price_str}\n  _{reason}_\n\n"
+                return answer, {"items": items, "category": "clothes"}
+        except Exception as e:
+            self.logger.warning(f"Clothes handler failed: {e}")
+        
+        # Fallback
+        return self._fallback_clothes(text)
+    
+    def _fallback_clothes(self, text: str) -> tuple[str, Dict[str, Any]]:
+        """Fallback clothing recommendations."""
+        items = [
+            {"title": "Classic White T-Shirt", "brand": "Uniqlo", "reason": "Versatile summer essential"},
+            {"title": "Linen Blend Shorts", "brand": "H&M", "reason": "Breathable for hot weather"},
+            {"title": "Canvas Sneakers", "brand": "Converse", "reason": "Timeless casual style"},
+            {"title": "Floral Summer Dress", "brand": "Zara", "reason": "Perfect for warm days"},
+            {"title": "Lightweight Denim Jacket", "brand": "Levi's", "reason": "Great for layering"},
+        ]
+        answer = "👕 **Clothing Recommendations:**\n\n"
+        for item in items:
+            answer += f"• **{item['title']}** by {item['brand']}\n  _{item['reason']}_\n\n"
+        return answer, {"items": items, "category": "clothes"}
+    
+    def _recommend_movies(self, text: str) -> tuple[str, Dict[str, Any]]:
+        """Movie recommendations."""
+        try:
+            from app.streamlit_chatbot.handlers.movies import recommend_movies
+            items = recommend_movies(query=text, top_n=5)
+            if items:
+                answer = "🎬 **Movie Recommendations:**\n\n"
+                for item in items:
+                    title = item.get("title", "")
+                    genre = item.get("genre", "")
+                    reason = item.get("reason", "")
+                    answer += f"• **{title}** ({genre})\n  _{reason}_\n\n"
+                return answer, {"items": items, "category": "movies"}
+        except Exception as e:
+            self.logger.warning(f"Movies handler failed: {e}")
+        
+        # Fallback
+        items = [
+            {"title": "Inception", "genre": "Sci-Fi/Thriller", "reason": "Mind-bending plot with stunning visuals"},
+            {"title": "The Shawshank Redemption", "genre": "Drama", "reason": "Timeless classic about hope"},
+            {"title": "Interstellar", "genre": "Sci-Fi", "reason": "Epic space exploration story"},
+            {"title": "Parasite", "genre": "Thriller", "reason": "Oscar-winning masterpiece"},
+            {"title": "The Dark Knight", "genre": "Action", "reason": "Best superhero film ever made"},
+        ]
+        answer = "🎬 **Movie Recommendations:**\n\n"
+        for item in items:
+            answer += f"• **{item['title']}** ({item['genre']})\n  _{item['reason']}_\n\n"
+        return answer, {"items": items, "category": "movies"}
+    
+    def _recommend_news(self, text: str) -> tuple[str, Dict[str, Any]]:
+        """News recommendations."""
+        items = [
+            {"title": "Tech Giants Report Quarterly Earnings", "source": "TechCrunch", "reason": "Major market impact"},
+            {"title": "Climate Summit Reaches New Agreement", "source": "Reuters", "reason": "Global policy shift"},
+            {"title": "AI Breakthrough in Medical Diagnosis", "source": "Nature", "reason": "Healthcare innovation"},
+            {"title": "Space Exploration Mission Update", "source": "NASA", "reason": "Scientific milestone"},
+            {"title": "Economic Outlook for 2025", "source": "Bloomberg", "reason": "Financial planning insights"},
+        ]
+        answer = "📰 **News Recommendations:**\n\n"
+        for item in items:
+            answer += f"• **{item['title']}** - {item['source']}\n  _{item['reason']}_\n\n"
+        return answer, {"items": items, "category": "news"}
+    
+    def _recommend_courses(self, text: str) -> tuple[str, Dict[str, Any]]:
+        """Course recommendations."""
+        items = [
+            {"title": "Machine Learning Specialization", "platform": "Coursera", "reason": "Industry-leading curriculum"},
+            {"title": "Full Stack Web Development", "platform": "Udemy", "reason": "Practical project-based learning"},
+            {"title": "Data Science Professional Certificate", "platform": "edX", "reason": "Harvard-backed program"},
+            {"title": "Python for Everybody", "platform": "Coursera", "reason": "Great for beginners"},
+            {"title": "AWS Cloud Practitioner", "platform": "AWS Training", "reason": "High demand certification"},
+        ]
+        answer = "📚 **Course Recommendations:**\n\n"
+        for item in items:
+            answer += f"• **{item['title']}** on {item['platform']}\n  _{item['reason']}_\n\n"
+        return answer, {"items": items, "category": "courses"}
+    
+    def _recommend_cars(self, text: str) -> tuple[str, Dict[str, Any]]:
+        """Car recommendations."""
+        items = [
+            {"title": "Tesla Model 3", "type": "Electric Sedan", "reason": "Best range and tech features"},
+            {"title": "Toyota RAV4 Hybrid", "type": "Hybrid SUV", "reason": "Reliable and fuel efficient"},
+            {"title": "Honda Civic", "type": "Compact Sedan", "reason": "Affordable and dependable"},
+            {"title": "Ford Mustang Mach-E", "type": "Electric SUV", "reason": "Sporty EV with great performance"},
+            {"title": "BMW 3 Series", "type": "Luxury Sedan", "reason": "Premium driving experience"},
+        ]
+        answer = "🚗 **Car Recommendations:**\n\n"
+        for item in items:
+            answer += f"• **{item['title']}** ({item['type']})\n  _{item['reason']}_\n\n"
+        return answer, {"items": items, "category": "cars"}
+    
+    def _recommend_electronics(self, text: str) -> tuple[str, Dict[str, Any]]:
+        """Electronics recommendations."""
+        items = [
+            {"title": "MacBook Air M3", "category": "Laptop", "reason": "Best battery life and performance"},
+            {"title": "iPhone 15 Pro", "category": "Smartphone", "reason": "Powerful camera and chip"},
+            {"title": "Sony WH-1000XM5", "category": "Headphones", "reason": "Industry-leading noise cancellation"},
+            {"title": "iPad Pro 12.9", "category": "Tablet", "reason": "Professional-grade display"},
+            {"title": "Samsung Galaxy S24 Ultra", "category": "Smartphone", "reason": "Best Android experience"},
+        ]
+        answer = "📱 **Electronics Recommendations:**\n\n"
+        for item in items:
+            answer += f"• **{item['title']}** ({item['category']})\n  _{item['reason']}_\n\n"
+        return answer, {"items": items, "category": "electronics"}
+    
+    def _recommend_places(self, text: str) -> tuple[str, Dict[str, Any]]:
+        """Travel/Places recommendations."""
+        items = [
+            {"title": "Kyoto, Japan", "type": "Cultural", "reason": "Ancient temples and beautiful gardens"},
+            {"title": "Santorini, Greece", "type": "Beach/Romantic", "reason": "Stunning sunsets and architecture"},
+            {"title": "Machu Picchu, Peru", "type": "Adventure", "reason": "Historic wonder with breathtaking views"},
+            {"title": "Iceland", "type": "Nature", "reason": "Northern lights and unique landscapes"},
+            {"title": "Barcelona, Spain", "type": "City", "reason": "Art, architecture, and vibrant nightlife"},
+        ]
+        answer = "✈️ **Travel Recommendations:**\n\n"
+        for item in items:
+            answer += f"• **{item['title']}** ({item['type']})\n  _{item['reason']}_\n\n"
+        return answer, {"items": items, "category": "places"}
 
     def _run_chat(self, text: str, emotion: dict[str, Any] | None) -> tuple[str, Dict[str, Any]]:
         prompt = text
