@@ -10,8 +10,8 @@ import {
   voiceEmotion,
 } from "../services/endpoints";
 
-type ToolId = "chat" | "vision" | "brand" | "audio" | "fraud" | "cyber" | "behavior";
-type FileToolId = "vision" | "brand" | "audio";
+type ToolId = "chat" | "vision" | "brand" | "audio" | "fraud" | "cyber" | "behavior" | "video";
+type FileToolId = "vision" | "brand" | "audio" | "video";
 type FeatureToolId = "fraud" | "cyber" | "behavior";
 
 interface RecommendationItem {
@@ -68,6 +68,7 @@ const toolOptions: Array<{ id: ToolId; label: string; description: string }> = [
   { id: "vision", label: "Vision", description: "Analyze images for authenticity and labels." },
   { id: "brand", label: "Brand", description: "Detect logos and brand marks in images." },
   { id: "audio", label: "Audio", description: "Detect emotion from audio clips." },
+  { id: "video", label: "Video", description: "Analyze video for deepfake detection." },
   { id: "fraud", label: "Fraud", description: "Score transaction features for fraud risk." },
   { id: "cyber", label: "Cyber", description: "Score network features for threat risk." },
   { id: "behavior", label: "Behavior", description: "Score user behavior features for anomalies." },
@@ -88,6 +89,11 @@ const fileToolConfig: Record<FileToolId, { label: string; accept: string; helper
     label: "Audio emotion",
     accept: "audio/*",
     helper: "WAV, MP3, M4A, AAC, OGG, FLAC, WEBM up to 25MB",
+  },
+  video: {
+    label: "Video analysis",
+    accept: "video/*",
+    helper: "MP4, MOV, AVI, MKV up to 100MB",
   },
 };
 
@@ -248,8 +254,16 @@ export default function Chat() {
     localStorage.getItem("backendUrl") || "http://localhost:8000"
   );
   const [isConnected, setIsConnected] = useState(false);
+  const [useRag, setUseRag] = useState(true);
+  const [showCamera, setShowCamera] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -287,6 +301,95 @@ export default function Chat() {
     setMessages((prev) => [...prev, message]);
   };
 
+  // Camera functions
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "environment", width: 640, height: 480 } 
+      });
+      setCameraStream(stream);
+      setShowCamera(true);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      appendMessage({ role: "assistant", content: "❌ Could not access camera. Please allow camera permissions." });
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setShowCamera(false);
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.drawImage(video, 0, 0);
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
+          setSelectedFile(file);
+          stopCamera();
+          appendMessage({ role: "assistant", content: "📸 Photo captured! Click 'Run Analysis' to analyze." });
+        }
+      }, "image/jpeg", 0.9);
+    }
+  };
+
+  // Audio recording functions
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
+        const file = new File([audioBlob], "recording.wav", { type: "audio/wav" });
+        setSelectedFile(file);
+        stream.getTracks().forEach(track => track.stop());
+        appendMessage({ role: "assistant", content: "🎤 Audio recorded! Click 'Run Analysis' to analyze emotion." });
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      appendMessage({ role: "assistant", content: "❌ Could not access microphone. Please allow microphone permissions." });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  // Cleanup camera on unmount or tool change
+  useEffect(() => {
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [cameraStream]);
+
   const sendChatMessage = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -299,6 +402,7 @@ export default function Chat() {
       const { data } = await api.post("/api/chat", {
         text: input,
         user_id: "web_user",
+        use_rag: useRag,
       });
       appendMessage({
         role: "assistant",
@@ -331,11 +435,11 @@ export default function Chat() {
   const handleRunTool = async () => {
     if (isLoading) return;
 
-    const isFileTool = activeTool === "vision" || activeTool === "brand" || activeTool === "audio";
+    const isFileToolLocal = activeTool === "vision" || activeTool === "brand" || activeTool === "audio" || activeTool === "video";
     const isFeatureTool =
       activeTool === "fraud" || activeTool === "cyber" || activeTool === "behavior";
 
-    if (isFileTool) {
+    if (isFileToolLocal) {
       if (!selectedFile) {
         appendMessage({
           role: "assistant",
@@ -363,6 +467,22 @@ export default function Chat() {
         if (activeTool === "audio") {
           const { data } = await voiceEmotion(payload);
           appendMessage({ role: "assistant", content: formatAudioResponse(data as AudioResponse) });
+        }
+        if (activeTool === "video") {
+          // Video analysis - use vision endpoint for now or dedicated video endpoint
+          const { data } = await api.post("/api/vision/video", payload, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          const result = data as { prediction?: string; confidence?: number; frames_analyzed?: number };
+          const lines = ["Video Analysis Result"];
+          lines.push(`Prediction: ${result.prediction || "Unknown"}`);
+          if (result.confidence !== undefined) {
+            lines.push(`Confidence: ${normalizeConfidence(result.confidence)}%`);
+          }
+          if (result.frames_analyzed !== undefined) {
+            lines.push(`Frames Analyzed: ${result.frames_analyzed}`);
+          }
+          appendMessage({ role: "assistant", content: lines.join("\n") });
         }
       } catch (error) {
         appendMessage({
@@ -424,23 +544,46 @@ export default function Chat() {
   };
 
   const activeConfig = toolOptions.find((tool) => tool.id === activeTool);
-  const isFileTool = activeTool === "vision" || activeTool === "brand" || activeTool === "audio";
+  const isFileTool = activeTool === "vision" || activeTool === "brand" || activeTool === "audio" || activeTool === "video";
   const isFeatureTool =
     activeTool === "fraud" || activeTool === "cyber" || activeTool === "behavior";
+  const canUseCamera = activeTool === "vision" || activeTool === "brand";
+  const canRecordAudio = activeTool === "audio";
+
+  // Statistics
+  const userMessages = messages.filter(m => m.role === "user").length;
+  const assistantMessages = messages.filter(m => m.role === "assistant").length;
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
       <div className="max-w-5xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white">AI Chat</h1>
-          <p className="text-slate-400 mt-1">
-            Unified chat with built-in vision, fraud, cyber, behavior, and audio tools.
-          </p>
+        <div className="mb-6 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-white">AI Chat</h1>
+            <p className="text-slate-400 mt-1">
+              Unified chat with built-in vision, fraud, cyber, behavior, video, and audio tools.
+            </p>
+          </div>
+          {/* Session Stats */}
+          <div className="flex gap-3 text-center">
+            <div className="bg-slate-800/60 rounded-xl px-4 py-2 border border-slate-700">
+              <div className="text-2xl font-bold text-emerald-400">{messages.length}</div>
+              <div className="text-xs text-slate-500 uppercase">Messages</div>
+            </div>
+            <div className="bg-slate-800/60 rounded-xl px-4 py-2 border border-slate-700">
+              <div className="text-2xl font-bold text-blue-400">{userMessages}</div>
+              <div className="text-xs text-slate-500 uppercase">Queries</div>
+            </div>
+            <div className="bg-slate-800/60 rounded-xl px-4 py-2 border border-slate-700">
+              <div className="text-2xl font-bold text-purple-400">{assistantMessages}</div>
+              <div className="text-xs text-slate-500 uppercase">Responses</div>
+            </div>
+          </div>
         </div>
 
         <div className="mb-4 p-4 bg-slate-800/60 rounded-xl border border-slate-700">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex-1 min-w-[250px]">
               <label className="text-sm text-slate-400 block mb-1">Backend URL</label>
               <input
                 type="text"
@@ -465,6 +608,19 @@ export default function Chat() {
               >
                 Test
               </button>
+            </div>
+            {/* RAG Toggle */}
+            <div className="flex items-center gap-2 pt-5">
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={useRag}
+                  onChange={(e) => setUseRag(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </label>
+              <span className="text-sm text-slate-400">RAG {useRag ? "On" : "Off"}</span>
             </div>
           </div>
         </div>
@@ -502,6 +658,50 @@ export default function Chat() {
                 onChange={handleFileChange}
                 className="hidden"
               />
+              
+              {/* Camera Preview */}
+              {showCamera && canUseCamera && (
+                <div className="mb-4 relative">
+                  <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    className="w-full max-w-md mx-auto rounded-lg border border-slate-600"
+                  />
+                  <canvas ref={canvasRef} className="hidden" />
+                  <div className="flex justify-center gap-3 mt-3">
+                    <button
+                      onClick={capturePhoto}
+                      className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold rounded-lg transition-all"
+                    >
+                      📸 Capture
+                    </button>
+                    <button
+                      onClick={stopCamera}
+                      className="px-4 py-2 border border-red-500 text-red-400 rounded-lg hover:bg-red-500/20 transition-all"
+                    >
+                      ✕ Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Audio Recording Indicator */}
+              {isRecording && canRecordAudio && (
+                <div className="mb-4 p-4 bg-red-500/10 border border-red-500/50 rounded-lg">
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                    <span className="text-red-400 font-medium">Recording...</span>
+                    <button
+                      onClick={stopRecording}
+                      className="px-4 py-2 bg-red-500 hover:bg-red-400 text-white font-semibold rounded-lg transition-all"
+                    >
+                      ⏹ Stop Recording
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium text-slate-200">
@@ -514,13 +714,37 @@ export default function Chat() {
                       : "No file selected yet."}
                   </p>
                 </div>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 border border-slate-600 text-slate-300 rounded-lg hover:border-emerald-400 transition-all"
-                  disabled={isLoading}
-                >
-                  Choose File
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-4 py-2 border border-slate-600 text-slate-300 rounded-lg hover:border-emerald-400 transition-all"
+                    disabled={isLoading}
+                  >
+                    📁 Choose File
+                  </button>
+                  
+                  {/* Camera Button for Vision/Brand */}
+                  {canUseCamera && !showCamera && (
+                    <button
+                      onClick={startCamera}
+                      className="px-4 py-2 border border-blue-500 text-blue-400 rounded-lg hover:bg-blue-500/20 transition-all"
+                      disabled={isLoading}
+                    >
+                      📷 Use Camera
+                    </button>
+                  )}
+                  
+                  {/* Record Button for Audio */}
+                  {canRecordAudio && !isRecording && (
+                    <button
+                      onClick={startRecording}
+                      className="px-4 py-2 border border-red-500 text-red-400 rounded-lg hover:bg-red-500/20 transition-all"
+                      disabled={isLoading}
+                    >
+                      🎤 Record Audio
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}
