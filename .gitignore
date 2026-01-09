@@ -85,6 +85,7 @@ nosetests.xml
 # ============================================
 build/
 dist/
+!ui-web/frontend/dist/
 *.egg-info/
 *.egg
 wheels/
