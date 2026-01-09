@@ -89,12 +89,6 @@ dist/
 *.egg
 wheels/
 *.whl
-docs/
-
-# ============================================
-# Documentation
-# ============================================
-*.[mM][dD]
 
 # ============================================
 # Node / Frontend
@@ -162,6 +156,7 @@ data/processed/brand_yolo/
 # ============================================
 artifacts/*
 !artifacts/.gitkeep
+!artifacts/README.md
 !artifacts/brand/
 models/
 experiments/
