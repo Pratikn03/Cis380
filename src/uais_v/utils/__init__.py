@@ -1,1 +1,1 @@
-"""SentinelForge package."""
+"""Sentifargo package."""

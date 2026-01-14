@@ -1,4 +1,4 @@
-project_name: "SentinelForge - Vision"
+project_name: "Sentifargo - Vision"
 data:
   dataset_dir: data/processed/vision
   image_size: 224

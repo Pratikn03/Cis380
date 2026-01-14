@@ -1,1 +1,1 @@
-"""Source namespace for SentinelForge."""
+"""Source namespace for Sentifargo."""

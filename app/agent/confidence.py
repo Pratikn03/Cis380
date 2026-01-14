@@ -3,7 +3,7 @@
 INTENT CONFIDENCE SCORING MODULE
 ==============================================================================
 Author: Pratik Niroula
-Project: SentinelForge - Universal Anomaly Intelligence System
+Project: Sentifargo - Sentifargo
 
 PURPOSE:
 --------

@@ -1,8 +1,8 @@
-# SentinelForge: Universal Anomaly Intelligence System
+# Sentifargo: Sentifargo
 
 ## 🎯 Project Overview
 
-**SentinelForge** is a comprehensive AI-powered anomaly detection and intelligent recommendation platform built by **Pratik Niroula** as part of the CIS 380 course project. The system demonstrates practical applications of machine learning in security, fraud detection, and personalized recommendations.
+**Sentifargo** is a comprehensive AI-powered anomaly detection and intelligent recommendation platform built by **Pratik Niroula** as part of the CIS 380 course project. The system demonstrates practical applications of machine learning in security, fraud detection, and personalized recommendations.
 
 ### Key Highlights
 - **154,000+ images** processed for vision analysis
@@ -33,7 +33,7 @@
 │  └─────────────────────────────────────────────────────────┘   │
 │                            │                                    │
 │  ┌─────────────────────────┴─────────────────────────────┐     │
-│  │              SentinelForge Orchestrator               │     │
+│  │              Sentifargo Orchestrator               │     │
 │  │   • Intent Detection  • Route Selection  • Response   │     │
 │  └───────────────────────────────────────────────────────┘     │
 └─────────────────────────────────────────────────────────────────┘
@@ -167,7 +167,7 @@
 ## 🚀 Key Innovations
 
 ### 1. Offline-First AI
-Unlike typical AI applications that require cloud APIs, SentinelForge works **100% offline**:
+Unlike typical AI applications that require cloud APIs, Sentifargo works **100% offline**:
 - Local ML models for all predictions
 - Pre-computed embeddings for recommendations
 - Intelligent response generation without LLM API
@@ -205,7 +205,7 @@ Every response is varied for a natural chatbot feel:
 ## 📁 Project Structure
 
 ```
-universal-anomaly-intelligence-v2/
+Sentifargo/
 ├── app/                      # Main application
 │   ├── main.py              # FastAPI entry point
 │   ├── api/                 # API routes
@@ -236,7 +236,7 @@ universal-anomaly-intelligence-v2/
 ### Running Locally
 ```bash
 # 1. Start the backend
-cd universal-anomaly-intelligence-v2
+cd Sentifargo
 source .venv/bin/activate
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 
@@ -345,4 +345,4 @@ MIT License - See [LICENSE](./LICENSE) for details.
 
 ---
 
-*Built with ❤️ by Pratik Niroula | SentinelForge v2.0 | January 2026*
+*Built with ❤️ by Pratik Niroula | Sentifargo v2.0 | January 2026*

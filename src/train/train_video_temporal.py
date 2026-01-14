@@ -76,7 +76,7 @@ def _load_vision_predictor(*, device: str = "cpu"):
 
 
 def _extract_frames(*, video_path: Path, fps: float, max_frames: int, ffmpeg: str) -> list[Path]:
-    frames_dir = Path(tempfile.mkdtemp(prefix="sentinelforge_video_frames_"))
+    frames_dir = Path(tempfile.mkdtemp(prefix="Sentifargo_video_frames_"))
     out_pattern = frames_dir / "frame_%06d.jpg"
 
     cmd = [
@@ -215,8 +215,8 @@ def main() -> int:
         "--device",
         type=str,
         default=(
-            os.getenv("SENTINELFORGE_VISION_DEVICE")
-            or os.getenv("UAIS_VISION_DEVICE")
+            os.getenv("Sentifargo_VISION_DEVICE")
+            or os.getenv("Sentifargo_VISION_DEVICE")
             or "cpu"
         ),
     )

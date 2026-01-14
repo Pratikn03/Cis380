@@ -1,4 +1,4 @@
-"""Recommender layer for SentinelForge.
+"""Recommender layer for Sentifargo.
 
 This package provides helpers to turn domain/fusion scores into
 actionable recommendations with lightweight explanations.

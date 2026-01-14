@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the MLOps roadmap for UAIS-v2, including shadow mode deployment, model validation, and safe rollout strategies.
+This document outlines the MLOps roadmap for Sentifargo, including shadow mode deployment, model validation, and safe rollout strategies.
 
 ## Current MLOps Stack
 

@@ -1,5 +1,5 @@
 # ============================================
-# SentinelForge Production Docker Compose
+# Sentifargo Production Docker Compose
 # Complete stack with monitoring & caching
 # ============================================
 
@@ -9,12 +9,12 @@ services:
   # ==========================================
   # Main API Service
   # ==========================================
-  sentinelforge-api:
+  Sentifargo-api:
     build:
       context: .
       dockerfile: Dockerfile.production
       target: production
-    container_name: sentinelforge-api
+    container_name: Sentifargo-api
     restart: unless-stopped
     ports:
       - "${API_PORT:-8000}:8000"
@@ -24,7 +24,7 @@ services:
       - AUTH_TOKEN=${AUTH_TOKEN:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - REDIS_URL=redis://redis:6379/0
-      - DATABASE_URL=${DATABASE_URL:-sqlite:///./data/sentinelforge.db}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./data/Sentifargo.db}
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
       - MAX_REQUEST_SIZE=${MAX_REQUEST_SIZE:-50MB}
     volumes:
@@ -42,7 +42,7 @@ services:
       start_period: 60s
       retries: 3
     networks:
-      - sentinelforge-network
+      - Sentifargo-network
     deploy:
       resources:
         limits:
@@ -60,17 +60,17 @@ services:
   # ==========================================
   # Streamlit UI Service
   # ==========================================
-  sentinelforge-ui:
+  Sentifargo-ui:
     build:
       context: .
       dockerfile: Dockerfile.production
       target: production
-    container_name: sentinelforge-ui
+    container_name: Sentifargo-ui
     restart: unless-stopped
     ports:
       - "${UI_PORT:-8501}:8501"
     environment:
-      - SENTINELFORGE_BACKEND=http://sentinelforge-api:8000
+      - Sentifargo_BACKEND=http://Sentifargo-api:8000
       - AUTH_TOKEN=${AUTH_TOKEN:-}
     volumes:
       - ./models:/app/models:ro
@@ -85,10 +85,10 @@ services:
       --theme.base=dark
       --theme.primaryColor=#3b82f6
     depends_on:
-      sentinelforge-api:
+      Sentifargo-api:
         condition: service_healthy
     networks:
-      - sentinelforge-network
+      - Sentifargo-network
     deploy:
       resources:
         limits:
@@ -100,7 +100,7 @@ services:
   # ==========================================
   redis:
     image: redis:7-alpine
-    container_name: sentinelforge-redis
+    container_name: Sentifargo-redis
     restart: unless-stopped
     command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
     volumes:
@@ -111,7 +111,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - sentinelforge-network
+      - Sentifargo-network
     deploy:
       resources:
         limits:
@@ -123,7 +123,7 @@ services:
   # ==========================================
   prometheus:
     image: prom/prometheus:v2.47.0
-    container_name: sentinelforge-prometheus
+    container_name: Sentifargo-prometheus
     restart: unless-stopped
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
@@ -136,7 +136,7 @@ services:
       - '--storage.tsdb.retention.time=30d'
       - '--web.enable-lifecycle'
     networks:
-      - sentinelforge-network
+      - Sentifargo-network
     profiles:
       - monitoring
 
@@ -145,7 +145,7 @@ services:
   # ==========================================
   grafana:
     image: grafana/grafana:10.2.0
-    container_name: sentinelforge-grafana
+    container_name: Sentifargo-grafana
     restart: unless-stopped
     ports:
       - "${GRAFANA_PORT:-3000}:3000"
@@ -160,7 +160,7 @@ services:
     depends_on:
       - prometheus
     networks:
-      - sentinelforge-network
+      - Sentifargo-network
     profiles:
       - monitoring
 
@@ -169,7 +169,7 @@ services:
   # ==========================================
   nginx:
     image: nginx:alpine
-    container_name: sentinelforge-nginx
+    container_name: Sentifargo-nginx
     restart: unless-stopped
     ports:
       - "${NGINX_HTTP_PORT:-80}:80"
@@ -178,10 +178,10 @@ services:
       - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./deploy/nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
-      - sentinelforge-api
-      - sentinelforge-ui
+      - Sentifargo-api
+      - Sentifargo-ui
     networks:
-      - sentinelforge-network
+      - Sentifargo-network
     profiles:
       - production
 
@@ -189,17 +189,17 @@ services:
 # Networks
 # ==========================================
 networks:
-  sentinelforge-network:
+  Sentifargo-network:
     driver: bridge
-    name: sentinelforge-network
+    name: Sentifargo-network
 
 # ==========================================
 # Volumes
 # ==========================================
 volumes:
   redis-data:
-    name: sentinelforge-redis-data
+    name: Sentifargo-redis-data
   prometheus-data:
-    name: sentinelforge-prometheus-data
+    name: Sentifargo-prometheus-data
   grafana-data:
-    name: sentinelforge-grafana-data
+    name: Sentifargo-grafana-data

@@ -24,7 +24,7 @@ def _load_clip_model():
 
 
 def _tags_enabled() -> bool:
-    mode = (os.getenv("SENTINELFORGE_IMAGE_TAGS") or "auto").strip().lower()
+    mode = (os.getenv("Sentifargo_IMAGE_TAGS") or "auto").strip().lower()
     if mode in {"0", "false", "off", "no"}:
         return False
     if mode in {"1", "true", "on", "yes"}:

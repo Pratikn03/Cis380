@@ -1,1 +1,1 @@
-"""Local inference utilities for SentinelForge."""
+"""Local inference utilities for Sentifargo."""

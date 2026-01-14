@@ -1,5 +1,5 @@
 """
-Classic Chat UI for SentinelForge
+Classic Chat UI for Sentifargo
 - Chat input at bottom
 - Messages displayed top (newest first option)
 - Camera and microphone recording
@@ -132,7 +132,7 @@ def render_classic_chat(
     st.markdown(
         """
     <div class="chat-header">
-        <h1>🤖 SentinelForge Assistant</h1>
+        <h1>🤖 Sentifargo Assistant</h1>
         <p style="color: #666; margin-top: 8px;">Fraud • Cyber • Voice • Vision • Recommendations</p>
     </div>
     """,
@@ -357,14 +357,14 @@ def render_classic_chat(
 def main():
     """Standalone entry point."""
     st.set_page_config(
-        page_title="SentinelForge - Classic Chat",
+        page_title="Sentifargo - Classic Chat",
         page_icon="🤖",
         layout="wide",
         initial_sidebar_state="expanded",
     )
 
     backend_url = (
-        os.environ.get("SENTINELFORGE_BACKEND")
+        os.environ.get("Sentifargo_BACKEND")
         or os.environ.get("OMNICHATX_BACKEND")
         or os.environ.get("OMNINEX_BACKEND")
         or "http://localhost:8000"

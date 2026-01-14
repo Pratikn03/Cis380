@@ -3,7 +3,7 @@
 REAL-TIME ALERT SERVICE
 ==============================================================================
 Author: Pratik Niroula
-Project: SentinelForge - Universal Anomaly Intelligence System
+Project: Sentifargo - Sentifargo
 
 PURPOSE:
 --------
@@ -90,7 +90,7 @@ class Alert:
     data: Dict[str, Any] = field(default_factory=dict)
     alert_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     timestamp: datetime = field(default_factory=datetime.now)
-    source: str = "sentinelforge"
+    source: str = "Sentifargo"
     tags: List[str] = field(default_factory=list)
     acknowledged: bool = False
     resolved: bool = False
@@ -261,7 +261,7 @@ class EmailChannel(AlertChannel):
         smtp_port: int = 587,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        sender: str = "alerts@sentinelforge.ai",
+        sender: str = "alerts@Sentifargo.ai",
         recipients: Optional[List[str]] = None,
         use_tls: bool = True
     ):

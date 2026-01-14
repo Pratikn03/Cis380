@@ -1,9 +1,9 @@
-# SentinelForge User Guide (RAG Corpus)
+# Sentifargo User Guide (RAG Corpus)
 
 This document is part of the local knowledge base under `data/docs/` and is indexed by the RAG pipeline.
 
 ## Overview
-SentinelForge is a multimodal AI agent platform that integrates:
+Sentifargo is a multimodal AI agent platform that integrates:
 - chat + routing,
 - local document Q&A (RAG),
 - risk scoring (fraud/cyber/behavior + fused decision),

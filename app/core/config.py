@@ -1,5 +1,5 @@
 """
-SentinelForge Production Settings Module
+Sentifargo Production Settings Module
 Centralized configuration management with Pydantic
 """
 
@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field, field_validator
 class DatabaseSettings(BaseModel):
     """Database configuration."""
 
-    url: str = Field(default="sqlite:///./data/sentinelforge.db", description="Database connection URL")
+    url: str = Field(default="sqlite:///./data/Sentifargo.db", description="Database connection URL")
     pool_size: int = Field(default=5, ge=1, le=50)
     max_overflow: int = Field(default=10, ge=0)
     echo: bool = Field(default=False, description="Echo SQL statements")
@@ -109,7 +109,7 @@ class Settings(BaseModel):
     """Main application settings."""
 
     # Application
-    app_name: str = Field(default="SentinelForge")
+    app_name: str = Field(default="Sentifargo")
     app_version: str = Field(default="1.0.0")
     app_env: Literal["development", "staging", "production"] = Field(default="development")
     debug: bool = Field(default=False)
@@ -148,7 +148,7 @@ class Settings(BaseModel):
 def _load_settings_from_env() -> Settings:
     """Load settings from environment variables."""
     return Settings(
-        app_name=os.getenv("APP_NAME", "SentinelForge"),
+        app_name=os.getenv("APP_NAME", "Sentifargo"),
         app_version=os.getenv("APP_VERSION", "1.0.0"),
         app_env=os.getenv("APP_ENV", "development"),  # type: ignore
         debug=os.getenv("DEBUG", "false").lower() == "true",
@@ -158,7 +158,7 @@ def _load_settings_from_env() -> Settings:
         timeout=int(os.getenv("TIMEOUT", "120")),
         max_request_size=os.getenv("MAX_REQUEST_SIZE", "50MB"),
         database=DatabaseSettings(
-            url=os.getenv("DATABASE_URL", "sqlite:///./data/sentinelforge.db"),
+            url=os.getenv("DATABASE_URL", "sqlite:///./data/Sentifargo.db"),
         ),
         redis=RedisSettings(
             url=os.getenv("REDIS_URL", "redis://localhost:6379/0"),

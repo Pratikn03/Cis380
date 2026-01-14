@@ -3,7 +3,7 @@
 FRAUD DETECTION API ROUTE
 ==============================================================================
 Author: Pratik Niroula
-Project: Universal Anomaly Intelligence System (UAIS)
+Project: Sentifargo (Sentifargo)
 
 WHAT THIS FILE DOES:
 --------------------

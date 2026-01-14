@@ -1,4 +1,4 @@
-"""Small IO helpers used by SentinelForge scripts."""
+"""Small IO helpers used by Sentifargo scripts."""
 
 from pathlib import Path
 from typing import Any, Dict

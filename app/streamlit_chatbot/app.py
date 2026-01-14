@@ -1,4 +1,4 @@
-"""SentinelForge Streamlit Command Center.
+"""Sentifargo Streamlit Command Center.
 
 Top-level layout:
 - Recommendations (text + multimodal)
@@ -50,10 +50,10 @@ from streamlit_chatbot.unified_chat import render_unified_chat  # noqa: E402
 
 def main():
     # Backward-compatible backend URL env var.
-    # Preferred: SENTINELFORGE_BACKEND; legacy: OMNICHATX_BACKEND / OMNINEX_BACKEND.
+    # Preferred: Sentifargo_BACKEND; legacy: OMNICHATX_BACKEND / OMNINEX_BACKEND.
     backend_url = (
         (
-            os.environ.get("SENTINELFORGE_BACKEND")
+            os.environ.get("Sentifargo_BACKEND")
             or os.environ.get("OMNICHATX_BACKEND")
             or os.environ.get("OMNINEX_BACKEND")
             or "http://localhost:8000"
@@ -136,7 +136,7 @@ def main():
     if nav == "💬 Chat":
         view = st.selectbox(
             "Chat UI",
-            ["✨ SentinelForge (Unified Chat)", "🧠 Sentinel (legacy)", "💬 Classic Chat (legacy)"],
+            ["✨ Sentifargo (Unified Chat)", "🧠 Sentinel (legacy)", "💬 Classic Chat (legacy)"],
             index=0,
             key="ocx_chat_view",
             label_visibility="collapsed",

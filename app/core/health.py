@@ -1,5 +1,5 @@
 """
-SentinelForge Production Health Checks & Metrics
+Sentifargo Production Health Checks & Metrics
 Comprehensive health checks for all system components
 """
 
@@ -28,7 +28,7 @@ from prometheus_client import (
     REGISTRY,
 )
 
-logger = logging.getLogger("sentinelforge.health")
+logger = logging.getLogger("Sentifargo.health")
 
 router = APIRouter(tags=["Health"])
 
@@ -90,13 +90,13 @@ class SystemHealth:
 
 # Request metrics
 REQUEST_COUNT = Counter(
-    "sentinelforge_requests_total",
+    "Sentifargo_requests_total",
     "Total HTTP requests",
     ["method", "endpoint", "status"],
 )
 
 REQUEST_LATENCY = Histogram(
-    "sentinelforge_request_duration_seconds",
+    "Sentifargo_request_duration_seconds",
     "Request latency in seconds",
     ["method", "endpoint"],
     buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
@@ -104,54 +104,54 @@ REQUEST_LATENCY = Histogram(
 
 # Model metrics
 MODEL_INFERENCE_COUNT = Counter(
-    "sentinelforge_model_inference_total",
+    "Sentifargo_model_inference_total",
     "Total model inferences",
     ["model_type", "model_name"],
 )
 
 MODEL_INFERENCE_LATENCY = Histogram(
-    "sentinelforge_model_inference_seconds",
+    "Sentifargo_model_inference_seconds",
     "Model inference latency in seconds",
     ["model_type", "model_name"],
     buckets=[0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0],
 )
 
 MODEL_ERRORS = Counter(
-    "sentinelforge_model_errors_total",
+    "Sentifargo_model_errors_total",
     "Total model errors",
     ["model_type", "model_name", "error_type"],
 )
 
 # System metrics
 SYSTEM_INFO = Info(
-    "sentinelforge_system",
+    "Sentifargo_system",
     "System information",
 )
 
 ACTIVE_CONNECTIONS = Gauge(
-    "sentinelforge_active_connections",
+    "Sentifargo_active_connections",
     "Number of active connections",
 )
 
 MEMORY_USAGE = Gauge(
-    "sentinelforge_memory_usage_bytes",
+    "Sentifargo_memory_usage_bytes",
     "Memory usage in bytes",
 )
 
 CPU_USAGE = Gauge(
-    "sentinelforge_cpu_usage_percent",
+    "Sentifargo_cpu_usage_percent",
     "CPU usage percentage",
 )
 
 # Health check metrics
 HEALTH_CHECK_STATUS = Gauge(
-    "sentinelforge_health_check_status",
+    "Sentifargo_health_check_status",
     "Health check status (1=healthy, 0.5=degraded, 0=unhealthy)",
     ["component"],
 )
 
 HEALTH_CHECK_LATENCY = Histogram(
-    "sentinelforge_health_check_latency_seconds",
+    "Sentifargo_health_check_latency_seconds",
     "Health check latency",
     ["component"],
 )

@@ -7,7 +7,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from pydantic import model_validator
 
-from ...agent.orchestrator import SentinelForgeOrchestrator
+from ...agent.orchestrator import SentifargoOrchestrator
 from ..deps import check_token_query, require_auth
 
 router = APIRouter(prefix="/api/chat", tags=["chat"], dependencies=[Depends(require_auth)])
@@ -32,8 +32,8 @@ class ChatRequest(BaseModel):
 
 
 @lru_cache(maxsize=1)
-def _get_agent() -> SentinelForgeOrchestrator:
-    return SentinelForgeOrchestrator()
+def _get_agent() -> SentifargoOrchestrator:
+    return SentifargoOrchestrator()
 
 
 @router.post("")

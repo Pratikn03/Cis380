@@ -69,7 +69,7 @@ FIELD_KEYS = {
 def _backend_base(backend_url: str | None = None) -> str:
     base = (
         backend_url
-        or os.getenv("SENTINELFORGE_BACKEND")
+        or os.getenv("Sentifargo_BACKEND")
         or os.getenv("OMNICHATX_BACKEND")
         or "http://localhost:8000"
     ).strip()

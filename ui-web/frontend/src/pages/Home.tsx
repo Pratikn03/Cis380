@@ -3,7 +3,7 @@
  * HOME PAGE - Main Landing Page for Portfolio Website
  * ==============================================================================
  * Author: Pratik Niroula
- * Project: Universal Anomaly Intelligence System (UAIS)
+ * Project: Sentifargo (Sentifargo)
  *
  * WHAT THIS FILE DOES:
  * --------------------

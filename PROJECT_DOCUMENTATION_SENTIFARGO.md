@@ -1,4 +1,4 @@
-# Universal Anomaly Intelligence System (UAIS)
+# Sentifargo (Sentifargo)
 ## Complete Project Documentation
 
 **Author:** Pratik Niroula  
@@ -21,9 +21,9 @@
 
 ## 🎯 Project Overview
 
-### What is UAIS?
+### What is Sentifargo?
 
-UAIS (Universal Anomaly Intelligence System) is a **multi-modal machine learning platform** that detects various types of anomalies:
+Sentifargo (Sentifargo) is a **multi-modal machine learning platform** that detects various types of anomalies:
 
 | Module | What It Detects | Use Case |
 |--------|-----------------|----------|
@@ -66,7 +66,7 @@ UAIS (Universal Anomaly Intelligence System) is a **multi-modal machine learning
 ## 📁 Directory Structure
 
 ```
-universal-anomaly-intelligence-v2/
+Sentifargo/
 │
 ├── app/                          # FastAPI application
 │   ├── main.py                   # 🔑 Main entry point - starts the API server
@@ -90,7 +90,7 @@ universal-anomaly-intelligence-v2/
 │       └── pages/               # Streamlit pages
 │
 ├── src/                          # Source code for ML models
-│   └── uais/                    # Universal Anomaly Intelligence System
+│   └── uais/                    # Sentifargo
 │       ├── anomaly/             # Anomaly detection algorithms
 │       │   ├── isolation_forest.py   # Isolation Forest algorithm
 │       │   ├── autoencoder.py        # Autoencoder for anomalies

@@ -1,1 +1,1 @@
-"""Preprocessing utilities for SentinelForge."""
+"""Preprocessing utilities for Sentifargo."""

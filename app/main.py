@@ -3,7 +3,7 @@
 OMNICHATX API - Main FastAPI Application Entry Point
 ==============================================================================
 Author: Pratik Niroula
-Project: Universal Anomaly Intelligence System (UAIS)
+Project: Sentifargo (Sentifargo)
 
 WHAT THIS FILE DOES:
 --------------------

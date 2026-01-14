@@ -1,4 +1,4 @@
-"""Central explainability runner for SentinelForge.
+"""Central explainability runner for Sentifargo.
 
 Provides helpers to generate SHAP/LIME for tabular models, text LIME/SHAP (optional),
 and vision Grad-CAM is handled in vision flows.

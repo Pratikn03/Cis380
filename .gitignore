@@ -253,3 +253,6 @@ scripts/dedupe_data.sh
 # ============================================
 !.gitkeep
 !.github/
+
+# Frontend
+ui-web/frontend/node_modules/

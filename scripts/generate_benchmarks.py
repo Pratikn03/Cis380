@@ -128,7 +128,7 @@ def generate_rows() -> list[Row]:
                 )
             )
 
-    # Core SentinelForge domain metrics (tracked, stable).
+    # Core Sentifargo domain metrics (tracked, stable).
     add_report_rows(
         module="Fraud",
         dataset="fraud_features.parquet",

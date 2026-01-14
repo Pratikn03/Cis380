@@ -47,10 +47,10 @@ const quickStart = [
   },
 ];
 
-const projectSummary = `SentinelForge: Universal Anomaly Intelligence System
+const projectSummary = `Sentifargo: Sentifargo
 
 Project Overview
-SentinelForge is a comprehensive AI-powered anomaly detection and intelligent recommendation platform built by Pratik Niroula as part of the CIS 380 course project. The system demonstrates practical applications of machine learning in security, fraud detection, and personalized recommendations.
+Sentifargo is a comprehensive AI-powered anomaly detection and intelligent recommendation platform built by Pratik Niroula as part of the CIS 380 course project. The system demonstrates practical applications of machine learning in security, fraud detection, and personalized recommendations.
 
 Key highlights:
 - 154,000+ images processed for vision analysis
@@ -187,9 +187,9 @@ export default function CommandCenter() {
       <div className="max-w-6xl mx-auto space-y-10">
         <section className="space-y-4">
           <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">
-            Universal Anomaly Intelligence
+            Sentifargo
           </p>
-          <h1 className="text-4xl md:text-5xl font-bold text-white">SentinelForge</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white">Sentifargo</h1>
           <p className="text-slate-300 max-w-3xl">
             A multimodal AI platform for fraud detection, cybersecurity monitoring, behavioral
             analytics, and vision intelligence. Built to run fully offline with a unified FastAPI
@@ -231,7 +231,7 @@ export default function CommandCenter() {
           <div>
             <h2 className="text-2xl font-semibold text-white">Core Capabilities</h2>
             <p className="text-slate-400">
-              SentinelForge combines multiple intelligence engines behind a single interface.
+              Sentifargo combines multiple intelligence engines behind a single interface.
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-4">

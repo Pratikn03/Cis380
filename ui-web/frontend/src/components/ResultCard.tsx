@@ -4,7 +4,7 @@ import { useState } from 'react';
  * Result Card Component
  * 
  * Displays analysis results with confidence bars, expandable details,
- * and action buttons for the SentinelForge dashboard.
+ * and action buttons for the Sentifargo dashboard.
  */
 
 type Severity = 'low' | 'medium' | 'high' | 'critical';

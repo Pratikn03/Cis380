@@ -778,7 +778,7 @@ export default function Chat() {
 
           {!isFileTool && !isFeatureTool && (
             <p className="text-sm text-slate-400">
-              Use the chat input below to talk with SentinelForge or ask for recommendations.
+              Use the chat input below to talk with Sentifargo or ask for recommendations.
             </p>
           )}
         </div>

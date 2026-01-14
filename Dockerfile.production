@@ -1,5 +1,5 @@
 # ============================================
-# SentinelForge Production Dockerfile
+# Sentifargo Production Dockerfile
 # Multi-stage build for optimized image size
 # ============================================
 
@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir --upgrade pip wheel setuptools && \
 FROM python:3.11-slim as production
 
 # Security: Create non-root user
-RUN groupadd -r sentinelforge && useradd -r -g sentinelforge sentinelforge
+RUN groupadd -r Sentifargo && useradd -r -g Sentifargo Sentifargo
 
 WORKDIR /app
 
@@ -49,11 +49,11 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application code
-COPY --chown=sentinelforge:sentinelforge . .
+COPY --chown=Sentifargo:Sentifargo . .
 
 # Create necessary directories with proper permissions
 RUN mkdir -p /app/logs /app/data/monitoring /app/artifacts \
-    && chown -R sentinelforge:sentinelforge /app
+    && chown -R Sentifargo:Sentifargo /app
 
 # Environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -71,7 +71,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 EXPOSE ${PORT}
 
 # Switch to non-root user
-USER sentinelforge
+USER Sentifargo
 
 # Production command with Gunicorn
 CMD ["gunicorn", "app.main:app", \

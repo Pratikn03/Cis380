@@ -1,5 +1,5 @@
 """
-SentinelForge - Unified Chat Interface
+Sentifargo - Unified Chat Interface
 Complete all-in-one assistant with:
 - Unified layout with bluish-gray background
 - Fraud/Cyber/Behavior detection
@@ -399,7 +399,7 @@ def render_unified_chat(
     st.markdown(
         """
     <div class="sentinel-header">
-        <h1 class="sentinel-title">🧠 SENTINELFORGE</h1>
+        <h1 class="sentinel-title">🧠 Sentifargo</h1>
         <div class="sentinel-subtitle">
             FRAUD • CYBER • VISION • VOICE • BEHAVIOR • RECOMMENDATIONS
         </div>
@@ -1099,16 +1099,16 @@ def render_unified_chat(
 
 
 def main():
-    """Standalone entry point for SentinelForge Unified."""
+    """Standalone entry point for Sentifargo Unified."""
     st.set_page_config(
-        page_title="SentinelForge - Unified AI Assistant",
+        page_title="Sentifargo - Unified AI Assistant",
         page_icon="🧠",
         layout="wide",
         initial_sidebar_state="expanded",
     )
 
     backend_url = (
-        os.environ.get("SENTINELFORGE_BACKEND")
+        os.environ.get("Sentifargo_BACKEND")
         or os.environ.get("OMNICHATX_BACKEND")
         or os.environ.get("OMNINEX_BACKEND")
         or "http://localhost:8000"

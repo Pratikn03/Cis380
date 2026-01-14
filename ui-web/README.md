@@ -1,6 +1,6 @@
-# SentinelForge Command Center Web UI
+# Sentifargo Command Center Web UI
 
-This folder contains the official web UI for the SentinelForge project.
+This folder contains the official web UI for the Sentifargo project.
 It is intentionally isolated from the backend and Streamlit UI.
 
 Structure:

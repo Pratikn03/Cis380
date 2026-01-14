@@ -1,9 +1,9 @@
-# Prometheus Configuration for SentinelForge
+# Prometheus Configuration for Sentifargo
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    monitor: 'sentinelforge-monitor'
+    monitor: 'Sentifargo-monitor'
 
 # Alerting rules
 rule_files:
@@ -16,15 +16,15 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # SentinelForge API metrics
-  - job_name: 'sentinelforge-api'
+  # Sentifargo API metrics
+  - job_name: 'Sentifargo-api'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['sentinelforge-api:8000']
+      - targets: ['Sentifargo-api:8000']
     relabel_configs:
       - source_labels: [__address__]
         target_label: instance
-        replacement: 'sentinelforge-api'
+        replacement: 'Sentifargo-api'
 
   # Redis metrics (if using redis_exporter)
   - job_name: 'redis'

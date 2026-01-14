@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Simple API latency checker for SentinelForge FastAPI endpoints."""
+"""Simple API latency checker for Sentifargo FastAPI endpoints."""
 import time
 import argparse
 import requests
@@ -19,7 +19,7 @@ def time_endpoint(url: str, payload: dict, n_runs: int = 5):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Check latency of SentinelForge API endpoints")
+    parser = argparse.ArgumentParser(description="Check latency of Sentifargo API endpoints")
     parser.add_argument("--host", default="http://localhost:8000", help="Base URL of API")
     parser.add_argument("--runs", type=int, default=5, help="Number of runs per endpoint")
     args = parser.parse_args()

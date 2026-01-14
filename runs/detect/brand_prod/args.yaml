@@ -1,7 +1,7 @@
 task: detect
 mode: train
 model: yolov8n.pt
-data: /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/brands.yaml
+data: /Users/pratik_n/Desktop/MyComputer/Sentifargo/data/processed/brand_yolo/brands.yaml
 epochs: 1
 time: null
 patience: 100
@@ -12,7 +12,7 @@ save_period: -1
 cache: false
 device: cpu
 workers: 8
-project: /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/runs/detect
+project: /Users/pratik_n/Desktop/MyComputer/Sentifargo/runs/detect
 name: brand_prod
 exist_ok: true
 pretrained: true
@@ -103,4 +103,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: botsort.yaml
-save_dir: /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/runs/detect/brand_prod
+save_dir: /Users/pratik_n/Desktop/MyComputer/Sentifargo/runs/detect/brand_prod

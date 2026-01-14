@@ -1,5 +1,5 @@
 # Cyber/intrusion domain override (UNSW-NB15)
-project_name: "SentinelForge - Cyber"
+project_name: "Sentifargo - Cyber"
 
 data:
   # UNSW-NB15 binary label column

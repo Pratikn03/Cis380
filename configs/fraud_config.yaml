@@ -1,5 +1,5 @@
 # Fraud domain override
-project_name: "SentinelForge - Fraud"
+project_name: "Sentifargo - Fraud"
 
 data:
   target: Class

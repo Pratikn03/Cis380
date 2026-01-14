@@ -1,4 +1,4 @@
-"""Central orchestrator for SentinelForge."""
+"""Central orchestrator for Sentifargo."""
 
 from __future__ import annotations
 
@@ -268,7 +268,7 @@ def _load_models() -> ModelBundle:
     )
 
 
-class SentinelForgeOrchestrator:
+class SentifargoOrchestrator:
     """Simple rule-based router that hits RAG, fraud, cyber, behavior, or recommender."""
 
     def __init__(self):

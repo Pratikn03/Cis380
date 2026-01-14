@@ -1,4 +1,4 @@
-"""SentinelForge core package."""
+"""Sentifargo core package."""
 
 __all__ = [
     "config",

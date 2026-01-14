@@ -1,14 +1,14 @@
 # 📊 Model Comparison & Benchmark Report
 
 **Author:** Pratik Niroula  
-**Project:** SentinelForge - Universal Anomaly Intelligence System  
+**Project:** Sentifargo - Sentifargo  
 **Generated:** January 7, 2026
 
 ---
 
 ## 📋 Executive Summary
 
-This report provides a comprehensive comparison of all machine learning models deployed in SentinelForge across different domains: fraud detection, cyber anomaly detection, behavioral analysis, voice emotion recognition, and vision intelligence.
+This report provides a comprehensive comparison of all machine learning models deployed in Sentifargo across different domains: fraud detection, cyber anomaly detection, behavioral analysis, voice emotion recognition, and vision intelligence.
 
 ---
 
@@ -245,4 +245,4 @@ This report provides a comprehensive comparison of all machine learning models d
 
 ---
 
-*Report generated automatically by SentinelForge Benchmark Suite v2.0*
+*Report generated automatically by Sentifargo Benchmark Suite v2.0*

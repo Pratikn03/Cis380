@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start FastAPI for SentinelForge (pure HTTP).
+# Start FastAPI for Sentifargo (pure HTTP).
 
 set -euo pipefail
 

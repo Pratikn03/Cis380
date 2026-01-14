@@ -2,7 +2,7 @@
 
 ## Overview
 
-SentinelForge evolved from multiple iterations of the codebase. This document explains what's legacy, what's current, and the deprecation roadmap.
+Sentifargo evolved from multiple iterations of the codebase. This document explains what's legacy, what's current, and the deprecation roadmap.
 
 ## Architecture Evolution
 

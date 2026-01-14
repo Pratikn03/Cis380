@@ -1,4 +1,4 @@
-"""Configuration loaders for SentinelForge."""
+"""Configuration loaders for Sentifargo."""
 
 from dataclasses import dataclass
 from pathlib import Path

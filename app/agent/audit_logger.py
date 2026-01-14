@@ -3,7 +3,7 @@
 AUDIT LOGGING MODULE
 ==============================================================================
 Author: Pratik Niroula
-Project: SentinelForge - Universal Anomaly Intelligence System
+Project: Sentifargo - Sentifargo
 
 PURPOSE:
 --------
@@ -131,7 +131,7 @@ class AuditLogger:
             self._setup_file_handler()
         
         # Standard logger for console output
-        self._logger = logging.getLogger("sentinelforge.audit")
+        self._logger = logging.getLogger("Sentifargo.audit")
         self._logger.setLevel(logging.INFO)
     
     def _setup_file_handler(self) -> None:

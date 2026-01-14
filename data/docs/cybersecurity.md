@@ -32,7 +32,7 @@ Key metrics for cyber risk:
 - **Behavioral Analysis**: User/entity behavior analytics
 - **Network Traffic Analysis**: Deep packet inspection
 
-## SentinelForge Cyber Features
+## Sentifargo Cyber Features
 - Real-time threat scoring
 - Network anomaly detection
 - Attack pattern recognition

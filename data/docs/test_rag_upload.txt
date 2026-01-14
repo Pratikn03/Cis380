@@ -1,1 +1,1 @@
-SentinelForge local-first RAG ensures answers mention local-first RAG.
+Sentifargo local-first RAG ensures answers mention local-first RAG.

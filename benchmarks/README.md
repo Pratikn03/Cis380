@@ -1,6 +1,6 @@
-# SentinelForge Benchmarks
+# Sentifargo Benchmarks
 
-End-to-end evaluation suite for the SentinelForge platform.
+End-to-end evaluation suite for the Sentifargo platform.
 
 ## Quick Start
 
@@ -32,7 +32,7 @@ benchmarks/
 │   ├── fraud_test.csv
 │   └── rag_test.json
 ├── results/              # Benchmark results (auto-generated)
-│   └── sentinelforge_e2e_YYYYMMDD_HHMMSS.json
+│   └── Sentifargo_e2e_YYYYMMDD_HHMMSS.json
 └── README.md
 ```
 
@@ -72,7 +72,7 @@ Add to `.github/workflows/ci.yml`:
 
 ```json
 {
-  "suite_name": "sentinelforge_e2e",
+  "suite_name": "Sentifargo_e2e",
   "timestamp": "2026-01-08T12:00:00",
   "pass_rate": 1.0,
   "results": [

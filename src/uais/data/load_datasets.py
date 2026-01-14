@@ -1,4 +1,4 @@
-"""Dataset loaders for SentinelForge (fraud/cyber/behavior + NLP/Vision)."""
+"""Dataset loaders for Sentifargo (fraud/cyber/behavior + NLP/Vision)."""
 
 import pickle
 from pathlib import Path

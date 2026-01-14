@@ -16,7 +16,7 @@ def _get_backend_url() -> str:
 
 
 celery = Celery(
-    "sentinelforge",
+    "Sentifargo",
     broker=_get_broker_url(),
     backend=_get_backend_url(),
 )

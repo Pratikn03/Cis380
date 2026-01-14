@@ -1,5 +1,5 @@
 # User/session behavior domain override (CERT r4.2 LDAP)
-project_name: "SentinelForge - Behavior (CERT)"
+project_name: "Sentifargo - Behavior (CERT)"
 
 data:
   # CERT LDAP is unlabeled; the pipeline will create a placeholder 0/1 label if needed.

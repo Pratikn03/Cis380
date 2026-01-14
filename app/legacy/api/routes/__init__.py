@@ -1,1 +1,1 @@
-"""Route package for SentinelForge API."""
+"""Route package for Sentifargo API."""
