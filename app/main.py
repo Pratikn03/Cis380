@@ -86,6 +86,7 @@ _app_risk_router = None       # Unified risk scoring
 _app_monitor_router = None    # System monitoring
 _app_voice_router = None      # Voice/audio analysis
 _app_rag_router = None        # Document Q&A (Retrieval Augmented Generation)
+_app_dsa_rag_router = None    # DSA RAG (offline-first)
 _app_brand_router = None      # Brand/logo detection
 _app_stt_router = None        # Speech-to-text
 _app_vision_temporal_router = None  # Video/temporal analysis
@@ -123,6 +124,17 @@ try:  # pragma: no cover
 except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.api.rag router unavailable: %s", exc)
     _app_rag_router = None
+
+# DSA RAG Router - Offline-first DSA document Q&A
+try:  # pragma: no cover
+    from app.api.dsa_rag import router as _app_dsa_rag_router
+    from app.rag_dsa.config import settings as _dsa_rag_settings
+    from app.rag_dsa.ingest import ensure_index as _dsa_rag_ensure_index
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.dsa_rag router unavailable: %s", exc)
+    _app_dsa_rag_router = None
+    _dsa_rag_settings = None
+    _dsa_rag_ensure_index = None
 
 # Brand Router - Logo and brand detection in images
 try:  # pragma: no cover
@@ -252,6 +264,8 @@ if _app_voice_router is not None:
     app.include_router(_app_voice_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_rag_router is not None:
     app.include_router(_app_rag_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_dsa_rag_router is not None:
+    app.include_router(_app_dsa_rag_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_brand_router is not None:
     app.include_router(_app_brand_router, dependencies=[Depends(require_auth)])
 if _app_stt_router is not None:
@@ -260,6 +274,19 @@ if _app_vision_temporal_router is not None:
     app.include_router(
         _app_vision_temporal_router, prefix="/api", dependencies=[Depends(require_auth)]
     )
+
+# ==============================================================================
+# STARTUP TASKS - Best-effort index build for DSA RAG
+# ==============================================================================
+if _dsa_rag_ensure_index is not None:
+    @app.on_event("startup")
+    def _dsa_rag_startup() -> None:
+        if _dsa_rag_settings is None or not _dsa_rag_settings.AUTO_INGEST:
+            return
+        try:
+            _dsa_rag_ensure_index()
+        except Exception as exc:  # pragma: no cover
+            logger.warning("DSA RAG auto-ingest skipped: %s", exc)
 
 
 # ==============================================================================

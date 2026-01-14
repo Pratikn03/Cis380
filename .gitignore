@@ -142,6 +142,7 @@ data/raw/
 data/interim/
 data/processed/
 data/embeddings/
+data/dsa_embeddings/
 data/monitoring/
 data/Celeb_V2/
 data/Video-2/

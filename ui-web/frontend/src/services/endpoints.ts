@@ -56,6 +56,17 @@ export const ragUpload = (payload: FormData) =>
     headers: { "Content-Type": "multipart/form-data" },
   });
 
+export const dsaRagAsk = (payload: { query: string }) =>
+  api.post("/api/dsa-rag/ask", payload);
+
+export const dsaRagUpload = (payload: FormData) =>
+  api.post("/api/dsa-rag/upload", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+export const dsaRagIngest = (payload: { filename?: string; content?: string }) =>
+  api.post("/api/dsa-rag/ingest", payload);
+
 export const visionVideoPredict = (payload: FormData) =>
   api.post("/api/vision/video/predict", payload, {
     headers: { "Content-Type": "multipart/form-data" },
