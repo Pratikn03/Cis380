@@ -60,6 +60,8 @@ type BrandDetection = {
 
 type BrandResponse = {
   detections?: BrandDetection[];
+  model_kind?: string;
+  available_kinds?: Record<string, string>;
 };
 
 type AudioResponse = {
@@ -90,7 +92,11 @@ type ScoreResponse = {
 const toolOptions: Array<{ id: ToolId; label: string; description: string }> = [
   { id: "chat", label: "AI Chat", description: "Ask questions or get recommendations." },
   { id: "vision", label: "Vision", description: "Analyze images for authenticity and labels." },
-  { id: "brand", label: "Brand (YOLO)", description: "Detect logos/brands in images (includes car logos)." },
+  {
+    id: "brand",
+    label: "Brand (YOLO)",
+    description: "Detect logos/brands in images. Choose logo/car/fashion if models are available.",
+  },
   { id: "clothes", label: "Outfits", description: "Image or text-based clothing recommendations." },
   { id: "audio", label: "Audio", description: "Detect emotion from audio clips." },
   { id: "video", label: "Video", description: "Analyze video for deepfake detection." },
@@ -108,7 +114,7 @@ const fileToolConfig: Record<FileToolId, { label: string; accept: string; helper
   brand: {
     label: "Brand detection",
     accept: "image/*",
-    helper: "JPG, PNG, WEBP, BMP up to 10MB (logos including car brands).",
+    helper: "JPG, PNG, WEBP, BMP up to 10MB. Pick a model kind if you trained it.",
   },
   clothes: {
     label: "Outfit photo",
@@ -150,6 +156,8 @@ const featureToolConfig: Record<
 
 const suggestions = [
   "Recommend a movie",
+  "Recommend a place to visit",
+  "Recommend a car under $30k",
   "Recommend action movies",
   "Recommend summer outfits",
   "What is fraud detection?",
@@ -222,6 +230,9 @@ const formatVisionResponse = (data: VisionResponse): string => {
 const formatBrandResponse = (data: BrandResponse): string => {
   const detections = Array.isArray(data.detections) ? data.detections : [];
   const lines = ["Brand detection"];
+  if (data.model_kind) {
+    lines.push(`Model kind: ${data.model_kind}`);
+  }
   lines.push(`Detections: ${detections.length}`);
   if (detections.length > 0) {
     lines.push("Top detections:");
@@ -305,6 +316,7 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [featureInput, setFeatureInput] = useState("");
   const [outfitQuery, setOutfitQuery] = useState("");
+  const [brandKind, setBrandKind] = useState("logo");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [activeTool, setActiveTool] = useState<ToolId>("chat");
   const [isLoading, setIsLoading] = useState(false);
@@ -568,7 +580,7 @@ export default function Chat() {
           appendMessage({ role: "assistant", content: formatVisionResponse(data as VisionResponse) });
         }
         if (activeTool === "brand") {
-          const { data } = await brandPredict(payload);
+          const { data } = await brandPredict(payload, brandKind);
           appendMessage({ role: "assistant", content: formatBrandResponse(data as BrandResponse) });
         }
         if (activeTool === "audio") {
@@ -821,6 +833,22 @@ export default function Chat() {
                     {fileToolConfig[activeTool].label}
                   </p>
                   <p className="text-xs text-slate-500">{fileToolConfig[activeTool].helper}</p>
+                  {activeTool === "brand" && (
+                    <div className="mt-3 flex flex-col gap-1">
+                      <label className="text-xs uppercase tracking-wide text-slate-500">
+                        Brand model kind
+                      </label>
+                      <select
+                        value={brandKind}
+                        onChange={(event) => setBrandKind(event.target.value)}
+                        className="w-44 rounded-lg border border-slate-600 bg-slate-900 px-2 py-1 text-sm text-slate-200"
+                      >
+                        <option value="logo">Logo</option>
+                        <option value="car">Car</option>
+                        <option value="fashion">Fashion</option>
+                      </select>
+                    </div>
+                  )}
                   <p className="text-sm text-slate-300 mt-2">
                     {selectedFile
                       ? `${selectedFile.name} (${formatBytes(selectedFile.size)})`

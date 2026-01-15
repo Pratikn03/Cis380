@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import re
 from dataclasses import dataclass
 from functools import lru_cache
@@ -117,6 +118,20 @@ def _load_csv_rows(path: Path) -> Iterable[dict[str, str]]:
             yield {str(k): ("" if v is None else str(v)) for k, v in row.items()}
 
 
+def _load_jsonl_rows(path: Path) -> Iterable[dict[str, str]]:
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            obj = json.loads(line)
+        except Exception:
+            continue
+        if not isinstance(obj, dict):
+            continue
+        yield {str(k): ("" if v is None else str(v)) for k, v in obj.items()}
+
+
 def _normalize_item_key(image_path: str) -> str:
     """Normalize an image identifier so catalog keys match index/meta values.
 
@@ -227,6 +242,36 @@ def _load_unified_catalog_cached() -> dict[str, CatalogItem]:
         for item in _ELECTRONICS_FALLBACK.get(domain_name, []):
             key = _image_key_for_item(domain_name, item.item_id, item.title)
             mapping[key] = item
+
+    # Local catalogs: clothes, cars, places
+    catalogs_dir = Path("data/catalogs")
+    local_catalogs = [
+        ("clothing_catalog.jsonl", "clothes", "clothes"),
+        ("cars_catalog.jsonl", "cars", "cars"),
+        ("places_catalog.jsonl", "places", "places"),
+    ]
+    for filename, domain, default_category in local_catalogs:
+        path = catalogs_dir / filename
+        if not path.exists():
+            continue
+        for row in _load_jsonl_rows(path):
+            item_id = _pick_first(row, ["id", "item_id", "itemId", "place_id", "car_id"]) or ""
+            title = _pick_first(row, ["title", "name"]) or ""
+            if not item_id or not title:
+                continue
+            category = _pick_first(row, ["category", "type"]) or default_category
+            brand = _pick_first(row, ["brand"]) or None
+            price = _coerce_float(_pick_first(row, ["price_usd", "price"]))
+            image_path = _pick_first(row, ["image_path", "image", "path", "img", "imageUrl"])
+            key = _normalize_item_key(image_path) if image_path else _image_key_for_item(domain, item_id, title)
+            mapping[key] = CatalogItem(
+                item_id=str(item_id),
+                title=str(title),
+                category=str(category),
+                brand=brand,
+                price=price,
+                image_path=image_path,
+            )
 
     return mapping
 

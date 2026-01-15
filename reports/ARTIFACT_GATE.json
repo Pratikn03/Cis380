@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-15T18:09:28.648728+00:00",
+  "generated_at": "2026-01-15T18:27:07.145613+00:00",
   "required": [
     {
       "name": "Fraud model",
@@ -128,6 +128,18 @@
       "path": "data/embeddings",
       "required": false,
       "status": "ok"
+    },
+    {
+      "name": "Brand YOLO (car)",
+      "path": "artifacts/brand/yolo_car_brand.pt",
+      "required": false,
+      "status": "missing"
+    },
+    {
+      "name": "Brand YOLO (fashion)",
+      "path": "artifacts/brand/yolo_fashion_brand.pt",
+      "required": false,
+      "status": "missing"
     }
   ],
   "missing_required": [],
@@ -135,6 +147,18 @@
     {
       "name": "DSA Chroma index",
       "path": "chroma/dsa",
+      "required": false,
+      "status": "missing"
+    },
+    {
+      "name": "Brand YOLO (car)",
+      "path": "artifacts/brand/yolo_car_brand.pt",
+      "required": false,
+      "status": "missing"
+    },
+    {
+      "name": "Brand YOLO (fashion)",
+      "path": "artifacts/brand/yolo_fashion_brand.pt",
       "required": false,
       "status": "missing"
     }

@@ -1,47 +1,89 @@
 from __future__ import annotations
 
 import io
+import os
 from pathlib import Path
 from typing import Any, Dict, List
 
 
-_ARTIFACT_PATH = Path("artifacts/brand/yolo_logo_det.pt")
-_MODEL = None
-_MODEL_ERROR: str | None = None
+_MODEL_CACHE: dict[str, object] = {}
+_MODEL_ERROR: dict[str, str] = {}
 
 
-def _get_model():
-    global _MODEL, _MODEL_ERROR
-    if _MODEL is not None:
-        return _MODEL
-    if _MODEL_ERROR is not None:
-        raise RuntimeError(_MODEL_ERROR)
+def _normalize_kind(kind: str | None) -> str:
+    return (kind or "logo").strip().lower() or "logo"
 
-    if not _ARTIFACT_PATH.exists():
-        _MODEL_ERROR = (
-            "Brand model not trained. Run scripts/prepare_brand_data.py then "
-            "python -m src.train.train_brand_logo_detector to create artifacts/brand/yolo_logo_det.pt"
+
+def _model_registry() -> dict[str, Path]:
+    default_logo = Path("artifacts/brand/yolo_logo_det.pt")
+    logo_path = os.getenv("BRAND_MODEL_LOGO_PATH")
+    if not logo_path:
+        logo_path = os.getenv("BRAND_MODEL_PATH", str(default_logo))
+    return {
+        "logo": Path(logo_path),
+        "car": Path(os.getenv("BRAND_MODEL_CAR_PATH", "artifacts/brand/yolo_car_brand.pt")),
+        "fashion": Path(os.getenv("BRAND_MODEL_FASHION_PATH", "artifacts/brand/yolo_fashion_brand.pt")),
+    }
+
+
+def available_model_kinds(*, include_missing: bool = False) -> dict[str, str]:
+    registry = _model_registry()
+    if include_missing:
+        return {k: str(v) for k, v in registry.items()}
+    return {k: str(v) for k, v in registry.items() if v.exists()}
+
+
+def _resolve_model_path(kind: str | None) -> Path:
+    key = _normalize_kind(kind)
+    registry = _model_registry()
+    return registry.get(key, registry["logo"])
+
+
+def _get_model(kind: str | None):
+    key = _normalize_kind(kind)
+    model_path = _resolve_model_path(key)
+    cache_key = f"{key}:{model_path}"
+    if cache_key in _MODEL_CACHE:
+        return _MODEL_CACHE[cache_key]
+    if cache_key in _MODEL_ERROR:
+        raise RuntimeError(_MODEL_ERROR[cache_key])
+
+    if not model_path.exists():
+        msg = (
+            f"Brand model not trained for kind='{key}'. "
+            f"Expected weights at {model_path}. "
+            "Run scripts/prepare_brand_data.py then "
+            "python -m src.train.train_brand_logo_detector to create the artifact."
         )
-        raise RuntimeError(_MODEL_ERROR)
+        _MODEL_ERROR[cache_key] = msg
+        raise RuntimeError(msg)
 
     try:
         from ultralytics import YOLO
     except Exception as exc:
-        _MODEL_ERROR = f"ultralytics not available: {exc}"
-        raise RuntimeError(_MODEL_ERROR) from exc
+        msg = f"ultralytics not available: {exc}"
+        _MODEL_ERROR[cache_key] = msg
+        raise RuntimeError(msg) from exc
 
     try:
-        _MODEL = YOLO(str(_ARTIFACT_PATH))
+        model = YOLO(str(model_path))
     except Exception as exc:
-        _MODEL_ERROR = f"Could not load YOLO weights at {_ARTIFACT_PATH}: {exc}"
-        raise RuntimeError(_MODEL_ERROR) from exc
+        msg = f"Could not load YOLO weights at {model_path}: {exc}"
+        _MODEL_ERROR[cache_key] = msg
+        raise RuntimeError(msg) from exc
 
-    return _MODEL
+    _MODEL_CACHE[cache_key] = model
+    return model
 
 
-def predict_image_bytes(image_bytes: bytes, *, conf: float = 0.25) -> List[Dict[str, Any]]:
+def predict_image_bytes(
+    image_bytes: bytes,
+    *,
+    conf: float = 0.25,
+    kind: str | None = None,
+) -> List[Dict[str, Any]]:
     """Return logo detections with brand names and bounding boxes."""
-    model = _get_model()
+    model = _get_model(kind)
 
     # Ultralytics accepts np arrays, PIL images, and file paths. We'll use PIL to avoid temp files.
     try:
@@ -96,8 +138,8 @@ def predict_image_bytes(image_bytes: bytes, *, conf: float = 0.25) -> List[Dict[
     return detections
 
 
-def model_path() -> str:
-    return str(_ARTIFACT_PATH)
+def model_path(kind: str | None = None) -> str:
+    return str(_resolve_model_path(kind))
 
 
-__all__ = ["predict_image_bytes", "model_path"]
+__all__ = ["predict_image_bytes", "model_path", "available_model_kinds"]

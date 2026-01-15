@@ -75,6 +75,7 @@ The elite part is not only the models. It is that the platform is designed for c
 - Personalized top-k recommendations.
 - Optional explanation endpoint.
 - Multimodal recommendation (image/text similarity).
+- Local offline catalogs for clothes, cars, and places (data/catalogs/*.jsonl).
 
 ### F) Vision intelligence (image/video analysis)
 - Image classification pipelines.
@@ -86,6 +87,7 @@ The elite part is not only the models. It is that the platform is designed for c
 - Detect brand/logo from uploaded image.
 - Return bounding boxes + confidence.
 - Can be linked to recommendation outputs (brand -> product suggestions).
+- Supports multiple model kinds (logo/car/fashion) when trained; select via `kind` on `/api/vision/brand/predict`.
 
 ### H) Voice intelligence (emotion / speech signals)
 - Estimate emotion or stress cues.

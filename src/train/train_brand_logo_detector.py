@@ -168,7 +168,12 @@ def main() -> int:
         ) from exc
 
     project_root = Path(__file__).resolve().parents[2]
-    data_yaml = project_root / "data" / "processed" / "brand_yolo" / "brands.yaml"
+    data_yaml = Path(
+        os.getenv(
+            "BRAND_DATA_YAML",
+            project_root / "data" / "processed" / "brand_yolo" / "brands.yaml",
+        )
+    )
     if not data_yaml.exists():
         raise FileNotFoundError(
             f"Missing YOLO dataset config at {data_yaml}. Run scripts/prepare_brand_data.py first."
@@ -259,7 +264,8 @@ def main() -> int:
     ckpt_path = _pick_checkpoint(run_dir)
     out_dir = project_root / "artifacts" / "brand"
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "yolo_logo_det.pt"
+    out_path = Path(os.getenv("BRAND_OUT_PATH", str(out_dir / "yolo_logo_det.pt")))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ckpt_path, out_path)
 
     print(f"Saved YOLO weights to: {out_path} (from: {ckpt_path})")

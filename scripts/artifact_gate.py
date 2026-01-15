@@ -67,6 +67,8 @@ def main() -> int:
         ("DSA embeddings", "data/dsa_embeddings"),
         ("DSA Chroma index", "chroma/dsa"),
         ("RAG embeddings", "data/embeddings"),
+        ("Brand YOLO (car)", "artifacts/brand/yolo_car_brand.pt"),
+        ("Brand YOLO (fashion)", "artifacts/brand/yolo_fashion_brand.pt"),
     ]
 
     required = _collect(required_items, required=True)

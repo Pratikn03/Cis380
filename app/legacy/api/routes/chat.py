@@ -195,13 +195,20 @@ async def chat_multimodal(
                 if brand_intent:
                     from src.vision.brand.recognizer import predict_image_bytes, model_path
 
-                    detections = predict_image_bytes(image_bytes, conf=0.25)
+                    brand_kind = "logo"
+                    if any(k in brand_text for k in ("car", "vehicle", "auto", "automotive")):
+                        brand_kind = "car"
+                    elif any(k in brand_text for k in ("fashion", "clothes", "clothing", "shoe", "sneaker")):
+                        brand_kind = "fashion"
+
+                    detections = predict_image_bytes(image_bytes, conf=0.25, kind=brand_kind)
                     attachments["brand_detections"] = detections
-                    attachments["brand_model"] = model_path()
+                    attachments["brand_model"] = model_path(kind=brand_kind)
+                    attachments["brand_kind"] = brand_kind
                     if detections:
                         top = detections[0]
                         context_lines.append(
-                            f"[brand] {top.get('brand')} ({top.get('confidence'):.2f})"
+                            f"[brand:{brand_kind}] {top.get('brand')} ({top.get('confidence'):.2f})"
                         )
             except Exception as exc:
                 attachments["brand_error"] = str(exc)

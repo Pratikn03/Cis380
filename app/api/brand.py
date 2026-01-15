@@ -14,7 +14,11 @@ router = APIRouter(prefix="/api/vision/brand", tags=["vision", "brand"])
 
 
 @router.post("/predict")
-async def predict_brand(file: UploadFile = File(...), conf: float = 0.25):
+async def predict_brand(
+    file: UploadFile = File(...),
+    conf: float = 0.25,
+    kind: str = "logo",
+):
     """Predict brand logos from an uploaded image.
 
     Returns a list of detections: {brand, confidence, bbox:[x1,y1,x2,y2]}.
@@ -34,10 +38,15 @@ async def predict_brand(file: UploadFile = File(...), conf: float = 0.25):
         raise HTTPException(status_code=400, detail=f"Could not read upload: {exc}") from exc
 
     try:
-        from src.vision.brand.recognizer import model_path, predict_image_bytes
+        from src.vision.brand.recognizer import available_model_kinds, model_path, predict_image_bytes
 
-        detections = predict_image_bytes(image_bytes, conf=conf)
-        return {"detections": detections, "model_path": model_path()}
+        detections = predict_image_bytes(image_bytes, conf=conf, kind=kind)
+        return {
+            "detections": detections,
+            "model_path": model_path(kind=kind),
+            "model_kind": kind,
+            "available_kinds": available_model_kinds(),
+        }
     except RuntimeError as exc:
         # Model missing or ultralytics missing. Mark service unavailable.
         raise HTTPException(status_code=503, detail=str(exc)) from exc

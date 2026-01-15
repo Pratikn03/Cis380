@@ -384,16 +384,25 @@ class SentifargoOrchestrator:
     
     def _recommend_cars(self, text: str) -> tuple[str, Dict[str, Any]]:
         """Car recommendations."""
-        items = [
-            {"title": "Tesla Model 3", "type": "Electric Sedan", "reason": "Best range and tech features"},
-            {"title": "Toyota RAV4 Hybrid", "type": "Hybrid SUV", "reason": "Reliable and fuel efficient"},
-            {"title": "Honda Civic", "type": "Compact Sedan", "reason": "Affordable and dependable"},
-            {"title": "Ford Mustang Mach-E", "type": "Electric SUV", "reason": "Sporty EV with great performance"},
-            {"title": "BMW 3 Series", "type": "Luxury Sedan", "reason": "Premium driving experience"},
-        ]
+        try:
+            from app.streamlit_chatbot.handlers.cars import recommend_cars
+
+            items = recommend_cars(text)
+        except Exception as exc:
+            self.logger.warning("Cars handler failed: %s", exc)
+            items = [
+                {"title": "Tesla Model 3", "type": "Electric Sedan", "reason": "Best range and tech features"},
+                {"title": "Toyota RAV4 Hybrid", "type": "Hybrid SUV", "reason": "Reliable and fuel efficient"},
+                {"title": "Honda Civic", "type": "Compact Sedan", "reason": "Affordable and dependable"},
+                {"title": "Ford Mustang Mach-E", "type": "Electric SUV", "reason": "Sporty EV with great performance"},
+                {"title": "BMW 3 Series", "type": "Luxury Sedan", "reason": "Premium driving experience"},
+            ]
         answer = "🚗 **Car Recommendations:**\n\n"
         for item in items:
-            answer += f"• **{item['title']}** ({item['type']})\n  _{item['reason']}_\n\n"
+            title = item.get("title", "Car")
+            car_type = item.get("type") or item.get("brand") or "Car"
+            reason = item.get("reason") or ""
+            answer += f"• **{title}** ({car_type})\n  _{reason}_\n\n"
         return answer, {"items": items, "category": "cars"}
     
     def _recommend_electronics(self, text: str) -> tuple[str, Dict[str, Any]]:
@@ -412,16 +421,25 @@ class SentifargoOrchestrator:
     
     def _recommend_places(self, text: str) -> tuple[str, Dict[str, Any]]:
         """Travel/Places recommendations."""
-        items = [
-            {"title": "Kyoto, Japan", "type": "Cultural", "reason": "Ancient temples and beautiful gardens"},
-            {"title": "Santorini, Greece", "type": "Beach/Romantic", "reason": "Stunning sunsets and architecture"},
-            {"title": "Machu Picchu, Peru", "type": "Adventure", "reason": "Historic wonder with breathtaking views"},
-            {"title": "Iceland", "type": "Nature", "reason": "Northern lights and unique landscapes"},
-            {"title": "Barcelona, Spain", "type": "City", "reason": "Art, architecture, and vibrant nightlife"},
-        ]
+        try:
+            from app.streamlit_chatbot.handlers.places import recommend_places
+
+            items = recommend_places(query=text, places_api_key=None)
+        except Exception as exc:
+            self.logger.warning("Places handler failed: %s", exc)
+            items = [
+                {"title": "Kyoto, Japan", "type": "Cultural", "reason": "Ancient temples and beautiful gardens"},
+                {"title": "Santorini, Greece", "type": "Beach/Romantic", "reason": "Stunning sunsets and architecture"},
+                {"title": "Machu Picchu, Peru", "type": "Adventure", "reason": "Historic wonder with breathtaking views"},
+                {"title": "Iceland", "type": "Nature", "reason": "Northern lights and unique landscapes"},
+                {"title": "Barcelona, Spain", "type": "City", "reason": "Art, architecture, and vibrant nightlife"},
+            ]
         answer = "✈️ **Travel Recommendations:**\n\n"
         for item in items:
-            answer += f"• **{item['title']}** ({item['type']})\n  _{item['reason']}_\n\n"
+            title = item.get("title", "Place")
+            place_type = item.get("type") or item.get("location") or "Place"
+            reason = item.get("reason") or ""
+            answer += f"• **{title}** ({place_type})\n  _{reason}_\n\n"
         return answer, {"items": items, "category": "places"}
 
     def _run_chat(self, text: str, emotion: dict[str, Any] | None) -> tuple[str, Dict[str, Any]]:

@@ -1,6 +1,6 @@
 # Artifact Gate Report
 
-- Generated: 2026-01-15T18:09:28.648728+00:00
+- Generated: 2026-01-15T18:27:07.145613+00:00
 - Strict mode: True
 
 ## Required artifacts
@@ -27,3 +27,5 @@
 - ok: `data/dsa_embeddings` (DSA embeddings)
 - missing: `chroma/dsa` (DSA Chroma index)
 - ok: `data/embeddings` (RAG embeddings)
+- missing: `artifacts/brand/yolo_car_brand.pt` (Brand YOLO (car))
+- missing: `artifacts/brand/yolo_fashion_brand.pt` (Brand YOLO (fashion))

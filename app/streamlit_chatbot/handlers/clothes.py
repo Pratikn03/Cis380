@@ -28,6 +28,12 @@ class ClothingItem:
     tags: tuple[str, ...]
     gender: str | None = None
     price_usd: float | None = None
+    season: str | None = None
+    material: str | None = None
+    style: str | None = None
+    occasion: str | None = None
+    color: str | None = None
+    fit: str | None = None
 
 
 def _load_catalog(path: Path = DEFAULT_CATALOG) -> list[ClothingItem]:
@@ -40,17 +46,37 @@ def _load_catalog(path: Path = DEFAULT_CATALOG) -> list[ClothingItem]:
             continue
         try:
             obj = json.loads(line)
+            raw_tags = obj.get("tags") or []
+            tag_set = {str(t).lower() for t in raw_tags if str(t).strip()}
+            for extra in (
+                obj.get("category"),
+                obj.get("gender"),
+                obj.get("season"),
+                obj.get("material"),
+                obj.get("style"),
+                obj.get("occasion"),
+                obj.get("color"),
+                obj.get("fit"),
+            ):
+                if extra:
+                    tag_set |= _tokenize(str(extra))
             items.append(
                 ClothingItem(
                     id=str(obj.get("id", "")),
                     category=str(obj.get("category", "clothes")),
                     title=str(obj.get("title", "")),
                     brand=str(obj.get("brand", "")),
-                    tags=tuple(str(t).lower() for t in (obj.get("tags") or [])),
+                    tags=tuple(sorted(tag_set)),
                     gender=(str(obj.get("gender")) if obj.get("gender") is not None else None),
                     price_usd=(
                         float(obj.get("price_usd")) if obj.get("price_usd") is not None else None
                     ),
+                    season=(str(obj.get("season")) if obj.get("season") is not None else None),
+                    material=(str(obj.get("material")) if obj.get("material") is not None else None),
+                    style=(str(obj.get("style")) if obj.get("style") is not None else None),
+                    occasion=(str(obj.get("occasion")) if obj.get("occasion") is not None else None),
+                    color=(str(obj.get("color")) if obj.get("color") is not None else None),
+                    fit=(str(obj.get("fit")) if obj.get("fit") is not None else None),
                 )
             )
         except Exception:
@@ -108,6 +134,18 @@ def recommend_clothes(
                 )
             if it.gender:
                 reason_bits.append(f"Fit: {it.gender}")
+            if it.season:
+                reason_bits.append(f"Season: {it.season}")
+            if it.material:
+                reason_bits.append(f"Material: {it.material}")
+            if it.style:
+                reason_bits.append(f"Style: {it.style}")
+            if it.occasion:
+                reason_bits.append(f"Occasion: {it.occasion}")
+            if it.color:
+                reason_bits.append(f"Color: {it.color}")
+            if it.fit:
+                reason_bits.append(f"Fit: {it.fit}")
             if price:
                 reason_bits.append(f"Price: {price}")
 

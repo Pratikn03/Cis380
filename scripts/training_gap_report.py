@@ -137,7 +137,10 @@ def main() -> int:
     lines.append("- Video temporal: retrain if new real/fake videos are added; monitor LSTM drift.")
     lines.append("- Behavior model: add more insider-style patterns if false positives remain high.")
     lines.append("- Voice emotion: augment with noise if `tests/test_voice_noise.py` fails.")
-    lines.append("- Brand YOLO: current model is single-class (`logo`); multi-class car-brand needs new dataset + retrain.")
+    lines.append(
+        "- Brand YOLO: multi-class (car/fashion) requires its own dataset + retrain."
+        " Use BRAND_DATA_YAML + BRAND_OUT_PATH, then set BRAND_MODEL_CAR_PATH/BRAND_MODEL_FASHION_PATH."
+    )
     lines.append("- DSA RAG: expand docs beyond arrays/search/linked-lists/stack-queue as coverage grows.")
     lines.append("")
 

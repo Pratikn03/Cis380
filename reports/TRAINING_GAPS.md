@@ -1,6 +1,6 @@
 # Training Gap Analysis
 
-- Generated: 2026-01-15 18:08:56 UTC
+- Generated: 2026-01-15 18:25:50 UTC
 
 ## Data readiness (from TRAINING_DATA.json)
 
@@ -59,5 +59,5 @@
 - Video temporal: retrain if new real/fake videos are added; monitor LSTM drift.
 - Behavior model: add more insider-style patterns if false positives remain high.
 - Voice emotion: augment with noise if `tests/test_voice_noise.py` fails.
-- Brand YOLO: current model is single-class (`logo`); multi-class car-brand needs new dataset + retrain.
+- Brand YOLO: multi-class (car/fashion) requires its own dataset + retrain. Use BRAND_DATA_YAML + BRAND_OUT_PATH, then set BRAND_MODEL_CAR_PATH/BRAND_MODEL_FASHION_PATH.
 - DSA RAG: expand docs beyond arrays/search/linked-lists/stack-queue as coverage grows.

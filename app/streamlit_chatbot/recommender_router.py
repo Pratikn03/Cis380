@@ -95,6 +95,11 @@ def _detect_intent(text: str) -> Tuple[str, str]:
         "suv",
         "sedan",
         "hatchback",
+        "truck",
+        "pickup",
+        "ev",
+        "electric",
+        "hybrid",
         "tesla",
         "bmw",
         "audi",
@@ -143,7 +148,22 @@ def _detect_intent(text: str) -> Tuple[str, str]:
     }
     if tokens.intersection(movie_terms) or "science fiction" in t:
         return "movies", text
-    if tokens.intersection({"place", "restaurant", "cafe", "coffee", "park", "visit", "trip"}):
+    if tokens.intersection(
+        {
+            "place",
+            "restaurant",
+            "cafe",
+            "coffee",
+            "park",
+            "visit",
+            "trip",
+            "hotel",
+            "resort",
+            "beach",
+            "museum",
+            "bar",
+        }
+    ):
         return "places", text
     if "health" in t:
         return "news_health", text

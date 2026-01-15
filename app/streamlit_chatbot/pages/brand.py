@@ -24,6 +24,13 @@ def render_brand_page(*, call_upload: Callable[..., dict]) -> None:
         step=0.05,
         key="brand_conf_page",
     )
+    kind = st.selectbox(
+        "Model kind",
+        options=["logo", "car", "fashion"],
+        index=0,
+        help="Select which brand model to use (logo default; car/fashion require their own weights).",
+        key="brand_kind_page",
+    )
 
     if brand_img is None:
         st.info("Upload an image to detect logos.")
@@ -32,7 +39,7 @@ def render_brand_page(*, call_upload: Callable[..., dict]) -> None:
     call_with_container_width(st.image, brand_img, caption=brand_img.name)
     if st.button("Detect logos", key="brand_detect_page", type="primary"):
         result = call_upload(
-            f"/api/vision/brand/predict?conf={conf}",
+            f"/api/vision/brand/predict?conf={conf}&kind={kind}",
             filename=brand_img.name or "image.jpg",
             content=brand_img.getvalue(),
             content_type=brand_img.type or "image/jpeg",
