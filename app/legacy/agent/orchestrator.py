@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import logging
-import re
 import os
+import re
 import requests
 from collections import defaultdict, deque
 from dataclasses import dataclass
@@ -16,6 +16,9 @@ import numpy as np
 import pandas as pd
 
 from .policy import decide
+from app.services.risk_engine import analyze_risk
+from app.services.decision_engine import make_decision
+from app.services.explainer import explain_decision
 from ..rag.service import rag_service
 from .utils.shap_explainer import explain as shap_explain
 from .chat_responses import get_enhanced_response, get_fallback_response
@@ -212,6 +215,58 @@ def _llm_call(message: str) -> str:
 
 def _extract_numbers(text: str) -> list[float]:
     return [float(x) for x in re.findall(r"[-+]?(?:\d*\.?\d+)", text)]
+
+
+def _coerce_bool(value: str) -> bool | None:
+    norm = value.strip().lower()
+    if norm in {"true", "yes", "y", "1"}:
+        return True
+    if norm in {"false", "no", "n", "0"}:
+        return False
+    return None
+
+
+def _extract_kv_pairs(text: str) -> dict[str, str]:
+    pairs: dict[str, str] = {}
+    for key, val in re.findall(r"([a-zA-Z_]+)\s*[:=]\s*([a-zA-Z0-9_.-]+)", text):
+        pairs[key.lower()] = val
+    return pairs
+
+
+def _risk_payload_from_message(message: str) -> dict[str, object]:
+    pairs = _extract_kv_pairs(message or "")
+    payload: dict[str, object] = {
+        "transaction_amount": 0.0,
+        "clicks_per_minute": 10.0,
+        "files_accessed": 0,
+        "device_known": True,
+        "login_time": 12.0,
+        "login_country": "US",
+    }
+
+    def _set_float(keys: list[str], field: str) -> None:
+        for k in keys:
+            if k in pairs:
+                try:
+                    payload[field] = float(pairs[k])
+                except Exception:
+                    pass
+                return
+
+    _set_float(["amount", "transaction_amount", "txn_amount"], "transaction_amount")
+    _set_float(["clicks", "clicks_per_minute", "cpm"], "clicks_per_minute")
+    _set_float(["files", "files_accessed"], "files_accessed")
+    _set_float(["login_time", "hour", "time"], "login_time")
+
+    if "device_known" in pairs:
+        val = _coerce_bool(pairs["device_known"])
+        if val is not None:
+            payload["device_known"] = val
+    if "country" in pairs or "login_country" in pairs:
+        payload["login_country"] = (pairs.get("country") or pairs.get("login_country") or "US").upper()
+
+    payload["used_defaults"] = not bool(pairs)
+    return payload
 
 
 @dataclass
@@ -536,6 +591,142 @@ class SentifargoOrchestrator:
         label = classes[top_idx] if len(classes) > top_idx else "like"
         return f"Movie recommendation: {label} (p={proba[top_idx]:.3f}) for user {user_id}, movie {movie_id}."
 
+    def _risk_score(self, message: str) -> tuple[str, dict[str, Any]]:
+        payload = _risk_payload_from_message(message or "")
+        scores = analyze_risk(payload)
+        decision = make_decision(
+            scores.get("cyber_risk", 0.0),
+            scores.get("behavior_risk", 0.0),
+            scores.get("fraud_risk", 0.0),
+        )
+        explanation = explain_decision(
+            risks={
+                "cyber_risk": float(scores.get("cyber_risk", 0.0)),
+                "behavior_risk": float(scores.get("behavior_risk", 0.0)),
+                "fraud_risk": float(scores.get("fraud_risk", 0.0)),
+                "fusion_risk": float(scores.get("fusion_risk", 0.0)),
+            },
+            decision=decision.decision,
+            context=[
+                f"login_country={payload.get('login_country')}",
+                f"device_known={payload.get('device_known')}",
+                f"transaction_amount={payload.get('transaction_amount')}",
+            ],
+        )
+        answer = (
+            f"Unified risk decision: {decision.decision} "
+            f"(fusion_risk={scores.get('fusion_risk', 0.0):.2f})."
+        )
+        meta = {
+            "payload": payload,
+            "scores": scores,
+            "decision": decision.decision,
+            "reason_code": decision.reason_code,
+            "explanation": explanation,
+        }
+        return answer, meta
+
+    def _dsa_rag(self, message: str) -> tuple[str, dict[str, Any]]:
+        try:
+            from app.rag_dsa.pipeline import run_dsa_rag
+        except Exception as exc:
+            return (
+                "DSA RAG module not available.",
+                {"available": False, "error": str(exc)},
+            )
+
+        result = run_dsa_rag(message)
+        answer = str(result.get("answer") or "No DSA answer available.")
+        meta = {
+            "available": True,
+            "sources": result.get("sources", []),
+            "citations": result.get("citations", []),
+            "rewritten_queries": result.get("rewritten_queries", []),
+            "retrieval_counts": result.get("retrieval_counts", {}),
+            "online_used": result.get("online_used", False),
+            "online_reason": result.get("online_reason"),
+        }
+        return answer, meta
+
+    def _vision_summary(
+        self, *, attachments: dict[str, Any] | None
+    ) -> tuple[str, dict[str, Any]]:
+        if not attachments:
+            return (
+                "No image or video attached. Use /api/chat/multimodal or /api/vision/predict.",
+                {"available": False},
+            )
+
+        lines = []
+        meta: dict[str, Any] = {"available": True}
+        if attachments.get("vision_image"):
+            vi = attachments["vision_image"]
+            lines.append(
+                f"Image label: {vi.get('label')} (confidence {vi.get('confidence')})"
+            )
+            meta["vision_image"] = vi
+        if attachments.get("vision_video"):
+            vv = attachments["vision_video"]
+            lines.append(
+                f"Video label: {vv.get('label')} (confidence {vv.get('confidence')})"
+            )
+            meta["vision_video"] = vv
+        if attachments.get("face_emotion"):
+            fe = attachments["face_emotion"]
+            lines.append(
+                f"Face emotion: {fe.get('emotion')} (confidence {fe.get('confidence')})"
+            )
+            meta["face_emotion"] = fe
+        if attachments.get("image_tags"):
+            tags = attachments["image_tags"]
+            lines.append(f"Image tags: {', '.join(tags)}")
+            meta["image_tags"] = tags
+
+        if not lines:
+            return (
+                "No vision signals detected in the attachment.",
+                {"available": False, "attachments": attachments},
+            )
+
+        answer = "Vision analysis results:\n- " + "\n- ".join(lines)
+        return answer, meta
+
+    def _brand_summary(
+        self, *, attachments: dict[str, Any] | None
+    ) -> tuple[str, dict[str, Any]]:
+        if not attachments or not attachments.get("brand_detections"):
+            return (
+                "No brand detections available. Upload a logo image via /api/chat/multimodal or /api/vision/brand/predict.",
+                {"available": False},
+            )
+
+        detections = attachments["brand_detections"]
+        lines = []
+        for det in detections[:5]:
+            brand = det.get("brand")
+            conf = det.get("confidence")
+            lines.append(f"{brand} ({conf:.2f})" if conf is not None else str(brand))
+        answer = "Brand/logo detections:\n- " + "\n- ".join(lines)
+        return answer, {"available": True, "detections": detections}
+
+    def _voice_summary(
+        self, *, attachments: dict[str, Any] | None
+    ) -> tuple[str, dict[str, Any]]:
+        if not attachments or not attachments.get("voice"):
+            return (
+                "No audio attached. Upload audio via /api/chat/multimodal or /voice/emotion.",
+                {"available": False},
+            )
+
+        voice = attachments["voice"]
+        emotion = voice.get("emotion")
+        conf = voice.get("confidence")
+        answer = f"Voice emotion: {emotion} (confidence {conf})"
+        meta = {"available": True, "voice": voice}
+        if attachments.get("stt"):
+            meta["stt"] = attachments["stt"]
+        return answer, meta
+
     # ---------------- Routing ---------------- #
     def handle(
         self,
@@ -551,8 +742,25 @@ class SentifargoOrchestrator:
         """
         intent = decide(message)
         route = "chat" if intent == "llm" else intent
-        if route == "rag" and not use_rag:
+        if route in {"rag", "dsa_rag"} and not use_rag:
             route = "chat"
+
+        # If multimodal attachments exist, steer to the right engine only when the user asks for it.
+        base_message = (message or "").strip()
+        for marker in ("\n\nContext:\n", "\n\nInstruction:\n"):
+            if marker in base_message:
+                base_message = base_message.split(marker, 1)[0].strip()
+        base_lower = base_message.lower()
+        if attachments and route in {"chat", "rag"}:
+            if any(k in base_lower for k in ("logo", "brand")):
+                route = "brand"
+            elif any(k in base_lower for k in ("voice", "audio", "speech", "emotion")):
+                route = "voice"
+            elif any(
+                k in base_lower
+                for k in ("image", "photo", "picture", "vision", "deepfake", "video", "face")
+            ):
+                route = "vision"
 
         meta: dict[str, Any] = {"intent": intent}
 
@@ -570,6 +778,16 @@ class SentifargoOrchestrator:
                 answer, route_meta = self._cyber_score(message)
             elif route == "behavior":
                 answer, route_meta = self._behavior_score(message)
+            elif route == "risk":
+                answer, route_meta = self._risk_score(message)
+            elif route == "dsa_rag":
+                answer, route_meta = self._dsa_rag(message)
+            elif route == "vision":
+                answer, route_meta = self._vision_summary(attachments=attachments)
+            elif route == "brand":
+                answer, route_meta = self._brand_summary(attachments=attachments)
+            elif route == "voice":
+                answer, route_meta = self._voice_summary(attachments=attachments)
             elif route == "recommend":
                 if _looks_like_numeric_vector(message):
                     answer, route_meta = self._recommend(message)

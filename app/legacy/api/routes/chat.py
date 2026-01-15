@@ -1,5 +1,6 @@
 import asyncio
 import os
+from pathlib import Path
 import requests
 from functools import lru_cache
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
@@ -55,6 +56,7 @@ async def chat_multimodal(
     audio: UploadFile | None = File(default=None),
     image: UploadFile | None = File(default=None),
     video: UploadFile | None = File(default=None),
+    document: UploadFile | None = File(default=None),
     fps: float = Form(1.0),
     max_frames: int = Form(25),
     transcribe_audio: bool = Form(False),
@@ -182,6 +184,27 @@ async def chat_multimodal(
                 attachments["face_emotion_error"] = str(exc)
             except Exception as exc:
                 attachments["face_emotion_error"] = str(exc)
+
+            # Optional: brand/logo detection if user requests it.
+            try:
+                brand_text = f"{base_message or ''} {instruction_text or ''}".lower()
+                brand_intent = any(
+                    kw in brand_text
+                    for kw in ("logo", "brand", "company logo", "brand recognition")
+                )
+                if brand_intent:
+                    from src.vision.brand.recognizer import predict_image_bytes, model_path
+
+                    detections = predict_image_bytes(image_bytes, conf=0.25)
+                    attachments["brand_detections"] = detections
+                    attachments["brand_model"] = model_path()
+                    if detections:
+                        top = detections[0]
+                        context_lines.append(
+                            f"[brand] {top.get('brand')} ({top.get('confidence'):.2f})"
+                        )
+            except Exception as exc:
+                attachments["brand_error"] = str(exc)
         except Exception as exc:
             attachments["vision_image_error"] = str(exc)
 
@@ -217,6 +240,33 @@ async def chat_multimodal(
                 )
         except Exception as exc:
             attachments["vision_video_error"] = str(exc)
+
+    if document is not None:
+        try:
+            doc_bytes = await document.read()
+            doc_name = document.filename or "document.txt"
+            suffix = Path(doc_name).suffix.lower()
+            if suffix not in {".txt", ".md", ".json"}:
+                attachments["document_error"] = "Unsupported document type."
+            else:
+                upload_dir = Path("data/docs/uploads")
+                upload_dir.mkdir(parents=True, exist_ok=True)
+                safe_name = f"{Path(doc_name).stem}{suffix}"
+                dest_path = upload_dir / safe_name
+                dest_path.write_bytes(doc_bytes)
+                from app.rag.ingest import ingest_from_paths
+
+                chunk_count = ingest_from_paths([dest_path])
+                attachments["document_ingest"] = {
+                    "filename": dest_path.name,
+                    "chunks_indexed": chunk_count,
+                    "path": str(dest_path),
+                }
+                context_lines.append(f"[doc] {dest_path.name} chunks={chunk_count}")
+                if not base_message:
+                    base_message = f"Summarize the uploaded document ({dest_path.name})."
+        except Exception as exc:
+            attachments["document_error"] = str(exc)
 
     if not base_message:
         raise HTTPException(

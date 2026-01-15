@@ -7,6 +7,52 @@ def decide(message: str) -> str:
     text = message.lower()
     tokens = set(re.findall(r"[a-z0-9]+", text))
 
+    # DSA-specific routing (offline-first DSA RAG).
+    if any(
+        k in text
+        for k in [
+            "dsa",
+            "data structure",
+            "algorithm",
+            "array",
+            "linked list",
+            "stack",
+            "queue",
+            "sorting",
+            "searching",
+            "binary search",
+            "merge sort",
+            "quick sort",
+            "time complexity",
+            "big o",
+        ]
+    ):
+        return "dsa_rag"
+
+    # Unified risk/fusion summary.
+    if any(k in text for k in ["risk", "fusion", "overall risk", "risk summary"]):
+        return "risk"
+
+    # Vision / brand / voice cues (multimodal requests).
+    if any(k in text for k in ["logo", "brand"]):
+        return "brand"
+    if any(k in text for k in ["voice", "audio", "speech", "stt"]):
+        return "voice"
+    if any(
+        k in text
+        for k in [
+            "image",
+            "photo",
+            "picture",
+            "vision",
+            "deepfake",
+            "real or fake",
+            "video",
+            "face",
+        ]
+    ):
+        return "vision"
+
     if any(k in text for k in ["fraud", "transaction", "card"]):
         return "fraud"
     if any(k in text for k in ["cyber", "network", "attack", "packet"]):

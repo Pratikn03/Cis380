@@ -27,6 +27,9 @@
 ## 🚀 Deployment
 See `docs/DEPLOY_RENDER.md` for Render backend + GitHub Pages frontend steps.
 
+## Tier-5 Overview
+See `docs/TIER5_OVERVIEW.md` for the platform identity, architecture, and feature map.
+
 ## What You Get
 
 ## ✨ Key Features
