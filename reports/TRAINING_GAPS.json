@@ -1,0 +1,327 @@
+{
+  "generated_at": "2026-01-15 04:07:13 UTC",
+  "training_data": {
+    "generated_at": "2026-01-15 04:01:43 UTC",
+    "required": [
+      {
+        "name": "Fraud (creditcard.csv)",
+        "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/fraud/creditcard.csv",
+        "status": "ok",
+        "size_mb": 143.84,
+        "schema": {
+          "status": "ok",
+          "label_ok": true,
+          "amount_ok": true,
+          "time_ok": true,
+          "note": ""
+        },
+        "column_count": 31,
+        "columns_sample": [
+          "Time",
+          "V1",
+          "V2",
+          "V3",
+          "V4",
+          "V5",
+          "V6",
+          "V7"
+        ]
+      },
+      {
+        "name": "Cyber (UNSW_NB15_training-set.csv)",
+        "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/cyber/UNSW_NB15_training-set.csv",
+        "status": "ok",
+        "size_mb": 14.67,
+        "schema": {
+          "status": "ok",
+          "label_ok": true,
+          "note": ""
+        },
+        "column_count": 45,
+        "columns_sample": [
+          "id",
+          "dur",
+          "proto",
+          "service",
+          "state",
+          "spkts",
+          "dpkts",
+          "sbytes"
+        ]
+      },
+      {
+        "name": "Behavior (online_shoppers_intention.csv)",
+        "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/behavior/online_shoppers_intention.csv",
+        "status": "ok",
+        "size_mb": 1.02,
+        "schema": {
+          "status": "ok",
+          "revenue_ok": true,
+          "note": ""
+        },
+        "column_count": 18,
+        "columns_sample": [
+          "Administrative",
+          "Administrative_Duration",
+          "Informational",
+          "Informational_Duration",
+          "ProductRelated",
+          "ProductRelated_Duration",
+          "BounceRates",
+          "ExitRates"
+        ]
+      },
+      {
+        "name": "Voice emotion (wav folders)",
+        "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice",
+        "status": "ok",
+        "total_wav": 7364,
+        "details": [
+          {
+            "emotion": "happy",
+            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/happy",
+            "wav_count": 1863,
+            "count_capped": false,
+            "status": "ok",
+            "probe": {
+              "ok": true,
+              "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/happy/1008_TAI_HAP_XX.wav",
+              "channels": 1,
+              "sample_rate": 16000
+            }
+          },
+          {
+            "emotion": "sad",
+            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/sad",
+            "wav_count": 1863,
+            "count_capped": false,
+            "status": "ok",
+            "probe": {
+              "ok": true,
+              "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/sad/tess__OAF_Sad__OAF_chat_sad.wav",
+              "channels": 1,
+              "sample_rate": 24414
+            }
+          },
+          {
+            "emotion": "angry",
+            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/angry",
+            "wav_count": 1863,
+            "count_capped": false,
+            "status": "ok",
+            "probe": {
+              "ok": true,
+              "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/angry/1022_ITS_ANG_XX.wav",
+              "channels": 1,
+              "sample_rate": 16000
+            }
+          },
+          {
+            "emotion": "neutral",
+            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/neutral",
+            "wav_count": 1775,
+            "count_capped": false,
+            "status": "ok",
+            "probe": {
+              "ok": true,
+              "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/neutral/1060_ITS_NEU_XX.wav",
+              "channels": 1,
+              "sample_rate": 16000
+            }
+          }
+        ]
+      },
+      {
+        "name": "Brand (LogoDet-3K raw)",
+        "path": [
+          "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/brand/LogoDet-3K",
+          "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/brand/logodet3k"
+        ],
+        "status": "ok"
+      },
+      {
+        "name": "Brand (prepared YOLO dataset)",
+        "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/brands.yaml",
+        "status": "ok",
+        "note": "prepared dataset present",
+        "yaml": {
+          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo",
+          "train": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/images/train",
+          "val": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/images/val",
+          "names_count": 1
+        },
+        "train_exists": true,
+        "val_exists": true,
+        "train_images": 5000,
+        "val_images": 5000,
+        "train_capped": true,
+        "val_capped": true
+      }
+    ],
+    "optional": [
+      {
+        "name": "Vision real/fake (raw)",
+        "path": [
+          "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/vision/train_real",
+          "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/vision/train_fake"
+        ],
+        "status": "ok",
+        "real_images": 5000,
+        "fake_images": 5000,
+        "real_capped": true,
+        "fake_capped": true
+      },
+      {
+        "name": "Celeb_V2 (deepfake)",
+        "path": [
+          "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/Celeb_V2/Train",
+          "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/Celeb_V2/Val"
+        ],
+        "status": "ok",
+        "train_images": 5000,
+        "val_images": 5000,
+        "train_capped": true,
+        "val_capped": true
+      },
+      {
+        "name": "Face emotion (image)",
+        "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/vision/face_emotion",
+        "status": "ok",
+        "image_count": 5000,
+        "count_capped": true
+      },
+      {
+        "name": "Video temporal (real/fake)",
+        "path": [
+          "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/vision/video/real",
+          "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/vision/video/fake"
+        ],
+        "status": "ok",
+        "real_videos": 890,
+        "fake_videos": 2000,
+        "real_capped": false,
+        "fake_capped": true
+      },
+      {
+        "name": "MovieLens recommender",
+        "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/recommendation/movielens.csv",
+        "status": "ok",
+        "size_mb": 658.37,
+        "schema": {
+          "status": "ok",
+          "note": ""
+        },
+        "column_count": 4,
+        "columns_sample": [
+          "userId",
+          "movieId",
+          "rating",
+          "timestamp"
+        ]
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "name": "fraud_model",
+      "path": "models/fraud/supervised/fraud_model.pkl",
+      "status": "ok"
+    },
+    {
+      "name": "cyber_model",
+      "path": "models/cyber/supervised/cyber_model.pkl",
+      "status": "ok"
+    },
+    {
+      "name": "behavior_model",
+      "path": "models/behavior/behavior_supervised.pkl",
+      "status": "ok"
+    },
+    {
+      "name": "behavior_lof",
+      "path": "models/behavior/behavior_lof.pkl",
+      "status": "ok"
+    },
+    {
+      "name": "voice_emotion",
+      "path": "models/voice_emotion.pkl",
+      "status": "ok"
+    },
+    {
+      "name": "recommender_model",
+      "path": "models/recommender/recommender_model.pkl",
+      "status": "ok"
+    },
+    {
+      "name": "recommender_meta",
+      "path": "models/recommender/recommender_meta.joblib",
+      "status": "missing"
+    },
+    {
+      "name": "movielens_model",
+      "path": "models/recommender/movielens_model.pkl",
+      "status": "ok"
+    },
+    {
+      "name": "movielens_meta",
+      "path": "models/recommender/movielens_meta.joblib",
+      "status": "ok"
+    },
+    {
+      "name": "vision_resnet",
+      "path": "models/vision/resnet/model.pt",
+      "status": "ok"
+    },
+    {
+      "name": "vision_resnet_classes",
+      "path": "models/vision/resnet/classes.txt",
+      "status": "ok"
+    },
+    {
+      "name": "vision_face_emotion",
+      "path": "models/vision/face_emotion/model.pt",
+      "status": "ok"
+    },
+    {
+      "name": "vision_face_emotion_classes",
+      "path": "models/vision/face_emotion/classes.txt",
+      "status": "ok"
+    },
+    {
+      "name": "vision_temporal",
+      "path": "artifacts/vision_temporal/temporal_lstm.pt",
+      "status": "missing"
+    },
+    {
+      "name": "vision_brand_yolo",
+      "path": "artifacts/brand/yolo_logo_det.pt",
+      "status": "ok"
+    },
+    {
+      "name": "fusion_model",
+      "path": "models/fusion/fusion_meta_model.pkl",
+      "status": "ok"
+    }
+  ],
+  "missing_artifacts": [
+    {
+      "name": "recommender_meta",
+      "path": "models/recommender/recommender_meta.joblib"
+    },
+    {
+      "name": "vision_temporal",
+      "path": "artifacts/vision_temporal/temporal_lstm.pt"
+    }
+  ],
+  "dvc": {
+    "dvc_yaml": "dvc.yaml",
+    "dvc_yaml_exists": true,
+    "dvc_lock": "dvc.lock",
+    "dvc_lock_exists": false
+  },
+  "dsa_rag": {
+    "docs_dir": "data/dsa_docs",
+    "embed_dir": "data/dsa_embeddings",
+    "embed_dir_ready": true
+  }
+}

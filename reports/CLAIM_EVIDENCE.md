@@ -1,6 +1,6 @@
 # Claim Evidence Report
 
-Generated: 2026-01-14 14:56:54
+Generated: 2026-01-14 22:02:24
 
 ## C1. Orchestrator routes a single request to the right subsystem
 
@@ -82,9 +82,9 @@ Generated: 2026-01-14 14:56:54
   - ui-web/frontend/src/pages/CommandCenter.tsx - ui-web/frontend/src/pages/CommandCenter.tsx:79: - Training datasets (fraud, cyber, vision)
   - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:4: Sentifargo (Sentifargo) is a multi-module AI platform that exposes **production-style APIs** plus a **Streamlit command center UI** and a **React web UI** for anomaly/risk intelligence across multiple domains (fraud, cyber, behavior, fusion risk, RAG/document QA, recommendations, voice emotion, computer vision including brand/logo recognition, and offline-first DSA RAG with optional online fallback).
   - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:6: - **FastAPI backend** with modular routers (chat, RAG, recommender, fraud, cyber, behavior, risk, voice, vision, brand, STT, monitoring).
-  - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:98: - Measurable claims (accuracy/latency/cost) backed by scripts + reports.
-  - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:99: - Evaluation harness across modules (fraud/cyber/vision/voice/RAG) + regression tests.
-  - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:118: - Build a full evaluation harness across fraud/cyber/vision/voice/RAG with regression tests.
+  - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:101: - Measurable claims (accuracy/latency/cost) backed by scripts + reports.
+  - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:102: - Evaluation harness across modules (fraud/cyber/vision/voice/RAG) + regression tests.
+  - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:123: - Build a full evaluation harness across fraud/cyber/vision/voice/RAG with regression tests.
 - Notes:
   - No metrics artifact with 99.2/0.992 found in reports
   - Claim appears in UI/docs copy; consider linking to a metrics file

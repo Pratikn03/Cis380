@@ -43,9 +43,10 @@
 - `POST` `/predict_nlp` — `deploy/api/main.py`
 - `POST` `/predict_vision` — `deploy/api/main.py`
 
-### LEGACY — 11 endpoints
+### LEGACY — 12 endpoints
 
 - `GET` `/stream` — `app/legacy/api/routes/chat.py`
+- `POST` `/clothes` — `app/legacy/api/routes/recommend.py`
 - `POST` `/explain` — `app/legacy/api/routes/recommend.py`
 - `POST` `/face_emotion/predict` — `app/legacy/api/routes/vision.py`
 - `POST` `/logs` — `app/legacy/api/routes/behavior.py`
@@ -254,7 +255,7 @@
 
 ## UI → API Calls Evidence
 
-- UI files referencing `/api/*`: **334**
+- UI files referencing `/api/*`: **336**
 
 - `app/streamlit_chatbot/risk_dashboard.py` references `/api/risk/analyze`
 - `app/streamlit_chatbot/unified_chat.py` references `/api/chat/multimodal`
@@ -313,13 +314,14 @@
 - `ui-web/frontend/src/services/endpoints.ts` references `/api/behavior/logs`
 - `ui-web/frontend/src/services/endpoints.ts` references `/api/vision/predict`
 - `ui-web/frontend/src/services/endpoints.ts` references `/api/recommend/multimodal`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/recommend/clothes`
 - `ui-web/frontend/src/services/endpoints.ts` references `/api/rag/query`
 - `ui-web/frontend/src/services/endpoints.ts` references `/api/rag/upload`
 - `ui-web/frontend/src/services/endpoints.ts` references `/api/dsa-rag/ask`
 - `ui-web/frontend/src/services/endpoints.ts` references `/api/dsa-rag/upload`
 - `ui-web/frontend/src/services/endpoints.ts` references `/api/dsa-rag/ingest`
 - `ui-web/frontend/src/services/endpoints.ts` references `/api/vision/video/predict`
-- `ui-web/frontend/node_modules/.vite/deps/chunk-PJEEZAML.js` references `/api/webview-tag`
+- `ui-web/frontend/node_modules/.vite/deps_temp_3fc4bba1/chunk-PJEEZAML.js` references `/api/webview-tag`
 - `ui-web/frontend/node_modules/axios/dist/axios.js` references `/api/http`
 - `ui-web/frontend/node_modules/axios/lib/helpers/parseHeaders.js` references `/api/http`
 - `ui-web/frontend/node_modules/axios/dist/esm/axios.js` references `/api/http`
@@ -455,4 +457,3 @@
 - `ui-web/frontend/node_modules/@types/node/test.d.ts` references `/api/cli`
 - `ui-web/frontend/node_modules/@types/node/test.d.ts` references `/api/cli`
 - `ui-web/frontend/node_modules/@types/node/http.d.ts` references `/api/net`
-- `ui-web/frontend/node_modules/@types/node/http2.d.ts` references `/api/errors`

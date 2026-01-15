@@ -238,15 +238,15 @@
       },
       {
         "path": "docs/PROJECT_DESCRIPTION.md",
-        "detail": "docs/PROJECT_DESCRIPTION.md:98: - Measurable claims (accuracy/latency/cost) backed by scripts + reports."
+        "detail": "docs/PROJECT_DESCRIPTION.md:101: - Measurable claims (accuracy/latency/cost) backed by scripts + reports."
       },
       {
         "path": "docs/PROJECT_DESCRIPTION.md",
-        "detail": "docs/PROJECT_DESCRIPTION.md:99: - Evaluation harness across modules (fraud/cyber/vision/voice/RAG) + regression tests."
+        "detail": "docs/PROJECT_DESCRIPTION.md:102: - Evaluation harness across modules (fraud/cyber/vision/voice/RAG) + regression tests."
       },
       {
         "path": "docs/PROJECT_DESCRIPTION.md",
-        "detail": "docs/PROJECT_DESCRIPTION.md:118: - Build a full evaluation harness across fraud/cyber/vision/voice/RAG with regression tests."
+        "detail": "docs/PROJECT_DESCRIPTION.md:123: - Build a full evaluation harness across fraud/cyber/vision/voice/RAG with regression tests."
       }
     ],
     "notes": [
