@@ -10,7 +10,7 @@ from app.rag_dsa.bm25 import BM25Index
 from app.rag_dsa.config import settings
 from app.rag_dsa.embeddings import DsaEmbeddingModel
 from app.rag_dsa.ingest import build_chunks, ensure_index, load_docs
-from app.rag_dsa.online import online_enabled, rerank_online, rewrite_queries_online
+from app.rag_dsa.online import answer_online, online_enabled
 from app.rag_dsa.utils import cache_get, cache_set, stable_hash, tokenize, unique_preserve
 
 
@@ -34,12 +34,6 @@ def rewrite_query(query: str) -> List[str]:
     cached = cache_get(cache_path)
     if cached and isinstance(cached.get("queries"), list):
         return cached["queries"]
-
-    if online_enabled():
-        online = rewrite_queries_online(query)
-        if online:
-            cache_set(cache_path, {"queries": online})
-            return online
 
     base = query.strip()
     lower = base.lower()
@@ -129,7 +123,9 @@ def merge_dedupe(items: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]
         existing = merged[key]
         existing["score_dense"] = max(existing.get("score_dense", 0.0), item.get("score_dense", 0.0))
         existing["score_bm25"] = max(existing.get("score_bm25", 0.0), item.get("score_bm25", 0.0))
-        existing["retrievers"] = set(existing.get("retrievers", set())) | set(item.get("retrievers", set()))
+        existing["retrievers"] = set(existing.get("retrievers", set())) | set(
+            item.get("retrievers", set())
+        )
     ordered = sorted(
         merged.values(),
         key=lambda h: (h.get("score_dense", 0.0) + h.get("score_bm25", 0.0)),
@@ -151,18 +147,9 @@ def _minmax(values: List[float]) -> List[float]:
 def rerank(query: str, candidates: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]]:
     cache_path = os.path.join(settings.CACHE_DIR, f"rerank_{stable_hash(query)}.json")
     cached = cache_get(cache_path)
+    cached_order = None
     if cached and isinstance(cached.get("order"), list):
-        order = cached["order"]
-        ordered = [candidates[i] for i in order if 0 <= i < len(candidates)]
-        return ordered[:top_k]
-
-    if online_enabled():
-        candidate_texts = [c.get("text") or "" for c in candidates]
-        online_order = rerank_online(query, candidate_texts, top_k)
-        if online_order:
-            cache_set(cache_path, {"order": online_order})
-            ordered = [candidates[i] for i in online_order if 0 <= i < len(candidates)]
-            return ordered[:top_k]
+        cached_order = cached["order"]
 
     dense_scores = [c.get("score_dense", 0.0) for c in candidates]
     bm25_scores = [c.get("score_bm25", 0.0) for c in candidates]
@@ -177,9 +164,12 @@ def rerank(query: str, candidates: List[Dict[str, Any]], top_k: int) -> List[Dic
         score = 0.5 * dense_norm[idx] + 0.3 * bm25_norm[idx] + 0.2 * overlap
         cand["score_final"] = score
 
-    ordered = sorted(candidates, key=lambda c: c.get("score_final", 0.0), reverse=True)
-    order = [candidates.index(c) for c in ordered]
-    cache_set(cache_path, {"order": order})
+    if cached_order is not None:
+        ordered = [candidates[i] for i in cached_order if 0 <= i < len(candidates)]
+    else:
+        ordered = sorted(candidates, key=lambda c: c.get("score_final", 0.0), reverse=True)
+        cache_set(cache_path, {"order": [candidates.index(c) for c in ordered]})
+
     return ordered[:top_k]
 
 
@@ -245,10 +235,7 @@ def answer_with_sources(query: str, sources: List[Dict[str, Any]]) -> Dict[str, 
         )
 
     context_prompt = "\n\n".join(
-        [
-            f"[{i}] {s['snippet']} (source={s['source']})"
-            for i, s in enumerate(ui_sources)
-        ]
+        [f"[{i}] {s['snippet']} (source={s['source']})" for i, s in enumerate(ui_sources)]
     )
     chatgpt_prompt = (
         "You are a DSA tutor. Use the context below and answer with citations.\n\n"
@@ -262,6 +249,15 @@ def answer_with_sources(query: str, sources: List[Dict[str, Any]]) -> Dict[str, 
         "chatgpt_link": _CHATGPT_LINK,
         "chatgpt_prompt": chatgpt_prompt,
     }
+
+
+def _should_fallback_online(candidates: List[Dict[str, Any]]) -> bool:
+    if not candidates:
+        return True
+    top_score = candidates[0].get("score_final")
+    if top_score is None:
+        return True
+    return float(top_score) < settings.ONLINE_FALLBACK_MIN_SCORE
 
 
 def run_dsa_rag(query: str) -> Dict[str, Any]:
@@ -285,4 +281,16 @@ def run_dsa_rag(query: str) -> Dict[str, Any]:
         "bm25": len(bm25_hits),
         "merged": len(merged),
     }
+    result["online_used"] = False
+
+    if online_enabled() and _should_fallback_online(top):
+        online_answer = answer_online(query)
+        if online_answer:
+            result["answer"] = online_answer
+            result["sources"] = []
+            result["citations"] = []
+            result["chatgpt_prompt"] = ""
+            result["online_used"] = True
+            result["online_reason"] = "offline_context_insufficient"
+
     return result

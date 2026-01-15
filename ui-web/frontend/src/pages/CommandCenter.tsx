@@ -66,7 +66,7 @@ Frontend Layer
 - GitHub Pages (Portfolio)
 
 FastAPI Backend
-- API routes: /api/chat, /api/risk, /api/vision, /api/voice
+- API routes: /api/chat, /api/risk/analyze, /api/vision/predict, /api/voice/emotion
 - Orchestrator: intent detection, route selection, response fusion
 
 ML Models Layer

@@ -39,7 +39,7 @@ def _detect_intent(text: str) -> Tuple[str, str]:
     t = text.lower()
     tokens = set(re.findall(r"[a-z0-9]+", t))
 
-    if tokens.intersection({"clothes", "outfit", "fashion", "wear"}):
+    if tokens.intersection({"clothes", "outfit", "outfits", "clothing", "fashion", "wear", "apparel"}):
         return "clothes", text
 
     phone_terms = {

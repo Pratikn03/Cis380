@@ -22,7 +22,12 @@
 
 **[View Live Demo →](https://pratikn03.github.io/Cis380/)**
 
-**[View Live Demo →](https://pratikn03.github.io/Cis380/)**## What You Get
+**[View Live Demo →](https://pratikn03.github.io/Cis380/)**
+
+## 🚀 Deployment
+See `docs/DEPLOY_RENDER.md` for Render backend + GitHub Pages frontend steps.
+
+## What You Get
 
 ## ✨ Key Features
 

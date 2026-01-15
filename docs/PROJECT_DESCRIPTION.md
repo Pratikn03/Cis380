@@ -1,12 +1,13 @@
 # Sentifargo — Full Project Description
-_Auto-generated on 2026-01-13 19:48:29_
+_Auto-generated on 2026-01-14 16:51:15_
 ## What this project is
-Sentifargo (Sentifargo) is a multi-module AI platform that exposes **production-style APIs** and a **Streamlit command center UI** for anomaly/risk intelligence across multiple domains (fraud, cyber, behavior, fusion risk, RAG/document QA, recommendations, voice emotion, and computer vision including brand/logo recognition).
+Sentifargo (Sentifargo) is a multi-module AI platform that exposes **production-style APIs** plus a **Streamlit command center UI** and a **React web UI** for anomaly/risk intelligence across multiple domains (fraud, cyber, behavior, fusion risk, RAG/document QA, recommendations, voice emotion, computer vision including brand/logo recognition, and offline-first DSA RAG with optional online fallback).
 ## High-level capabilities
 - **FastAPI backend** with modular routers (chat, RAG, recommender, fraud, cyber, behavior, risk, voice, vision, brand, STT, monitoring).
-- **Streamlit UI** pages for chat/command center/risk/metrics/tools/voice/brand.
+- **Streamlit UI** pages for chat/command center/risk/metrics/tools/voice/brand, plus a React UI in `ui-web/`.
 - **MLOps signals**: Docker + Compose, CI workflows, metrics (Prometheus/Grafana), MLflow runs/registry patterns, explainability hooks.
 - **Multimodal**: embeddings (sentence-transformers / transformers), FAISS indexing, YOLO/Ultralytics for brand/logo detection.
+- **DSA RAG (offline-first)**: local embeddings + BM25, merge/dedupe, rerank, citations; optional OpenAI fallback when offline context is insufficient.
 ## Architecture at a glance
 ### Key entrypoints
 - `app/main.py`
@@ -21,21 +22,26 @@ Sentifargo (Sentifargo) is a multi-module AI platform that exposes **production-
 - `.github/workflows/deploy-pages.yml`
 
 ## API surface summary (FastAPI)
-- **Total detected endpoints:** **51**
+- **Total detected endpoints:** **56**
+- **Detection scope:** decorator scan across analyzed Python files (includes legacy routers and any utility scripts defining FastAPI routers).
+- **OpenAPI routes served (latest snapshot):** **41** (from `reports/openapi.json`).
 
-**Endpoint groups (approx):**
-- `/health*`: 6
+**Endpoint groups (first path segment, top 12):**
+- `health`: 6
 - `predict`: 3
 - `recommend`: 3
-- ``: 2
-- `events`: 2
+- `root`: 2
 - `multimodal`: 2
+- `events`: 2
 - `summary`: 2
-- `/api/*`: 1
-- `/metrics*`: 1
-- `analyze`: 1
-- `baseline`: 1
-- `chat`: 1
+- `ingest`: 2
+- `upload`: 2
+- `api`: 1
+- `metrics`: 1
+- `ready`: 1
+Remaining groups are singletons (see `reports/PROJECT_AUDIT.md`).
+
+Note: Some detected endpoints are defined in legacy modules or utility scripts and are not necessarily mounted in the running API. See `reports/CONTRACT_DIFF.md` for UI ↔ OpenAPI mismatches.
 
 **Sample endpoints (first 30):**
 - `GET` `/api/health`  — `app/main.py`
@@ -46,6 +52,17 @@ Sentifargo (Sentifargo) is a multi-module AI platform that exposes **production-
 - `GET` `/health/detailed`  — `app/core/health.py`
 - `GET` `/metrics`  — `app/core/health.py`
 - `GET` `/ready`  — `app/core/health.py`
+- `POST` `/logs`  — `app/legacy/api/routes/behavior.py`
+- `POST` `/train`  — `app/legacy/api/routes/vision.py`
+- `POST` `/predict`  — `app/legacy/api/routes/vision.py`
+- `POST` `/face_emotion/predict`  — `app/legacy/api/routes/vision.py`
+- `POST` `/video/predict`  — `app/legacy/api/routes/vision.py`
+- `POST` `/explain`  — `app/legacy/api/routes/recommend.py`
+- `POST` `/multimodal`  — `app/legacy/api/routes/recommend.py`
+- `POST` `/topn`  — `app/legacy/api/routes/recommend.py`
+- `POST` `/multimodal`  — `app/legacy/api/routes/chat.py`
+- `GET` `/stream`  — `app/legacy/api/routes/chat.py`
+- `POST` `/query`  — `app/legacy/api/routes/rag.py`
 - `GET` `/events`  — `app/api/cyber_timeline.py`
 - `GET` `/patterns`  — `app/api/cyber_timeline.py`
 - `GET` `/sources`  — `app/api/cyber_timeline.py`
@@ -57,17 +74,6 @@ Sentifargo (Sentifargo) is a multi-module AI platform that exposes **production-
 - `GET` `/events`  — `app/api/monitor.py`
 - `POST` `/baseline/build`  — `app/api/monitor.py`
 - `GET` `/health`  — `app/api/health.py`
-- `POST` `/predict`  — `app/api/vision_temporal.py`
-- `POST` `/speak`  — `app/api/tts.py`
-- `POST` `/fraud`  — `app/api/fraud.py`
-- `POST` `/emotion`  — `app/api/voice.py`
-- `POST` `/chat`  — `app/api/chat.py`
-- `POST` `/ingest`  — `app/api/rag.py`
-- `POST` `/upload`  — `app/api/rag.py`
-- `POST` `/analyze`  — `app/api/fusion.py`
-- `POST` `/risk/analyze`  — `app/api/risk.py`
-- `POST` `/predict`  — `app/api/brand.py`
-- `POST` `/recommend`  — `app/api/recommender.py`
 
 ## Streamlit UI
 **Pages found:**
@@ -80,6 +86,43 @@ Sentifargo (Sentifargo) is a multi-module AI platform that exposes **production-
 - `app/streamlit_chatbot/pages/risk.py`
 - `app/streamlit_chatbot/pages/tools.py`
 - `app/streamlit_chatbot/pages/voice_chat.py`
+
+## DSA RAG (offline-first + online fallback)
+- **Pipeline:** query rewrite → dense (local embeddings) + BM25 → merge/dedupe → rerank → answer + citations.
+- **Storage defaults:** docs in `data/dsa_docs`, embeddings in `data/dsa_embeddings` (created on ingest), cache in `data/processed/cache/dsa`.
+- **API endpoints:** `POST /api/dsa-rag/ask`, `POST /api/dsa-rag/ingest`, `POST /api/dsa-rag/upload`.
+- **Online fallback:** optional OpenAI answer when offline context is insufficient (guarded by `DSA_ONLINE_MODE` and `DSA_ONLINE_FALLBACK_MIN_SCORE`).
+- **Core modules:** `app/rag_dsa/pipeline.py`, `app/rag_dsa/ingest.py`, `app/rag_dsa/online.py`, `app/api/dsa_rag.py`.
+
+## Tier-6 definition (practical)
+A Tier-6 repository has these properties:
+- One canonical API contract (OpenAPI), UI never 404s.
+- End-to-end reproducibility (one command to set up + one command to reproduce results).
+- Measurable claims (accuracy/latency/cost) backed by scripts + reports.
+- Evaluation harness across modules (fraud/cyber/vision/voice/RAG) + regression tests.
+- Observability (metrics, traces, structured logs) + dashboards.
+- Security posture (auth, rate limits, secrets, input validation).
+- Model governance (versioning, registry, shadow mode, rollback, drift gates).
+- Clear current vs legacy strategy (explicit, tested, documented).
+
+## Tier-6 status (evidence in repo)
+- **Canonical map:** `docs/CANONICAL.md` documents current vs legacy and entrypoints.
+- **Contract tooling:** `scripts/contract_diff.py` and `scripts/ci_contract_gate.sh` (outputs `reports/CONTRACT_DIFF.md`, uses `reports/openapi.json`).
+- **Contract diff result (latest run):** 0 UI routes missing in OpenAPI, 18 unused OpenAPI routes (see `reports/CONTRACT_DIFF.md`).
+- **Scorecard harness:** `scripts/system_scorecard.py` writes `reports/SYSTEM_SCORECARD.md`.
+- **E2E smoke tests:** `tests/e2e/test_smoke.py`.
+- **Truth table audit:** `scripts/truth_table_audit.py` → `reports/TRUTH_TABLE.md`.
+- **Claims evidence:** `scripts/claim_evidence.py` → `reports/CLAIM_EVIDENCE.md`.
+- **Full repo audit:** `scripts/full_project_audit.py` → `reports/PROJECT_AUDIT.md` + `reports/PROJECT_AUDIT.json`.
+- **Training data audit:** `scripts/training_data_audit.py` → `reports/TRAINING_DATA.md` + `reports/TRAINING_DATA.json`.
+- **Observability hooks:** `/metrics` endpoint via `app/core/health.py`.
+- **Auth/rate-limit wiring:** `app/main.py` includes `require_auth` + `setup_production_middleware`.
+
+## Tier-6 plan (next steps)
+- Centralize UI endpoint mapping into a single shared module for Streamlit + React.
+- Build a full evaluation harness across fraud/cyber/vision/voice/RAG with regression tests.
+- Add dashboards under `dashboards/` and formal SLO reporting to `reports/`.
+- Wire contract gate + scorecard into CI (nightly or per-PR).
 
 ## Training / pipelines
 **Trainer / pipeline scripts detected:**
@@ -106,6 +149,7 @@ Sentifargo (Sentifargo) is a multi-module AI platform that exposes **production-
 - `data/catalogs`
 - `data/Celeb_V2`
 - `data/docs`
+- `data/dsa_docs`
 - `data/embeddings`
 - `data/interim`
 - `data/monitoring`

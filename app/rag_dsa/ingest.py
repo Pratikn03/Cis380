@@ -81,9 +81,7 @@ def _write_index_meta(embed_dir: Path, doc_count: int, chunk_count: int, dim: in
         "chunk_count": chunk_count,
         "embed_dim": dim,
     }
-    (embed_dir / "index_meta.json").write_text(
-        json.dumps(payload, indent=2), encoding="utf-8"
-    )
+    (embed_dir / "index_meta.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
 def ingest() -> int:

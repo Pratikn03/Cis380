@@ -46,7 +46,8 @@ def stable_hash(text: str) -> str:
 
 
 def ensure_dir(path: str) -> None:
-    os.makedirs(path, exist_ok=True)
+    if path:
+        os.makedirs(path, exist_ok=True)
 
 
 def cache_get(path: str) -> Optional[Any]:
@@ -59,7 +60,7 @@ def cache_get(path: str) -> Optional[Any]:
 def cache_set(path: str, obj: Any) -> None:
     ensure_dir(os.path.dirname(path))
     with open(path, "w", encoding="utf-8") as handle:
-        json.dump(obj, handle, ensure_ascii=True, indent=2)
+        json.dump(obj, handle, ensure_ascii=False, indent=2)
 
 
 def tokenize(text: str) -> list[str]:

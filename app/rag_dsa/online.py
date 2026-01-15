@@ -124,3 +124,39 @@ def rerank_online(query: str, candidates: List[str], top_k: int) -> Optional[Lis
             continue
     ordered = [i for i in ordered if 0 <= i < len(candidates)][:top_k]
     return ordered
+
+
+def answer_online(query: str) -> Optional[str]:
+    if not online_enabled():
+        return None
+    client_info = _openai_client()
+    if client_info is None:
+        return None
+
+    prompt = (
+        "You are a DSA tutor. Answer the question clearly and concisely. "
+        "If you are unsure, say so and suggest what to look up next.\n\n"
+        f"Question: {query}"
+    )
+
+    mode, client = client_info
+    try:
+        if mode == "v1":
+            response = client.chat.completions.create(
+                model=settings.OPENAI_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.2,
+            )
+            content = response.choices[0].message.content or ""
+        else:
+            response = client.ChatCompletion.create(
+                model=settings.OPENAI_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.2,
+            )
+            content = response["choices"][0]["message"]["content"] or ""
+    except Exception:
+        return None
+
+    cleaned = content.strip()
+    return cleaned or None

@@ -255,6 +255,71 @@ async def recommend_multimodal(
         )
 
 
+@router.post("/clothes")
+async def recommend_clothes(
+    text: Optional[str] = Form(default=None),
+    top_k: int = Form(default=5, ge=1, le=20),
+    image: UploadFile | None = File(default=None),
+):
+    """Image/text clothing recommendations (offline-first).
+
+    Uses CLIP image tags when available; falls back to text-only matching.
+    """
+    query = (text or "").strip()
+    image_tags: list[str] = []
+    tag_error: str | None = None
+
+    if image is not None:
+        try:
+            import io
+
+            from PIL import Image
+
+            from app.streamlit_chatbot.image_tags import extract_tags_from_image
+
+            image_bytes = await image.read()
+            img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+            image_tags = extract_tags_from_image(img, top_k=5)
+        except Exception as exc:
+            tag_error = str(exc)
+
+    if not query and image is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Provide a text prompt or an image.",
+        )
+
+    try:
+        from app.streamlit_chatbot.handlers.clothes import recommend_clothes as _recommend_clothes
+
+        items = _recommend_clothes(
+            age=None,
+            query=query,
+            preferred_tags=image_tags,
+            top_k=top_k,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Clothing recommendation failed: {exc}",
+        ) from exc
+
+    payload: dict[str, object] = {
+        "mode": "clothes",
+        "query": query,
+        "image_tags": image_tags,
+        "items": items,
+    }
+    if tag_error:
+        payload["image_tag_error"] = tag_error
+        if not image_tags:
+            payload["notice"] = (
+                "Image tags unavailable; enable CLIP tags via Sentifargo_IMAGE_TAGS=1 "
+                "and ensure the CLIP checkpoint is cached."
+            )
+    return payload
+
+
 class TopNRequest(BaseModel):
     user_id: int
     candidate_ids: List[int]

@@ -218,7 +218,10 @@ def main():
 
         with risk_tabs[2]:
             st.markdown("## Monitoring & Logs")
-            st.caption("Reads from `data/monitoring/logs` via `/api/monitor/*` endpoints.")
+            st.caption(
+                "Reads from `data/monitoring/logs` via `/api/monitor/summary` and "
+                "`/api/monitor/events`."
+            )
 
             window_n = st.slider("Window size (events)", min_value=10, max_value=5000, value=250, step=10)
             refresh = st.button("Refresh metrics", key="monitor_refresh", type="secondary")

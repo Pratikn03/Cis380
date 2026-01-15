@@ -48,6 +48,11 @@ export const recommendMultimodal = (payload: FormData) =>
     headers: { "Content-Type": "multipart/form-data" },
   });
 
+export const recommendClothes = (payload: FormData) =>
+  api.post("/api/recommend/clothes", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
 export const ragQuery = (payload: { query: string; top_k?: number }) =>
   api.post("/api/rag/query", payload);
 

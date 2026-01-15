@@ -4,11 +4,24 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Tuple, Set, Optional
 
-EXCLUDE_DIRS = {
+DEFAULT_EXCLUDE_DIRS = {
     ".git", ".venv", "venv", "__pycache__", ".mypy_cache", ".pytest_cache",
     "node_modules", "dist", "build", ".next", ".cache",
     ".idea", ".vscode",
+    "data", "models", "reports", "runs", "ui-web",
+    "artifacts", "experiments", "notebooks", "logs",
 }
+
+ANALYSIS_EXCLUDE_DIRS = {
+    ".git", ".venv", "venv", "__pycache__", ".mypy_cache", ".pytest_cache",
+    "node_modules", "dist", "build", ".next", ".cache",
+    ".idea", ".vscode",
+    "data", "models", "reports", "runs", "ui-web",
+    "artifacts", "experiments", "notebooks", "logs",
+}
+
+FULL_SCAN = os.getenv("FULL_PROJECT_SCAN", "false").lower() == "true"
+EXCLUDE_DIRS = {".git"} if FULL_SCAN else DEFAULT_EXCLUDE_DIRS
 
 FASTAPI_DECORATORS = ("get","post","put","delete","patch","options","head")
 TRAIN_HINTS = [
@@ -40,8 +53,14 @@ class DupGroup:
 @dataclass
 class Audit:
     root: str
+    full_scan: bool
+    scan_exclusions: List[str]
+    analysis_exclusions: List[str]
+    scan_started_at: str
+    scan_duration_s: float
     files_scanned: int
-    py_files: int
+    py_files_total: int
+    py_files_analyzed: int
     total_bytes: int
 
     fastapi_includes: List[RouterInclude]
@@ -66,6 +85,9 @@ class Audit:
 def is_excluded_dir(d: str) -> bool:
     return d in EXCLUDE_DIRS
 
+def path_has_dir(p: Path, targets: Set[str]) -> bool:
+    return any(part in targets for part in p.parts)
+
 def walk(root: Path) -> List[Path]:
     out: List[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
@@ -74,10 +96,10 @@ def walk(root: Path) -> List[Path]:
             out.append(Path(dirpath) / fn)
     return out
 
-def read_text(p: Path, limit: int = 400_000) -> str:
+def read_text(p: Path, limit: Optional[int] = 400_000) -> str:
     try:
         b = p.read_bytes()
-        if len(b) > limit:
+        if limit is not None and len(b) > limit:
             b = b[:limit]
         return b.decode("utf-8", errors="ignore")
     except Exception:
@@ -124,7 +146,7 @@ def compile_check(py_files: List[Path]) -> List[str]:
     errs = []
     for p in py_files:
         try:
-            src = read_text(p)
+            src = read_text(p, limit=None)
             compile(src, str(p), "exec")
         except Exception as e:
             errs.append(f"{p}: {type(e).__name__}: {e}")
@@ -185,34 +207,41 @@ def import_graph_unreferenced(py_files: List[Path], root: Path) -> List[str]:
             unref.append(str(path))
     return sorted(unref)
 
-def summarize_data(root: Path) -> Tuple[Dict[str,int], List[str]]:
+def count_files_limited(path: Path, limit: int) -> Tuple[int, bool]:
+    cnt = 0
+    for dirpath, _, filenames in os.walk(path):
+        if filenames:
+            cnt += len(filenames)
+            if cnt >= limit:
+                return limit, True
+    return cnt, False
+
+def summarize_data(root: Path, limit: int = 5000) -> Tuple[Dict[str,int], List[str], List[str]]:
     expected = ["data/raw","data/processed","artifacts","runs","models","configs","reports"]
     summary: Dict[str,int] = {}
     missing: List[str] = []
+    truncated: List[str] = []
     for d in expected:
         p = root / d
         if not p.exists():
             missing.append(d)
             continue
-        cnt = 0
-        for x in p.rglob("*"):
-            if x.is_file():
-                cnt += 1
+        cnt, did_truncate = count_files_limited(p, limit)
         summary[d] = cnt
-    return summary, missing
+        if did_truncate:
+            truncated.append(d)
+    return summary, missing, truncated
 
-def find_files_by_names(root: Path, names: List[str]) -> List[str]:
+def find_files_by_names(files: List[Path], names: List[str]) -> List[str]:
     out = []
-    for p in root.rglob("*"):
-        if p.is_file() and p.name in names:
+    for p in files:
+        if p.name in names:
             out.append(str(p))
     return sorted(out)
 
-def find_ci_files(root: Path) -> List[str]:
+def find_ci_files(files: List[Path]) -> List[str]:
     out = []
-    for p in root.rglob("*"):
-        if not p.is_file():
-            continue
+    for p in files:
         s = p.as_posix()
         if ".github/workflows/" in s or s.endswith((".gitlab-ci.yml",".circleci/config.yml")):
             out.append(str(p))
@@ -221,9 +250,14 @@ def find_ci_files(root: Path) -> List[str]:
 def main():
     root = Path(".").resolve()
     t0 = time.time()
+    scan_started_at = time.strftime("%Y-%m-%dT%H:%M:%S")
 
     files = [p for p in walk(root) if p.is_file()]
-    py_files = [p for p in files if p.suffix == ".py"]
+    analysis_files = [
+        p for p in files if not path_has_dir(p.relative_to(root), ANALYSIS_EXCLUDE_DIRS)
+    ]
+    py_files_total = [p for p in files if p.suffix == ".py"]
+    py_files_analyzed = [p for p in analysis_files if p.suffix == ".py"]
     total_bytes = sum(p.stat().st_size for p in files)
 
     # duplicates
@@ -239,29 +273,29 @@ def main():
     # fastapi
     includes: List[RouterInclude] = []
     endpoints: List[Endpoint] = []
-    for p in py_files:
+    for p in py_files_analyzed:
         inc, eps = detect_fastapi(p)
         includes.extend(inc)
         endpoints.extend(eps)
 
     # training and rag candidates
-    training = [str(p) for p in py_files if looks_like_training(p)]
-    rag = [str(p) for p in py_files if looks_like_rag(p)]
+    training = [str(p) for p in py_files_analyzed if looks_like_training(p)]
+    rag = [str(p) for p in py_files_analyzed if looks_like_rag(p)]
     training.sort(); rag.sort()
 
     # compile errors
-    compile_errors = compile_check(py_files)
+    compile_errors = compile_check(py_files_analyzed)
 
     # other infra files
-    reqs = [str(p) for p in root.rglob("*") if p.is_file() and p.name in {"requirements.txt","pyproject.toml","poetry.lock","Pipfile","Pipfile.lock"}]
-    docker = find_files_by_names(root, ["Dockerfile","docker-compose.yml","docker-compose.yaml","Dockerfile.production","Dockerfile.prod"])
-    ci = find_ci_files(root)
+    reqs = [str(p) for p in files if p.name in {"requirements.txt","pyproject.toml","poetry.lock","Pipfile","Pipfile.lock"}]
+    docker = find_files_by_names(files, ["Dockerfile","docker-compose.yml","docker-compose.yaml","Dockerfile.production","Dockerfile.prod"])
+    ci = find_ci_files(files)
 
     # data summary
-    data_summary, missing_data_dirs = summarize_data(root)
+    data_summary, missing_data_dirs, truncated_data_dirs = summarize_data(root)
 
     # unreferenced (heuristic)
-    unref = import_graph_unreferenced(py_files, root)
+    unref = import_graph_unreferenced(py_files_analyzed, root)
 
     notes = []
     if not includes and not endpoints:
@@ -274,11 +308,21 @@ def main():
         notes.append("Unreferenced internal modules found (may indicate duplicates/dead code).")
     if missing_data_dirs:
         notes.append("Some standard data dirs missing (not always a problem, but check).")
+    if truncated_data_dirs:
+        notes.append("Data summary capped at 5000 files for: " + ", ".join(truncated_data_dirs))
+
+    dt = time.time() - t0
 
     audit = Audit(
         root=str(root),
+        full_scan=FULL_SCAN,
+        scan_exclusions=sorted(EXCLUDE_DIRS),
+        analysis_exclusions=sorted(ANALYSIS_EXCLUDE_DIRS),
+        scan_started_at=scan_started_at,
+        scan_duration_s=dt,
         files_scanned=len(files),
-        py_files=len(py_files),
+        py_files_total=len(py_files_total),
+        py_files_analyzed=len(py_files_analyzed),
         total_bytes=total_bytes,
         fastapi_includes=includes[:800],
         fastapi_endpoints=endpoints[:1200],
@@ -302,8 +346,16 @@ def main():
     md = []
     md.append("# Full Project Audit Report\n")
     md.append(f"- Root: `{audit.root}`")
+    md.append(f"- Full scan: **{audit.full_scan}**")
+    md.append(f"- Scan exclusions: `{', '.join(audit.scan_exclusions) if audit.scan_exclusions else 'none'}`")
+    md.append(
+        f"- Analysis exclusions: `{', '.join(audit.analysis_exclusions) if audit.analysis_exclusions else 'none'}`"
+    )
+    md.append(f"- Scan started: `{audit.scan_started_at}`")
+    md.append(f"- Scan duration (s): **{audit.scan_duration_s:.2f}**")
     md.append(f"- Files scanned: **{audit.files_scanned}**")
-    md.append(f"- Python files: **{audit.py_files}**")
+    md.append(f"- Python files (total): **{audit.py_files_total}**")
+    md.append(f"- Python files (analyzed): **{audit.py_files_analyzed}**")
     md.append(f"- Total size (bytes): **{audit.total_bytes}**\n")
 
     md.append("## Infra Files Found\n")
@@ -380,15 +432,18 @@ def main():
         md.append("- No major notes found.")
     md.append("")
 
-    dt = time.time() - t0
-    md.append(f"_Generated in {dt:.2f}s._\n")
+    md.append(f"_Generated in {audit.scan_duration_s:.2f}s._\n")
 
     Path("reports/PROJECT_AUDIT.md").write_text("\n".join(md), encoding="utf-8")
 
     # terminal summary for copy/paste back to chat
     print("\n================ FULL PROJECT AUDIT SUMMARY ================")
     print(f"Root: {audit.root}")
-    print(f"Files scanned: {audit.files_scanned} | Python: {audit.py_files}")
+    print(
+        "Files scanned: "
+        f"{audit.files_scanned} | Python (total): {audit.py_files_total} | "
+        f"Python (analyzed): {audit.py_files_analyzed}"
+    )
     print(f"FastAPI include_router: {len(includes)} | endpoints: {len(endpoints)}")
     print(f"RAG candidates: {len(rag)} | Training candidates: {len(training)}")
     print(f"Duplicate groups: {len(dups)} (<=2MB hashed)")

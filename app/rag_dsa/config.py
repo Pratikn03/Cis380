@@ -22,6 +22,7 @@ class DsaRagSettings:
     TOPK_FINAL = int(os.getenv("DSA_TOPK_FINAL", "6"))
 
     AUTO_INGEST = os.getenv("DSA_AUTO_INGEST", "true").lower() == "true"
+    ONLINE_FALLBACK_MIN_SCORE = float(os.getenv("DSA_ONLINE_FALLBACK_MIN_SCORE", "0.2"))
 
 
 settings = DsaRagSettings()

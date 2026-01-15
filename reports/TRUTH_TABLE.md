@@ -1,0 +1,458 @@
+# Truth Table Audit (Current vs Legacy vs Training vs UI)
+
+## Endpoint Inventory (grouped)
+
+### CURRENT_API — 28 endpoints
+
+- `GET` `/drift` — `app/api/monitor.py`
+- `GET` `/events` — `app/api/cyber_timeline.py`
+- `GET` `/events` — `app/api/monitor.py`
+- `GET` `/health` — `app/api/health.py`
+- `GET` `/patterns` — `app/api/cyber_timeline.py`
+- `GET` `/risk_summary` — `app/api/monitor.py`
+- `GET` `/sources` — `app/api/cyber_timeline.py`
+- `GET` `/summary` — `app/api/cyber_timeline.py`
+- `GET` `/summary` — `app/api/monitor.py`
+- `POST` `/analyze` — `app/api/fusion.py`
+- `POST` `/ask` — `app/api/dsa_rag.py`
+- `POST` `/baseline/build` — `app/api/monitor.py`
+- `POST` `/chat` — `app/api/chat.py`
+- `POST` `/emotion` — `app/api/voice.py`
+- `POST` `/fraud` — `app/api/fraud.py`
+- `POST` `/ingest` — `app/api/dsa_rag.py`
+- `POST` `/ingest` — `app/api/rag.py`
+- `POST` `/log` — `app/api/monitor.py`
+- `POST` `/predict` — `app/api/brand.py`
+- `POST` `/predict` — `app/api/vision_temporal.py`
+- `POST` `/recommend` — `app/api/recommender.py`
+- `POST` `/recommend/explain` — `app/api/recommender.py`
+- `POST` `/recommend/multimodal` — `app/api/recommender.py`
+- `POST` `/risk/analyze` — `app/api/risk.py`
+- `POST` `/speak` — `app/api/tts.py`
+- `POST` `/transcribe` — `app/api/stt.py`
+- `POST` `/upload` — `app/api/dsa_rag.py`
+- `POST` `/upload` — `app/api/rag.py`
+
+### DEPLOY — 7 endpoints
+
+- `GET` `/` — `deploy/api/main.py`
+- `GET` `/health` — `deploy/api/main.py`
+- `POST` `/predict_cyber` — `deploy/api/main.py`
+- `POST` `/predict_fraud` — `deploy/api/main.py`
+- `POST` `/predict_fusion` — `deploy/api/main.py`
+- `POST` `/predict_nlp` — `deploy/api/main.py`
+- `POST` `/predict_vision` — `deploy/api/main.py`
+
+### LEGACY — 11 endpoints
+
+- `GET` `/stream` — `app/legacy/api/routes/chat.py`
+- `POST` `/explain` — `app/legacy/api/routes/recommend.py`
+- `POST` `/face_emotion/predict` — `app/legacy/api/routes/vision.py`
+- `POST` `/logs` — `app/legacy/api/routes/behavior.py`
+- `POST` `/multimodal` — `app/legacy/api/routes/chat.py`
+- `POST` `/multimodal` — `app/legacy/api/routes/recommend.py`
+- `POST` `/predict` — `app/legacy/api/routes/vision.py`
+- `POST` `/query` — `app/legacy/api/routes/rag.py`
+- `POST` `/topn` — `app/legacy/api/routes/recommend.py`
+- `POST` `/train` — `app/legacy/api/routes/vision.py`
+- `POST` `/video/predict` — `app/legacy/api/routes/vision.py`
+
+### OTHER — 53 endpoints
+
+- `DELETE` `/items/{item_id}` — `.venv/lib/python3.13/site-packages/fastapi/applications.py`
+- `DELETE` `/items/{item_id}` — `.venv/lib/python3.13/site-packages/fastapi/routing.py`
+- `GET` `/` — `app/main.py`
+- `GET` `/api/health` — `app/main.py`
+- `GET` `/health` — `app/core/health.py`
+- `GET` `/health/detailed` — `app/core/health.py`
+- `GET` `/health/live` — `app/core/health.py`
+- `GET` `/health/ready` — `app/core/health.py`
+- `GET` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/applications.py`
+- `GET` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/applications.py`
+- `GET` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/applications.py`
+- `GET` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/param_functions.py`
+- `GET` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/routing.py`
+- `GET` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/security/api_key.py`
+- `GET` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/security/api_key.py`
+- `GET` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/security/api_key.py`
+- `GET` `/items/{item_id}` — `.venv/lib/python3.13/site-packages/fastapi/exceptions.py`
+- `GET` `/items/{item_id}` — `.venv/lib/python3.13/site-packages/fastapi/param_functions.py`
+- `GET` `/metrics` — `app/core/health.py`
+- `GET` `/ready` — `app/core/health.py`
+- `GET` `/users/` — `.venv/lib/python3.13/site-packages/fastapi/applications.py`
+- `GET` `/users/` — `.venv/lib/python3.13/site-packages/fastapi/routing.py`
+- `GET` `/users/` — `.venv/lib/python3.13/site-packages/fastapi/routing.py`
+- `GET` `/users/me` — `.venv/lib/python3.13/site-packages/fastapi/security/http.py`
+- `GET` `/users/me` — `.venv/lib/python3.13/site-packages/fastapi/security/http.py`
+- `GET` `/users/me` — `.venv/lib/python3.13/site-packages/fastapi/security/http.py`
+- `GET` `/users/me/items/` — `.venv/lib/python3.13/site-packages/fastapi/param_functions.py`
+- `GET` `/x` — `scripts/truth_table_audit.py`
+- `PATCH` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/applications.py`
+- `PATCH` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/routing.py`
+- `PATCH` `distutils.command.bdist_rpm.bdist_rpm` — `.venv/lib/python3.13/site-packages/setuptools/tests/test_bdist_deprecations.py`
+- `PATCH` `name` — `.venv/lib/python3.13/site-packages/torch/utils/_config_module.py`
+- `PATCH` `platform.python_version` — `.venv/lib/python3.13/site-packages/pkg_resources/tests/test_markers.py`
+- `PATCH` `psutil._pslinux.socket.inet_ntop` — `.venv/lib/python3.13/site-packages/psutil/tests/test_linux.py`
+- `PATCH` `psutil._pslinux.supports_ipv6` — `.venv/lib/python3.13/site-packages/psutil/tests/test_linux.py`
+- `PATCH` `setuptools.command.build_clib.newer_pairwise_group` — `.venv/lib/python3.13/site-packages/setuptools/tests/test_build_clib.py`
+- `PATCH` `setuptools.command.build_clib.newer_pairwise_group` — `.venv/lib/python3.13/site-packages/setuptools/tests/test_build_clib.py`
+- `PATCH` `time.sleep` — `.venv/lib/python3.13/site-packages/psutil/tests/test_testutils.py`
+- `PATCH` `time.sleep` — `.venv/lib/python3.13/site-packages/psutil/tests/test_testutils.py`
+- `PATCH` `time.sleep` — `.venv/lib/python3.13/site-packages/psutil/tests/test_testutils.py`
+- `PATCH` `time.sleep` — `.venv/lib/python3.13/site-packages/psutil/tests/test_testutils.py`
+- `PATCH` `time.sleep` — `.venv/lib/python3.13/site-packages/psutil/tests/test_testutils.py`
+- `PATCH` `time.sleep` — `.venv/lib/python3.13/site-packages/psutil/tests/test_testutils.py`
+- `POST` `/files/` — `.venv/lib/python3.13/site-packages/fastapi/datastructures.py`
+- `POST` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/applications.py`
+- `POST` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/routing.py`
+- `POST` `/login` — `.venv/lib/python3.13/site-packages/fastapi/security/oauth2.py`
+- `POST` `/login` — `.venv/lib/python3.13/site-packages/fastapi/security/oauth2.py`
+- `POST` `/send-notification/{email}` — `.venv/lib/python3.13/site-packages/fastapi/background.py`
+- `POST` `/uploadfile/` — `.venv/lib/python3.13/site-packages/fastapi/datastructures.py`
+- `POST` `/y` — `scripts/truth_table_audit.py`
+- `PUT` `/items/{item_id}` — `.venv/lib/python3.13/site-packages/fastapi/applications.py`
+- `PUT` `/items/{item_id}` — `.venv/lib/python3.13/site-packages/fastapi/routing.py`
+
+## Model Loading Evidence (runtime loads)
+
+- Files with model-load patterns: **134**
+
+- `src/scripts/run_fusion_experiment.py` matched `joblib\.load\(`
+- `src/train/train_video_temporal.py` matched `torch\.load\(`
+- `src/uais/app/predict_example.py` matched `joblib\.load\(`
+- `src/uais/recommender/load_models.py` matched `joblib\.load\(`
+- `src/uais/data/load_datasets.py` matched `pickle\.load\(`
+- `src/uais_v/models/video_temporal.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/shap/_serializable.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/jinja2/bccache.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/xgboost/core.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/xgboost/sklearn.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/torch/_weights_only_unpickler.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/_tensor.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/hub.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/storage.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/serialization.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/anyio/to_process.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/joblib/_store_backends.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/joblib/numpy_pickle.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/parso/cache.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/pandas/io/pickle.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/pandas/tests/io/test_pickle.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/scipy/datasets/_fetchers.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/ultralytics/nn/tasks.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/ultralytics/nn/autobackend.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/ultralytics/utils/patches.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/ultralytics/hub/session.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/ultralytics/models/sam/predict.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/ultralytics/models/yolo/yoloe/train.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/ultralytics/models/yolo/world/train.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/ultralytics/utils/callbacks/hub.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/numba/core/caching.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/matplotlib/tests/test_pickle.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/tensorflow/python/keras/keras_parameterized.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/tensorflow/python/saved_model/load_options.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/tensorflow/python/keras/saving/save.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/tensorflow/python/keras/engine/training.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/tensorflow/python/keras/saving/saved_model/load.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/tensorflow/tools/compatibility/tf_upgrade_v2.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/joblib/test/test_numpy_pickle.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/joblib/test/test_store_backends.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/joblib/test/test_memory.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/joblib/externals/loky/backend/popen_loky_posix.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/datasets/_olivetti_faces.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/datasets/_kddcup99.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/datasets/_california_housing.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/datasets/_species_distributions.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/datasets/_covtype.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/datasets/_rcv1.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/datasets/_twenty_newsgroups.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/utils/_testing.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/neighbors/tests/test_kde.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/neural_network/tests/test_mlp.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/ensemble/_hist_gradient_boosting/tests/test_gradient_boosting.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/metrics/tests/test_score_objects.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/sklearn/tree/tests/test_tree.py` matched `joblib\.load\(`
+- `.venv/lib/python3.13/site-packages/numpy/lib/format.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/numpy/lib/_npyio_impl.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/numpy/random/tests/test_generator_mt19937.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/numpy/random/tests/test_direct.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/numpy/_core/tests/test_stringdtype.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/numpy/_core/tests/test_regression.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/numpy/ma/tests/test_core.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/_functorch/compilers.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/fx/graph_module.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/multiprocessing/spawn.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/cuda/_memory_viz.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/optim/optimizer.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/_inductor/autotune_process.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/_inductor/standalone_compile.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/_inductor/debug.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/_inductor/fuzzer.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/utils/_content_store.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/_dynamo/package.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/export/pt2_archive/_package.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/testing/_internal/common_nn.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/testing/_internal/common_quantization.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/testing/_internal/common_utils.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/testing/_internal/jit_utils.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/testing/_internal/distributed/distributed_test.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/testing/_internal/optests/generate_tests.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/utils/data/datapipes/utils/decoder.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/utils/benchmark/utils/valgrind_wrapper/timer_interface.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/distributed/checkpoint/format_utils.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/distributed/checkpoint/planner.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/distributed/checkpoint/filesystem.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/distributed/checkpoint/state_dict_loader.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/distributed/checkpoint/default_planner.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/distributed/optim/zero_redundancy_optimizer.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/distributed/_tools/memory_tracker.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/distributed/fsdp/fully_sharded_data_parallel.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/distributed/fsdp/api.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/distributed/checkpoint/_experimental/checkpoint_reader.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torch/onnx/_internal/torchscript_exporter/verification.py` matched `onnxruntime\.InferenceSession\(`
+- `.venv/lib/python3.13/site-packages/torch/_export/serde/serialize.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/fontTools/cffLib/__init__.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torchvision/datasets/lsun.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torchvision/datasets/imagenet.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torchvision/datasets/cifar.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/torchvision/datasets/phototour.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/torchvision/datasets/mnist.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/xgboost/spark/core.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/xgboost/spark/utils.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/fsspec/implementations/cache_metadata.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/mpmath/tests/test_pickle.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/pycparser/ply/yacc.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/shap/benchmark/metrics.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/shap/benchmark/experiments.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/networkx/algorithms/flow/tests/test_maxflow_large_graph.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/networkx/algorithms/flow/tests/test_networksimplex.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/networkx/algorithms/flow/tests/test_mincost.py` matched `pickle\.load\(`
+- `.venv/lib/python3.13/site-packages/keras/src/layers/layer.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/keras/src/callbacks/backup_and_restore.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/keras/src/callbacks/model_checkpoint.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/keras/src/utils/torch_utils.py` matched `torch\.load\(`
+- `.venv/lib/python3.13/site-packages/keras/src/models/model.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/keras/src/saving/saving_api.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/keras/src/saving/object_registration.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/keras/src/saving/saving_lib.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/keras/src/export/onnx.py` matched `onnxruntime\.InferenceSession\(`
+- `.venv/lib/python3.13/site-packages/keras/src/legacy/saving/legacy_h5_format.py` matched `load_model\(`
+- `.venv/lib/python3.13/site-packages/keras/src/layers/preprocessing/feature_space.py` matched `load_model\(`
+- `deploy/api/main.py` matched `joblib\.load\(`
+- `app/fusion/engine.py` matched `joblib\.load\(`
+- `app/api/vision_temporal.py` matched `torch\.load\(`
+- `app/services/risk_engine.py` matched `joblib\.load\(`
+- `app/models/video/video_lstm.py` matched `torch\.load\(`
+- `app/models/vision/face_emotion_predict.py` matched `torch\.load\(`
+- `app/models/voice/emotion_predict.py` matched `joblib\.load\(`
+- `app/legacy/agent/orchestrator.py` matched `joblib\.load\(`
+- `app/legacy/api/routes/behavior.py` matched `joblib\.load\(`
+- `app/legacy/api/routes/vision.py` matched `torch\.load\(`
+- `app/legacy/api/routes/fraud.py` matched `joblib\.load\(`
+- `app/legacy/api/routes/cyber.py` matched `joblib\.load\(`
+- `app/legacy/api/routes/recommend.py` matched `joblib\.load\(`
+
+## UI → API Calls Evidence
+
+- UI files referencing `/api/*`: **334**
+
+- `app/streamlit_chatbot/risk_dashboard.py` references `/api/risk/analyze`
+- `app/streamlit_chatbot/unified_chat.py` references `/api/chat/multimodal`
+- `app/streamlit_chatbot/unified_chat.py` references `/api/chat`
+- `app/streamlit_chatbot/app.py` references `/api/fraud`
+- `app/streamlit_chatbot/app.py` references `/api/cyber`
+- `app/streamlit_chatbot/app.py` references `/api/behavior`
+- `app/streamlit_chatbot/app.py` references `/api/fraud`
+- `app/streamlit_chatbot/app.py` references `/api/cyber`
+- `app/streamlit_chatbot/app.py` references `/api/behavior`
+- `app/streamlit_chatbot/app.py` references `/api/monitor/summary`
+- `app/streamlit_chatbot/app.py` references `/api/monitor/events`
+- `app/streamlit_chatbot/app.py` references `/api/monitor/summary`
+- `app/streamlit_chatbot/app.py` references `/api/monitor/events`
+- `app/streamlit_chatbot/classic_chat.py` references `/api/chat/multimodal`
+- `app/streamlit_chatbot/classic_chat.py` references `/api/chat`
+- `app/streamlit_chatbot/ui/theme.py` references `/api/health`
+- `app/streamlit_chatbot/pages/voice_chat.py` references `/api/tts/speak`
+- `app/streamlit_chatbot/pages/voice_chat.py` references `/api/chat`
+- `app/streamlit_chatbot/pages/voice_chat.py` references `/api/stt/transcribe`
+- `app/streamlit_chatbot/pages/voice_chat.py` references `/api/stt/transcribe`
+- `app/streamlit_chatbot/pages/voice_chat.py` references `/api/chat`
+- `app/streamlit_chatbot/pages/command_center.py` references `/api/chat`
+- `app/streamlit_chatbot/pages/command_center.py` references `/api/recommend/multimodal`
+- `app/streamlit_chatbot/pages/command_center.py` references `/api/recommend/multimodal`
+- `app/streamlit_chatbot/pages/command_center.py` references `/api/recommend/multimodal`
+- `app/streamlit_chatbot/pages/tools.py` references `/api/voice/emotion`
+- `app/streamlit_chatbot/pages/tools.py` references `/api/vision/predict`
+- `app/streamlit_chatbot/pages/tools.py` references `/api/vision/face_emotion/predict`
+- `app/streamlit_chatbot/pages/tools.py` references `/api/vision/video/predict`
+- `app/streamlit_chatbot/pages/chat.py` references `/api/chat/multimodal`
+- `app/streamlit_chatbot/pages/chat.py` references `/api/chat`
+- `app/streamlit_chatbot/pages/live.py` references `/api/chat/multimodal`
+- `app/streamlit_chatbot/pages/live.py` references `/api/chat/multimodal`
+- `app/streamlit_chatbot/pages/live.py` references `/api/chat/multimodal`
+- `app/streamlit_chatbot/pages/live.py` references `/api/chat/multimodal`
+- `app/streamlit_chatbot/pages/brand.py` references `/api/vision/brand/predict`
+- `app/streamlit_chatbot/pages/brand.py` references `/api/vision/brand/predict`
+- `ui-web/frontend/src/pages/CommandCenter.tsx` references `/api/chat`
+- `ui-web/frontend/src/pages/CommandCenter.tsx` references `/api/risk/analyze`
+- `ui-web/frontend/src/pages/CommandCenter.tsx` references `/api/vision/predict`
+- `ui-web/frontend/src/pages/CommandCenter.tsx` references `/api/voice/emotion`
+- `ui-web/frontend/src/pages/DsaRag.tsx` references `/api/dsa-rag/ask`
+- `ui-web/frontend/src/pages/DsaRag.tsx` references `/api/dsa-rag/upload`
+- `ui-web/frontend/src/pages/DsaRag.tsx` references `/api/dsa-rag/ingest`
+- `ui-web/frontend/src/pages/Chat.tsx` references `/api/health`
+- `ui-web/frontend/src/pages/Chat.tsx` references `/api/chat`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/chat`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/chat/multimodal`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/risk/analyze`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/vision/brand/predict`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/voice/emotion`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/fraud`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/cyber`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/behavior`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/behavior/logs`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/vision/predict`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/recommend/multimodal`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/rag/query`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/rag/upload`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/dsa-rag/ask`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/dsa-rag/upload`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/dsa-rag/ingest`
+- `ui-web/frontend/src/services/endpoints.ts` references `/api/vision/video/predict`
+- `ui-web/frontend/node_modules/.vite/deps/chunk-PJEEZAML.js` references `/api/webview-tag`
+- `ui-web/frontend/node_modules/axios/dist/axios.js` references `/api/http`
+- `ui-web/frontend/node_modules/axios/lib/helpers/parseHeaders.js` references `/api/http`
+- `ui-web/frontend/node_modules/axios/dist/esm/axios.js` references `/api/http`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/chat`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/chat/multimodal`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/risk/analyze`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/vision/brand/predict`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/voice/emotion`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/fraud`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/cyber`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/behavior`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/behavior/logs`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/vision/predict`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/recommend/multimodal`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/rag/query`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/rag/upload`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/vision/video/predict`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/chat`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/chat/multimodal`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/risk/analyze`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/fraud`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/cyber`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/behavior`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/behavior/logs`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/vision/brand/predict`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/vision/predict`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/vision/video/predict`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/voice/emotion`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/recommend/multimodal`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/rag/query`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/rag/upload`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/chat`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/chat/multimodal`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/risk/analyze`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/vision/brand/predict`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/voice/emotion`
+- `ui-web/frontend/node_modules/.cache/gh-pages/https!github.com!Pratikn03!Cis380.git/assets/index-Bel7Ivb2.js` references `/api/risk/analyze`
+- `ui-web/frontend/node_modules/esbuild/lib/main.js` references `/api/worker_threads`
+- `ui-web/frontend/node_modules/vite/dist/node/index.d.ts` references `/api/fs`
+- `ui-web/frontend/node_modules/vite/dist/node/index.d.ts` references `/api/fs`
+- `ui-web/frontend/node_modules/vite/dist/node/chunks/dep-Dnp7gl8U.js` references `/api/crypto`
+- `ui-web/frontend/node_modules/vite/dist/node/chunks/dep-Dnp7gl8U.js` references `/api/crypto`
+- `ui-web/frontend/node_modules/vite/dist/node/chunks/dep-Dnp7gl8U.js` references `/api/crypto`
+- `ui-web/frontend/node_modules/vite/dist/node/chunks/dep-Dnp7gl8U.js` references `/api/crypto`
+- `ui-web/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js` references `/api/fs`
+- `ui-web/frontend/node_modules/fs-extra/lib/copy/copy.js` references `/api/fs`
+- `ui-web/frontend/node_modules/fs-extra/lib/copy/copy-sync.js` references `/api/fs`
+- `ui-web/frontend/node_modules/chokidar/types/index.d.ts` references `/api/fs`
+- `ui-web/frontend/node_modules/chokidar/types/index.d.ts` references `/api/fs`
+- `ui-web/frontend/node_modules/@types/node/diagnostics_channel.d.ts` references `/api/diagnostics_channel`
+- `ui-web/frontend/node_modules/@types/node/tls.d.ts` references `/api/tls`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/stream`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/process`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/stream`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/stream`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/readline`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/readline`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/stream`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/stream`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/readline`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/tty`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/tty`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/tty`
+- `ui-web/frontend/node_modules/@types/node/readline.d.ts` references `/api/tty`
+- `ui-web/frontend/node_modules/@types/node/crypto.d.ts` references `/api/crypto`
+- `ui-web/frontend/node_modules/@types/node/crypto.d.ts` references `/api/buffer`
+- `ui-web/frontend/node_modules/@types/node/crypto.d.ts` references `/api/buffer`
+- `ui-web/frontend/node_modules/@types/node/crypto.d.ts` references `/api/webcrypto`
+- `ui-web/frontend/node_modules/@types/node/crypto.d.ts` references `/api/webcrypto`
+- `ui-web/frontend/node_modules/@types/node/crypto.d.ts` references `/api/webcrypto`
+- `ui-web/frontend/node_modules/@types/node/crypto.d.ts` references `/api/webcrypto`
+- `ui-web/frontend/node_modules/@types/node/crypto.d.ts` references `/api/webcrypto`
+- `ui-web/frontend/node_modules/@types/node/trace_events.d.ts` references `/api/async_hooks`
+- `ui-web/frontend/node_modules/@types/node/trace_events.d.ts` references `/api/async_hooks`
+- `ui-web/frontend/node_modules/@types/node/trace_events.d.ts` references `/api/perf_hooks`
+- `ui-web/frontend/node_modules/@types/node/trace_events.d.ts` references `/api/v8`
+- `ui-web/frontend/node_modules/@types/node/trace_events.d.ts` references `/api/worker_threads`
+- `ui-web/frontend/node_modules/@types/node/os.d.ts` references `/api/errors`
+- `ui-web/frontend/node_modules/@types/node/os.d.ts` references `/api/process`
+- `ui-web/frontend/node_modules/@types/node/buffer.d.ts` references `/api/buffer`
+- `ui-web/frontend/node_modules/@types/node/buffer.d.ts` references `/api/buffer`
+- `ui-web/frontend/node_modules/@types/node/worker_threads.d.ts` references `/api/globals`
+- `ui-web/frontend/node_modules/@types/node/worker_threads.d.ts` references `/api/globals`
+- `ui-web/frontend/node_modules/@types/node/worker_threads.d.ts` references `/api/globals`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/process`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/process`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/process`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/util`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/util`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/util`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/util`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/util`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/util`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/util`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/util`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/process`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/process`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/process`
+- `ui-web/frontend/node_modules/@types/node/console.d.ts` references `/api/util`
+- `ui-web/frontend/node_modules/@types/node/async_hooks.d.ts` references `/api/async_context`
+- `ui-web/frontend/node_modules/@types/node/async_hooks.d.ts` references `/api/process`
+- `ui-web/frontend/node_modules/@types/node/async_hooks.d.ts` references `/api/async_hooks`
+- `ui-web/frontend/node_modules/@types/node/async_hooks.d.ts` references `/api/async_hooks`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/dns`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/dns`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/cli`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/dns`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/util`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/errors`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/util`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/errors`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/errors`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/dns`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/dns`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/dns`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/cli`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/worker_threads`
+- `ui-web/frontend/node_modules/@types/node/dns.d.ts` references `/api/dns`
+- `ui-web/frontend/node_modules/@types/node/vm.d.ts` references `/api/vm`
+- `ui-web/frontend/node_modules/@types/node/vm.d.ts` references `/api/vm`
+- `ui-web/frontend/node_modules/@types/node/vm.d.ts` references `/api/vm`
+- `ui-web/frontend/node_modules/@types/node/vm.d.ts` references `/api/vm`
+- `ui-web/frontend/node_modules/@types/node/vm.d.ts` references `/api/vm`
+- `ui-web/frontend/node_modules/@types/node/vm.d.ts` references `/api/vm`
+- `ui-web/frontend/node_modules/@types/node/vm.d.ts` references `/api/vm`
+- `ui-web/frontend/node_modules/@types/node/vm.d.ts` references `/api/vm`
+- `ui-web/frontend/node_modules/@types/node/vm.d.ts` references `/api/vm`
+- `ui-web/frontend/node_modules/@types/node/test.d.ts` references `/api/test`
+- `ui-web/frontend/node_modules/@types/node/test.d.ts` references `/api/test`
+- `ui-web/frontend/node_modules/@types/node/test.d.ts` references `/api/test`
+- `ui-web/frontend/node_modules/@types/node/test.d.ts` references `/api/cli`
+- `ui-web/frontend/node_modules/@types/node/test.d.ts` references `/api/cli`
+- `ui-web/frontend/node_modules/@types/node/test.d.ts` references `/api/cli`
+- `ui-web/frontend/node_modules/@types/node/test.d.ts` references `/api/cli`
+- `ui-web/frontend/node_modules/@types/node/http.d.ts` references `/api/net`
+- `ui-web/frontend/node_modules/@types/node/http2.d.ts` references `/api/errors`

@@ -6,12 +6,23 @@ import {
   brandPredict,
   cyberScore,
   fraudScore,
+  recommendClothes,
   visionPredict,
+  visionVideoPredict,
   voiceEmotion,
 } from "../services/endpoints";
 
-type ToolId = "chat" | "vision" | "brand" | "audio" | "fraud" | "cyber" | "behavior" | "video";
-type FileToolId = "vision" | "brand" | "audio" | "video";
+type ToolId =
+  | "chat"
+  | "vision"
+  | "brand"
+  | "audio"
+  | "fraud"
+  | "cyber"
+  | "behavior"
+  | "video"
+  | "clothes";
+type FileToolId = "vision" | "brand" | "audio" | "video" | "clothes";
 type FeatureToolId = "fraud" | "cyber" | "behavior";
 
 interface RecommendationItem {
@@ -57,6 +68,19 @@ type AudioResponse = {
   emotion_vector?: Record<string, number>;
 };
 
+type ClothesItem = {
+  title?: string;
+  brand?: string;
+  price_usd?: number;
+  reason?: string;
+};
+
+type ClothesResponse = {
+  items?: ClothesItem[];
+  image_tags?: string[];
+  notice?: string;
+};
+
 type ScoreResponse = {
   score?: number;
   input_features?: number;
@@ -66,7 +90,8 @@ type ScoreResponse = {
 const toolOptions: Array<{ id: ToolId; label: string; description: string }> = [
   { id: "chat", label: "AI Chat", description: "Ask questions or get recommendations." },
   { id: "vision", label: "Vision", description: "Analyze images for authenticity and labels." },
-  { id: "brand", label: "Brand", description: "Detect logos and brand marks in images." },
+  { id: "brand", label: "Brand (YOLO)", description: "Detect logos/brands in images (includes car logos)." },
+  { id: "clothes", label: "Outfits", description: "Image or text-based clothing recommendations." },
   { id: "audio", label: "Audio", description: "Detect emotion from audio clips." },
   { id: "video", label: "Video", description: "Analyze video for deepfake detection." },
   { id: "fraud", label: "Fraud", description: "Score transaction features for fraud risk." },
@@ -83,7 +108,12 @@ const fileToolConfig: Record<FileToolId, { label: string; accept: string; helper
   brand: {
     label: "Brand detection",
     accept: "image/*",
-    helper: "JPG, PNG, WEBP, BMP up to 10MB",
+    helper: "JPG, PNG, WEBP, BMP up to 10MB (logos including car brands).",
+  },
+  clothes: {
+    label: "Outfit photo",
+    accept: "image/*",
+    helper: "Upload an outfit image or use the camera; add optional style keywords below.",
   },
   audio: {
     label: "Audio emotion",
@@ -121,6 +151,7 @@ const featureToolConfig: Record<
 const suggestions = [
   "Recommend a movie",
   "Recommend action movies",
+  "Recommend summer outfits",
   "What is fraud detection?",
   "Help",
 ];
@@ -228,6 +259,32 @@ const formatAudioResponse = (data: AudioResponse): string => {
   return lines.join("\n");
 };
 
+const formatClothesResponse = (data: ClothesResponse): string => {
+  const items = Array.isArray(data.items) ? data.items : [];
+  const lines = ["Clothing recommendations"];
+  const tags = Array.isArray(data.image_tags) ? data.image_tags : [];
+  if (tags.length > 0) {
+    lines.push(`Image tags: ${tags.join(", ")}`);
+  }
+  if (data.notice) {
+    lines.push(`Note: ${data.notice}`);
+  }
+  if (items.length === 0) {
+    lines.push("No clothing recommendations available.");
+    return lines.join("\n");
+  }
+  lines.push("Top picks:");
+  items.slice(0, 5).forEach((item) => {
+    const title = item.title ? String(item.title) : "Item";
+    const brand = item.brand ? ` by ${item.brand}` : "";
+    const price =
+      typeof item.price_usd === "number" ? ` ($${Math.round(item.price_usd)})` : "";
+    const reason = item.reason ? ` — ${item.reason}` : "";
+    lines.push(`- ${title}${brand}${price}${reason}`);
+  });
+  return lines.join("\n");
+};
+
 const formatScoreResponse = (label: string, data: ScoreResponse, provided: number): string => {
   const lines = [`${label} result`];
   if (typeof data.score === "number") {
@@ -247,6 +304,7 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [featureInput, setFeatureInput] = useState("");
+  const [outfitQuery, setOutfitQuery] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [activeTool, setActiveTool] = useState<ToolId>("chat");
   const [isLoading, setIsLoading] = useState(false);
@@ -280,6 +338,7 @@ export default function Chat() {
   useEffect(() => {
     setSelectedFile(null);
     setFeatureInput("");
+    setOutfitQuery("");
   }, [activeTool]);
 
   const checkConnection = async () => {
@@ -440,27 +499,70 @@ export default function Chat() {
   const handleRunTool = async () => {
     if (isLoading) return;
 
-    const isFileToolLocal = activeTool === "vision" || activeTool === "brand" || activeTool === "audio" || activeTool === "video";
+    const isClothesTool = activeTool === "clothes";
+    const isFileToolLocal =
+      activeTool === "vision" ||
+      activeTool === "brand" ||
+      activeTool === "audio" ||
+      activeTool === "video" ||
+      isClothesTool;
     const isFeatureTool =
       activeTool === "fraud" || activeTool === "cyber" || activeTool === "behavior";
 
     if (isFileToolLocal) {
-      if (!selectedFile) {
+      const hasOutfitQuery = outfitQuery.trim();
+      if (!selectedFile && !isClothesTool) {
         appendMessage({
           role: "assistant",
           content: "Please choose a file before running the analysis.",
         });
         return;
       }
+      if (isClothesTool && !selectedFile && !hasOutfitQuery) {
+        appendMessage({
+          role: "assistant",
+          content: "Upload an outfit photo or add a style prompt before running.",
+        });
+        return;
+      }
       const fileLabel = fileToolConfig[activeTool].label;
+      const userParts: string[] = [];
+      if (selectedFile) {
+        userParts.push(`${fileLabel}: ${selectedFile.name}`);
+      }
+      if (isClothesTool && hasOutfitQuery) {
+        userParts.push(`Style: ${hasOutfitQuery}`);
+      }
       appendMessage({
         role: "user",
-        content: `${fileLabel}: ${selectedFile.name}`,
+        content: userParts.length > 0 ? userParts.join(" | ") : fileLabel,
       });
       setIsLoading(true);
       try {
         const payload = new FormData();
-        payload.append("file", selectedFile);
+        if (isClothesTool) {
+          if (selectedFile) {
+            payload.append("image", selectedFile);
+          }
+          if (hasOutfitQuery) {
+            payload.append("text", hasOutfitQuery);
+          }
+          const { data } = await recommendClothes(payload);
+          const items = Array.isArray((data as ClothesResponse).items)
+            ? ((data as ClothesResponse).items as ClothesItem[])
+            : [];
+          const metaItems = items.map((item, idx) => ({
+            title: item.title ?? `Item ${idx + 1}`,
+            reason: item.reason ?? "",
+          }));
+          appendMessage({
+            role: "assistant",
+            content: formatClothesResponse(data as ClothesResponse),
+            meta: { items: metaItems },
+          });
+          return;
+        }
+        payload.append("file", selectedFile as File);
         if (activeTool === "vision") {
           const { data } = await visionPredict(payload);
           appendMessage({ role: "assistant", content: formatVisionResponse(data as VisionResponse) });
@@ -475,9 +577,7 @@ export default function Chat() {
         }
         if (activeTool === "video") {
           // Video analysis - use vision endpoint for now or dedicated video endpoint
-          const { data } = await api.post("/api/vision/video", payload, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
+          const { data } = await visionVideoPredict(payload);
           const result = data as { prediction?: string; confidence?: number; frames_analyzed?: number };
           const lines = ["Video Analysis Result"];
           lines.push(`Prediction: ${result.prediction || "Unknown"}`);
@@ -549,11 +649,18 @@ export default function Chat() {
   };
 
   const activeConfig = toolOptions.find((tool) => tool.id === activeTool);
-  const isFileTool = activeTool === "vision" || activeTool === "brand" || activeTool === "audio" || activeTool === "video";
+  const isFileTool =
+    activeTool === "vision" ||
+    activeTool === "brand" ||
+    activeTool === "audio" ||
+    activeTool === "video" ||
+    activeTool === "clothes";
   const isFeatureTool =
     activeTool === "fraud" || activeTool === "cyber" || activeTool === "behavior";
-  const canUseCamera = activeTool === "vision" || activeTool === "brand";
+  const canUseCamera = activeTool === "vision" || activeTool === "brand" || activeTool === "clothes";
   const canRecordAudio = activeTool === "audio";
+  const clothesReady = activeTool === "clothes" ? Boolean(selectedFile || outfitQuery.trim()) : true;
+  const fileReady = !isFileTool || (activeTool === "clothes" ? clothesReady : Boolean(selectedFile));
 
   // Statistics
   const userMessages = messages.filter(m => m.role === "user").length;
@@ -752,6 +859,24 @@ export default function Chat() {
                   )}
                 </div>
               </div>
+
+              {activeTool === "clothes" && (
+                <div className="mt-4">
+                  <label className="text-xs uppercase tracking-wide text-slate-500 block mb-2">
+                    Style prompt (optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={outfitQuery}
+                    onChange={(event) => setOutfitQuery(event.target.value)}
+                    placeholder="summer outfit, beach, casual, streetwear..."
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 text-sm focus:border-emerald-500 focus:outline-none"
+                  />
+                  <p className="text-xs text-slate-500 mt-2">
+                    Use an image, text, or both to get better outfit matches.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -879,7 +1004,7 @@ export default function Chat() {
                   onClick={handleRunTool}
                   disabled={
                     isLoading ||
-                    (isFileTool && !selectedFile) ||
+                    (isFileTool && !fileReady) ||
                     (isFeatureTool && !featureInput.trim())
                   }
                   className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-700 disabled:text-slate-500 text-slate-900 font-semibold rounded-xl transition-all"

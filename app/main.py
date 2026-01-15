@@ -85,6 +85,7 @@ from app.legacy.api.routes import behavior, chat, cyber, fraud, rag, recommend, 
 _app_risk_router = None       # Unified risk scoring
 _app_monitor_router = None    # System monitoring
 _app_voice_router = None      # Voice/audio analysis
+_app_tts_router = None        # Text-to-speech
 _app_rag_router = None        # Document Q&A (Retrieval Augmented Generation)
 _app_dsa_rag_router = None    # DSA RAG (offline-first)
 _app_brand_router = None      # Brand/logo detection
@@ -149,6 +150,13 @@ try:  # pragma: no cover
 except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.api.stt router unavailable: %s", exc)
     _app_stt_router = None
+
+# TTS Router - Text-to-Speech (local Piper)
+try:  # pragma: no cover
+    from app.api.tts import router as _app_tts_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.tts router unavailable: %s", exc)
+    _app_tts_router = None
 
 # Vision Temporal Router - Video frame analysis over time
 try:  # pragma: no cover
@@ -270,6 +278,8 @@ if _app_brand_router is not None:
     app.include_router(_app_brand_router, dependencies=[Depends(require_auth)])
 if _app_stt_router is not None:
     app.include_router(_app_stt_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_tts_router is not None:
+    app.include_router(_app_tts_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_vision_temporal_router is not None:
     app.include_router(
         _app_vision_temporal_router, prefix="/api", dependencies=[Depends(require_auth)]

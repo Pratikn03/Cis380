@@ -158,6 +158,7 @@ artifacts/*
 !artifacts/.gitkeep
 !artifacts/README.md
 !artifacts/brand/
+artifacts/brand/_dataset_subsets/
 /models/
 /experiments/
 runs/

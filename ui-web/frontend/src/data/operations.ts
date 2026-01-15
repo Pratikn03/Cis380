@@ -11,8 +11,17 @@ export const runbooks = [
     title: "GitHub Pages build",
     items: [
       "cd ui-web/frontend",
-      "VITE_BASE_PATH=/REPO_NAME/ npm run build",
+      "VITE_API_BASE=https://your-backend.onrender.com VITE_BASE_PATH=/REPO_NAME/ npm run build",
       "Deploy dist/ to the gh-pages branch",
+    ],
+  },
+  {
+    title: "Render backend deploy",
+    items: [
+      "Build: pip install -r requirements.txt",
+      "Start: uvicorn app.main:app --host 0.0.0.0 --port 8000",
+      "Set CORS_ORIGINS to your GitHub Pages domain",
+      "Set AUTH_TOKEN and (optional) OPENAI_API_KEY",
     ],
   },
   {
