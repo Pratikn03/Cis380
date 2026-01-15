@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.utils.uploads import (
     IMAGE_EXTENSIONS,
     IMAGE_MIME_TYPES,
     MAX_IMAGE_BYTES,
-    read_upload_bytes,
-    validate_upload,
+    read_image_payload,
 )
 
 router = APIRouter(prefix="/api/vision/brand", tags=["vision", "brand"])
@@ -15,23 +14,26 @@ router = APIRouter(prefix="/api/vision/brand", tags=["vision", "brand"])
 
 @router.post("/predict")
 async def predict_brand(
-    file: UploadFile = File(...),
+    file: UploadFile | None = File(default=None),
+    image_url: str | None = Form(default=None),
+    image_base64: str | None = Form(default=None),
     conf: float = 0.25,
     kind: str = "logo",
 ):
-    """Predict brand logos from an uploaded image.
+    """Predict brand logos from an uploaded image or remote payload.
 
     Returns a list of detections: {brand, confidence, bbox:[x1,y1,x2,y2]}.
     """
-    validate_upload(
-        file,
-        allowed_exts=IMAGE_EXTENSIONS,
-        allowed_mimes=IMAGE_MIME_TYPES,
-        max_bytes=MAX_IMAGE_BYTES,
-        kind="image",
-    )
     try:
-        image_bytes = await read_upload_bytes(file, max_bytes=MAX_IMAGE_BYTES, kind="image")
+        image_bytes = await read_image_payload(
+            file=file,
+            image_url=image_url,
+            image_base64=image_base64,
+            allowed_exts=IMAGE_EXTENSIONS,
+            allowed_mimes=IMAGE_MIME_TYPES,
+            max_bytes=MAX_IMAGE_BYTES,
+            kind="image",
+        )
     except HTTPException:
         raise
     except Exception as exc:

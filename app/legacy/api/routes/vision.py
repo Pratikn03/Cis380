@@ -79,7 +79,7 @@ import shutil
 import subprocess
 import tempfile
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from pydantic import BaseModel, Field
 
 from ..deps import require_auth
@@ -91,6 +91,7 @@ from app.utils.uploads import (
     MAX_VIDEO_BYTES,
     VIDEO_EXTENSIONS,
     VIDEO_MIME_TYPES,
+    read_image_payload,
     read_upload_bytes,
     validate_upload,
 )
@@ -268,8 +269,13 @@ def _load_vision_predictor():
 
 
 @router.post("/predict")
-async def vision_predict(file: UploadFile = File(...), top_k: int = 3):
-    """Predict class label for an uploaded image using the trained ResNet artifact."""
+async def vision_predict(
+    file: UploadFile | None = File(default=None),
+    image_url: str | None = Form(default=None),
+    image_base64: str | None = Form(default=None),
+    top_k: int = 3,
+):
+    """Predict class label for an uploaded image or image_url using the trained ResNet artifact."""
     try:
         import io
 
@@ -280,15 +286,16 @@ async def vision_predict(file: UploadFile = File(...), top_k: int = 3):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"Missing deps: {exc}"
         ) from exc
 
-    validate_upload(
-        file,
-        allowed_exts=SAFE_IMAGE_EXTENSIONS,
-        allowed_mimes=IMAGE_MIME_TYPES,
-        max_bytes=MAX_IMAGE_BYTES,
-        kind="image",
-    )
     try:
-        image_bytes = await read_upload_bytes(file, max_bytes=MAX_IMAGE_BYTES, kind="image")
+        image_bytes = await read_image_payload(
+            file=file,
+            image_url=image_url,
+            image_base64=image_base64,
+            allowed_exts=SAFE_IMAGE_EXTENSIONS,
+            allowed_mimes=IMAGE_MIME_TYPES,
+            max_bytes=MAX_IMAGE_BYTES,
+            kind="image",
+        )
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     except HTTPException:
         raise
@@ -319,8 +326,15 @@ async def vision_predict(file: UploadFile = File(...), top_k: int = 3):
         top_k = max(1, min(int(top_k), len(probs)))
         ranked = sorted(enumerate(probs), key=lambda x: x[1], reverse=True)[:top_k]
         best_idx, best_prob = ranked[0]
+        filename = "image"
+        if file is not None and file.filename:
+            filename = file.filename
+        elif image_url:
+            filename = image_url
+        elif image_base64:
+            filename = "image_base64"
         return {
-            "filename": file.filename,
+            "filename": filename,
             "label": (
                 class_names[int(best_idx)] if int(best_idx) < len(class_names) else str(best_idx)
             ),

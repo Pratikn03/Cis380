@@ -95,22 +95,31 @@ def _image_size(img_path: Path) -> tuple[int, int] | None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="Prepare LogoDet-3K brand dataset into unified YOLO format"
+        description="Prepare a brand dataset into unified YOLO format (logo/car/fashion)."
     )
+    ap.add_argument("--kind", type=str, choices=["logo", "car", "fashion"], default=None)
     # Keep backward compatibility with older docs that used "logodet3k".
-    default_src = (
+    default_logo = (
         "data/raw/brand/LogoDet-3K"
         if Path("data/raw/brand/LogoDet-3K").exists()
         else "data/raw/brand/logodet3k"
     )
-    ap.add_argument("--src_root", type=str, default=default_src)
-    ap.add_argument("--out_root", type=str, default="data/processed/brand_yolo")
+    ap.add_argument("--src_root", type=str, default=None)
+    ap.add_argument("--out_root", type=str, default=None)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--val_ratio", type=float, default=0.1)
     args = ap.parse_args()
 
-    src_root = Path(args.src_root)
-    out_root = Path(args.out_root)
+    kind = (args.kind or "").strip().lower()
+    if kind:
+        default_src = default_logo if kind == "logo" else f"data/raw/brand/{kind}"
+        default_out = f"data/processed/brand_yolo/{kind}"
+    else:
+        default_src = default_logo
+        default_out = "data/processed/brand_yolo"
+
+    src_root = Path(args.src_root or default_src)
+    out_root = Path(args.out_root or default_out)
     random.seed(int(args.seed))
 
     fmt = _detect_format(src_root)

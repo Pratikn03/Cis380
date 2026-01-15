@@ -318,6 +318,7 @@ export default function Chat() {
   const [outfitQuery, setOutfitQuery] = useState("");
   const [brandKind, setBrandKind] = useState("logo");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
   const [activeTool, setActiveTool] = useState<ToolId>("chat");
   const [isLoading, setIsLoading] = useState(false);
   const [backendUrl, setBackendUrl] = useState(
@@ -351,6 +352,7 @@ export default function Chat() {
     setSelectedFile(null);
     setFeatureInput("");
     setOutfitQuery("");
+    setImageUrl("");
   }, [activeTool]);
 
   const checkConnection = async () => {
@@ -414,6 +416,7 @@ export default function Chat() {
         if (blob) {
           const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
           setSelectedFile(file);
+          setImageUrl("");
           stopCamera();
           appendMessage({ role: "assistant", content: "📸 Photo captured! Click 'Run Analysis' to analyze." });
         }
@@ -505,6 +508,7 @@ export default function Chat() {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
     setSelectedFile(file);
+    setImageUrl("");
     event.target.value = "";
   };
 
@@ -523,14 +527,17 @@ export default function Chat() {
 
     if (isFileToolLocal) {
       const hasOutfitQuery = outfitQuery.trim();
-      if (!selectedFile && !isClothesTool) {
+      const imageUrlValue = imageUrl.trim();
+      const isImageToolLocal = activeTool === "vision" || activeTool === "brand" || isClothesTool;
+      const hasImageUrl = isImageToolLocal && imageUrlValue.length > 0;
+      if (!selectedFile && !hasImageUrl && !isClothesTool) {
         appendMessage({
           role: "assistant",
           content: "Please choose a file before running the analysis.",
         });
         return;
       }
-      if (isClothesTool && !selectedFile && !hasOutfitQuery) {
+      if (isClothesTool && !selectedFile && !hasImageUrl && !hasOutfitQuery) {
         appendMessage({
           role: "assistant",
           content: "Upload an outfit photo or add a style prompt before running.",
@@ -541,6 +548,8 @@ export default function Chat() {
       const userParts: string[] = [];
       if (selectedFile) {
         userParts.push(`${fileLabel}: ${selectedFile.name}`);
+      } else if (hasImageUrl) {
+        userParts.push(`${fileLabel}: ${imageUrlValue}`);
       }
       if (isClothesTool && hasOutfitQuery) {
         userParts.push(`Style: ${hasOutfitQuery}`);
@@ -555,6 +564,8 @@ export default function Chat() {
         if (isClothesTool) {
           if (selectedFile) {
             payload.append("image", selectedFile);
+          } else if (hasImageUrl) {
+            payload.append("image_url", imageUrlValue);
           }
           if (hasOutfitQuery) {
             payload.append("text", hasOutfitQuery);
@@ -574,7 +585,11 @@ export default function Chat() {
           });
           return;
         }
-        payload.append("file", selectedFile as File);
+        if (selectedFile) {
+          payload.append("file", selectedFile as File);
+        } else if (hasImageUrl) {
+          payload.append("image_url", imageUrlValue);
+        }
         if (activeTool === "vision") {
           const { data } = await visionPredict(payload);
           appendMessage({ role: "assistant", content: formatVisionResponse(data as VisionResponse) });
@@ -669,10 +684,15 @@ export default function Chat() {
     activeTool === "clothes";
   const isFeatureTool =
     activeTool === "fraud" || activeTool === "cyber" || activeTool === "behavior";
-  const canUseCamera = activeTool === "vision" || activeTool === "brand" || activeTool === "clothes";
+  const isImageTool = activeTool === "vision" || activeTool === "brand" || activeTool === "clothes";
+  const imageUrlValue = imageUrl.trim();
+  const hasImageUrl = isImageTool && imageUrlValue.length > 0;
+  const canUseCamera = isImageTool;
   const canRecordAudio = activeTool === "audio";
-  const clothesReady = activeTool === "clothes" ? Boolean(selectedFile || outfitQuery.trim()) : true;
-  const fileReady = !isFileTool || (activeTool === "clothes" ? clothesReady : Boolean(selectedFile));
+  const clothesReady =
+    activeTool === "clothes" ? Boolean(selectedFile || hasImageUrl || outfitQuery.trim()) : true;
+  const fileReady =
+    !isFileTool || (activeTool === "clothes" ? clothesReady : Boolean(selectedFile || hasImageUrl));
 
   // Statistics
   const userMessages = messages.filter(m => m.role === "user").length;
@@ -852,8 +872,33 @@ export default function Chat() {
                   <p className="text-sm text-slate-300 mt-2">
                     {selectedFile
                       ? `${selectedFile.name} (${formatBytes(selectedFile.size)})`
-                      : "No file selected yet."}
+                      : hasImageUrl
+                        ? `Image URL: ${imageUrlValue}`
+                        : "No file selected yet."}
                   </p>
+                  {isImageTool && (
+                    <div className="mt-3">
+                      <label className="text-xs uppercase tracking-wide text-slate-500 block mb-2">
+                        Image URL (optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={imageUrl}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setImageUrl(value);
+                          if (value.trim().length > 0) {
+                            setSelectedFile(null);
+                          }
+                        }}
+                        placeholder="https://example.com/image.jpg"
+                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 text-sm focus:border-emerald-500 focus:outline-none"
+                      />
+                      <p className="text-xs text-slate-500 mt-2">
+                        Remote loading requires ALLOW_REMOTE_MEDIA=true on the backend.
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button

@@ -88,6 +88,7 @@ _app_voice_router = None      # Voice/audio analysis
 _app_tts_router = None        # Text-to-speech
 _app_rag_router = None        # Document Q&A (Retrieval Augmented Generation)
 _app_dsa_rag_router = None    # DSA RAG (offline-first)
+_app_dsa_algo_router = None   # DSA algorithm API
 _app_brand_router = None      # Brand/logo detection
 _app_stt_router = None        # Speech-to-text
 _app_vision_temporal_router = None  # Video/temporal analysis
@@ -136,6 +137,13 @@ except Exception as exc:  # pragma: no cover
     _app_dsa_rag_router = None
     _dsa_rag_settings = None
     _dsa_rag_ensure_index = None
+
+# DSA Algorithms Router - Executable DSA helpers
+try:  # pragma: no cover
+    from app.api.dsa_algorithms import router as _app_dsa_algo_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.dsa_algorithms router unavailable: %s", exc)
+    _app_dsa_algo_router = None
 
 # Brand Router - Logo and brand detection in images
 try:  # pragma: no cover
@@ -274,6 +282,8 @@ if _app_rag_router is not None:
     app.include_router(_app_rag_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_dsa_rag_router is not None:
     app.include_router(_app_dsa_rag_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_dsa_algo_router is not None:
+    app.include_router(_app_dsa_algo_router, dependencies=[Depends(require_auth)])
 if _app_brand_router is not None:
     app.include_router(_app_brand_router, dependencies=[Depends(require_auth)])
 if _app_stt_router is not None:
@@ -416,7 +426,7 @@ def api_health():
 
     return {
         "status": "ok",
-        "service": "omnichatx",
+        "service": settings.app_name,
         "version": app.version,
         "python": {
             "version": platform.python_version(),

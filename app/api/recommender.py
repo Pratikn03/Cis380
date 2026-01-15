@@ -7,6 +7,12 @@ from pydantic import BaseModel, Field
 
 from app.models.recommender.explain import explain_recommendation
 from app.models.recommender.predict import predict_multimodal, recommend
+from app.utils.uploads import (
+    IMAGE_EXTENSIONS,
+    IMAGE_MIME_TYPES,
+    MAX_IMAGE_BYTES,
+    read_image_payload,
+)
 
 router = APIRouter()
 
@@ -38,6 +44,8 @@ async def recommend_multimodal(
     text: Optional[str] = Form(default=None),
     top_k: int = Form(default=5, ge=1, le=20),
     image: UploadFile | None = File(default=None),
+    image_url: str | None = Form(default=None),
+    image_base64: str | None = Form(default=None),
     use_brand: bool = Form(default=False),
     brand_kind: str = Form(default="logo"),
 ) -> dict[str, object]:
@@ -46,10 +54,21 @@ async def recommend_multimodal(
     This is additive and doesn't replace the existing recommender.
     Provide either:
     - image upload, or
+    - image_url / image_base64, or
     - text query
     """
     try:
-        image_bytes = await image.read() if image is not None else None
+        image_bytes = None
+        if image is not None or image_url or image_base64:
+            image_bytes = await read_image_payload(
+                file=image,
+                image_url=image_url,
+                image_base64=image_base64,
+                allowed_exts=IMAGE_EXTENSIONS,
+                allowed_mimes=IMAGE_MIME_TYPES,
+                max_bytes=MAX_IMAGE_BYTES,
+                kind="image",
+            )
         brand_detections = None
         brand_error = None
         brand_model = None

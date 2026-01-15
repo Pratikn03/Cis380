@@ -30,6 +30,13 @@ See `docs/DEPLOY_RENDER.md` for Render backend + GitHub Pages frontend steps.
 ## Tier-5 Overview
 See `docs/TIER5_OVERVIEW.md` for the platform identity, architecture, and feature map.
 
+## Project Ops
+- `PROJECT_STATUS.md` for the truth audit and demo readiness checklist.
+- `DATASETS.md` for dataset registry and paths.
+- `TRAINING.md` for training entrypoints and audits.
+- `scripts/data/` for dataset validation + splits.
+- `scripts/smoke/run_smoke.sh` for local smoke testing.
+
 ## What You Get
 
 ## ✨ Key Features

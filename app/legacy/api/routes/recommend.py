@@ -7,6 +7,12 @@ from fastapi import APIRouter, HTTPException, status, Depends, File, Form, Uploa
 from pydantic import BaseModel, Field
 
 from ..deps import require_auth
+from app.utils.uploads import (
+    IMAGE_EXTENSIONS,
+    IMAGE_MIME_TYPES,
+    MAX_IMAGE_BYTES,
+    read_image_payload,
+)
 
 # Optional multimodal extension (must not break if deps/index missing)
 try:  # pragma: no cover
@@ -230,14 +236,26 @@ async def recommend_multimodal(
     text: Optional[str] = Form(default=None),
     top_k: int = Form(default=5, ge=1, le=20),
     image: UploadFile | None = File(default=None),
+    image_url: str | None = Form(default=None),
+    image_base64: str | None = Form(default=None),
 ):
     """CLIP + FAISS multimodal recommender (additive).
 
-    Provide either a text query or an uploaded image. If the index isn't built yet,
+    Provide either a text query, an uploaded image, or image_url/image_base64. If the index isn't built yet,
     this endpoint returns 503 with instructions.
     """
     try:
-        image_bytes = await image.read() if image is not None else None
+        image_bytes = None
+        if image is not None or image_url or image_base64:
+            image_bytes = await read_image_payload(
+                file=image,
+                image_url=image_url,
+                image_base64=image_base64,
+                allowed_exts=IMAGE_EXTENSIONS,
+                allowed_mimes=IMAGE_MIME_TYPES,
+                max_bytes=MAX_IMAGE_BYTES,
+                kind="image",
+            )
         if _mm is None:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -262,6 +280,8 @@ async def recommend_clothes(
     text: Optional[str] = Form(default=None),
     top_k: int = Form(default=5, ge=1, le=20),
     image: UploadFile | None = File(default=None),
+    image_url: str | None = Form(default=None),
+    image_base64: str | None = Form(default=None),
 ):
     """Image/text clothing recommendations (offline-first).
 
@@ -271,7 +291,8 @@ async def recommend_clothes(
     image_tags: list[str] = []
     tag_error: str | None = None
 
-    if image is not None:
+    image_bytes = None
+    if image is not None or image_url or image_base64:
         try:
             import io
 
@@ -279,13 +300,21 @@ async def recommend_clothes(
 
             from app.streamlit_chatbot.image_tags import extract_tags_from_image
 
-            image_bytes = await image.read()
+            image_bytes = await read_image_payload(
+                file=image,
+                image_url=image_url,
+                image_base64=image_base64,
+                allowed_exts=IMAGE_EXTENSIONS,
+                allowed_mimes=IMAGE_MIME_TYPES,
+                max_bytes=MAX_IMAGE_BYTES,
+                kind="image",
+            )
             img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
             image_tags = extract_tags_from_image(img, top_k=5)
         except Exception as exc:
             tag_error = str(exc)
 
-    if not query and image is None:
+    if not query and image_bytes is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Provide a text prompt or an image.",

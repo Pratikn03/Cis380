@@ -127,6 +127,7 @@ def create_error_response(
 ) -> dict:
     """Create a standardized error response."""
     return {
+        "detail": message,
         "success": False,
         "error": {
             "code": error_code,

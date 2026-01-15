@@ -45,6 +45,15 @@ def _summarize_items(items: list[dict[str, Any]]) -> list[str]:
     return lines
 
 
+def _summarize_dsa_docs(root: Path) -> dict[str, Any]:
+    docs_dir = root / "data" / "dsa_docs"
+    if not docs_dir.exists():
+        return {"docs_dir": "data/dsa_docs", "doc_count": 0, "topics": []}
+    doc_paths = [p for p in docs_dir.rglob("*") if p.is_file() and p.suffix.lower() in {".md", ".txt"}]
+    topics = sorted({p.relative_to(docs_dir).parts[0] for p in doc_paths if p.relative_to(docs_dir).parts})
+    return {"docs_dir": "data/dsa_docs", "doc_count": len(doc_paths), "topics": topics}
+
+
 def main() -> int:
     if not TRAINING_DATA.exists():
         raise SystemExit("Missing reports/TRAINING_DATA.json. Run scripts/training_data_audit.py first.")
@@ -77,6 +86,7 @@ def main() -> int:
     missing_artifacts = [a for a in artifacts if a["status"] != "ok"]
 
     dsa_embed = ROOT / "data" / "dsa_embeddings"
+    dsa_docs = _summarize_dsa_docs(ROOT)
     dvc_yaml = ROOT / "dvc.yaml"
     dvc_lock = ROOT / "dvc.lock"
 
@@ -92,9 +102,11 @@ def main() -> int:
             "dvc_lock_exists": dvc_lock.exists(),
         },
         "dsa_rag": {
-            "docs_dir": "data/dsa_docs",
+            "docs_dir": dsa_docs["docs_dir"],
             "embed_dir": str(dsa_embed),
             "embed_dir_ready": _path_ready(dsa_embed),
+            "doc_count": dsa_docs["doc_count"],
+            "topics": dsa_docs["topics"],
         },
     }
 
@@ -126,6 +138,10 @@ def main() -> int:
 
     lines.append("## DSA RAG index\n")
     lines.append(f"- `{payload['dsa_rag']['embed_dir']}` ready: **{payload['dsa_rag']['embed_dir_ready']}**")
+    lines.append(f"- Docs: **{payload['dsa_rag']['doc_count']}**")
+    if payload["dsa_rag"]["topics"]:
+        topics = ", ".join(payload["dsa_rag"]["topics"])
+        lines.append(f"- Topics: {topics}")
     lines.append("")
 
     lines.append("## DVC status\n")
@@ -141,7 +157,10 @@ def main() -> int:
         "- Brand YOLO: multi-class (car/fashion) requires its own dataset + retrain."
         " Use BRAND_DATA_YAML + BRAND_OUT_PATH, then set BRAND_MODEL_CAR_PATH/BRAND_MODEL_FASHION_PATH."
     )
-    lines.append("- DSA RAG: expand docs beyond arrays/search/linked-lists/stack-queue as coverage grows.")
+    if len(payload["dsa_rag"]["topics"]) <= 4:
+        lines.append("- DSA RAG: expand docs beyond arrays/search/linked-lists/stack-queue as coverage grows.")
+    else:
+        lines.append("- DSA RAG: continue adding advanced topics (tries, segment trees, suffix arrays).")
     lines.append("")
 
     OUT_MD.write_text("\n".join(lines), encoding="utf-8")

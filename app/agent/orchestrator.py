@@ -30,7 +30,7 @@ class SentifargoOrchestrator:
         decision_engine: Optional[DecisionEngine] = None,
     ) -> None:
         self.llm = llm_client or LLMStub()
-        self.memory = memory_store or MemoryStore()
+        self.memory = memory_store or MemoryStore.from_env()
         self.decision_engine = decision_engine or DecisionEngine()
         self.logger = get_logger(self.__class__.__name__)
         self.audit = get_audit_logger()
@@ -155,7 +155,7 @@ class SentifargoOrchestrator:
             return self._run_voice(text)
         if route == "recommend":
             return self._run_recommend(text, user_id)
-        return self._run_chat(text, emotion)
+        return self._run_chat(text, emotion, user_id)
 
     def _run_rag(self, text: str, emotion: dict[str, Any] | None) -> tuple[str, Dict[str, Any]]:
         context = retrieve_context(text)
@@ -442,10 +442,13 @@ class SentifargoOrchestrator:
             answer += f"• **{title}** ({place_type})\n  _{reason}_\n\n"
         return answer, {"items": items, "category": "places"}
 
-    def _run_chat(self, text: str, emotion: dict[str, Any] | None) -> tuple[str, Dict[str, Any]]:
+    def _run_chat(
+        self, text: str, emotion: dict[str, Any] | None, user_id: str
+    ) -> tuple[str, Dict[str, Any]]:
         prompt = text
         if emotion:
             prompt = f"Emotion detected: {emotion['emotion']} ({emotion['confidence']}).\n" + prompt
-        answer = self.llm.generate(prompt)
-        meta = {"source": "chat_fallback"}
+        history = self.memory.get_history(user_id)
+        answer = self.llm.generate(prompt, history=history)
+        meta = {"source": "chat", "memory_turns": len(history)}
         return answer, meta

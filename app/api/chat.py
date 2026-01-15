@@ -9,7 +9,7 @@ from app.agent import MemoryStore, SentifargoOrchestrator
 from app.utils import LLMStub
 
 router = APIRouter()
-orchestrator = SentifargoOrchestrator(llm_client=LLMStub(), memory_store=MemoryStore())
+orchestrator = SentifargoOrchestrator(llm_client=LLMStub(), memory_store=MemoryStore.from_env())
 
 
 class ChatRequest(BaseModel):

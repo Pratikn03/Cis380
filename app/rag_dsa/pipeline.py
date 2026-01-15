@@ -28,6 +28,21 @@ _REWRITE_HINTS = {
 _BM25_INDEX: BM25Index | None = None
 _BM25_CHUNKS: List[dict] | None = None
 
+_SHORT_ANCHORS = {
+    "lca",
+    "dp",
+    "dfs",
+    "bfs",
+    "mst",
+    "scc",
+    "lcs",
+    "lcp",
+    "lps",
+    "dijkstra",
+    "kruskal",
+    "prim",
+}
+
 
 def rewrite_query(query: str) -> List[str]:
     cache_path = os.path.join(settings.CACHE_DIR, f"rewrite_{stable_hash(query)}.json")
@@ -134,6 +149,64 @@ def merge_dedupe(items: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]
     return ordered[:top_k]
 
 
+def _candidate_key(candidate: Dict[str, Any]) -> tuple:
+    meta = candidate.get("meta", {})
+    return (meta.get("doc_id") or meta.get("source"), meta.get("chunk_id"))
+
+
+def _query_anchors(query: str) -> list[str]:
+    anchors = []
+    for token in tokenize(query):
+        if len(token) >= 4 or token in _SHORT_ANCHORS:
+            anchors.append(token)
+    return unique_preserve(anchors)
+
+
+def _query_phrases(query: str) -> list[str]:
+    tokens = tokenize(query)
+    phrases: list[str] = []
+    for size in (2, 3):
+        for idx in range(len(tokens) - size + 1):
+            phrase = " ".join(tokens[idx : idx + size])
+            if phrase and phrase not in phrases:
+                phrases.append(phrase)
+    return phrases[:8]
+
+
+def _phrase_hit(phrases: list[str], text: str) -> bool:
+    if not phrases or not text:
+        return False
+    lowered = text.lower()
+    return any(p in lowered for p in phrases)
+
+
+def _apply_grounding_gate(query: str, candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    if not candidates:
+        return candidates
+    anchors = set(_query_anchors(query))
+    phrases = _query_phrases(query)
+    if not anchors and not phrases:
+        return candidates
+
+    min_required = 1 if len(anchors) <= 1 else 2
+    filtered: list[Dict[str, Any]] = []
+    for cand in candidates:
+        text = cand.get("text") or ""
+        tokens = set(tokenize(text))
+        match_count = len(anchors & tokens)
+        if match_count >= min_required or _phrase_hit(phrases, text):
+            filtered.append(cand)
+
+    if not filtered:
+        return candidates
+
+    top_bm25 = max(candidates, key=lambda c: c.get("score_bm25", 0.0))
+    filtered_keys = {_candidate_key(c) for c in filtered}
+    if _candidate_key(top_bm25) not in filtered_keys:
+        filtered.append(top_bm25)
+    return filtered
+
+
 def _minmax(values: List[float]) -> List[float]:
     if not values:
         return []
@@ -145,7 +218,12 @@ def _minmax(values: List[float]) -> List[float]:
 
 
 def rerank(query: str, candidates: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]]:
-    cache_path = os.path.join(settings.CACHE_DIR, f"rerank_{stable_hash(query)}.json")
+    candidate_sig = stable_hash(
+        "|".join(f"{_candidate_key(c)[0]}:{_candidate_key(c)[1]}" for c in candidates)
+    )
+    cache_path = os.path.join(
+        settings.CACHE_DIR, f"rerank_{stable_hash(query)}_{candidate_sig}.json"
+    )
     cached = cache_get(cache_path)
     cached_order = None
     if cached and isinstance(cached.get("order"), list):
@@ -157,11 +235,21 @@ def rerank(query: str, candidates: List[Dict[str, Any]], top_k: int) -> List[Dic
     bm25_norm = _minmax(bm25_scores)
 
     query_terms = set(tokenize(query))
+    anchors = set(_query_anchors(query))
+    phrases = _query_phrases(query)
     for idx, cand in enumerate(candidates):
         text = cand.get("text") or ""
         tokens = set(tokenize(text))
         overlap = len(query_terms & tokens) / max(len(query_terms), 1)
-        score = 0.5 * dense_norm[idx] + 0.3 * bm25_norm[idx] + 0.2 * overlap
+        anchor_ratio = len(anchors & tokens) / max(len(anchors), 1) if anchors else 0.0
+        phrase_bonus = 0.05 if _phrase_hit(phrases, text) else 0.0
+        score = (
+            0.4 * dense_norm[idx]
+            + 0.3 * bm25_norm[idx]
+            + 0.15 * overlap
+            + 0.1 * anchor_ratio
+            + phrase_bonus
+        )
         cand["score_final"] = score
 
     if cached_order is not None:
@@ -272,7 +360,8 @@ def run_dsa_rag(query: str) -> Dict[str, Any]:
         bm25_hits.extend(bm25_retrieve(q, settings.TOPK_BM25))
 
     merged = merge_dedupe(dense_hits + bm25_hits, settings.TOPK_MERGED)
-    top = rerank(query, merged, settings.TOPK_FINAL)
+    grounded = _apply_grounding_gate(query, merged)
+    top = rerank(query, grounded, settings.TOPK_FINAL)
 
     result = answer_with_sources(query, top)
     result["rewritten_queries"] = rewritten

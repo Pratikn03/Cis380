@@ -158,8 +158,28 @@ def _pick_checkpoint(run_dir: Path) -> Path:
     raise FileNotFoundError(f"Could not find best.pt/last.pt under {run_dir}.")
 
 
+def _normalize_kind(value: str | None) -> str:
+    kind = (value or "logo").strip().lower()
+    return kind or "logo"
+
+
+def _default_dataset_yaml(project_root: Path, kind: str) -> Path:
+    preferred = project_root / "data" / "processed" / "brand_yolo" / kind / "brands.yaml"
+    legacy = project_root / "data" / "processed" / "brand_yolo" / "brands.yaml"
+    if kind == "logo" and legacy.exists():
+        return legacy
+    return preferred
+
+
+def _default_out_path(project_root: Path, kind: str) -> Path:
+    out_dir = project_root / "artifacts" / "brand"
+    if kind == "logo":
+        return out_dir / "yolo_logo_det.pt"
+    return out_dir / f"yolo_{kind}_brand.pt"
+
+
 def main() -> int:
-    """Train a YOLOv8 logo/brand detector on the prepared YOLO dataset."""
+    """Train a YOLOv8 brand detector on the prepared YOLO dataset."""
     try:
         from ultralytics import YOLO
     except Exception as exc:
@@ -168,15 +188,12 @@ def main() -> int:
         ) from exc
 
     project_root = Path(__file__).resolve().parents[2]
-    data_yaml = Path(
-        os.getenv(
-            "BRAND_DATA_YAML",
-            project_root / "data" / "processed" / "brand_yolo" / "brands.yaml",
-        )
-    )
+    kind = _normalize_kind(os.getenv("BRAND_KIND"))
+    data_yaml = Path(os.getenv("BRAND_DATA_YAML", _default_dataset_yaml(project_root, kind)))
     if not data_yaml.exists():
         raise FileNotFoundError(
-            f"Missing YOLO dataset config at {data_yaml}. Run scripts/prepare_brand_data.py first."
+            f"Missing YOLO dataset config at {data_yaml}. "
+            "Run scripts/prepare_brand_data.py --kind <logo|car|fashion> first."
         )
 
     model_name = os.getenv("BRAND_YOLO_MODEL", "yolov8s.pt")
@@ -222,6 +239,7 @@ def main() -> int:
     print(
         "[brand_yolo] config:",
         {
+            "kind": kind,
             "model": model_name,
             "data": str(data_yaml),
             "epochs": epochs,
@@ -264,7 +282,7 @@ def main() -> int:
     ckpt_path = _pick_checkpoint(run_dir)
     out_dir = project_root / "artifacts" / "brand"
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = Path(os.getenv("BRAND_OUT_PATH", str(out_dir / "yolo_logo_det.pt")))
+    out_path = Path(os.getenv("BRAND_OUT_PATH", str(_default_out_path(project_root, kind))))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ckpt_path, out_path)
 

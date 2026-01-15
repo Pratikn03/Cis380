@@ -52,7 +52,7 @@ def _get_model(kind: str | None):
         msg = (
             f"Brand model not trained for kind='{key}'. "
             f"Expected weights at {model_path}. "
-            "Run scripts/prepare_brand_data.py then "
+            "Run scripts/prepare_brand_data.py --kind <logo|car|fashion> then "
             "python -m src.train.train_brand_logo_detector to create the artifact."
         )
         _MODEL_ERROR[cache_key] = msg

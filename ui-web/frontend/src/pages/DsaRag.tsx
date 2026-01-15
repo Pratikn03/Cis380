@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import "../styles/dsa_docs.css";
 
 interface DsaSource {
   topic?: string;
@@ -291,13 +292,15 @@ export default function DsaRag() {
 
         <section className="rounded-2xl border border-slate-700 bg-slate-800/60 p-5 space-y-4">
           <h2 className="text-lg font-semibold text-white">Answer</h2>
-          {response?.answer ? (
-            <pre className="whitespace-pre-wrap text-sm text-slate-200">
-              {response.answer}
-            </pre>
-          ) : (
-            <p className="text-sm text-slate-400">Ask a question to see the answer.</p>
-          )}
+          <div className="dsa-docs dsa-docs--embedded">
+            {response?.answer ? (
+              <pre className="whitespace-pre-wrap text-sm text-slate-200">
+                {response.answer}
+              </pre>
+            ) : (
+              <p className="text-sm text-slate-400">Ask a question to see the answer.</p>
+            )}
+          </div>
           {response?.rewritten_queries && response.rewritten_queries.length > 0 && (
             <div className="text-xs text-slate-400">
               <span className="font-semibold text-slate-300">Rewritten queries:</span>{" "}
