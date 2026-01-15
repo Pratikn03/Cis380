@@ -18,6 +18,7 @@
 - Contract diff check passes (UI routes exist in OpenAPI)
 - E2E smoke tests pass
 - Evaluation harness produces `reports/SYSTEM_SCORECARD.md`
+- Artifact gate verifies required model files (`reports/ARTIFACT_GATE.md`)
 - Claims evidence report present (`reports/CLAIM_EVIDENCE.md`)
 - Truth table audit present (`reports/TRUTH_TABLE.md`)
 

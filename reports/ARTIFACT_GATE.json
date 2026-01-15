@@ -1,0 +1,143 @@
+{
+  "generated_at": "2026-01-15T18:09:28.648728+00:00",
+  "required": [
+    {
+      "name": "Fraud model",
+      "path": "models/fraud/supervised/fraud_model.pkl",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Cyber model",
+      "path": "models/cyber/supervised/cyber_model.pkl",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Behavior model",
+      "path": "models/behavior/behavior_supervised.pkl",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Behavior LOF",
+      "path": "models/behavior/behavior_lof.pkl",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Voice emotion",
+      "path": "models/voice_emotion.pkl",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Recommender model",
+      "path": "models/recommender/recommender_model.pkl",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Recommender meta",
+      "path": "models/recommender/recommender_meta.joblib",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "MovieLens model",
+      "path": "models/recommender/movielens_model.pkl",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "MovieLens meta",
+      "path": "models/recommender/movielens_meta.joblib",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Vision ResNet",
+      "path": "models/vision/resnet/model.pt",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Vision ResNet classes",
+      "path": "models/vision/resnet/classes.txt",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Face emotion model",
+      "path": "models/vision/face_emotion/model.pt",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Face emotion classes",
+      "path": "models/vision/face_emotion/classes.txt",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Vision temporal model",
+      "path": "models/vision/video_temporal_model.pkl",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Temporal LSTM",
+      "path": "artifacts/vision_temporal/temporal_lstm.pt",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Brand YOLO",
+      "path": "artifacts/brand/yolo_logo_det.pt",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "Fusion model",
+      "path": "models/fusion/fusion_meta_model.pkl",
+      "required": true,
+      "status": "ok"
+    },
+    {
+      "name": "DVC lock",
+      "path": "dvc.lock",
+      "required": true,
+      "status": "ok"
+    }
+  ],
+  "optional": [
+    {
+      "name": "DSA embeddings",
+      "path": "data/dsa_embeddings",
+      "required": false,
+      "status": "ok"
+    },
+    {
+      "name": "DSA Chroma index",
+      "path": "chroma/dsa",
+      "required": false,
+      "status": "missing"
+    },
+    {
+      "name": "RAG embeddings",
+      "path": "data/embeddings",
+      "required": false,
+      "status": "ok"
+    }
+  ],
+  "missing_required": [],
+  "missing_optional": [
+    {
+      "name": "DSA Chroma index",
+      "path": "chroma/dsa",
+      "required": false,
+      "status": "missing"
+    }
+  ],
+  "strict": true
+}

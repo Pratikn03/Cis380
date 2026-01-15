@@ -109,20 +109,23 @@ A Tier-6 repository has these properties:
 - **Canonical map:** `docs/CANONICAL.md` documents current vs legacy and entrypoints.
 - **Contract tooling:** `scripts/contract_diff.py` and `scripts/ci_contract_gate.sh` (outputs `reports/CONTRACT_DIFF.md`, uses `reports/openapi.json`).
 - **Contract diff result (latest run):** 0 UI routes missing in OpenAPI, 18 unused OpenAPI routes (see `reports/CONTRACT_DIFF.md`).
-- **Scorecard harness:** `scripts/system_scorecard.py` writes `reports/SYSTEM_SCORECARD.md`.
-- **E2E smoke tests:** `tests/e2e/test_smoke.py`.
+- **Scorecard harness:** `scripts/system_scorecard.py` writes `reports/SYSTEM_SCORECARD.md` (CI: `scripts/ci_scorecard.sh`).
+- **E2E smoke tests:** `tests/e2e/test_smoke.py` (CI: `scripts/ci_e2e.sh`).
+- **Artifact gate:** `scripts/artifact_gate.py` → `reports/ARTIFACT_GATE.md` (required model artifacts + `dvc.lock`).
 - **Truth table audit:** `scripts/truth_table_audit.py` → `reports/TRUTH_TABLE.md`.
 - **Claims evidence:** `scripts/claim_evidence.py` → `reports/CLAIM_EVIDENCE.md`.
 - **Full repo audit:** `scripts/full_project_audit.py` → `reports/PROJECT_AUDIT.md` + `reports/PROJECT_AUDIT.json`.
 - **Training data audit:** `scripts/training_data_audit.py` → `reports/TRAINING_DATA.md` + `reports/TRAINING_DATA.json`.
+- **Training gap report:** `scripts/training_gap_report.py` → `reports/TRAINING_GAPS.md` + `reports/TRAINING_GAPS.json`.
 - **Observability hooks:** `/metrics` endpoint via `app/core/health.py`.
 - **Auth/rate-limit wiring:** `app/main.py` includes `require_auth` + `setup_production_middleware`.
+- **CI wiring:** `.github/workflows/ci-cd.yml` runs contract gate, artifact gate, scorecard, and E2E smoke.
 
 ## Tier-6 plan (next steps)
 - Centralize UI endpoint mapping into a single shared module for Streamlit + React.
 - Build a full evaluation harness across fraud/cyber/vision/voice/RAG with regression tests.
 - Add dashboards under `dashboards/` and formal SLO reporting to `reports/`.
-- Wire contract gate + scorecard into CI (nightly or per-PR).
+- Add strict scorecard thresholds and SLO gates (p95 budgets) in CI.
 
 ## Training / pipelines
 **Trainer / pipeline scripts detected:**

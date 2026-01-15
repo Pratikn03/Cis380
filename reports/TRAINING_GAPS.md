@@ -1,6 +1,6 @@
 # Training Gap Analysis
 
-- Generated: 2026-01-15 04:22:48 UTC
+- Generated: 2026-01-15 18:08:56 UTC
 
 ## Data readiness (from TRAINING_DATA.json)
 
@@ -47,16 +47,17 @@
 
 ## DSA RAG index
 
-- `data/dsa_embeddings/` ready: **True**
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/dsa_embeddings` ready: **True**
 
 ## DVC status
 
 - `dvc.yaml` present: **True**
-- `dvc.lock` present: **False**
+- `dvc.lock` present: **True**
 
 ## Accuracy + training recommendations
 
-- **Video temporal**: both sklearn and LSTM artifacts are present; tune epochs for accuracy.
-- **Behavior model**: if accuracy is low, add CERT r4.2 LDAP or engineer more features; dataset is small.
-- **Voice emotion**: consider augmentation or more data for higher robustness (noise tests exist in `tests/test_voice_noise.py`).
-- **Brand YOLO**: current model is single-class (`logo`); multi-class car-brand needs a new dataset + retrain.
+- Video temporal: retrain if new real/fake videos are added; monitor LSTM drift.
+- Behavior model: add more insider-style patterns if false positives remain high.
+- Voice emotion: augment with noise if `tests/test_voice_noise.py` fails.
+- Brand YOLO: current model is single-class (`logo`); multi-class car-brand needs new dataset + retrain.
+- DSA RAG: expand docs beyond arrays/search/linked-lists/stack-queue as coverage grows.

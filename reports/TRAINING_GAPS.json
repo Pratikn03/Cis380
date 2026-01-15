@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-01-15 04:22:48 UTC",
+  "generated_at": "2026-01-15 18:08:56 UTC",
   "training_data": {
-    "generated_at": "2026-01-15 04:22:05 UTC",
+    "generated_at": "2026-01-15 18:08:49 UTC",
     "required": [
       {
         "name": "Fraud (creditcard.csv)",
@@ -310,14 +310,14 @@
   ],
   "missing_artifacts": [],
   "dvc": {
-    "dvc_yaml": "dvc.yaml",
+    "dvc_yaml": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/dvc.yaml",
     "dvc_yaml_exists": true,
-    "dvc_lock": "dvc.lock",
-    "dvc_lock_exists": false
+    "dvc_lock": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/dvc.lock",
+    "dvc_lock_exists": true
   },
   "dsa_rag": {
     "docs_dir": "data/dsa_docs",
-    "embed_dir": "data/dsa_embeddings",
+    "embed_dir": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/dsa_embeddings",
     "embed_dir_ready": true
   }
 }
