@@ -1,8 +1,14 @@
 from __future__ import annotations
-import os, re, json, time, hashlib, ast, subprocess, sys
+
+import ast
+import hashlib
+import json
+import os
+import re
+import time
 from dataclasses import dataclass, asdict
 from pathlib import Path
-from typing import Dict, List, Tuple, Set, Optional
+from typing import Dict, List, Optional, Set, Tuple
 
 DEFAULT_EXCLUDE_DIRS = {
     ".git", ".venv", "venv", "__pycache__", ".mypy_cache", ".pytest_cache",
@@ -281,7 +287,8 @@ def main():
     # training and rag candidates
     training = [str(p) for p in py_files_analyzed if looks_like_training(p)]
     rag = [str(p) for p in py_files_analyzed if looks_like_rag(p)]
-    training.sort(); rag.sort()
+    training.sort()
+    rag.sort()
 
     # compile errors
     compile_errors = compile_check(py_files_analyzed)
@@ -360,11 +367,14 @@ def main():
 
     md.append("## Infra Files Found\n")
     md.append(f"- Requirements/pyproject files: {len(audit.pip_requirements_files)}")
-    for x in audit.pip_requirements_files: md.append(f"  - `{x}`")
+    for x in audit.pip_requirements_files:
+        md.append(f"  - `{x}`")
     md.append(f"- Docker files: {len(audit.docker_files)}")
-    for x in audit.docker_files: md.append(f"  - `{x}`")
+    for x in audit.docker_files:
+        md.append(f"  - `{x}`")
     md.append(f"- CI files: {len(audit.ci_files)}")
-    for x in audit.ci_files[:20]: md.append(f"  - `{x}`")
+    for x in audit.ci_files[:20]:
+        md.append(f"  - `{x}`")
     md.append("")
 
     md.append("## Data / Artifacts Summary (file counts)\n")

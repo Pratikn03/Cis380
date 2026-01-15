@@ -1,7 +1,5 @@
 """Vision anomaly classifier using a pretrained ResNet backbone."""
 from dataclasses import dataclass
-
-import torch
 from torch import nn
 from torchvision import models
 

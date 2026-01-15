@@ -27,14 +27,11 @@ METRICS:
 - Confusion pattern analysis
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
-from pathlib import Path
-import json
-import math
 import random
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+
+import pytest
 
 
 # Lazy imports
@@ -293,8 +290,6 @@ class VoiceRobustnessTester:
         snr_db: float
     ) -> RobustnessResult:
         """Test under a specific noise condition."""
-        np = _get_numpy()
-        
         clean_correct = 0
         noisy_correct = 0
         clean_predictions = []

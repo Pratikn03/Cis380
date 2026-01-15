@@ -1,14 +1,39 @@
-import os, sys, hashlib, json, csv, time
-from pathlib import Path
+import csv
+import hashlib
+import json
+import os
+import sys
+import time
 from collections import defaultdict
+from pathlib import Path
+
 INCLUDE_EXT = {
-    ".csv",".parquet",".json",".jsonl",".txt",
-    ".jpg",".jpeg",".png",".webp",
-    ".wav",".mp3",".flac",".m4a",
-    ".mp4",".mov",".avi",".mkv",
-    ".zip",".tar",".gz",".tgz",".7z"
+    ".csv",
+    ".parquet",
+    ".json",
+    ".jsonl",
+    ".txt",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".wav",
+    ".mp3",
+    ".flac",
+    ".m4a",
+    ".mp4",
+    ".mov",
+    ".avi",
+    ".mkv",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".tgz",
+    ".7z",
 }
-def sha256_file(path: Path, chunk=1024*1024) -> str:
+
+
+def sha256_file(path: Path, chunk=1024 * 1024) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
         while True:

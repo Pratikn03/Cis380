@@ -1,7 +1,6 @@
 """TensorFlow sequence encoder used for 30-sequence model."""
 try:
-    import tensorflow as tf
-    from tensorflow.keras import layers, Model
+    from tensorflow.keras import Model, layers
 except Exception as exc:  # pragma: no cover - optional dependency
     raise ImportError(
         "TensorFlow is required for the 30-sequence model. Install tensorflow or tensorflow-cpu."

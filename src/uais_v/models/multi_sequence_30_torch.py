@@ -1,5 +1,4 @@
 """Multi-sequence TCN classifier in PyTorch (faster CPU/GPU alternative)."""
-from typing import Dict
 
 import torch
 from torch import nn
@@ -53,7 +52,6 @@ class MultiSequenceTCNClassifier(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (batch, num_seq, seq_len, feat)
-        batch_size = x.size(0)
         encodings = []
         for i in range(self.num_sequences):
             enc = self.encoder(x[:, i, :, :])  # (batch, latent_dim)

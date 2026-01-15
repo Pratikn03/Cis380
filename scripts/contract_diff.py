@@ -1,15 +1,25 @@
 from __future__ import annotations
-import json, re, sys
+
+import json
+import re
+import sys
 from pathlib import Path
-from typing import Set, Dict, List, Tuple
+from typing import Set
 
 ROOT = Path(".").resolve()
 
 EXCLUDE_DIRS = {
-    ".venv", "venv", "__pycache__", ".git",
-    "ui-web/frontend/node_modules", "ui-web/frontend/dist",
-    "src/mlruns", "runs", "data", "artifacts",
-    "ui-web/frontend/.cache"
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".git",
+    "ui-web/frontend/node_modules",
+    "ui-web/frontend/dist",
+    "src/mlruns",
+    "runs",
+    "data",
+    "artifacts",
+    "ui-web/frontend/.cache",
 }
 
 def is_excluded(p: Path) -> bool:
@@ -20,10 +30,12 @@ def is_excluded(p: Path) -> bool:
     return False
 
 def collect_ui_api_refs() -> Set[str]:
-    refs=set()
+    refs = set()
     # Streamlit Python + frontend TS/TSX/JS
-    patterns = [("app/streamlit_chatbot", {".py"}),
-                ("ui-web/frontend/src", {".ts",".tsx",".js"})]
+    patterns = [
+        ("app/streamlit_chatbot", {".py"}),
+        ("ui-web/frontend/src", {".ts", ".tsx", ".js"}),
+    ]
     api_re = re.compile(r"(/api/[a-zA-Z0-9_\-\/]+)")
     for base, exts in patterns:
         basep = ROOT / base

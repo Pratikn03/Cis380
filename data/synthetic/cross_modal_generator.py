@@ -83,7 +83,8 @@ class InsiderThreatScenario(CrossModalScenario):
         if is_anomaly:
             # Generate correlated anomaly signals
             base_anomaly = random.uniform(0.6, 0.95)
-            noise = lambda: random.uniform(-0.1, 0.1)
+            def noise() -> float:
+                return random.uniform(-0.1, 0.1)
             
             # Behavior signal - unusual patterns
             signals.append(ModalitySignal(
@@ -137,7 +138,8 @@ class InsiderThreatScenario(CrossModalScenario):
         else:
             # Generate normal signals
             base_normal = random.uniform(0.05, 0.25)
-            noise = lambda: random.uniform(-0.05, 0.05)
+            def noise() -> float:
+                return random.uniform(-0.05, 0.05)
             
             signals.append(ModalitySignal(
                 modality="behavior",
@@ -190,7 +192,8 @@ class FraudCollisionScenario(CrossModalScenario):
         
         if is_anomaly:
             base_anomaly = random.uniform(0.65, 0.98)
-            noise = lambda: random.uniform(-0.1, 0.1)
+            def noise() -> float:
+                return random.uniform(-0.1, 0.1)
             
             # Fraud signal
             signals.append(ModalitySignal(
@@ -238,11 +241,12 @@ class FraudCollisionScenario(CrossModalScenario):
             ))
             
             severity = base_anomaly
-            description = f"Fraud collision: Transaction anomaly correlated with face mismatch and behavioral deviation"
+            description = "Fraud collision: Transaction anomaly correlated with face mismatch and behavioral deviation"
             
         else:
             base_normal = random.uniform(0.05, 0.2)
-            noise = lambda: random.uniform(-0.05, 0.05)
+            def noise() -> float:
+                return random.uniform(-0.05, 0.05)
             
             signals.append(ModalitySignal(
                 modality="fraud",
@@ -309,7 +313,8 @@ class NetworkIntrusionScenario(CrossModalScenario):
         
         if is_anomaly:
             base_anomaly = random.uniform(0.7, 0.95)
-            noise = lambda: random.uniform(-0.1, 0.1)
+            def noise() -> float:
+                return random.uniform(-0.1, 0.1)
             
             # Cyber signal - intrusion indicators
             signals.append(ModalitySignal(
@@ -362,7 +367,8 @@ class NetworkIntrusionScenario(CrossModalScenario):
             
         else:
             base_normal = random.uniform(0.05, 0.2)
-            noise = lambda: random.uniform(-0.05, 0.05)
+            def noise() -> float:
+                return random.uniform(-0.05, 0.05)
             
             signals.append(ModalitySignal(
                 modality="cyber",
@@ -415,7 +421,8 @@ class VoicePhishingScenario(CrossModalScenario):
         
         if is_anomaly:
             base_anomaly = random.uniform(0.6, 0.92)
-            noise = lambda: random.uniform(-0.1, 0.1)
+            def noise() -> float:
+                return random.uniform(-0.1, 0.1)
             
             # Voice signal - caller deception indicators
             signals.append(ModalitySignal(
@@ -468,7 +475,8 @@ class VoicePhishingScenario(CrossModalScenario):
             
         else:
             base_normal = random.uniform(0.05, 0.25)
-            noise = lambda: random.uniform(-0.05, 0.05)
+            def noise() -> float:
+                return random.uniform(-0.05, 0.05)
             
             signals.append(ModalitySignal(
                 modality="voice",
@@ -732,7 +740,7 @@ def main():
     print(f"\nTrain set: 1000 samples ({output_dir}/cross_modal_train.json)")
     print(f"Val set:   200 samples ({output_dir}/cross_modal_val.json)")
     print(f"Test set:  200 samples ({output_dir}/cross_modal_test.json)")
-    print(f"\nPyTorch format:")
+    print("\nPyTorch format:")
     print(f"  Feature dimensions: {pytorch_info['feature_dims']}")
     print(f"  Modality dimensions: {pytorch_info['modality_dims']}")
     print(f"  Anomaly ratio: {pytorch_info['anomaly_ratio']:.2%}")
