@@ -32,16 +32,18 @@ class RecommendRequest(BaseModel):
     candidate_ids: Optional[List[int]] = None  # for top-N from a provided set
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+# Resolve project root (repo) for model artifacts
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
+RECOMMENDER_DIR = PROJECT_ROOT / "models" / "recommender"
 
-# generic/tabular recommender (XGBoost)
-_rec_path = PROJECT_ROOT / "recommender" / "models" / "recommender.pkl"
+# generic/tabular recommender (sklearn)
+_rec_path = RECOMMENDER_DIR / "recommender_model.pkl"
 _rec_model = None
 _rec_model_error: str | None = None
 
-# MovieLens model/meta (uses same xgboost by default)
-_ml_model_path = PROJECT_ROOT / "recommender" / "models" / "recommender.pkl"
-_ml_meta_path = PROJECT_ROOT / "recommender" / "models" / "recommender_meta.joblib"
+# MovieLens model/meta
+_ml_model_path = RECOMMENDER_DIR / "movielens_model.pkl"
+_ml_meta_path = RECOMMENDER_DIR / "movielens_meta.joblib"
 _ml_model = None
 _ml_model_error: str | None = None
 _ml_meta = None

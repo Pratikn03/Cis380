@@ -16,6 +16,7 @@ from sklearn.model_selection import train_test_split
 
 EXP_DIR = Path("experiments")
 OUT_MODEL = Path("models/recommender/recommender_model.pkl")
+OUT_META = Path("models/recommender/recommender_meta.joblib")
 OUT_METRICS = EXP_DIR / "recommender/metrics/metrics.json"
 OUT_EXP_DIR = EXP_DIR / "recommender"
 
@@ -160,11 +161,19 @@ def main():
     OUT_MODEL.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(model, OUT_MODEL)
 
+    meta = {
+        "feature_names": features,
+        "classes": list(getattr(model, "classes_", [])),
+        "n_features": int(len(features)),
+    }
+    joblib.dump(meta, OUT_META)
+
     OUT_METRICS.parent.mkdir(parents=True, exist_ok=True)
     with OUT_METRICS.open("w") as f:
         json.dump(report, f, indent=2)
 
     print(f"Saved recommender model to {OUT_MODEL}")
+    print(f"Saved recommender meta to {OUT_META}")
     print(f"Metrics written to {OUT_METRICS}")
 
 

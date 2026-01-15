@@ -1,6 +1,6 @@
 # Training Gap Analysis
 
-- Generated: 2026-01-15 04:07:13 UTC
+- Generated: 2026-01-15 04:22:48 UTC
 
 ## Data readiness (from TRAINING_DATA.json)
 
@@ -29,21 +29,21 @@
 - `models/behavior/behavior_lof.pkl` — **ok**
 - `models/voice_emotion.pkl` — **ok**
 - `models/recommender/recommender_model.pkl` — **ok**
-- `models/recommender/recommender_meta.joblib` — **missing**
+- `models/recommender/recommender_meta.joblib` — **ok**
 - `models/recommender/movielens_model.pkl` — **ok**
 - `models/recommender/movielens_meta.joblib` — **ok**
 - `models/vision/resnet/model.pt` — **ok**
 - `models/vision/resnet/classes.txt` — **ok**
 - `models/vision/face_emotion/model.pt` — **ok**
 - `models/vision/face_emotion/classes.txt` — **ok**
-- `artifacts/vision_temporal/temporal_lstm.pt` — **missing**
+- `models/vision/video_temporal_model.pkl` — **ok**
+- `artifacts/vision_temporal/temporal_lstm.pt` — **ok**
 - `artifacts/brand/yolo_logo_det.pt` — **ok**
 - `models/fusion/fusion_meta_model.pkl` — **ok**
 
 ## Missing artifacts (must train/build)
 
-- `models/recommender/recommender_meta.joblib` (recommender_meta)
-- `artifacts/vision_temporal/temporal_lstm.pt` (vision_temporal)
+- None
 
 ## DSA RAG index
 
@@ -56,8 +56,7 @@
 
 ## Accuracy + training recommendations
 
-- **Vision temporal**: train `artifacts/vision_temporal/temporal_lstm.pt` with `python -m src.train.train_video_temporal`.
-- **Recommender meta**: generate `models/recommender/recommender_meta.joblib` or adjust legacy paths; missing meta limits feature-name output.
+- **Video temporal**: both sklearn and LSTM artifacts are present; tune epochs for accuracy.
 - **Behavior model**: if accuracy is low, add CERT r4.2 LDAP or engineer more features; dataset is small.
 - **Voice emotion**: consider augmentation or more data for higher robustness (noise tests exist in `tests/test_voice_noise.py`).
 - **Brand YOLO**: current model is single-class (`logo`); multi-class car-brand needs a new dataset + retrain.

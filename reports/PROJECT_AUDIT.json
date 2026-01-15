@@ -49,12 +49,12 @@
     "ui-web",
     "venv"
   ],
-  "scan_started_at": "2026-01-14T22:01:29",
-  "scan_duration_s": 0.8152108192443848,
-  "files_scanned": 499,
-  "py_files_total": 339,
-  "py_files_analyzed": 339,
-  "total_bytes": 31008656,
+  "scan_started_at": "2026-01-14T22:23:03",
+  "scan_duration_s": 0.5961148738861084,
+  "files_scanned": 500,
+  "py_files_total": 340,
+  "py_files_analyzed": 340,
+  "total_bytes": 31013918,
   "fastapi_includes": [
     {
       "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py",
@@ -499,6 +499,7 @@
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_brand_logo_detector.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_face_emotion.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_video_temporal.py",
+    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_video_temporal_lstm.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/sequence/train_gru.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/sequence/train_lstm.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/sequence/transformer_tcn.py",
@@ -622,11 +623,11 @@
   "data_dirs": {
     "data/raw": 5000,
     "data/processed": 5000,
-    "artifacts": 4,
+    "artifacts": 5,
     "runs": 3727,
-    "models": 91,
+    "models": 92,
     "configs": 18,
-    "reports": 36
+    "reports": 38
   },
   "missing_expected_data_dirs": [],
   "unreferenced_internal_modules": [
@@ -707,6 +708,7 @@
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_movielens_recommender.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_recommender.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_video_temporal.py",
+    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_video_temporal_lstm.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/__init__.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/anomaly/__init__.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/anomaly/evaluate_anomaly.py",

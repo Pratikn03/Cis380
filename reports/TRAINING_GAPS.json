@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-01-15 04:07:13 UTC",
+  "generated_at": "2026-01-15 04:22:48 UTC",
   "training_data": {
-    "generated_at": "2026-01-15 04:01:43 UTC",
+    "generated_at": "2026-01-15 04:22:05 UTC",
     "required": [
       {
         "name": "Fraud (creditcard.csv)",
@@ -255,7 +255,7 @@
     {
       "name": "recommender_meta",
       "path": "models/recommender/recommender_meta.joblib",
-      "status": "missing"
+      "status": "ok"
     },
     {
       "name": "movielens_model",
@@ -288,9 +288,14 @@
       "status": "ok"
     },
     {
-      "name": "vision_temporal",
+      "name": "vision_temporal_sklearn",
+      "path": "models/vision/video_temporal_model.pkl",
+      "status": "ok"
+    },
+    {
+      "name": "vision_temporal_lstm",
       "path": "artifacts/vision_temporal/temporal_lstm.pt",
-      "status": "missing"
+      "status": "ok"
     },
     {
       "name": "vision_brand_yolo",
@@ -303,16 +308,7 @@
       "status": "ok"
     }
   ],
-  "missing_artifacts": [
-    {
-      "name": "recommender_meta",
-      "path": "models/recommender/recommender_meta.joblib"
-    },
-    {
-      "name": "vision_temporal",
-      "path": "artifacts/vision_temporal/temporal_lstm.pt"
-    }
-  ],
+  "missing_artifacts": [],
   "dvc": {
     "dvc_yaml": "dvc.yaml",
     "dvc_yaml_exists": true,

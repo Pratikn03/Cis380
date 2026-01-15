@@ -4,12 +4,12 @@
 - Full scan: **False**
 - Scan exclusions: `.cache, .git, .idea, .mypy_cache, .next, .pytest_cache, .venv, .vscode, __pycache__, artifacts, build, data, dist, experiments, logs, models, node_modules, notebooks, reports, runs, ui-web, venv`
 - Analysis exclusions: `.cache, .git, .idea, .mypy_cache, .next, .pytest_cache, .venv, .vscode, __pycache__, artifacts, build, data, dist, experiments, logs, models, node_modules, notebooks, reports, runs, ui-web, venv`
-- Scan started: `2026-01-14T22:01:29`
-- Scan duration (s): **0.82**
-- Files scanned: **499**
-- Python files (total): **339**
-- Python files (analyzed): **339**
-- Total size (bytes): **31008656**
+- Scan started: `2026-01-14T22:23:03`
+- Scan duration (s): **0.60**
+- Files scanned: **500**
+- Python files (total): **340**
+- Python files (analyzed): **340**
+- Total size (bytes): **31013918**
 
 ## Infra Files Found
 
@@ -29,11 +29,11 @@
 
 - `data/raw`: **5000** files
 - `data/processed`: **5000** files
-- `artifacts`: **4** files
+- `artifacts`: **5** files
 - `runs`: **3727** files
-- `models`: **91** files
+- `models`: **92** files
 - `configs`: **18** files
-- `reports`: **36** files
+- `reports`: **38** files
 
 ## FastAPI Wiring
 
@@ -130,7 +130,7 @@
 
 ## Training/Modeling Candidates (heuristic)
 
-- Files flagged: **33**
+- Files flagged: **34**
 
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/core/config.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/agent/chat_responses.py`
@@ -153,6 +153,7 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_brand_logo_detector.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_face_emotion.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_video_temporal.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_video_temporal_lstm.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/sequence/train_gru.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/sequence/train_lstm.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/sequence/transformer_tcn.py`
@@ -236,7 +237,7 @@
 
 ## Unreferenced Internal Modules (heuristic)
 
-- Unreferenced: **188** (showing up to 100)
+- Unreferenced: **189** (showing up to 100)
 
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/agent/orchestrator.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/__init__.py`
@@ -315,6 +316,7 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_movielens_recommender.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_recommender.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_video_temporal.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_video_temporal_lstm.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/anomaly/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/anomaly/evaluate_anomaly.py`
@@ -337,7 +339,6 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/ensembles/stacking.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/explainability/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/explainability/explainer_utils.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/explainability/gradcam_explainer.py`
 
 ## Notes
 
@@ -345,4 +346,4 @@
 - Unreferenced internal modules found (may indicate duplicates/dead code).
 - Data summary capped at 5000 files for: data/raw, data/processed
 
-_Generated in 0.82s._
+_Generated in 0.60s._
