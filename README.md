@@ -467,6 +467,8 @@ See [benchmarks/README.md](benchmarks/README.md) for benchmark documentation.- *
 
 ## 🤝 ContributingBrand/logo YOLO (full control via env vars):
 
+Note: The current brand YOLO dataset/model is single-class (`logo`). For car-brand classification, use a separate multi-class dataset/model.
+
 - Prepare dataset: `python scripts/prepare_brand_data.py`
 
 1. Fork the repository- Train: `python -m src.train.train_brand_logo_detector`
