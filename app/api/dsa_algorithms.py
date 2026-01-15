@@ -5,9 +5,21 @@ from typing import List, Literal, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from app.dsa_algorithms.graph_algorithms import (
+    WeightedEdge as GraphWeightedEdge,
+    bfs,
+    dijkstra,
+    dfs,
+    kruskal_mst,
+    scc_kosaraju,
+)
+from app.dsa_algorithms.dp_algorithms import coin_change_min, knapsack_01, lis_length
 from app.dsa_algorithms.lca import LcaSolver
 from app.dsa_algorithms.min_cost_max_flow import min_cost_max_flow
 from app.dsa_algorithms.segment_tree import SegmentTreeLazy
+from app.dsa_algorithms.segment_tree_queries import SegmentTreeMin
+from app.dsa_algorithms.shortest_paths import bellman_ford, floyd_warshall, zero_one_bfs
+from app.dsa_algorithms.trie import Trie
 
 router = APIRouter(prefix="/api/dsa", tags=["dsa-algorithms"])
 
@@ -108,3 +120,240 @@ def solve_min_cost_max_flow(payload: MinCostMaxFlowRequest) -> dict[str, int]:
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return {"flow": int(flow), "cost": int(cost)}
+
+
+class SegmentTreeMinOp(BaseModel):
+    type: Literal["set", "min"]
+    l: int = Field(..., ge=0)
+    r: int = Field(..., ge=0)
+    value: Optional[float] = None
+
+
+class SegmentTreeMinRequest(BaseModel):
+    values: List[float]
+    ops: List[SegmentTreeMinOp]
+
+
+@router.post("/algorithms/segment-tree-min")
+def run_segment_tree_min(payload: SegmentTreeMinRequest) -> dict[str, object]:
+    if not payload.values:
+        raise HTTPException(status_code=400, detail="values must not be empty")
+    try:
+        tree = SegmentTreeMin(payload.values)
+        results = []
+        for idx, op in enumerate(payload.ops):
+            if op.l > op.r:
+                raise ValueError("l must be <= r")
+            if op.type == "set":
+                if op.value is None:
+                    raise ValueError("set operation requires value")
+                if op.l != op.r:
+                    raise ValueError("set operation requires l == r (point update)")
+                tree.update(op.l, op.value)
+            else:
+                value = tree.range_min(op.l, op.r)
+                results.append({"op_index": idx, "value": value})
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"results": results, "ops": len(payload.ops)}
+
+
+class GraphEdge(BaseModel):
+    u: int
+    v: int
+    w: float = 1.0
+
+
+class GraphTraversalRequest(BaseModel):
+    n: int = Field(..., ge=1, le=200000)
+    edges: List[GraphEdge]
+    start: int
+    directed: bool = False
+
+
+@router.post("/algorithms/bfs")
+def solve_bfs(payload: GraphTraversalRequest) -> dict[str, object]:
+    try:
+        result = bfs(
+            payload.n,
+            [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges],
+            payload.start,
+            directed=payload.directed,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return result
+
+
+@router.post("/algorithms/dfs")
+def solve_dfs(payload: GraphTraversalRequest) -> dict[str, object]:
+    try:
+        result = dfs(
+            payload.n,
+            [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges],
+            payload.start,
+            directed=payload.directed,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return result
+
+
+class ShortestPathRequest(BaseModel):
+    n: int = Field(..., ge=1, le=200000)
+    edges: List[GraphEdge]
+    source: int
+    directed: bool = False
+
+
+@router.post("/algorithms/shortest-paths")
+def solve_shortest_paths(payload: ShortestPathRequest) -> dict[str, object]:
+    try:
+        result = dijkstra(
+            payload.n,
+            [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges],
+            payload.source,
+            directed=payload.directed,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return result
+
+
+@router.post("/algorithms/shortest-paths/bellman-ford")
+def solve_bellman_ford(payload: ShortestPathRequest) -> dict[str, object]:
+    try:
+        result = bellman_ford(
+            payload.n,
+            [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges],
+            payload.source,
+            directed=payload.directed,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return result
+
+
+class FloydWarshallRequest(BaseModel):
+    n: int = Field(..., ge=1, le=400)
+    edges: List[GraphEdge]
+    directed: bool = False
+
+
+@router.post("/algorithms/shortest-paths/floyd-warshall")
+def solve_floyd_warshall(payload: FloydWarshallRequest) -> dict[str, object]:
+    try:
+        result = floyd_warshall(
+            payload.n,
+            [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges],
+            directed=payload.directed,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return result
+
+
+@router.post("/algorithms/shortest-paths/zero-one-bfs")
+def solve_zero_one_bfs(payload: ShortestPathRequest) -> dict[str, object]:
+    try:
+        result = zero_one_bfs(
+            payload.n,
+            [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges],
+            payload.source,
+            directed=payload.directed,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return result
+
+
+class MstRequest(BaseModel):
+    n: int = Field(..., ge=1, le=200000)
+    edges: List[GraphEdge]
+
+
+@router.post("/algorithms/mst")
+def solve_mst(payload: MstRequest) -> dict[str, object]:
+    try:
+        result = kruskal_mst(
+            payload.n, [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges]
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return result
+
+
+class SccRequest(BaseModel):
+    n: int = Field(..., ge=1, le=200000)
+    edges: List[GraphEdge]
+
+
+@router.post("/algorithms/scc")
+def solve_scc(payload: SccRequest) -> dict[str, object]:
+    try:
+        result = scc_kosaraju(
+            payload.n, [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges]
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return result
+
+
+class TrieOp(BaseModel):
+    op: Literal["insert", "search", "starts_with", "delete"]
+    text: str
+
+
+class TrieRequest(BaseModel):
+    operations: List[TrieOp]
+
+
+@router.post("/algorithms/trie")
+def run_trie(payload: TrieRequest) -> dict[str, object]:
+    trie = Trie()
+    results = []
+    for idx, op in enumerate(payload.operations):
+        text = op.text
+        if op.op == "insert":
+            trie.insert(text)
+            results.append({"op_index": idx, "op": op.op, "result": True})
+        elif op.op == "search":
+            results.append({"op_index": idx, "op": op.op, "result": trie.search(text)})
+        elif op.op == "starts_with":
+            results.append({"op_index": idx, "op": op.op, "result": trie.starts_with(text)})
+        else:
+            results.append({"op_index": idx, "op": op.op, "result": trie.delete(text)})
+    return {"results": results, "ops": len(payload.operations)}
+
+
+class DpRequest(BaseModel):
+    method: Literal["lis", "knapsack", "coin_change"]
+    nums: Optional[List[int]] = None
+    weights: Optional[List[int]] = None
+    values: Optional[List[int]] = None
+    capacity: Optional[int] = None
+    coins: Optional[List[int]] = None
+    amount: Optional[int] = None
+
+
+@router.post("/algorithms/dp")
+def run_dp(payload: DpRequest) -> dict[str, object]:
+    try:
+        if payload.method == "lis":
+            if payload.nums is None:
+                raise ValueError("nums is required for LIS")
+            result = lis_length(payload.nums)
+            return {"method": "lis", "result": result}
+        if payload.method == "knapsack":
+            if payload.weights is None or payload.values is None or payload.capacity is None:
+                raise ValueError("weights, values, capacity are required for knapsack")
+            result = knapsack_01(payload.weights, payload.values, payload.capacity)
+            return {"method": "knapsack", "result": result}
+        if payload.method == "coin_change":
+            if payload.coins is None or payload.amount is None:
+                raise ValueError("coins and amount are required for coin_change")
+            result = coin_change_min(payload.coins, payload.amount)
+            return {"method": "coin_change", "result": result}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"method": payload.method, "result": None}

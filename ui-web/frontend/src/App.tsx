@@ -3,7 +3,6 @@ import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import CommandCenter from "./pages/CommandCenter";
 import Chat from "./pages/Chat";
-import DsaRag from "./pages/DsaRag";
 
 export default function App() {
   return (
@@ -16,7 +15,6 @@ export default function App() {
               <Route path="/" element={<CommandCenter />} />
               <Route path="/command-center" element={<CommandCenter />} />
               <Route path="/chat" element={<Chat />} />
-              <Route path="/dsa-rag" element={<DsaRag />} />
             </Routes>
           </div>
           <Footer />

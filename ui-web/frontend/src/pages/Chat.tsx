@@ -30,8 +30,20 @@ interface RecommendationItem {
   reason: string;
 }
 
+type DsaSource = {
+  topic?: string;
+  source?: string;
+  doc_id?: string;
+  chunk_id?: number;
+  snippet?: string;
+  score_final?: number;
+};
+
 interface MessageMeta {
   items?: RecommendationItem[];
+  sources?: DsaSource[];
+  citations?: string[];
+  dsa?: boolean;
   [key: string]: unknown;
 }
 
@@ -162,6 +174,14 @@ const suggestions = [
   "Recommend summer outfits",
   "What is fraud detection?",
   "Help",
+];
+
+const dsaSuggestions = [
+  "Explain LCA with binary lifting",
+  "Lazy propagation segment tree example",
+  "What is min-cost max flow?",
+  "Compare BFS vs DFS",
+  "How does Dijkstra work?",
 ];
 
 const normalizeConfidence = (value?: number): number | undefined => {
@@ -326,6 +346,9 @@ export default function Chat() {
   );
   const [isConnected, setIsConnected] = useState(false);
   const [useRag, setUseRag] = useState(true);
+  const [useDsaRag, setUseDsaRag] = useState(
+    localStorage.getItem("useDsaRag") === "true"
+  );
   const [showCamera, setShowCamera] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
@@ -368,6 +391,11 @@ export default function Chat() {
     setBackendUrl(url);
     localStorage.setItem("backendUrl", url);
     api.defaults.baseURL = url;
+  };
+
+  const updateDsaMode = (enabled: boolean) => {
+    setUseDsaRag(enabled);
+    localStorage.setItem("useDsaRag", String(enabled));
   };
 
   const appendMessage = (message: Message) => {
@@ -478,16 +506,31 @@ export default function Chat() {
     setIsLoading(true);
 
     try {
-      const { data } = await api.post("/api/chat", {
-        text: input,
-        user_id: "web_user",
-        use_rag: useRag,
-      });
-      appendMessage({
-        role: "assistant",
-        content: data.answer || data.reply || "No response received",
-        meta: data.meta,
-      });
+      if (useDsaRag) {
+        const { data } = await api.post("/api/dsa-rag/ask", {
+          query: input,
+        });
+        appendMessage({
+          role: "assistant",
+          content: data.answer || "No response received",
+          meta: {
+            sources: Array.isArray(data.sources) ? data.sources : [],
+            citations: Array.isArray(data.citations) ? data.citations : [],
+            dsa: true,
+          },
+        });
+      } else {
+        const { data } = await api.post("/api/chat", {
+          text: input,
+          user_id: "web_user",
+          use_rag: useRag,
+        });
+        appendMessage({
+          role: "assistant",
+          content: data.answer || data.reply || "No response received",
+          meta: data.meta,
+        });
+      }
     } catch (error) {
       appendMessage({
         role: "assistant",
@@ -697,6 +740,7 @@ export default function Chat() {
   // Statistics
   const userMessages = messages.filter(m => m.role === "user").length;
   const assistantMessages = messages.filter(m => m.role === "assistant").length;
+  const activeSuggestions = useDsaRag ? dsaSuggestions : suggestions;
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
@@ -705,7 +749,7 @@ export default function Chat() {
           <div>
             <h1 className="text-3xl font-bold text-white">AI Chat</h1>
             <p className="text-slate-400 mt-1">
-              Unified chat with built-in vision, fraud, cyber, behavior, video, and audio tools.
+              Unified chat with built-in tools plus offline-first DSA RAG when enabled.
             </p>
           </div>
           {/* Session Stats */}
@@ -760,11 +804,24 @@ export default function Chat() {
                   type="checkbox"
                   checked={useRag}
                   onChange={(e) => setUseRag(e.target.checked)}
+                  disabled={useDsaRag}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
               </label>
               <span className="text-sm text-slate-400">RAG {useRag ? "On" : "Off"}</span>
+            </div>
+            <div className="flex items-center gap-2 pt-5">
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={useDsaRag}
+                  onChange={(e) => updateDsaMode(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </label>
+              <span className="text-sm text-slate-400">DSA Mode {useDsaRag ? "On" : "Off"}</span>
             </div>
           </div>
         </div>
@@ -987,7 +1044,7 @@ export default function Chat() {
               <div className="text-center py-12">
                 <p className="text-slate-400 mb-6">Start a conversation! Try one of these:</p>
                 <div className="flex flex-wrap justify-center gap-2">
-                  {suggestions.map((suggestion) => (
+                  {activeSuggestions.map((suggestion) => (
                     <button
                       key={suggestion}
                       onClick={() => setInput(suggestion)}
@@ -1031,6 +1088,23 @@ export default function Chat() {
                             )}
                           </div>
                         ))}
+                      </div>
+                    )}
+                    {msg.meta?.sources && msg.meta.sources.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-slate-600/50">
+                        <p className="text-xs opacity-70 mb-2">DSA Sources:</p>
+                        {msg.meta.sources.slice(0, 3).map((src, j) => (
+                          <div key={j} className="text-xs text-slate-300 leading-relaxed">
+                            <span className="font-semibold">{src.topic || "misc"}</span>{" "}
+                            <span className="opacity-70">{src.source || src.doc_id}</span>
+                            {src.snippet && <div className="opacity-80">{src.snippet}</div>}
+                          </div>
+                        ))}
+                        {msg.meta.citations && msg.meta.citations.length > 0 && (
+                          <p className="text-[11px] text-slate-400 mt-2">
+                            Citations: {msg.meta.citations.slice(0, 5).join(" · ")}
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
