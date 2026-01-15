@@ -1,7 +1,7 @@
-# SentinelForge - Executive Summary
+# Sentifargo - Executive Summary
 
 ## One-Liner
-**SentinelForge** is an AI-powered anomaly detection platform combining fraud detection, cybersecurity analysis, and intelligent recommendations in a single offline-capable system.
+**Sentifargo** is an AI-powered anomaly detection platform combining fraud detection, cybersecurity analysis, and intelligent recommendations in a single offline-capable system.
 
 ---
 
@@ -93,4 +93,4 @@ User → FastAPI → Orchestrator → ML Models → Response
 
 ---
 
-*SentinelForge v2.0 - AI Security & Recommendations Platform*
+*Sentifargo v2.0 - AI Security & Recommendations Platform*

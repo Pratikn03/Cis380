@@ -1,0 +1,1564 @@
+{
+  "repo_root": "/Users/pratik_n/Desktop/MyComputer/Sentifargo",
+  "generated_at": "2026-01-13T19:42:46",
+  "entrypoints": {
+    "common_entrypoints": [
+      "app/main.py"
+    ],
+    "uvicorn_or_fastapi_files": [
+      "app/main.py"
+    ]
+  },
+  "repo_stats": {
+    "total_files": 1045541,
+    "by_ext": {
+      ".md": 27,
+      ".log": 3,
+      ".py": 379,
+      ".ds_store": 7,
+      ".ini": 1,
+      "license": 1,
+      ".txt": 317324,
+      ".sh": 28,
+      ".pt": 25,
+      "dockerfile": 1,
+      "makefile": 1,
+      ".toml": 1,
+      ".coveragerc": 1,
+      ".example": 3,
+      ".editorconfig": 1,
+      ".yaml": 94,
+      ".dockerignore": 1,
+      ".yml": 7,
+      ".gitignore": 1,
+      ".env": 2,
+      ".gitattributes": 1,
+      ".python-version": 1,
+      ".production": 1,
+      ".json": 40,
+      "config": 1,
+      ".pkl": 25,
+      ".html": 4,
+      ".svg": 2,
+      ".gitkeep": 12,
+      ".csv": 114,
+      ".docx": 2,
+      "pkg-info": 1,
+      "roc_auc_ci_upper": 1,
+      "train_time_sec": 1,
+      "roc_auc_ci_lower": 1,
+      "accuracy": 1,
+      "recall": 1,
+      "roc_auc": 1,
+      "pr_auc": 1,
+      "predict_proba_sec_per_run": 1,
+      "best_f1_threshold": 1,
+      "precision": 1,
+      "f1": 1,
+      ".user": 34,
+      ".commit": 18,
+      ".runname": 34,
+      ".name": 34,
+      ".type": 34,
+      "max_depth": 1,
+      "learning_rate": 1,
+      "model_type": 1,
+      "n_estimators": 1,
+      "max_iter": 1,
+      "epochs": 30,
+      "batch_size": 1,
+      "lr": 1,
+      "hidden_dim": 1,
+      ".ipynb": 39,
+      ".png": 29,
+      "copy_paste": 29,
+      "split": 29,
+      "retina_masks": 29,
+      "mask_ratio": 29,
+      "lr0": 29,
+      "keras": 29,
+      "save_json": 29,
+      "mosaic": 29,
+      "lrf": 29,
+      "seed": 29,
+      "dynamic": 29,
+      "box": 29,
+      "freeze": 29,
+      "max_det": 29,
+      "scale": 29,
+      "single_cls": 29,
+      "rect": 29,
+      "optimize": 29,
+      "cache": 29,
+      "embed": 29,
+      "mode": 29,
+      "optimizer": 29,
+      "patience": 29,
+      "cos_lr": 29,
+      "opset": 29,
+      "translate": 29,
+      "momentum": 29,
+      "classes": 29,
+      "nbs": 29,
+      "save_txt": 29,
+      "show_boxes": 29,
+      "bgr": 29,
+      "erasing": 29,
+      "workspace": 29,
+      "source": 29,
+      "resume": 29,
+      "show": 29,
+      "multi_scale": 29,
+      "cutmix": 29,
+      "hsv_v": 29,
+      "deterministic": 29,
+      "save_conf": 29,
+      "augment": 29,
+      "iou": 29,
+      "cls": 29,
+      "tracker": 29,
+      "half": 29,
+      "vid_stride": 29,
+      "kobj": 29,
+      "visualize": 29,
+      "weight_decay": 29,
+      "cfg": 29,
+      "verbose": 29,
+      "time": 29,
+      "show_labels": 29,
+      "flipud": 29,
+      "close_mosaic": 29,
+      "project": 29,
+      "line_width": 29,
+      "mixup": 29,
+      "save_period": 29,
+      "auto_augment": 29,
+      "save_frames": 29,
+      "compile": 29,
+      "profile": 29,
+      "warmup_epochs": 29,
+      "amp": 29,
+      "pose": 29,
+      "batch": 29,
+      "degrees": 29,
+      "dropout": 29,
+      "agnostic_nms": 29,
+      "task": 29,
+      "model": 29,
+      "dfl": 29,
+      "format": 29,
+      "int8": 29,
+      "shear": 29,
+      "workers": 29,
+      "dnn": 29,
+      "device": 29,
+      "fliplr": 29,
+      "imgsz": 29,
+      "warmup_bias_lr": 29,
+      "nms": 29,
+      "exist_ok": 29,
+      "name": 29,
+      "save_dir": 29,
+      "simplify": 29,
+      "save": 29,
+      "data": 29,
+      "conf": 29,
+      "fraction": 29,
+      "save_crop": 29,
+      "stream_buffer": 29,
+      "copy_paste_mode": 29,
+      "show_conf": 29,
+      "warmup_momentum": 29,
+      "pretrained": 29,
+      "perspective": 29,
+      "plots": 29,
+      "hsv_h": 29,
+      "overlap_mask": 29,
+      "val": 29,
+      "hsv_s": 29,
+      "recallb": 5,
+      "map50-95b": 5,
+      "precisionb": 5,
+      "map50b": 5,
+      "dfl_loss": 13,
+      "cls_loss": 13,
+      "box_loss": 13,
+      "pg0": 8,
+      "pg1": 8,
+      "pg2": 8,
+      ".jpg": 664326,
+      ".npy": 15867,
+      ".index": 2,
+      ".jsonl": 5,
+      ".bz2": 1,
+      ".complete": 2,
+      ".flv": 7442,
+      ".wav": 23286,
+      ".mp4": 13058,
+      ".cache": 4,
+      ".pdf": 1,
+      ".parquet": 3,
+      ".css": 2,
+      ".js": 2,
+      ".joblib": 1,
+      ".bak": 1,
+      ".conf": 1,
+      ".ts": 11,
+      ".tsbuildinfo": 2,
+      ".cjs": 1,
+      ".tsx": 12
+    },
+    "largest_files": [
+      {
+        "file": "data/raw/behavior/r4.2/http.csv",
+        "size_bytes": 14536257467
+      },
+      {
+        "file": "data/raw/recommendation/yelp/yelp_academic_dataset_review.json",
+        "size_bytes": 5341868833
+      },
+      {
+        "file": "data/raw/behavior/r4.2.tar.bz2",
+        "size_bytes": 4824287500
+      },
+      {
+        "file": "data/raw/recommendation/yelp/yelp_academic_dataset_user.json",
+        "size_bytes": 3363329011
+      },
+      {
+        "file": "data/raw/recommendation/Electronics_5.json",
+        "size_bytes": 1478965298
+      },
+      {
+        "file": "data/raw/behavior/r4.2/email.csv",
+        "size_bytes": 1362101939
+      },
+      {
+        "file": "data/raw/recommendation/movielens.csv",
+        "size_bytes": 690353377
+      },
+      {
+        "file": "data/raw/archive/rating.csv",
+        "size_bytes": 690353377
+      },
+      {
+        "file": "data/raw/recommendation/electronics_small.csv",
+        "size_bytes": 681420010
+      },
+      {
+        "file": "data/raw/recommendation/_archive_electronics/electronics_small.csv",
+        "size_bytes": 681420010
+      },
+      {
+        "file": "data/raw/fraud/paysim/paysim_transactions.csv",
+        "size_bytes": 493534783
+      },
+      {
+        "file": "data/processed/cyber/unsw_nb15_features.parquet",
+        "size_bytes": 450605781
+      },
+      {
+        "file": "data/raw/recommendation/ratings_Electronics.csv",
+        "size_bytes": 318766497
+      },
+      {
+        "file": "data/raw/recommendation/yelp/yelp_academic_dataset_checkin.json",
+        "size_bytes": 286958945
+      },
+      {
+        "file": "data/embeddings/recommender_vectors.npy",
+        "size_bytes": 279531648
+      },
+      {
+        "file": "models/behavior.pkl",
+        "size_bytes": 230334637
+      },
+      {
+        "file": "models/behavior/behavior_best.pkl",
+        "size_bytes": 230334607
+      },
+      {
+        "file": "data/raw/archive/genome_scores.csv",
+        "size_bytes": 214322450
+      },
+      {
+        "file": "data/raw/behavior/r4.2/file.csv",
+        "size_bytes": 193055265
+      },
+      {
+        "file": "data/raw/recommendation/yelp/yelp_academic_dataset_tip.json",
+        "size_bytes": 180604475
+      }
+    ]
+  },
+  "infra": {
+    "dockerfiles": [
+      "Dockerfile",
+      "Dockerfile.production"
+    ],
+    "compose": [
+      "docker-compose.production.yml",
+      "docker-compose.yml"
+    ],
+    "k8s": [],
+    "github_actions": [
+      ".github/workflows/ci-cd.yml",
+      ".github/workflows/ci.yml",
+      ".github/workflows/deploy-pages.yml"
+    ],
+    "makefiles": [
+      "Makefile"
+    ],
+    "requirements": [
+      "requirements.txt"
+    ],
+    "pyproject": [
+      "pyproject.toml"
+    ],
+    "precommit": [],
+    "tests": [],
+    "docs": [
+      "data/docs/cybersecurity.md",
+      "data/docs/fraud_detection.md",
+      "data/docs/job_roles.md",
+      "data/docs/Sentifargo_guide.md",
+      "docs/ARCHITECTURE.md",
+      "docs/LEGACY.md",
+      "docs/MLOPS_ROADMAP.md",
+      "docs/behavior_features.md",
+      "docs/vision_labels.md"
+    ],
+    "monitoring": [
+      "app/models/recommender/metrics.py",
+      "app/monitoring/metrics.py",
+      "app/rag/metrics.py",
+      "app/streamlit_chatbot/pages/metrics.py",
+      "deploy/grafana/provisioning/datasources/datasource.yml",
+      "deploy/prometheus/prometheus.yml",
+      "experiments/behavior/metrics/metrics.csv",
+      "experiments/behavior/metrics/metrics.json",
+      "experiments/cyber/metrics/metrics.csv",
+      "experiments/cyber/metrics/metrics.json",
+      "experiments/fraud/ablations/none_metrics.csv",
+      "experiments/fraud/metrics/metrics.csv",
+      "experiments/fraud/metrics/metrics.json",
+      "experiments/fusion/metrics/metrics.csv",
+      "experiments/fusion/metrics/metrics.json",
+      "experiments/recommender/metrics/metrics.json",
+      "experiments/recommender/metrics/movielens_metrics.json",
+      "experiments/recommender/metrics/recommender_metrics.json",
+      "experiments/recommender/metrics/recommender_ncf_metrics.json",
+      "experiments/vision/metrics/metrics.csv",
+      "experiments/vision/video_temporal/metrics.json",
+      "models/fraud/supervised_metrics.json",
+      "models/vision/face_emotion/metrics.json",
+      "notebooks/evaluation/70_voice_metrics.ipynb",
+      "notebooks/evaluation/71_video_metrics.ipynb",
+      "notebooks/evaluation/72_recommender_metrics.ipynb",
+      "notebooks/evaluation/98_metrics_audit.ipynb",
+      "notebooks/experiments/cyber/ablations/none_metrics.csv",
+      "notebooks/experiments/fraud/ablations/binning_metrics.csv",
+      "notebooks/experiments/fraud/ablations/mi_filter_metrics.csv",
+      "notebooks/experiments/fraud/ablations/none_metrics.csv",
+      "notebooks/experiments/fraud/ablations/poly_binning_metrics.csv",
+      "notebooks/experiments/fraud/ablations/poly_metrics.csv",
+      "notebooks/experiments/fraud/ablations/vif_binning_metrics.csv",
+      "reports/metrics_behavior.csv",
+      "reports/metrics_cyber.csv",
+      "reports/metrics_fraud.csv",
+      "reports/metrics_fusion.csv",
+      "reports/metrics_vision.csv",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/lr/pg0",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/lr/pg1",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/lr/pg2",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/metrics/mAP50-95B",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/metrics/mAP50B",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/metrics/precisionB",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/metrics/recallB",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/train/box_loss",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/train/cls_loss",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/train/dfl_loss",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/val/box_loss",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/val/cls_loss",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/metrics/val/dfl_loss",
+      "runs/mlflow/716084780746542089/aa9002e01d824a44a3093b0ca960dc64/metrics/lr/pg0",
+      "runs/mlflow/716084780746542089/aa9002e01d824a44a3093b0ca960dc64/metrics/lr/pg1",
+      "runs/mlflow/716084780746542089/aa9002e01d824a44a3093b0ca960dc64/metrics/lr/pg2",
+      "runs/mlflow/716084780746542089/aa9002e01d824a44a3093b0ca960dc64/metrics/train/box_loss",
+      "runs/mlflow/716084780746542089/aa9002e01d824a44a3093b0ca960dc64/metrics/train/cls_loss",
+      "runs/mlflow/716084780746542089/aa9002e01d824a44a3093b0ca960dc64/metrics/train/dfl_loss",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/lr/pg0",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/lr/pg1",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/lr/pg2",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/metrics/mAP50-95B",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/metrics/mAP50B",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/metrics/precisionB",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/metrics/recallB",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/train/box_loss",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/train/cls_loss",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/train/dfl_loss",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/val/box_loss",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/val/cls_loss",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/metrics/val/dfl_loss",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/lr/pg0",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/lr/pg1",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/lr/pg2",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/metrics/mAP50-95B",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/metrics/mAP50B",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/metrics/precisionB",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/metrics/recallB",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/train/box_loss",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/train/cls_loss",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/train/dfl_loss",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/val/box_loss",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/val/cls_loss",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/metrics/val/dfl_loss",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/lr/pg0",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/lr/pg1",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/lr/pg2",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/metrics/mAP50-95B",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/metrics/mAP50B",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/metrics/precisionB",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/metrics/recallB",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/train/box_loss",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/train/cls_loss",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/train/dfl_loss",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/val/box_loss",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/val/cls_loss",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/metrics/val/dfl_loss",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/lr/pg0",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/lr/pg1",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/lr/pg2",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/metrics/mAP50-95B",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/metrics/mAP50B",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/metrics/precisionB",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/metrics/recallB",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/train/box_loss",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/train/cls_loss",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/train/dfl_loss",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/val/box_loss",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/val/cls_loss",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/metrics/val/dfl_loss",
+      "runs/mlflow/737381424675970088/686d00fdf22e42adb9ab56fbcab350b0/metrics/lr/pg0",
+      "runs/mlflow/737381424675970088/686d00fdf22e42adb9ab56fbcab350b0/metrics/lr/pg1",
+      "runs/mlflow/737381424675970088/686d00fdf22e42adb9ab56fbcab350b0/metrics/lr/pg2",
+      "runs/mlflow/737381424675970088/686d00fdf22e42adb9ab56fbcab350b0/metrics/train/box_loss",
+      "runs/mlflow/737381424675970088/686d00fdf22e42adb9ab56fbcab350b0/metrics/train/cls_loss",
+      "runs/mlflow/737381424675970088/686d00fdf22e42adb9ab56fbcab350b0/metrics/train/dfl_loss",
+      "runs/mlflow/737381424675970088/c6ec16fd1552409fa5ffeb72375b2603/metrics/lr/pg0",
+      "runs/mlflow/737381424675970088/c6ec16fd1552409fa5ffeb72375b2603/metrics/lr/pg1",
+      "runs/mlflow/737381424675970088/c6ec16fd1552409fa5ffeb72375b2603/metrics/lr/pg2",
+      "runs/mlflow/737381424675970088/c6ec16fd1552409fa5ffeb72375b2603/metrics/train/box_loss",
+      "runs/mlflow/737381424675970088/c6ec16fd1552409fa5ffeb72375b2603/metrics/train/cls_loss",
+      "runs/mlflow/737381424675970088/c6ec16fd1552409fa5ffeb72375b2603/metrics/train/dfl_loss",
+      "src/experiments/behavior/metrics/metrics.csv",
+      "src/experiments/behavior/metrics/metrics.json",
+      "src/experiments/cyber/metrics/metrics.csv",
+      "src/experiments/cyber/metrics/metrics.json",
+      "src/experiments/cyber/metrics/runtime.csv",
+      "src/experiments/fraud/metrics/metrics.csv",
+      "src/experiments/fraud/metrics/metrics.json",
+      "src/experiments/fusion/metrics/metrics.csv",
+      "src/experiments/fusion/metrics/metrics.json",
+      "src/experiments/recommender/metrics/metrics.json",
+      "src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/accuracy",
+      "src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/best_f1_threshold",
+      "src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/f1",
+      "src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/pr_auc",
+      "src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/precision",
+      "src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/predict_proba_sec_per_run",
+      "src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/recall",
+      "src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/roc_auc",
+      "src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/roc_auc_ci_lower",
+      "src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/roc_auc_ci_upper",
+      "src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/train_time_sec",
+      "src/uais/utils/metrics.py",
+      "src/uais_v/evaluation/metrics.py",
+      "ui-web/frontend/src/data/metrics.ts"
+    ]
+  },
+  "fastapi": {
+    "fastapi_app_files": [
+      "app/main.py",
+      "deploy/api/main.py"
+    ],
+    "router_defs": [
+      {
+        "file": "app/core/health.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/cyber_timeline.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/monitor.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/health.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/vision_temporal.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/tts.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/fraud.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/voice.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/chat.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/rag.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/fusion.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/risk.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/brand.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/recommender.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/api/stt.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/legacy/api/routes/behavior.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/legacy/api/routes/vision.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/legacy/api/routes/fraud.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/legacy/api/routes/cyber.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/legacy/api/routes/recommend.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/legacy/api/routes/chat.py",
+        "router_var": "router"
+      },
+      {
+        "file": "app/legacy/api/routes/rag.py",
+        "router_var": "router"
+      }
+    ],
+    "include_router_calls": [
+      {
+        "file": "app/main.py",
+        "router_ref": "chat.router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "rag.router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "recommend.router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "behavior.router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "fraud.router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "cyber.router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "vision.router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "_health_router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "_app_risk_router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "_app_monitor_router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "_app_voice_router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "_app_rag_router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "_app_brand_router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "_app_stt_router"
+      },
+      {
+        "file": "app/main.py",
+        "router_ref": "_app_vision_temporal_router"
+      }
+    ],
+    "endpoints_sample": [
+      {
+        "file": "app/main.py",
+        "object": "app",
+        "method": "GET",
+        "path": "/api/health"
+      },
+      {
+        "file": "app/main.py",
+        "object": "app",
+        "method": "GET",
+        "path": "/"
+      },
+      {
+        "file": "deploy/api/main.py",
+        "object": "app",
+        "method": "GET",
+        "path": "/"
+      },
+      {
+        "file": "deploy/api/main.py",
+        "object": "app",
+        "method": "GET",
+        "path": "/health"
+      },
+      {
+        "file": "deploy/api/main.py",
+        "object": "app",
+        "method": "POST",
+        "path": "/predict_fraud"
+      },
+      {
+        "file": "deploy/api/main.py",
+        "object": "app",
+        "method": "POST",
+        "path": "/predict_cyber"
+      },
+      {
+        "file": "deploy/api/main.py",
+        "object": "app",
+        "method": "POST",
+        "path": "/predict_fusion"
+      },
+      {
+        "file": "deploy/api/main.py",
+        "object": "app",
+        "method": "POST",
+        "path": "/predict_nlp"
+      },
+      {
+        "file": "deploy/api/main.py",
+        "object": "app",
+        "method": "POST",
+        "path": "/predict_vision"
+      },
+      {
+        "file": "app/core/health.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/health"
+      },
+      {
+        "file": "app/core/health.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/health/live"
+      },
+      {
+        "file": "app/core/health.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/health/ready"
+      },
+      {
+        "file": "app/core/health.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/health/detailed"
+      },
+      {
+        "file": "app/core/health.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/metrics"
+      },
+      {
+        "file": "app/core/health.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/ready"
+      },
+      {
+        "file": "app/api/cyber_timeline.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/events"
+      },
+      {
+        "file": "app/api/cyber_timeline.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/patterns"
+      },
+      {
+        "file": "app/api/cyber_timeline.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/sources"
+      },
+      {
+        "file": "app/api/cyber_timeline.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/summary"
+      },
+      {
+        "file": "app/api/monitor.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/log"
+      },
+      {
+        "file": "app/api/monitor.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/summary"
+      },
+      {
+        "file": "app/api/monitor.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/drift"
+      },
+      {
+        "file": "app/api/monitor.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/risk_summary"
+      },
+      {
+        "file": "app/api/monitor.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/events"
+      },
+      {
+        "file": "app/api/monitor.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/baseline/build"
+      },
+      {
+        "file": "app/api/health.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/health"
+      },
+      {
+        "file": "app/api/vision_temporal.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/predict"
+      },
+      {
+        "file": "app/api/tts.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/speak"
+      },
+      {
+        "file": "app/api/fraud.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/fraud"
+      },
+      {
+        "file": "app/api/voice.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/emotion"
+      },
+      {
+        "file": "app/api/chat.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/chat"
+      },
+      {
+        "file": "app/api/rag.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/ingest"
+      },
+      {
+        "file": "app/api/rag.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/upload"
+      },
+      {
+        "file": "app/api/fusion.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/analyze"
+      },
+      {
+        "file": "app/api/risk.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/risk/analyze"
+      },
+      {
+        "file": "app/api/brand.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/predict"
+      },
+      {
+        "file": "app/api/recommender.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/recommend"
+      },
+      {
+        "file": "app/api/recommender.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/recommend/explain"
+      },
+      {
+        "file": "app/api/recommender.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/recommend/multimodal"
+      },
+      {
+        "file": "app/api/stt.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/transcribe"
+      },
+      {
+        "file": "app/legacy/api/routes/behavior.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/logs"
+      },
+      {
+        "file": "app/legacy/api/routes/vision.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/train"
+      },
+      {
+        "file": "app/legacy/api/routes/vision.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/predict"
+      },
+      {
+        "file": "app/legacy/api/routes/vision.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/face_emotion/predict"
+      },
+      {
+        "file": "app/legacy/api/routes/vision.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/video/predict"
+      },
+      {
+        "file": "app/legacy/api/routes/recommend.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/explain"
+      },
+      {
+        "file": "app/legacy/api/routes/recommend.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/multimodal"
+      },
+      {
+        "file": "app/legacy/api/routes/recommend.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/topn"
+      },
+      {
+        "file": "app/legacy/api/routes/chat.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/multimodal"
+      },
+      {
+        "file": "app/legacy/api/routes/chat.py",
+        "object": "router",
+        "method": "GET",
+        "path": "/stream"
+      },
+      {
+        "file": "app/legacy/api/routes/rag.py",
+        "object": "router",
+        "method": "POST",
+        "path": "/query"
+      }
+    ],
+    "endpoints_count": 51
+  },
+  "streamlit": {
+    "streamlit_files": [
+      "app/agent/orchestrator.py",
+      "app/legacy/agent/orchestrator.py",
+      "app/legacy/api/routes/chat.py",
+      "app/main.py",
+      "app/streamlit_chatbot/app.py",
+      "app/streamlit_chatbot/classic_chat.py",
+      "app/streamlit_chatbot/pages/brand.py",
+      "app/streamlit_chatbot/pages/chat.py",
+      "app/streamlit_chatbot/pages/command_center.py",
+      "app/streamlit_chatbot/pages/live.py",
+      "app/streamlit_chatbot/pages/metrics.py",
+      "app/streamlit_chatbot/pages/risk.py",
+      "app/streamlit_chatbot/pages/tools.py",
+      "app/streamlit_chatbot/pages/voice_chat.py",
+      "app/streamlit_chatbot/recommender_router.py",
+      "app/streamlit_chatbot/risk_dashboard.py",
+      "app/streamlit_chatbot/ui/theme.py",
+      "app/streamlit_chatbot/unified_chat.py",
+      "dashboard/components/shap_viz.py",
+      "scripts/check_production.py",
+      "tests/test_clothes_catalog.py"
+    ],
+    "probable_pages": [
+      "app/streamlit_chatbot/classic_chat.py",
+      "app/streamlit_chatbot/ui/theme.py",
+      "app/streamlit_chatbot/unified_chat.py",
+      "dashboard/components/shap_viz.py"
+    ]
+  },
+  "ml_tech_hits": {
+    "sklearn": [
+      "benchmarks/benchmark_suite.py",
+      "scripts/train_production.py",
+      "scripts/generate_benchmarks.py",
+      "scripts/retrain_all_98.py",
+      "scripts/train_all_vision_full.py",
+      "scripts/train_all.py",
+      "reports/codex_audit_20251213_120625.md",
+      "src/pipeline/train_models.py",
+      "src/scripts/run_cyber_experiment.py",
+      "src/scripts/run_fraud_experiment.py",
+      "src/scripts/run_behavior_experiment.py",
+      "src/scripts/run_fusion_experiment.py",
+      "src/train/train_video_temporal.py",
+      "src/train/train_movielens_recommender.py",
+      "src/train/train_recommender.py",
+      "src/train/train_fusion.py",
+      "src/uais/fusion/run_fusion.py",
+      "src/uais/fusion/build_embeddings.py",
+      "src/uais/fusion/train_fusion_model.py",
+      "src/uais/anomaly/train_isolation_forest.py",
+      "src/uais/anomaly/train_ocsvm.py",
+      "src/uais/anomaly/train_lof.py",
+      "src/uais/anomaly/train_autoencoder.py",
+      "src/uais/ensembles/stacking.py",
+      "src/uais/experiments/feature_ablation.py",
+      "src/uais/features/cyber_features.py",
+      "src/uais/features/scalers_encoders.py",
+      "src/uais/features/behavior_features.py",
+      "src/uais/utils/metrics.py",
+      "src/uais/utils/plotting.py",
+      "src/uais/supervised/evaluate_supervised.py",
+      "src/uais/supervised/train_fraud_supervised.py",
+      "src/uais/supervised/train_cyber_supervised.py",
+      "src/uais/recommender/train_recommender.py",
+      "src/uais/generative/train_vae.py",
+      "src/uais/nlp/train_text_classifier.py",
+      "src/uais/nlp/nlp_utils.py",
+      "src/uais/preprocessing/pipeline.py",
+      "src/uais/data/split_data.py",
+      "src/uais_v/evaluation/metrics.py",
+      "scripts/experimental/train_real_fake.py",
+      "scripts/experimental/train_behavior_v2.py",
+      "scripts/experimental/train_voice_emotion_v2.py",
+      "app/mlops/registry.py",
+      "app/rag/embed.py",
+      "app/services/risk_engine.py",
+      "app/models/recommender/features.py",
+      "app/models/recommender/train.py",
+      "app/models/voice/emotion_train.py",
+      "app/models/voice/emotion_predict.py",
+      "app/legacy/rag/service.py",
+      "app/legacy/rag/embed.py",
+      "app/legacy/api/routes/fraud.py",
+      "app/streamlit_chatbot/handlers/static_fallbacks.py",
+      "app/streamlit_chatbot/handlers/movies.py"
+    ],
+    "xgboost": [
+      "PROJECT_SUMMARY.md",
+      "requirements.txt",
+      "GAP_ANALYSIS.md",
+      "README.md",
+      "EXECUTIVE_SUMMARY.md",
+      "PROJECT_DOCUMENTATION.md",
+      "app/main.py",
+      "docs/ARCHITECTURE.md",
+      "configs/cyber_baseline.yaml",
+      "configs/fraud_baseline.yaml",
+      "configs/behavior_baseline.yaml",
+      "scripts/generate_benchmarks.py",
+      "reports/model_comparison.md",
+      "src/uais/supervised/train_fraud_supervised.py",
+      "src/uais/supervised/train_cyber_supervised.py",
+      "data/docs/fraud_detection.md",
+      "dashboard/components/shap_viz.py",
+      "app/legacy/agent/chat_responses.py",
+      "app/legacy/api/routes/fraud.py",
+      "app/legacy/api/routes/recommend.py"
+    ],
+    "lightgbm": [
+      "requirements.txt",
+      "GAP_ANALYSIS.md",
+      "README.md",
+      "docs/ARCHITECTURE.md",
+      "configs/cyber_baseline.yaml",
+      "configs/fraud_baseline.yaml",
+      "configs/base_config.yaml",
+      "configs/behavior_baseline.yaml",
+      "reports/model_comparison.md",
+      "src/uais/supervised/train_fraud_supervised.py",
+      "src/uais/supervised/train_cyber_supervised.py",
+      "dashboard/components/shap_viz.py"
+    ],
+    "catboost": [
+      "requirements.txt",
+      "configs/cyber_baseline.yaml",
+      "configs/fraud_baseline.yaml",
+      "configs/behavior_baseline.yaml",
+      "src/uais/supervised/train_fraud_supervised.py",
+      "src/uais/supervised/train_cyber_supervised.py",
+      "dashboard/components/shap_viz.py"
+    ],
+    "torch": [
+      "PROJECT_SUMMARY.md",
+      "PROJECT_AUDIT_REPORT.md",
+      "requirements.txt",
+      "requirements-optional.txt",
+      "README.md",
+      "EXECUTIVE_SUMMARY.md",
+      "PROJECT_DOCUMENTATION.md",
+      "app/main.py",
+      "tests/test_nlp_tiny.py",
+      "tests/test_multi_sequence_30_torch.py",
+      "tests/test_vision_resnet.py",
+      "benchmarks/benchmark_suite.py",
+      "configs/model_30seq.yaml",
+      "scripts/prepare_intel_scene_vision.py",
+      "scripts/import_celeb_v2_vision.py",
+      "scripts/train_all_vision_full.py",
+      "reports/model_comparison.md",
+      "src/universal_anomaly_intelligence.egg-info/SOURCES.txt",
+      "src/train/train_brand_logo_detector.py",
+      "src/train/train_face_emotion.py",
+      "src/train/train_video_temporal.py",
+      "src/uais/explainability/vision_gradcam.py",
+      "src/uais/sequence/transformer_tcn.py",
+      "src/uais/sequence/train_gru.py",
+      "src/uais/sequence/train_lstm.py",
+      "src/uais_v/training/train_30seq_torch.py",
+      "src/uais_v/training/train_nlp.py",
+      "src/uais_v/training/train_vision.py",
+      "src/uais_v/training/train_30seq.py",
+      "src/uais_v/utils/seed.py",
+      "src/uais_v/models/nlp_text_model.py",
+      "src/uais_v/models/multi_sequence_30_torch.py",
+      "src/uais_v/models/vision_resnet.py",
+      "notebooks/eda/import torch.py",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/artifacts/args.yaml",
+      "runs/detect/brand_final/args.yaml",
+      "runs/detect/train11/args.yaml",
+      "runs/detect/train10/args.yaml",
+      "runs/detect/train2/args.yaml",
+      "runs/detect/train5/args.yaml",
+      "runs/detect/train4/args.yaml",
+      "runs/detect/train3/args.yaml",
+      "runs/detect/brand_production/args.yaml",
+      "runs/detect/brand_quick/args.yaml",
+      "runs/detect/train/args.yaml",
+      "runs/detect/brand_logodet3k/args.yaml",
+      "runs/detect/train12/args.yaml",
+      "runs/detect/train13/args.yaml",
+      "runs/detect/train8/args.yaml",
+      "runs/detect/train6/args.yaml",
+      "runs/detect/brand_full/args.yaml",
+      "runs/detect/brand_prod/args.yaml",
+      "runs/detect/train7/args.yaml",
+      "runs/detect/brand_logodet3k_v2/args.yaml",
+      "runs/detect/train9/args.yaml",
+      "data/docs/job_roles.md",
+      "data/synthetic/README.md",
+      "data/synthetic/cross_modal_generator.py",
+      "scripts/experimental/train_real_fake.py",
+      "scripts/experimental/train_behavior_v2.py"
+    ],
+    "tensorflow": [
+      "requirements.txt",
+      "tests/test_multi_sequence_30_tf.py",
+      "reports/codex_audit_20251213_120625.md",
+      "src/uais/vision/train_vision_model.py",
+      "src/uais/generative/train_vae.py",
+      "src/uais_v/training/train_30seq.py",
+      "src/uais_v/utils/seed.py",
+      "src/uais_v/models/seq_encoder_tf.py",
+      "src/uais_v/models/multi_sequence_30_tf.py",
+      "src/uais_v/cli/main.py",
+      "data/docs/job_roles.md",
+      "app/legacy/api/routes/vision.py"
+    ],
+    "keras": [
+      "src/uais/vision/train_vision_model.py",
+      "src/uais/generative/train_vae.py",
+      "src/uais_v/training/train_30seq.py",
+      "src/uais_v/models/seq_encoder_tf.py",
+      "src/uais_v/models/multi_sequence_30_tf.py",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/artifacts/args.yaml",
+      "runs/detect/brand_final/args.yaml",
+      "runs/detect/train11/args.yaml",
+      "runs/detect/train10/args.yaml",
+      "runs/detect/train2/args.yaml",
+      "runs/detect/train5/args.yaml",
+      "runs/detect/train4/args.yaml",
+      "runs/detect/train3/args.yaml",
+      "runs/detect/brand_production/args.yaml",
+      "runs/detect/brand_quick/args.yaml",
+      "runs/detect/train/args.yaml",
+      "runs/detect/brand_logodet3k/args.yaml",
+      "runs/detect/train12/args.yaml",
+      "runs/detect/train13/args.yaml",
+      "runs/detect/train8/args.yaml",
+      "runs/detect/train6/args.yaml",
+      "runs/detect/brand_full/args.yaml",
+      "runs/detect/brand_prod/args.yaml",
+      "runs/detect/train7/args.yaml",
+      "runs/detect/brand_logodet3k_v2/args.yaml",
+      "runs/detect/train9/args.yaml",
+      "models/brand/full/args.yaml",
+      "models/brand/yolo_logodet/args.yaml",
+      "models/brand/full_training/args.yaml",
+      "models/brand/fast_run_1epoch/args.yaml",
+      "models/brand/val_run/args.yaml",
+      "models/brand/val_run_3epoch/args.yaml",
+      "models/brand/yolo_full/args.yaml"
+    ],
+    "ultralytics": [
+      "requirements.txt",
+      "scripts/train_production.py",
+      "scripts/train_all.py",
+      "src/train/train_brand_logo_detector.py",
+      "src/vision/brand/recognizer.py",
+      "src/vision/brand/data_utils.py",
+      "runs/mlflow/716084780746542089/meta.yaml",
+      "app/api/brand.py"
+    ],
+    "yolo": [
+      "PROJECT_AUDIT_REPORT.md",
+      "GAP_ANALYSIS.md",
+      "README.md",
+      "PROJECT_DOCUMENTATION.md",
+      "artifacts/README.md",
+      "tests/test_brand_routes_import.py",
+      "docs/ARCHITECTURE.md",
+      "docs/vision_labels.md",
+      "scripts/train_production.py",
+      "scripts/prepare_brand_data.py",
+      "scripts/README.md",
+      "scripts/train_all.py",
+      "scripts/train_all_vision.py",
+      "data/README.md",
+      "notebooks/README.md",
+      "reports/model_comparison.md",
+      "src/train/train_brand_logo_detector.py",
+      "src/vision/brand/recognizer.py",
+      "src/vision/brand/data_utils.py",
+      "runs/mlflow/737381424675970088/417117cbefca432dbc52a51be0d1bd3b/meta.yaml",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/artifacts/args.yaml",
+      "runs/detect/brand_final/args.yaml",
+      "runs/detect/train11/args.yaml",
+      "runs/detect/train10/args.yaml",
+      "runs/detect/train2/args.yaml",
+      "runs/detect/train5/args.yaml",
+      "runs/detect/train4/args.yaml",
+      "runs/detect/train3/args.yaml",
+      "runs/detect/brand_production/args.yaml",
+      "runs/detect/brand_quick/args.yaml",
+      "runs/detect/train/args.yaml",
+      "runs/detect/brand_logodet3k/args.yaml",
+      "runs/detect/train12/args.yaml",
+      "runs/detect/train13/args.yaml",
+      "runs/detect/train8/args.yaml",
+      "runs/detect/train6/args.yaml",
+      "runs/detect/brand_full/args.yaml",
+      "runs/detect/brand_prod/args.yaml",
+      "runs/detect/train7/args.yaml",
+      "runs/detect/brand_logodet3k_v2/args.yaml",
+      "runs/detect/train9/args.yaml",
+      "data/docs/Sentifargo_guide.md",
+      "data/processed/brand_yolo/brands.yaml",
+      "models/brand/full/args.yaml",
+      "models/brand/yolo_logodet/args.yaml",
+      "models/brand/full_training/args.yaml",
+      "models/brand/fast_run_1epoch/args.yaml",
+      "models/brand/val_run/args.yaml",
+      "models/brand/val_run_3epoch/args.yaml",
+      "models/brand/yolo_full/args.yaml",
+      "app/core/config.py",
+      "app/streamlit_chatbot/pages/metrics.py",
+      "artifacts/brand/_dataset_subsets/brands_val_2000_seed42.txt",
+      "artifacts/brand/_dataset_subsets/brands_train_5000_seed42.txt",
+      "artifacts/brand/_dataset_subsets/brands_subset.yaml"
+    ],
+    "faiss": [
+      "PROJECT_SUMMARY.md",
+      "requirements.txt",
+      "README.md",
+      "app/main.py",
+      "tests/test_health_endpoint.py",
+      "docs/ARCHITECTURE.md",
+      "scripts/build_recommender_index.py",
+      "app/rag/vector_store.py",
+      "app/vision_local/index.py",
+      "app/models/recommender/index.py",
+      "app/models/recommender/multimodal/build_index.py",
+      "app/models/recommender/multimodal/__init__.py",
+      "app/models/recommender/multimodal/multimodal_predict.py",
+      "app/models/recommender/multimodal/index_store.py",
+      "app/legacy/api/routes/recommend.py",
+      "app/streamlit_chatbot/ui/theme.py"
+    ],
+    "sentence_transformers": [
+      "app/rag/embed.py"
+    ],
+    "transformers": [
+      "PROJECT_SUMMARY.md",
+      "conftest.py",
+      "pytest.ini",
+      "requirements.txt",
+      "app/main.py",
+      "tests/test_nlp_tiny.py",
+      "src/uais/experiments/feature_ablation.py",
+      "src/uais/features/scalers_encoders.py",
+      "src/uais/preprocessing/pipeline.py",
+      "src/uais_v/training/train_nlp.py",
+      "src/uais_v/models/nlp_text_model.py",
+      "app/core/logging.py",
+      "app/rag/embed.py",
+      "app/vision_local/embedder.py",
+      "app/models/recommender/multimodal/image_embed.py",
+      "app/legacy/agent/chat_responses.py"
+    ],
+    "onnx": [],
+    "shap": [
+      "PROJECT_SUMMARY.md",
+      "requirements.txt",
+      "GAP_ANALYSIS.md",
+      "tests/test_fusion_run.py",
+      "tests/test_nlp_tiny.py",
+      "tests/test_voice_noise.py",
+      "tests/test_multi_sequence_30_torch.py",
+      "tests/test_multi_sequence_30_tf.py",
+      "tests/test_build_30seq_dataset.py",
+      "tests/test_api_payloads.py",
+      "tests/test_vision_resnet.py",
+      "docs/ARCHITECTURE.md",
+      "docs/LEGACY.md",
+      "scripts/train_production.py",
+      "scripts/retrain_all_98.py",
+      "scripts/ci_smoke.py",
+      "src/pipeline/build_features.py",
+      "src/universal_anomaly_intelligence.egg-info/SOURCES.txt",
+      "src/scripts/run_fraud_experiment.py",
+      "src/uais/fusion/run_fusion.py",
+      "src/uais/fusion/build_embeddings.py",
+      "src/uais/fusion/train_fusion_model.py",
+      "src/uais/anomaly/train_isolation_forest.py",
+      "src/uais/ensembles/blending.py",
+      "src/uais/ensembles/stacking.py",
+      "src/uais/experiments/feature_ablation.py",
+      "src/uais/features/cyber_features.py",
+      "src/uais/features/behavior_features.py",
+      "src/uais/vision/train_vision_model.py",
+      "src/uais/explainability/runner.py",
+      "src/uais/explainability/shap_explainer.py",
+      "src/uais/explainability/__init__.py",
+      "src/uais/explainability/explainer_utils.py",
+      "src/uais/recommender/utils.py",
+      "src/uais/recommender/explain.py",
+      "src/uais/recommender/recommender_engine.py",
+      "src/uais/generative/train_vae.py",
+      "src/uais/preprocessing/pipeline.py",
+      "src/uais/sequence/build_sequences.py",
+      "src/uais/sequence/transformer_tcn.py",
+      "src/uais/sequence/train_gru.py",
+      "src/uais/sequence/train_lstm.py",
+      "src/uais/data/load_behavior_data.py",
+      "src/uais/data/load_cert_behavior_data.py",
+      "src/uais/data/load_datasets.py",
+      "src/uais/data/load_cyber_data.py",
+      "src/uais_v/training/train_30seq_torch.py",
+      "src/uais_v/training/train_vision.py",
+      "src/uais_v/models/multi_sequence_30_torch.py",
+      "src/uais_v/models/seq_encoder_tf.py",
+      "src/uais_v/models/multi_sequence_30_tf.py",
+      "src/uais_v/evaluation/metrics.py",
+      "src/uais_v/data/build_30seq_dataset.py",
+      "data/docs/fraud_detection.md",
+      "data/docs/cybersecurity.md",
+      "data/synthetic/README.md",
+      "scripts/experimental/train_behavior_v2.py",
+      "scripts/experimental/train_voice_emotion_v2.py",
+      "dashboard/components/shap_viz.py",
+      "deploy/api/main.py"
+    ],
+    "lime": [
+      "requirements.txt",
+      "src/universal_anomaly_intelligence.egg-info/SOURCES.txt",
+      "src/uais/explainability/runner.py",
+      "src/uais/explainability/lime_explainer.py",
+      "src/uais/explainability/__init__.py"
+    ],
+    "mlflow": [
+      "PROJECT_AUDIT_REPORT.md",
+      "requirements.txt",
+      "GAP_ANALYSIS.md",
+      "requirements-optional.txt",
+      "README.md",
+      "mlflow_config.yaml",
+      "docs/ARCHITECTURE.md",
+      "docs/MLOPS_ROADMAP.md",
+      "configs/cyber_baseline.yaml",
+      "configs/fraud_baseline.yaml",
+      "configs/behavior_baseline.yaml",
+      "src/pipeline/train_models.py",
+      "src/universal_anomaly_intelligence.egg-info/SOURCES.txt",
+      "src/uais/utils/mlflow_utils.py",
+      "runs/mlflow/690575434915126183/meta.yaml",
+      "runs/mlflow/716084780746542089/meta.yaml",
+      "runs/mlflow/0/meta.yaml",
+      "runs/mlflow/258724143996341502/meta.yaml",
+      "runs/mlflow/737381424675970088/meta.yaml",
+      "runs/mlflow/737381424675970088/21bb448d52ef4dcb9d69a43e12213663/meta.yaml",
+      "runs/mlflow/737381424675970088/686d00fdf22e42adb9ab56fbcab350b0/meta.yaml",
+      "runs/mlflow/737381424675970088/dde6c05d05754c9a8755c77b37f909f4/meta.yaml",
+      "runs/mlflow/737381424675970088/c6ec16fd1552409fa5ffeb72375b2603/meta.yaml",
+      "runs/mlflow/737381424675970088/423917e4418a4d329c8f8ba3b3d4cbe7/meta.yaml",
+      "runs/mlflow/737381424675970088/417117cbefca432dbc52a51be0d1bd3b/meta.yaml",
+      "runs/mlflow/737381424675970088/d0954de194014d82a6e5dfa63fd3ae75/meta.yaml",
+      "runs/mlflow/737381424675970088/8e5127bb0e624222b642a728481a696f/meta.yaml",
+      "runs/mlflow/737381424675970088/fb5726140a6c4eda8948bf7ced179251/meta.yaml",
+      "runs/mlflow/737381424675970088/5663d1ea4b0e48e1874444b5948d428a/meta.yaml",
+      "runs/mlflow/737381424675970088/7de6b75aa04248f19bb90c3271f9c377/meta.yaml",
+      "runs/mlflow/258724143996341502/a8c1470dbc9b4e169d2baf97d992cd73/meta.yaml",
+      "runs/mlflow/716084780746542089/7b17b7938d314837bc616f1b4eaa61e0/meta.yaml",
+      "runs/mlflow/716084780746542089/be07c54f81c840f4b013395c3692aabc/meta.yaml",
+      "runs/mlflow/716084780746542089/e9e1263a26004adf8cd01c59b75d9140/meta.yaml",
+      "runs/mlflow/716084780746542089/cf765ddd49b34214be6801e68b6b76d6/meta.yaml",
+      "runs/mlflow/716084780746542089/f17d47052b9647ac95ad98b1cfb87b34/meta.yaml",
+      "runs/mlflow/716084780746542089/7fb5fc8df17b4a4781a931bccb96a12b/meta.yaml",
+      "runs/mlflow/716084780746542089/f096573168a24037bfb1e2e63d36f3a0/meta.yaml",
+      "runs/mlflow/716084780746542089/895a24d609034688a2ae438c82065892/meta.yaml",
+      "runs/mlflow/716084780746542089/aa9002e01d824a44a3093b0ca960dc64/meta.yaml",
+      "runs/mlflow/716084780746542089/5e8b1cce53ca42d6b583be0cb1b2823e/meta.yaml",
+      "runs/mlflow/716084780746542089/b912f726af064948a9431fd393d2ff58/meta.yaml",
+      "runs/mlflow/716084780746542089/73e8fe0669bb404cab7e52a64edaf242/meta.yaml",
+      "runs/mlflow/716084780746542089/3d7e61729cd447e0bbd1ea030d3b0966/meta.yaml",
+      "runs/mlflow/690575434915126183/114dda5609b04174a7f96a1b23db1259/meta.yaml",
+      "runs/mlflow/690575434915126183/b2595831450845948accbe232e1c675e/meta.yaml",
+      "runs/mlflow/690575434915126183/5e5a248b5aad4d74a58fde71d49c5e96/meta.yaml",
+      "runs/mlflow/690575434915126183/95bd7ecdf57c4fea971ec60153aeadd5/meta.yaml",
+      "app/mlops/registry.py"
+    ],
+    "prometheus": [
+      "PROJECT_AUDIT_REPORT.md",
+      "requirements.txt",
+      "README.md",
+      "docker-compose.production.yml",
+      "requirements-ci.txt",
+      "app/main.py",
+      "tests/test_production.py",
+      "docs/ARCHITECTURE.md",
+      "scripts/check_production.py",
+      "deploy/prometheus/prometheus.yml",
+      "deploy/grafana/provisioning/datasources/datasource.yml",
+      "app/core/config.py",
+      "app/core/health.py"
+    ],
+    "grafana": [
+      "PROJECT_AUDIT_REPORT.md",
+      "README.md",
+      "docker-compose.production.yml",
+      "docs/ARCHITECTURE.md",
+      "scripts/check_production.py"
+    ],
+    "opentelemetry": [],
+    "jwt": [
+      "PROJECT_AUDIT_REPORT.md",
+      "docs/ARCHITECTURE.md"
+    ],
+    "oauth": []
+  },
+  "datasets": {
+    "data_dir_found": true,
+    "dir_file_counts_sample": {
+      "data/Celeb_V2": 0,
+      "data/Celeb_V2/Test": 0,
+      "data/Celeb_V2/Test/fake": 5067,
+      "data/Celeb_V2/Test/real": 5036,
+      "data/Celeb_V2/Train": 0,
+      "data/Celeb_V2/Train/fake": 40536,
+      "data/Celeb_V2/Train/real": 40288,
+      "data/Celeb_V2/Val": 0,
+      "data/Celeb_V2/Val/fake": 5068,
+      "data/Celeb_V2/Val/real": 5036,
+      "data/Video-2": 1,
+      "data/Video-2/Celeb-real": 590,
+      "data/Video-2/Celeb-synthesis": 5639,
+      "data/Video-2/YouTube-real": 300,
+      "data/catalogs": 1,
+      "data/docs": 7,
+      "data/embeddings": 6,
+      "data/interim": 1,
+      "data/monitoring": 0,
+      "data/monitoring/baseline": 1,
+      "data/monitoring/live": 1,
+      "data/monitoring/logs": 2,
+      "data/processed": 0,
+      "data/processed/behavior": 1,
+      "data/processed/brand_yolo": 2,
+      "data/processed/brand_yolo/images": 0,
+      "data/processed/brand_yolo/labels": 2,
+      "data/processed/cyber": 1,
+      "data/processed/fraud": 1,
+      "data/processed/recommender": 0,
+      "data/processed/vision": 0,
+      "data/processed/vision/train": 0,
+      "data/processed/vision/val": 0,
+      "data/processed/voice": 0,
+      "data/raw": 0,
+      "data/raw/archive": 6,
+      "data/raw/behavior": 2,
+      "data/raw/behavior/_archive_r4_2": 0,
+      "data/raw/behavior/r4.2": 8,
+      "data/raw/brand": 1,
+      "data/raw/brand/LogoDet-3K": 4,
+      "data/raw/crema_d": 0,
+      "data/raw/crema_d/audio_wav": 7442,
+      "data/raw/crema_d/labels": 1,
+      "data/raw/crema_d/video": 7442,
+      "data/raw/cyber": 8,
+      "data/raw/cyber/_archive_unsw_nb15": 8,
+      "data/raw/fraud": 1,
+      "data/raw/fraud/paysim": 1,
+      "data/raw/nlp": 0,
+      "data/raw/nlp/fakenews": 1,
+      "data/raw/recommendation": 11,
+      "data/raw/recommendation/_archive_electronics": 2,
+      "data/raw/recommendation/yelp": 6,
+      "data/raw/recommender": 0,
+      "data/raw/vision": 1,
+      "data/raw/vision/_archive_intel": 0,
+      "data/raw/vision/datasets": 0,
+      "data/raw/vision/face_emotion": 3,
+      "data/raw/vision/train_fake": 0,
+      "data/raw/vision/train_real": 0,
+      "data/raw/vision/video": 0,
+      "data/raw/voice": 0,
+      "data/raw/voice/_ravdess": 0,
+      "data/raw/voice/_tess": 0,
+      "data/raw/voice/angry": 1863,
+      "data/raw/voice/happy": 1863,
+      "data/raw/voice/neutral": 1775,
+      "data/raw/voice/sad": 1863,
+      "data/synthetic": 2
+    }
+  },
+  "commands": {
+    "python_version": {
+      "cmd": "python --version",
+      "returncode": 0,
+      "stdout": "Python 3.13.5\n",
+      "stderr": ""
+    },
+    "pip_freeze_head": {
+      "cmd": "python -m pip freeze",
+      "returncode": 0,
+      "stdout": "absl-py==2.3.1\naext-assistant @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_d5fxz3l2ix/croot/aext-assistant_1746560160060/work\naext-assistant-server @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_1emcn1_yt0/croot/aext-assistant-server_1746552985810/work\naext-core @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_2eg8ig5bzd/croot/aext-core_1746546095117/work\naext-core-server @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_1eo4dumd8o/croot/aext-core-server_1746542359934/work\naext-panels @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_88neb0jwio/croot/aext-panels_1746560092300/work\naext-panels-server @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_f8jcm1930j/croot/aext-panels-server_1746552964188/work\naext-project-filebrowser-server @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_32_va59s0l/croot/aext-project-filebrowser-server_1746562207762/work/backend_lib/project_filebrowser\naext-share-notebook @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_355mar42bl/croot/aext-share-notebook_1746556798423/work\naext-share-notebook-server @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_c8l1ebgxcq/croot/aext-share-notebook-server_1746552715655/work\naext-shared @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_9etxpmoe8u/croot/aext-shared_1746540522024/work\naext-toolbox @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_4fo05xs80k/croot/anaconda-toolbox_1747230963854/work\naext_environments_server @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_44sltsc9tr/croot/aext-environments-server_1746560394654/work/backend_lib/environments\naiobotocore @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_b2htsn1rgl/croot/aiobotocore_1738237874912/work\naiohappyeyeballs @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_b38qlemj37/croot/aiohappyeyeballs_1734469403568/work\naiohttp @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_44bhte2f2d/croot/aiohttp_1734692700992/work\naioitertools @ file:///tmp/build/80754af9/aioitertools_1607109665762/work\naiosignal @ file:///tmp/build/80754af9/aiosignal_1637843061372/work\naiosqlite==0.21.0\nalabaster @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/alabaster_1728591579756/work\nalembic @ file:///opt/miniconda3/conda-bld/alembic_1760520175076/work\naltair @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_7ew3pavrjt/croot/altair_1743016738697/work\nanaconda-anon-usage @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_degjgm8ut1/croot/anaconda-anon-usage_1749054786234/work\nanaconda-auth @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_c9m1keso7m/croot/anaconda-cloud-auth-split_1747863789573/work\nanaconda-catalogs @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_90e2gpmhv3/croot/anaconda-catalogs_1747774728177/work\nanaconda-cli-base @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_08m4xcbj7q/croot/anaconda-cli-base_1741369478940/work\nanaconda-client @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_52pw426gad/croot/anaconda-client_1743199588333/work\nanaconda-navigator @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_57gf3vgn69/croot/anaconda-navigator_1749737717526/work\nanaconda-project @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_dcsecg0xhr/croot/anaconda-project_1746215306884/work\nannotated-doc==0.0.3\nannotated-types @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/annotated-types_1728588668736/work\nanyio @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_d9l4uro_qv/croot/anyio_1745334654441/work\nappdirs==1.4.4\napplaunchservices @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/applaunchservices_1728595929050/work\nappnope @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/appnope_1728587432692/work\napprise==1.9.5\nappscript @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_1abn3g1r3s/croot/appscript_1738045930024/work\narchspec @ file:///croot/archspec_1709217642129/work\nargon2-cffi @ file:///opt/conda/conda-bld/argon2-cffi_1645000214183/work\nargon2-cffi-bindings @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_2ef471wnyf/croot/argon2-cffi-bindings_1736182451265/work\narrow @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/arrow_1731714085106/work\nasgi-lifespan==2.1.0\nastroid @ file:///Users/builder/cbouss/buildout/croot/astroid_1739484442213/work\nastropy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a0fm0x2tco/croot/astropy_1738094414286/work\nastropy-iers-data @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_94mvdt0ezd/croot/astropy-iers-data_1737137597239/work\nasttokens @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_11i8cnwuxs/croot/asttokens_1743630449718/work\nastunparse==1.6.3\nasync-lru @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/async-lru_1728588685926/work\nasyncpg==0.31.0\nasyncssh @ file:///Users/builder/cbouss/buildout/croot/asyncssh_1732921222384/work\natomicwrites==1.4.0\nattrs @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_93pjmt0git/croot/attrs_1734533120523/work\naudioop-lts==0.2.2\naudioread==3.1.0\nautogluon.common==1.4.1b20251201\nautogluon.core==1.4.1b20251201\nautogluon.features==1.4.1b20251201\nautogluon.tabular==1.4.1b20251201\nAutomat @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_ddy0059olt/croot/automat_1743532570194/work\nautopep8 @ file:///croot/autopep8_1708962882016/work\nbabel @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_ed2j11k3aq/croot/babel_1737454371799/work\nbcrypt @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_66phductoz/croot/bcrypt_1747402781009/work\nbeartype==0.22.6\nbeautifulsoup4 @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/beautifulsoup4-split_1728586168300/work\nbinaryornot @ file:///tmp/build/80754af9/binaryornot_1617751525010/work\nblack @ file:///Users/builder/cbouss/buildout/croot/black_1739488418848/work\nbleach @ file:///Users/builder/cbouss/buildout/croot/bleach_1732921502063/work\nblinker @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_11lor_igbs/croot/blinker_1737449046432/work\nbokeh @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_fbv_t7u00p/croot/bokeh_1737999163044/work\nboltons @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_0a8f8rf2dq/croot/boltons_1737061714423/work\nboto3==1.42.0\nbotocore==1.41.6\nBottleneck @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_55txi4fy1u/croot/bottleneck_1731058642212/work\nBrotli @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_f7i0oxypt6/croot/brotli-split_1736182464088/work\nbuild==1.3.0\ncachetools @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_4dwsj6_xj_/croot/cachetools_1738225342715/work\ncatboost==1.2.8\ncertifi @ file:///opt/miniconda3/conda-bld/certifi_1759786064465/work/certifi\ncffi @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_e4xd9yd9i2/croot/cffi_1736182819442/work\nchardet @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/chardet_1728596873894/work\ncharset-normalizer @ file:///croot/charset-normalizer_1721748349566/work\nclick @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_d2rtg2ejqc/croot/click_1744271604580/work\ncloudpickle==3.1.2\ncolorama @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/colorama_1728588725923/work\ncolorcet @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/colorcet_1728594017635/work\ncolorlog==6.10.1\ncomm @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/comm_1728587617427/work\nconda @ file:///Users/runner/miniforge3/conda-bld/conda_1754405314681/work/conda-src\nconda-anaconda-telemetry @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_9cczaegl9x/croot/conda-anaconda-telemetry_1744662554568/work\nconda-anaconda-tos @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_1bplqvzf53/croot/conda-anaconda-tos_1748537203987/work\nconda-build @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_02fk6jrnv6/croot/conda-build_1748438542791/work\nconda-content-trust @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/conda-content-trust_1728603284288/work\nconda-libmamba-solver @ file:///croot/conda-libmamba-solver_1745607008911/work/src\nconda-pack @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/conda-pack_1728596947912/work\nconda-package-handling @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_82jv6q9ech/croot/conda-package-handling_1731369032774/work\nconda-repo-cli @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_68vjogocp_/croot/conda-repo-cli_1742233910757/work\nconda-token @ file:///croot/conda-token_1741722942912/work\nconda_index @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_6avyxr7xh2/croot/conda-index_1747936867285/work\nconda_package_streaming @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_2el5nlypud/croot/conda-package-streaming_1731366187356/work\nconstantly @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/constantly_1728594035089/work\ncontourpy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_2cvjf0v4ux/croot/contourpy_1732540055997/work\ncookiecutter @ file:///opt/conda/conda-bld/cookiecutter_1649151442564/work\ncoolname==2.2.0\ncryptography @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_fdxcx92j10/croot/cryptography_1740577852661/work\ncssselect @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/cssselect_1728591782906/work\ncycler @ file:///tmp/build/80754af9/cycler_1637851556182/work\ncytoolz @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_650qa8omvf/croot/cytoolz_1736803774487/work\ndask @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_30p2iqd82c/croot/dask-core_1741970182107/work\ndask-expr @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f3ve2fbmys/croot/dask-expr_1742226137182/work\ndatabricks-sdk==0.73.0\ndatasets==4.4.1\ndatashader @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_56s0bximf2/croot/datashader_1744385569001/work\ndateparser==1.2.2\ndebugpy @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_6a37he2v_t/croot/debugpy_1736267437603/work\ndecorator @ file:///opt/conda/conda-bld/decorator_1643638310831/work\ndefusedxml @ file:///tmp/build/80754af9/defusedxml_1615228127516/work\nDeprecated @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/deprecated_1728591820998/work\ndiff-match-patch @ file:///Users/ktietz/demo/mc3/conda-bld/diff-match-patch_1630511840874/work\ndill==0.4.0\ndistributed @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_49234nn7ms/croot/distributed_1741988120555/work\ndistro @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/distro_1728591855492/work\ndmglib @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_2f63rb3f79/croot/dmglib_1744638527725/work\ndnspython==2.8.0\ndocker==7.1.0\ndocstring-to-markdown @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/docstring-to-markdown_1728594227685/work\ndocutils @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f5szm7sjj2/croot/docutils_1744664123977/work\nemail-validator==2.3.0\nengarde==0.4.0\net_xmlfile @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/et_xmlfile_1728594253367/work\nevalidate @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_26kv6ehh61/croot/evalidate_1743606021523/work\nexceptiongroup==1.3.1\nexecuting @ file:///opt/conda/conda-bld/executing_1646925071911/work\nfakeredis==2.32.1\nfastapi==0.111.0\nfastapi-cli==0.0.16\nfastjsonschema @ file:///Users/builder/cbouss/buildout/croot/python-fastjsonschema_1735857864215/work\nfeaturetools==1.31.0\nfilelock @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_f6dmuewahq/croot/filelock_1744281400993/work\nflake8 @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/flake8_1728594304916/work\nFLAML==2.3.3\nFlask @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_fabivvom5o/croot/flask_1737454311468/work\nflask-cors==6.0.1\nflatbuffers==25.9.23\nfonttools @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_ce1jt_55vl/croot/fonttools_1737039388732/work\nfrozendict @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/frozendict_1728605521897/work\nfrozenlist @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_6eeg1bc_1e/croot/frozenlist_1730902809317/work\nfsspec @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_5exbmy7q2c/croot/fsspec_1747117730257/work\ngast==0.6.0\ngit-filter-repo==2.47.0\ngitdb @ file:///tmp/build/80754af9/gitdb_1617117951232/work\nGitPython @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/gitpython_1728586668495/work\ngmpy2 @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_51391juwln/croot/gmpy2_1738085477864/work\ngoogle-auth==2.43.0\ngoogle-pasta==0.2.0\ngraphene==3.4.3\ngraphql-core==3.2.7\ngraphql-relay==3.2.0\ngraphviz==0.21\ngreenlet @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_3fdrsxa1og/croot/greenlet_1733860082149/work\ngriffe==1.15.0\ngrpcio==1.76.0\ngunicorn==21.2.0\nh11 @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_557zp2ij9k/croot/h11_1748442489221/work\nh2==4.3.0\nh2o==3.46.0.8\nh5py @ file:///Users/builder/cbouss/buildout/croot/h5py_1739486040846/work\nHeapDict @ file:///Users/ktietz/demo/mc3/conda-bld/heapdict_1630598515714/work\nhf-xet==1.2.0\nholidays==0.83\nholoviews @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_38l_mgl_6j/croot/holoviews_1741882143791/work\nhpack==4.1.0\nhttpcore @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_941yf7p5zt/croot/httpcore_1748526061031/work\nhttptools==0.7.1\nhttpx @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_28ztzk1ij8/croot/httpx_1746747850138/work\nhuey==2.5.4\nhuggingface_hub==1.1.2\nhumanize==4.14.0\nhvplot @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_c2zgmufo5o/croot/hvplot_1746471225372/work\nhyperframe==6.1.0\nhyperlink @ file:///tmp/build/80754af9/hyperlink_1610130746837/work\nidna @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/idna_1728585920859/work\nimageio @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_c8zh9c28_k/croot/imageio_1738160231939/work\nimagesize @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/imagesize_1728592187602/work\nimbalanced-learn @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_c4pvwjsl7i/croot/imbalanced-learn_1738614376380/work\nimportlib_metadata @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_cc4qelzghy/croot/importlib_metadata-suite_1732633706960/work\nimportlib_resources==6.5.2\nincremental @ file:///croot/incremental_1743512672142/work\ninflection @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/inflection_1728594520428/work\niniconfig @ file:///home/linux1/recipes/ci/iniconfig_1610983019677/work\nintake @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/intake_1731716601436/work\nintervaltree @ file:///Users/ktietz/demo/mc3/conda-bld/intervaltree_1630511889664/work\nipykernel @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_908a9n7o3f/croot/ipykernel_1737660707910/work\nipython @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_2evnd74hdv/croot/ipython_1734548057210/work\nipywidgets @ file:///Users/builder/cbouss/buildout/croot/ipywidgets_1735844448411/work\nisort @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_3fj5_dtsoq/croot/isort_1741284893939/work\nitemadapter @ file:///tmp/build/80754af9/itemadapter_1626442940632/work\nitemloaders @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_7ey3gdivap/croot/itemloaders_1743525753900/work\nitsdangerous @ file:///Users/builder/cbouss/buildout/croot/itsdangerous_1732923588034/work\njaraco.classes @ file:///tmp/build/80754af9/jaraco.classes_1620983179379/work\njaraco.context @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/jaraco.context_1731716684676/work\njaraco.functools @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_91zaq5_008/croot/jaraco.functools_1740408121405/work\njedi @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_38ctoinnl0/croot/jedi_1733987402850/work\njellyfish @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_65cirpput0/croot/jellyfish_1736366673011/work\nJinja2 @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_2cnn4kenrm/croot/jinja2_1741710859444/work\njinja2-humanize-extension==0.4.0\njinja2-time @ file:///opt/conda/conda-bld/jinja2-time_1649251842261/work\njmespath @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/jmespath_1728586743316/work\njoblib @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/joblib_1728589613021/work\njson5 @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/json5_1731707537217/work\njsonpatch @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/jsonpatch_1728594556110/work\njsonpointer==2.1\njsonschema @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/jsonschema_1728585513023/work\njsonschema-specifications @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/jsonschema-specifications_1728585330576/work\njupyter @ file:///Users/builder/cbouss/buildout/croot/jupyter_1742577908394/work\njupyter-console @ file:///Users/builder/cbouss/buildout/croot/jupyter_console_1739485173236/work\njupyter-events @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_93fqb7dsil/croot/jupyter_events_1741184594429/work\njupyter-lsp @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_b2ljixsllb/croot/jupyter-lsp-meta_1745827035021/work\njupyter_client @ file:///Users/builder/cbouss/buildout/croot/jupyter_client_1739483928377/work\njupyter_core @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/jupyter_core_1731706459526/work\njupyter_server @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_c8ru9k_qi5/croot/jupyter_server_1741200908266/work\njupyter_server_terminals @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_ealwktxf9e/croot/jupyter_server_terminals_1744706715282/work\njupyterlab @ file:///Users/builder/cbouss/buildout/croot/jupyterlab_1742576777456/work\njupyterlab_pygments @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_42uijy7nfe/croot/jupyterlab_pygments_1741124161488/work\njupyterlab_server @ file:///Users/builder/cbouss/buildout/croot/jupyterlab_server_1742576679025/work\njupyterlab_widgets @ file:///Users/builder/cbouss/buildout/croot/jupyterlab_widgets_1735843764609/work\nkaggle==1.8.2\nkagglehub==0.3.13\nkagglesdk==0.1.13\nkeras==3.12.0\nkeyring @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_be9at15ui5/croot/keyring_1745484704517/work\nkiwisolver @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_cc2l_z_0ri/croot/kiwisolver_1737039586949/work\nlazy_loader @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/lazy_loader_1728594662675/work\nlckr_jupyterlab_variableinspector @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_9arj0c61z0/croot/jupyterlab-variableinspector_1744638302188/work\nliac-arff==2.5.0\nlibarchive-c @ file:///croot/python-libarchive-c_1726069797193/work\nlibclang==18.1.1\nlibmambapy @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_8fxbc14zt9/croot/mamba-split_1734469521691/work/libmambapy\nlibrosa==0.11.0\nlief @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_727tkm8enz/croot/lief_1746658723726/work/api/python\nlightgbm==4.5.0\nlinkify-it-py @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/linkify-it-py_1728592334655/work\nllvmlite @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_65gge4ik41/croot/llvmlite_1741209865541/work\nlmdb @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_81e0czduj3/croot/python-lmdb_1736540966426/work\nlocket @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/locket_1728588032653/work\nlupa==2.6\nlxml @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_1cc0pw19wu/croot/lxml_1737040416995/work\nlz4 @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_218ax89s2m/croot/lz4_1736367098210/work\nMako @ file:///opt/miniconda3/conda-bld/mako_1758276740580/work\nMarkdown @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_c8yxkefe2v/croot/markdown_1746114450220/work\nmarkdown-it-py @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/markdown-it-py_1728586321899/work\nMarkupSafe @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_1f_uj4vxik/croot/markupsafe_1738584045311/work\nmatplotlib==3.10.0\nmatplotlib-inline @ file:///Users/builder/cbouss/buildout/croot/matplotlib-inline_1732916182598/work\nmccabe @ file:///opt/conda/conda-bld/mccabe_1644221741721/work\nmdit-py-plugins @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/mdit-py-plugins_1728592491364/work\nmdurl @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/mdurl_1728585992209/work\nmenuinst @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_66is8p984e/croot/menuinst_1738943433761/work\nminio==7.2.18\nmistune @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_5be80wp982/croot/mistune_1741123981908/work\nml_dtypes==0.5.3\nmlflow==3.6.0\nmlflow-skinny==3.6.0\nmlflow-tracing==3.6.0\nmore-itertools @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/more-itertools_1728586808785/work\nmpmath @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/mpmath_1728592510324/work\nmsgpack @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/msgpack-python_1728592532947/work\nmultidict @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_de95nfn702/croot/multidict_1730905502686/work\nmultipledispatch @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/multipledispatch_1728588059410/work\nmultiprocess==0.70.18\nmypy==1.18.2\nmypy_extensions @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/mypy_extensions_1728592557222/work\nnamex==0.1.0\nnarwhals @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_edsgy5uj0u/croot/narwhals_1742845969002/work\nnavigator-updater @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_82m2ib9hfi/croot/navigator-updater_1744666450139/work\nnb_conda_kernels @ file:///opt/miniconda3/conda-bld/nb_conda_kernels_1761768968441/work\nnbclient @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_67j3qubf1d/croot/nbclient_1741124021022/work\nnbconvert @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_e4p9a3fnm6/croot/nbconvert-meta_1741184656667/work\nnbformat @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/nbformat_1728586010733/work\nnest_asyncio @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/nest-asyncio_1728588080290/work\nnetworkx @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_e6lt1dcyid/croot/networkx_1737040482044/work\nnltk @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/nltk_1728598230518/work\nnotebook @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_c2jl2w7hxj/croot/notebook_1749737441065/work\nnotebook_shim @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_ceoiz4k8qs/croot/notebook-shim_1741707775649/work\nnumba @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f762fjyubg/croot/numba_1740668200916/work\nnumexpr @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/numexpr_1731706619640/work\nnumpy==2.1.3\nnumpydoc @ file:///opt/conda/conda-bld/numpydoc_1643788541039/work\noauthlib==3.3.1\nopencv-python==4.12.0.88\nopencv-python-headless==4.12.0.88\nopenml==0.15.1\nopenpyxl @ file:///Users/builder/cbouss/buildout/croot/openpyxl_1739486465110/work\nopentelemetry-api==1.38.0\nopentelemetry-exporter-prometheus==0.59b0\nopentelemetry-proto==1.38.0\nopentelemetry-sdk==1.38.0\nopentelemetry-semantic-conventions==0.59b0\nopt_einsum==3.4.0\noptree==0.17.0\noptuna==4.5.0\norjson==3.11.4\noverrides @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/overrides_1728586843197/work\npackaging @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_a6_qk3qyg7/croot/packaging_1734472142254/work\npandas==2.2.2\npandocfilters @ file:///opt/conda/conda-bld/pandocfilters_1643405455980/work\npanel @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_be6j9jh7_0/croot/panel_1747424479432/work\nparam @ file:///Users/builder/cbouss/buildout/croot/param_1739484660218/work\nparsel @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/parsel_1728594980311/work\nparso @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_8824a1w4md/croot/parso_1733963320105/work\npartd @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_00gzvqt15t/croot/partd_1736803428764/work\npathspec @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pathspec_1728584715157/work\npatsy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_387cydj4cl/croot/patsy_1738159938409/work\npdfminer.six==20251107\npexpect @ file:///tmp/build/80754af9/pexpect_1605563209008/work\npickleshare @ file:///tmp/build/80754af9/pickleshare_1606932040724/work\npillow @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_bfoqpm49mx/croot/pillow_1744613079607/work\npkce @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pkce_1728592680499/work\npkginfo @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_5afc2abey3/croot/pkginfo_1743184763359/work\nplatformdirs @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_4euggz8v1n/croot/platformdirs_1744273055841/work\nplotly @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_355h7rp5w6/croot/plotly_1740385572072/work\npluggy==1.6.0\nply @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/ply_1728586895089/work\npolars==1.36.1\npolars-runtime-32==1.36.1\npooch==1.8.2\npoyo @ file:///tmp/build/80754af9/poyo_1617751526755/work\nprefect==3.6.4\nprometheus_client==0.23.1\nprompt_toolkit @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/prompt-toolkit_1728614904988/work\npropcache @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a337s3hyzy/croot/propcache_1744012732470/work\nProtego @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_417x0vb4sd/croot/protego_1746474581924/work\nprotobuf==6.33.1\npsutil @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_10oa1k8l11/croot/psutil_1736367646006/work\nptyprocess @ file:///tmp/build/80754af9/ptyprocess_1609355006118/work/dist/ptyprocess-0.7.0-py2.py3-none-any.whl\npure-eval @ file:///opt/conda/conda-bld/pure_eval_1646925070566/work\npy-cpuinfo @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/py-cpuinfo_1728593043967/work\npy-key-value-aio==0.3.0\npy-key-value-shared==0.3.0\npyarrow==20.0.0\npyasn1 @ file:///Users/ktietz/demo/mc3/conda-bld/pyasn1_1629708007385/work\npyasn1-modules==0.2.8\npycodestyle @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pycodestyle_1728593062144/work\npycosat @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_61k1o_oje7/croot/pycosat_1736868429741/work\npycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work\npycryptodome==3.23.0\npyct @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pyct_1731720644310/work\npycurl @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_ccc55mpc6t/croot/pycurl_1744743611044/work\npydantic @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_4blmh3bau_/croot/pydantic_1734736077970/work\npydantic-extra-types==2.10.6\npydantic-settings @ file:///Users/builder/cbouss/buildout/croot/pydantic-settings_1735843952737/work\npydantic_core @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_bdqco4zmod/croot/pydantic-core_1734726070262/work\nPyDispatcher @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pydispatcher_1728599194033/work\npydocket==0.15.0\npydocstyle @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pydocstyle_1728595035306/work\npyerfa @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_32yar1dp0d/croot/pyerfa_1738082795115/work\npyflakes @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pyflakes_1728593126560/work\nPyGithub @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pygithub_1731727162065/work\nPygments @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f0f10r98sf/croot/pygments_1744664126614/work\nPyJWT @ file:///Users/builder/cbouss/buildout/croot/pyjwt_1739484683708/work\npylint @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_ebomjbe652/croot/pylint_1743709210020/work\npylint-venv @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pylint-venv_1728599255979/work\npyls-spyder==0.4.0\nPyNaCl @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_269tpp_t1c/croot/pynacl_1736544549684/work\npyobjc-core @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pyobjc-core_1728588176107/work\npyobjc-framework-Cocoa @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pyobjc-framework-cocoa_1728589978134/work\npyobjc-framework-CoreServices @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pyobjc-framework-coreservices_1728595130860/work\npyobjc-framework-FSEvents @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pyobjc-framework-fsevents_1728593172439/work\npyodbc @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_34pbsruafo/croot/pyodbc_1737479629856/work\npyOpenSSL @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_fc2tw3ggkp/croot/pyopenssl_1741343830893/work\npyparsing @ file:///Users/builder/cbouss/buildout/croot/pyparsing_1735850351026/work\nPyPDF2==3.0.1\npyproject_hooks==1.2.0\nPyQt5==5.15.10\nPyQt5_sip @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_2fujrnx99b/croot/pyqt-split_1736540539550/work/pyqt_sip\nPyQtWebEngine==5.15.6\nPySocks @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pysocks_1728586068722/work\npytest @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_eb_o59tqte/croot/pytest_1738938845265/work\npython-dateutil @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/python-dateutil_1728585579455/work\npython-docx==1.2.0\npython-dotenv @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_0bqseadoho/croot/python-dotenv_1745610246418/work\npython-json-logger @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_9bjmcmh4nm/croot/python-json-logger_1734370248301/work\npython-lsp-black @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_27y6e_0rf3/croot/python-lsp-black_1744023216832/work\npython-lsp-jsonrpc @ file:///croot/python-lsp-jsonrpc_1708962872556/work\npython-lsp-server @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_9e46mdfob4/croot/python-lsp-server_1743715805868/work\npython-multipart==0.0.20\npython-slugify @ file:///tmp/build/80754af9/python-slugify_1620405669636/work\npytoolconfig @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pytoolconfig_1728593267795/work\npytz==2025.2\npyuca @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pyuca_1728617681886/work\npyviz_comms @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pyviz_comms_1728593287346/work\nPyWavelets @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_0a7kv1qxnw/croot/pywavelets_1737133694791/work\nPyYAML @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_e8m1aayrqt/croot/pyyaml_1731006115055/work\npyzmq @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_95lsut8ymz/croot/pyzmq_1734709560733/work\nQDarkStyle @ file:///croot/qdarkstyle_1709231003551/work\nqstylizer @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/qstylizer_1728600032640/work/dist/qstylizer-0.2.2-py2.py3-none-any.whl#sha256=44a0c85018ec31b1e3787b9778ad1fecc60de84815555c5c2b06fc41233274e2\nQtAwesome @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_9amch1jn0e/croot/qtawesome_1744810814648/work\nqtconsole @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a25ywr57ib/croot/qtconsole_1744633887886/work\nQtPy @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/qtpy_1728593308577/work\nqueuelib @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/queuelib_1728600089247/work\nreadchar @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/readchar_1728593329529/work\nredis==7.1.0\nreferencing @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/referencing_1728585313667/work\nregex @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_87pebw_aae/croot/regex_1736541331314/work\nrequests @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_ee45nsd33z/croot/requests_1730999134038/work\nrequests-file @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_bfbabejyv2/croot/requests-file_1749719739174/work\nrequests-oauthlib==2.0.0\nrequests-toolbelt @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/requests-toolbelt_1731721330284/work\nrfc3339_validator @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/rfc3339-validator_1731706731994/work\nrfc3986_validator @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/rfc3986-validator_1728586416230/work\nrich @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_034myiu7pr/croot/rich_1732638981241/work\nrich-toolkit==0.15.1\nroman-numerals-py @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_23k02cxtth/croot/roman-numerals-py_1744666286067/work\nrope @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_9ci6xl5vh7/croot/rope_1743709219355/work\nrpds-py @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_3awdke3eyt/croot/rpds-py_1736542475137/work\nrsa==4.9.1\nRtree @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/rtree_1728595390555/work\nruamel.yaml @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_beoui95smx/croot/ruamel.yaml_1745960312720/work\nruamel.yaml.clib @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_d9xusw0yil/croot/ruamel.yaml.clib_1745937162586/work\nruamel_yaml_conda @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/ruamel_yaml_1728600367948/work\ns3fs @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_437_njdoer/croot/s3fs_1747146200550/work\ns3transfer==0.16.0\nscikit-image @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_8ajafarikc/croot/scikit-image_1737473477372/work\nscikit-learn==1.5.2\nscikit-plot==0.3.7\nscipy==1.16.3\nScrapy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_aeen4cduj4/croot/scrapy_1743544477744/work\nseaborn @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_74n8m1zz4r/croot/seaborn_1749110344248/work\nsemver==3.0.4\nSend2Trash @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a6shz7yg5h/croot/send2trash_1736541353497/work\nsentry-sdk @ file:///Users/builder/cbouss/buildout/croot/sentry-sdk_1735858402985/work\nservice-identity @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_bcsu3iimeq/croot/service_identity_1749714989457/work\nsetuptools==72.1.0\nshap==0.49.1\nshellingham @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/shellingham_1728591266231/work\nsip @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_7dqoklyi10/croot/sip_1736542203351/work\nsix @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_03myqm7p6o/croot/six_1744271511946/work\nsklearn-compat @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f3aquxx6vz/croot/sklearn-compat_1738003932698/work\nslicer==0.0.8\nsmmap @ file:///tmp/build/80754af9/smmap_1611694433573/work\nsniffio @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/sniffio_1728586434087/work\nsnowballstemmer @ file:///tmp/build/80754af9/snowballstemmer_1637937080595/work\nsortedcontainers @ file:///tmp/build/80754af9/sortedcontainers_1623949099177/work\nsoundfile==0.13.1\nsoupsieve @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/soupsieve_1728586120162/work\nsoxr==1.0.0\nSphinx @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_13dzrrqdys/croot/sphinx_1744737147019/work\nsphinxcontrib-applehelp @ file:///croot/sphinxcontrib-applehelp_1744721330488/work\nsphinxcontrib-devhelp @ file:///croot/sphinxcontrib-devhelp_1744727995579/work\nsphinxcontrib-htmlhelp @ file:///croot/sphinxcontrib-htmlhelp_1744718370019/work\nsphinxcontrib-jsmath @ file:///home/ktietz/src/ci/sphinxcontrib-jsmath_1611920942228/work\nsphinxcontrib-qthelp @ file:///croot/sphinxcontrib-qthelp_1744721051257/work\nsphinxcontrib-serializinghtml @ file:///croot/sphinxcontrib-serializinghtml_1744724097162/work\nspyder @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_131__7pjr7/croot/spyder_1749737945896/work\nspyder-kernels @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f1f2blkxlb/croot/spyder-kernels_1748642516744/work\nSQLAlchemy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_90cekltohb/croot/sqlalchemy_1745854526578/work\nsqlparse==0.5.3\nstack-data @ file:///opt/conda/conda-bld/stack_data_1646927590127/work\nstandard-aifc==3.13.0\nstandard-chunk==3.13.0\nstandard-sunau==3.13.0\nstarlette==0.37.2\nstatsmodels==0.14.1\nstreamlit @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_f5z35txmh5/croot/streamlit-split_1748963604927/work/streamlit\nsuperqt @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_87599ar723/croot/superqt_1743709196898/work\nsympy @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_9edgwet_ug/croot/sympy_1738108502398/work\ntables @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_ddus262lcs/croot/pytables_1748447944347/work\ntabulate @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/tabulate_1728595611287/work\ntblib @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f6243h3wjj/croot/tblib_1749735192424/work\ntenacity @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/tenacity_1731707382227/work\ntensorboard==2.20.0\ntensorboard-data-server==0.7.2\ntensorflow==2.20.0\ntermcolor==3.2.0\nterminado @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/terminado_1728586450732/work\ntext-unidecode @ file:///Users/ktietz/demo/mc3/conda-bld/text-unidecode_1629401354553/work\ntextdistance @ file:///tmp/build/80754af9/textdistance_1612",
+      "stderr": ""
+    },
+    "pytest_quick": {
+      "cmd": "python -m pytest -q",
+      "returncode": 1,
+      "stdout": "============================= test session starts ==============================\nplatform darwin -- Python 3.13.5, pytest-8.3.4, pluggy-1.6.0\nrootdir: /Users/pratik_n/Desktop/MyComputer/Sentifargo\nconfigfile: pytest.ini\ntestpaths: tests\nplugins: anyio-4.7.0\n\n----------------------------- live log collection ------------------------------\n2026-01-13 19:42:37 [INFO] NumExpr defaulting to 10 threads.\n2026-01-13 19:42:40 [INFO] Production middleware configured successfully\ncollected 78 items / 1 skipped\n\ntests/test_api_payloads.py::test_fusion_keys_sorted_for_payload PASSED   [  1%]\ntests/test_behavior_logs_api.py::test_behavior_logs_endpoint_accepts_csv \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:40 [INFO] Request started: POST /api/behavior/logs request_id=38ff1210-9f2a-4134-b011-b63a656a9496 client=testclient\n2026-01-13 19:42:40 [INFO] Request completed: POST /api/behavior/logs status=200 duration=17.10ms request_id=38ff1210-9f2a-4134-b011-b63a656a9496\n2026-01-13 19:42:40 [INFO] HTTP Request: POST http://testserver/api/behavior/logs?max_rows=1000&top_n=5 \"HTTP/1.1 200 OK\"\nPASSED                                                                   [  2%]\ntests/test_brand_routes_import.py::test_brand_route_import_does_not_require_weights PASSED [  3%]\ntests/test_build_30seq_dataset.py::test_build_sequences_writes_files PASSED [  5%]\ntests/test_build_recommender_index_script.py::test_build_recommender_index_script_runs PASSED [  6%]\ntests/test_chat.py::test_chat_route \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:41 [INFO] Request started: POST /api/chat request_id=9d8ca8f1-b26b-4b26-97c3-0f6c539fcbe3 client=testclient\n2026-01-13 19:42:41 [INFO] Request completed: POST /api/chat status=200 duration=114.80ms request_id=9d8ca8f1-b26b-4b26-97c3-0f6c539fcbe3\n2026-01-13 19:42:41 [INFO] HTTP Request: POST http://testserver/api/chat \"HTTP/1.1 200 OK\"\nPASSED                                                                   [  7%]\ntests/test_chat_multimodal_stt.py::test_chat_multimodal_transcribe_flag_does_not_break \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:41 [INFO] Request started: POST /api/chat/multimodal request_id=b82ba926-0246-4bb3-9ff0-284bc9ad4468 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/chat/multimodal status=200 duration=980.06ms request_id=b82ba926-0246-4bb3-9ff0-284bc9ad4468\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/chat/multimodal \"HTTP/1.1 200 OK\"\nPASSED                                                                   [  8%]\ntests/test_clothes_catalog.py::test_recommend_clothes_includes_brand_and_title PASSED [ 10%]\ntests/test_clothes_catalog.py::test_recommend_clothes_works_without_preferred_tags PASSED [ 11%]\ntests/test_decision_engine.py::test_make_decision_blocks_on_high_fraud PASSED [ 12%]\ntests/test_decision_engine.py::test_make_decision_step_up_on_combined_risk PASSED [ 14%]\ntests/test_decision_engine.py::test_make_decision_allows_low_risk PASSED [ 15%]\ntests/test_face_emotion_endpoint.py::test_face_emotion_predict_no_file \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/vision/face_emotion/predict request_id=a37d40c7-b268-409e-9f4b-9ee1a5f663c1 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/vision/face_emotion/predict status=422 duration=0.75ms request_id=a37d40c7-b268-409e-9f4b-9ee1a5f663c1\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/vision/face_emotion/predict \"HTTP/1.1 422 Unprocessable Entity\"\nPASSED                                                                   [ 16%]\ntests/test_face_emotion_endpoint.py::test_face_emotion_predict_invalid_file \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/vision/face_emotion/predict request_id=07531b09-eddf-4e7a-85f3-cec83ea84c68 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/vision/face_emotion/predict status=400 duration=0.87ms request_id=07531b09-eddf-4e7a-85f3-cec83ea84c68\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/vision/face_emotion/predict \"HTTP/1.1 400 Bad Request\"\nPASSED                                                                   [ 17%]\ntests/test_fusion_run.py::test_generate_meta_features_and_train PASSED   [ 19%]\ntests/test_health.py::test_health_endpoint \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: GET /health request_id=2ba20d27-f8d1-446c-b3cb-ca74ed0c409b client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: GET /health status=200 duration=0.63ms request_id=2ba20d27-f8d1-446c-b3cb-ca74ed0c409b\n2026-01-13 19:42:42 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 20%]\ntests/test_health_endpoint.py::test_api_health_contract \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: GET /api/health request_id=4f50ffcf-cb81-49da-8126-822c959f82ef client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: GET /api/health status=200 duration=0.87ms request_id=4f50ffcf-cb81-49da-8126-822c959f82ef\n2026-01-13 19:42:42 [INFO] HTTP Request: GET http://testserver/api/health \"HTTP/1.1 200 OK\"\nFAILED                                                                   [ 21%]\ntests/test_monitoring.py::test_monitor_workflow \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/monitor/log request_id=cbd6835d-4340-4863-85a3-cd0ac537b1f0 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/monitor/log status=200 duration=0.94ms request_id=cbd6835d-4340-4863-85a3-cd0ac537b1f0\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/monitor/log \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:42 [INFO] Request started: GET /api/monitor/summary request_id=d18cab63-cb4a-4be7-8ddd-a4cbea5deba3 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: GET /api/monitor/summary status=200 duration=1.03ms request_id=d18cab63-cb4a-4be7-8ddd-a4cbea5deba3\n2026-01-13 19:42:42 [INFO] HTTP Request: GET http://testserver/api/monitor/summary?window_n=10 \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:42 [INFO] Request started: POST /api/monitor/baseline/build request_id=de1d01c6-6b68-484a-bd32-73117faa5f2d client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/monitor/baseline/build status=200 duration=0.70ms request_id=de1d01c6-6b68-484a-bd32-73117faa5f2d\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/monitor/baseline/build \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:42 [INFO] Request started: GET /api/monitor/drift request_id=c57f8649-9443-4320-b8b4-7e43ef82b79b client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: GET /api/monitor/drift status=200 duration=0.48ms request_id=c57f8649-9443-4320-b8b4-7e43ef82b79b\n2026-01-13 19:42:42 [INFO] HTTP Request: GET http://testserver/api/monitor/drift?window_n=10 \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 23%]\ntests/test_multi_sequence_30_torch.py::test_forward_pass_small_shape PASSED [ 24%]\ntests/test_nlp_tiny.py::test_distilbert_forward_smoke SKIPPED (could...) [ 25%]\ntests/test_paths.py::test_paths_exist PASSED                             [ 26%]\ntests/test_production.py::TestHealthEndpoints::test_health_check \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: GET /health request_id=82e5d23b-abee-4b2b-92e4-8cd1a670a6cc client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: GET /health status=200 duration=0.29ms request_id=82e5d23b-abee-4b2b-92e4-8cd1a670a6cc\n2026-01-13 19:42:42 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 28%]\ntests/test_production.py::TestHealthEndpoints::test_liveness_check \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: GET /health/live request_id=2dc0c787-7067-4a39-a4c2-9bbf1b9ccd01 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: GET /health/live status=200 duration=0.25ms request_id=2dc0c787-7067-4a39-a4c2-9bbf1b9ccd01\n2026-01-13 19:42:42 [INFO] HTTP Request: GET http://testserver/health/live \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 29%]\ntests/test_production.py::TestHealthEndpoints::test_readiness_check \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: GET /health/ready request_id=4d06bb30-6d21-4353-ac33-0cef443b5e60 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: GET /health/ready status=200 duration=0.78ms request_id=4d06bb30-6d21-4353-ac33-0cef443b5e60\n2026-01-13 19:42:42 [INFO] HTTP Request: GET http://testserver/health/ready \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 30%]\ntests/test_production.py::TestHealthEndpoints::test_detailed_health \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: GET /health/detailed request_id=d37d1ad8-97e6-4141-bc01-48994b8b5db3 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: GET /health/detailed status=200 duration=25.80ms request_id=d37d1ad8-97e6-4141-bc01-48994b8b5db3\n2026-01-13 19:42:42 [INFO] HTTP Request: GET http://testserver/health/detailed \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 32%]\ntests/test_production.py::TestChatAPI::test_chat_endpoint \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/chat request_id=fe87daff-7f16-4fc1-aacc-79bb790efb4c client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/chat status=200 duration=0.87ms request_id=fe87daff-7f16-4fc1-aacc-79bb790efb4c\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/chat \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 33%]\ntests/test_production.py::TestChatAPI::test_chat_empty_message \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/chat request_id=0f7e8c73-1c53-42d6-94bf-2cf0c5de9a73 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/chat status=422 duration=0.75ms request_id=0f7e8c73-1c53-42d6-94bf-2cf0c5de9a73\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/chat \"HTTP/1.1 422 Unprocessable Entity\"\nPASSED                                                                   [ 34%]\ntests/test_production.py::TestChatAPI::test_chat_with_rag \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/chat request_id=88c9dae7-04d0-42e8-a4e7-54b180022aa4 client=testclient\n2026-01-13 19:42:42 [WARNING] SHAP explanation failed: property 'feature_names_in_' of 'Pipeline' object has no setter\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/chat status=200 duration=52.99ms request_id=88c9dae7-04d0-42e8-a4e7-54b180022aa4\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/chat \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 35%]\ntests/test_production.py::TestFraudAPI::test_fraud_scoring \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/fraud request_id=19333c92-97d7-4f2b-806f-ad3cc4db5929 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/fraud status=200 duration=45.13ms request_id=19333c92-97d7-4f2b-806f-ad3cc4db5929\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/fraud \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 37%]\ntests/test_production.py::TestFraudAPI::test_fraud_invalid_features \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/fraud request_id=23e425dc-dcdb-4e13-8bb5-12dc7c1a4a7d client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/fraud status=422 duration=1.13ms request_id=23e425dc-dcdb-4e13-8bb5-12dc7c1a4a7d\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/fraud \"HTTP/1.1 422 Unprocessable Entity\"\nPASSED                                                                   [ 38%]\ntests/test_production.py::TestFraudAPI::test_fraud_empty_features \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/fraud request_id=67407440-6a3e-4907-954b-f2923f0ad640 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/fraud status=200 duration=15.21ms request_id=67407440-6a3e-4907-954b-f2923f0ad640\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/fraud \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 39%]\ntests/test_production.py::TestCyberAPI::test_cyber_scoring \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/cyber request_id=b175d276-f3d5-4484-a99f-c43a1bd1b48b client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/cyber status=200 duration=78.97ms request_id=b175d276-f3d5-4484-a99f-c43a1bd1b48b\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/cyber \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 41%]\ntests/test_production.py::TestBehaviorAPI::test_behavior_scoring \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/behavior request_id=11c87bb2-63b0-455a-a388-2ec5f5d9f5a5 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/behavior status=200 duration=1.46ms request_id=11c87bb2-63b0-455a-a388-2ec5f5d9f5a5\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/behavior \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 42%]\ntests/test_production.py::TestVisionAPI::test_vision_predict_no_file \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/vision/predict request_id=285f18ec-677d-49f8-bb97-cc7d1a12ea10 client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/vision/predict status=422 duration=0.59ms request_id=285f18ec-677d-49f8-bb97-cc7d1a12ea10\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/vision/predict \"HTTP/1.1 422 Unprocessable Entity\"\nPASSED                                                                   [ 43%]\ntests/test_production.py::TestVisionAPI::test_vision_predict_invalid_file \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/vision/predict request_id=6c2f48d4-8918-445e-92f9-db2e91de88af client=testclient\n2026-01-13 19:42:42 [INFO] Request completed: POST /api/vision/predict status=400 duration=0.88ms request_id=6c2f48d4-8918-445e-92f9-db2e91de88af\n2026-01-13 19:42:42 [INFO] HTTP Request: POST http://testserver/api/vision/predict \"HTTP/1.1 400 Bad Request\"\nPASSED                                                                   [ 44%]\ntests/test_production.py::TestRecommendAPI::test_recommend_movies \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:42 [INFO] Request started: POST /api/recommend request_id=80881466-84ab-434d-bfc6-557364d159d5 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/recommend status=200 duration=2169.32ms request_id=80881466-84ab-434d-bfc6-557364d159d5\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/recommend \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 46%]\ntests/test_production.py::TestRecommendAPI::test_recommend_products \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/recommend request_id=5e87c90f-6b42-42c2-b0d8-9bc50336cabd client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/recommend status=200 duration=249.01ms request_id=5e87c90f-6b42-42c2-b0d8-9bc50336cabd\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/recommend \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 47%]\ntests/test_production.py::TestRAGAPI::test_rag_query \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/rag/query request_id=55d05229-33ed-48b1-a145-b1daa88746b0 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/rag/query status=200 duration=4.86ms request_id=55d05229-33ed-48b1-a145-b1daa88746b0\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/rag/query \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 48%]\ntests/test_production.py::TestRAGAPI::test_rag_upload_no_file \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/rag/upload request_id=7ae704e3-de33-4f5d-9158-43d16823cd57 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/rag/upload status=422 duration=0.35ms request_id=7ae704e3-de33-4f5d-9158-43d16823cd57\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/rag/upload \"HTTP/1.1 422 Unprocessable Entity\"\nPASSED                                                                   [ 50%]\ntests/test_production.py::TestAuthentication::test_protected_endpoint_no_token \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: GET /api/monitor/summary request_id=b2fe5abf-02c3-4f00-bd4a-ff4b16f4d08d client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /api/monitor/summary status=200 duration=0.78ms request_id=b2fe5abf-02c3-4f00-bd4a-ff4b16f4d08d\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/api/monitor/summary \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 51%]\ntests/test_production.py::TestAuthentication::test_protected_endpoint_invalid_token \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: GET /api/monitor/summary request_id=05051f4f-dc92-41d7-9b07-e50cd1f305b6 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /api/monitor/summary status=200 duration=0.71ms request_id=05051f4f-dc92-41d7-9b07-e50cd1f305b6\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/api/monitor/summary \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 52%]\ntests/test_production.py::TestRateLimiting::test_rate_limit_not_exceeded \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=075fa0d0-de38-4288-99a0-243a44b51f2e client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=0.29ms request_id=075fa0d0-de38-4288-99a0-243a44b51f2e\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=19cb1930-09ba-4d9a-ad0a-297db374bc03 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=0.25ms request_id=19cb1930-09ba-4d9a-ad0a-297db374bc03\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=e8698cd1-8237-4989-ab2b-eaa3edff0960 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=0.41ms request_id=e8698cd1-8237-4989-ab2b-eaa3edff0960\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=ba1637b8-8a2f-4970-b4d3-06b91c41741e client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=0.24ms request_id=ba1637b8-8a2f-4970-b4d3-06b91c41741e\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=3bee70ac-098e-44ac-a00c-639d8405102e client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=0.24ms request_id=3bee70ac-098e-44ac-a00c-639d8405102e\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 53%]\ntests/test_production.py::TestRateLimiting::test_rate_limit_header \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=93b13913-a3c6-485a-978a-9157ea8ae0f9 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=0.45ms request_id=93b13913-a3c6-485a-978a-9157ea8ae0f9\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 55%]\ntests/test_production.py::TestErrorHandling::test_404_endpoint \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: GET /api/nonexistent request_id=6d5a33c0-a2d2-4322-81fc-3e8e3977e375 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /api/nonexistent status=404 duration=0.26ms request_id=6d5a33c0-a2d2-4322-81fc-3e8e3977e375\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/api/nonexistent \"HTTP/1.1 404 Not Found\"\nPASSED                                                                   [ 56%]\ntests/test_production.py::TestErrorHandling::test_method_not_allowed \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: DELETE /health request_id=5e592197-ab63-4403-9895-6876c3da6039 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: DELETE /health status=405 duration=0.25ms request_id=5e592197-ab63-4403-9895-6876c3da6039\n2026-01-13 19:42:45 [INFO] HTTP Request: DELETE http://testserver/health \"HTTP/1.1 405 Method Not Allowed\"\nPASSED                                                                   [ 57%]\ntests/test_production.py::TestErrorHandling::test_invalid_json \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/chat request_id=b4431f83-fac3-4c3f-9b01-52319b839ca7 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/chat status=422 duration=0.48ms request_id=b4431f83-fac3-4c3f-9b01-52319b839ca7\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/chat \"HTTP/1.1 422 Unprocessable Entity\"\nPASSED                                                                   [ 58%]\ntests/test_production.py::TestResponseFormat::test_json_response \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=e6c010af-3a51-4576-b40d-462f1e7bca27 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=0.26ms request_id=e6c010af-3a51-4576-b40d-462f1e7bca27\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 60%]\ntests/test_production.py::TestResponseFormat::test_request_id_header \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=5012cb60-f131-42d9-9b7b-7f3b7814e9f4 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=0.26ms request_id=5012cb60-f131-42d9-9b7b-7f3b7814e9f4\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 61%]\ntests/test_production.py::TestResponseFormat::test_cors_headers \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: OPTIONS /health request_id=4d91ee37-b28a-43ab-95ee-4066576399e1 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: OPTIONS /health status=405 duration=0.25ms request_id=4d91ee37-b28a-43ab-95ee-4066576399e1\n2026-01-13 19:42:45 [INFO] HTTP Request: OPTIONS http://testserver/health \"HTTP/1.1 405 Method Not Allowed\"\nPASSED                                                                   [ 62%]\ntests/test_production.py::TestPerformance::test_health_response_time \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=41b9507e-a780-4c50-a2f4-18625d04bc42 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=0.25ms request_id=41b9507e-a780-4c50-a2f4-18625d04bc42\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 64%]\ntests/test_production.py::TestPerformance::test_concurrent_requests \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=003a9257-75db-42de-82de-cb00f3d14ff4 client=testclient\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=8a08c178-a326-446b-b852-5e503f203e1e client=testclient\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=c5056feb-e666-4d48-875b-e1e811a8babe client=testclient\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=477d35ba-8769-4ae1-801b-22ee431a64bc client=testclient\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=15823fe8-7b87-427b-9f4c-09352fa1aa1b client=testclient\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=98fe4ba3-3287-47c1-ae44-1633fbbf04b1 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=1.49ms request_id=8a08c178-a326-446b-b852-5e503f203e1e\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=d87e19c8-bef6-43f0-a801-438d6f80c8ee client=testclient\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=72e9e128-e0d0-463b-a168-c46ff13fb45a client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=1.62ms request_id=477d35ba-8769-4ae1-801b-22ee431a64bc\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=1.35ms request_id=98fe4ba3-3287-47c1-ae44-1633fbbf04b1\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=8e31c8c8-5d38-4531-89f9-6e2161828aed client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=1.80ms request_id=15823fe8-7b87-427b-9f4c-09352fa1aa1b\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=80f3e7f1-80a5-4170-b4a3-c057cfa93f56 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=2.82ms request_id=c5056feb-e666-4d48-875b-e1e811a8babe\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=3.57ms request_id=003a9257-75db-42de-82de-cb00f3d14ff4\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=1.59ms request_id=d87e19c8-bef6-43f0-a801-438d6f80c8ee\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=2.52ms request_id=72e9e128-e0d0-463b-a168-c46ff13fb45a\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=2.89ms request_id=8e31c8c8-5d38-4531-89f9-6e2161828aed\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=3.71ms request_id=80f3e7f1-80a5-4170-b4a3-c057cfa93f56\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 65%]\ntests/test_production.py::TestIntegration::test_chat_workflow \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: GET /health request_id=fe1f5aff-cec2-416c-be56-2582222a2195 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /health status=200 duration=0.25ms request_id=fe1f5aff-cec2-416c-be56-2582222a2195\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] Request started: POST /api/chat request_id=bf82c5fa-c935-4862-ae6c-771496c00b84 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/chat status=200 duration=0.68ms request_id=bf82c5fa-c935-4862-ae6c-771496c00b84\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/chat \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 66%]\ntests/test_production.py::TestIntegration::test_multimodal_workflow \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/chat/multimodal request_id=2aa6ae42-b709-42e2-a982-579b89ee9e08 client=testclient\n2026-01-13 19:42:45 [INFO] Built RAG index with 29 passages.\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/chat/multimodal status=200 duration=5.86ms request_id=2aa6ae42-b709-42e2-a982-579b89ee9e08\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/chat/multimodal \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 67%]\ntests/test_production.py::TestMetrics::test_metrics_endpoint \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: GET /metrics request_id=d50ab1a5-7c24-45ce-b591-e61e069af65f client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: GET /metrics status=200 duration=1.90ms request_id=d50ab1a5-7c24-45ce-b591-e61e069af65f\n2026-01-13 19:42:45 [INFO] HTTP Request: GET http://testserver/metrics \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 69%]\ntests/test_production.py::TestConfiguration::test_settings_load PASSED   [ 70%]\ntests/test_production.py::TestConfiguration::test_settings_cached PASSED [ 71%]\ntests/test_production.py::TestMiddleware::test_exception_handling \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/fraud request_id=3fa22968-26e5-44dc-a3b6-2c388a3980e3 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/fraud status=422 duration=0.53ms request_id=3fa22968-26e5-44dc-a3b6-2c388a3980e3\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/fraud \"HTTP/1.1 422 Unprocessable Entity\"\nPASSED                                                                   [ 73%]\ntests/test_rag.py::test_rag_ingest_and_chat \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/rag/ingest request_id=4fa7d9a7-ab69-413c-a6f8-15064154cff3 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/rag/ingest status=200 duration=2.37ms request_id=4fa7d9a7-ab69-413c-a6f8-15064154cff3\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/rag/ingest \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] Request started: POST /api/chat request_id=d968e503-8e81-422d-a8bf-624dfb810e06 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/chat status=200 duration=0.87ms request_id=d968e503-8e81-422d-a8bf-624dfb810e06\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/chat \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 74%]\ntests/test_recommender.py::test_recommender_endpoints \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/recommend request_id=86269a2e-beec-4e19-b6d5-cd27efb99179 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/recommend status=200 duration=250.06ms request_id=86269a2e-beec-4e19-b6d5-cd27efb99179\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/recommend \"HTTP/1.1 200 OK\"\n2026-01-13 19:42:45 [INFO] Request started: POST /api/recommend/explain request_id=1336f1aa-e818-4bab-9a01-1d8dee105e92 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/recommend/explain status=200 duration=5.37ms request_id=1336f1aa-e818-4bab-9a01-1d8dee105e92\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/recommend/explain \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 75%]\ntests/test_recommender_multimodal_api.py::test_recommender_multimodal_endpoint_returns_503_when_index_missing \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/recommend/multimodal request_id=ccc93eb3-25aa-4d01-b83e-8585257fd4ec client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/recommend/multimodal status=503 duration=0.58ms request_id=ccc93eb3-25aa-4d01-b83e-8585257fd4ec\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/recommend/multimodal \"HTTP/1.1 503 Service Unavailable\"\nFAILED                                                                   [ 76%]\ntests/test_recommender_multimodal_api.py::test_recommender_multimodal_endpoint_accepts_text \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/recommend/multimodal request_id=1d6d6ebb-eaab-4bc5-88d5-a2a1a32bad95 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/recommend/multimodal status=200 duration=0.57ms request_id=1d6d6ebb-eaab-4bc5-88d5-a2a1a32bad95\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/recommend/multimodal \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 78%]\ntests/test_recommender_multimodal_api.py::test_recommender_multimodal_endpoint_accepts_text_and_image \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/recommend/multimodal request_id=22f1f35e-ec43-4d2a-ae35-aed84f5f63e3 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/recommend/multimodal status=200 duration=0.83ms request_id=22f1f35e-ec43-4d2a-ae35-aed84f5f63e3\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/recommend/multimodal \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 79%]\ntests/test_recommender_multimodal_catalog.py::test_unified_catalog_loads_multiple_domains PASSED [ 80%]\ntests/test_recommender_multimodal_import.py::test_multimodal_recommender_import_is_lightweight PASSED [ 82%]\ntests/test_risk_api.py::test_risk_analyze_endpoint_happy_path \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/risk/analyze request_id=41ab8d82-8176-4970-9d65-0f882b7090a4 client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/risk/analyze status=200 duration=98.58ms request_id=41ab8d82-8176-4970-9d65-0f882b7090a4\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/risk/analyze \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 83%]\ntests/test_vision_resnet.py::test_resnet_forward_smoke PASSED            [ 84%]\ntests/test_voice_emotion.py::test_voice_emotion_endpoint \n-------------------------------- live log call ---------------------------------\n2026-01-13 19:42:45 [INFO] Request started: POST /api/voice/emotion request_id=1cdb1853-a31b-4617-87aa-95cd6a35bf3f client=testclient\n2026-01-13 19:42:45 [INFO] Request completed: POST /api/voice/emotion status=200 duration=7.23ms request_id=1cdb1853-a31b-4617-87aa-95cd6a35bf3f\n2026-01-13 19:42:45 [INFO] HTTP Request: POST http://testserver/api/voice/emotion \"HTTP/1.1 200 OK\"\nPASSED                                                                   [ 85%]\ntests/test_voice_noise.py::TestNoiseGenerator::test_white_noise_shape PASSED [ 87%]\ntests/test_voice_noise.py::TestNoiseGenerator::test_pink_noise_generation PASSED [ 88%]\ntests/test_voice_noise.py::TestNoiseGenerator::test_babble_noise_generation PASSED [ 89%]\ntests/test_voice_noise.py::TestNoiseGenerator::test_add_noise_at_snr PASSED [ 91%]\ntests/test_voice_noise.py::TestMockVoiceModel::test_prediction_output PASSED [ 92%]\ntests/test_voice_noise.py::TestMockVoiceModel::test_noise_affects_accuracy PASSED [ 93%]\ntests/test_voice_noise.py::TestVoiceRobustnessTester::test_run_test_returns_results PASSED [ 94%]\ntests/test_voice_noise.py::TestVoiceRobustnessTester::test_result_fields PASSED [ 96%]\ntests/test_voice_noise.py::TestVoiceRobustnessTester::test_accuracy_degrades_with_noise PASSED [ 97%]\ntests/test_voice_noise.py::TestVoiceRobustnessTester::test_generate_report PASSED [ 98%]\ntests/test_voice_noise.py::TestRobustnessResult::test_to_dict PASSED     [100%]\n\n=================================== FAILURES ===================================\n___________________________ test_api_health_contract ___________________________\ntests/test_health_endpoint.py:13: in test_api_health_contract\n    assert body.get(\"service\") == \"Sentifargo\"\nE   AssertionError: assert 'omnichatx' == 'Sentifargo'\nE     \nE     - Sentifargo\nE     + omnichatx\n------------------------------ Captured log call -------------------------------\nINFO     Sentifargo.middleware:middleware.py:382 Request started: GET /api/health request_id=4f50ffcf-cb81-49da-8126-822c959f82ef client=testclient\nINFO     Sentifargo.middleware:midd",
+      "stderr": ""
+    }
+  },
+  "tier": {
+    "score_out_of_100": 93,
+    "tier_guess": "Tier 5 (elite production-grade signals present)",
+    "reasons": [
+      "+10: Repo scanned successfully",
+      "+12: FastAPI app detected",
+      "+8: 10+ API endpoints detected",
+      "+8: Streamlit UI detected",
+      "+8: Dockerfile present",
+      "+6: docker-compose present",
+      "+6: CI workflow present",
+      "+4: docs/ present",
+      "+5: Prometheus/metrics references found",
+      "+6: Auth (JWT/OAuth) references found",
+      "+6: MLflow/model registry references found",
+      "+4: Explainability references found",
+      "+4: YOLO/Ultralytics references found",
+      "+3: FAISS references found",
+      "+3: Transformer/RAG embeddings references found"
+    ]
+  }
+}

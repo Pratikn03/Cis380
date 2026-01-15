@@ -1,4 +1,4 @@
-"""Prepare Intel Scene Image Classification dataset for SentinelForge PyTorch trainer.
+"""Prepare Intel Scene Image Classification dataset for Sentifargo PyTorch trainer.
 
 Your repo contains the Kaggle-style Intel Image Classification dataset under:
 

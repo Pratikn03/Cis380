@@ -1,4 +1,4 @@
-project_name: "SentinelForge - NLP"
+project_name: "Sentifargo - NLP"
 data:
   file_name: enron_emails.csv
   text_column: content      # adjust to actual text column

@@ -1,4 +1,4 @@
-# SentinelForge
+# Sentifargo
 
 
 
@@ -6,13 +6,13 @@
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)**SentinelForge** is a comprehensive risk intelligence platform for fraud detection, cybersecurity monitoring, and behavioral analytics.SentinelForge is a **multimodal AI agent platform** that routes a single user request to the right subsystem (RAG, fraud/cyber/behavior scoring, recommendations, voice emotion, vision) and returns a **single structured response**: `{"route", "answer", "meta"}`.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)**Sentifargo** is a comprehensive risk intelligence platform for fraud detection, cybersecurity monitoring, and behavioral analytics.Sentifargo is a **multimodal AI agent platform** that routes a single user request to the right subsystem (RAG, fraud/cyber/behavior scoring, recommendations, voice emotion, vision) and returns a **single structured response**: `{"route", "answer", "meta"}`.
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 
 
-**SentinelForge** is a **production-grade multimodal AI platform** for enterprise anomaly detection, combining fraud detection, cybersecurity monitoring, behavioral analytics, voice emotion analysis, and computer vision into a unified intelligence system.
+**Sentifargo** is a **production-grade multimodal AI platform** for enterprise anomaly detection, combining fraud detection, cybersecurity monitoring, behavioral analytics, voice emotion analysis, and computer vision into a unified intelligence system.
 
 ## 🌐 Live DemoThe goal of this repository is not “a chatbot in a notebook”, but an end-to-end system that looks and feels like a service: **API, UI, training, monitoring, and a repeatable test gate**.
 
@@ -22,7 +22,12 @@
 
 **[View Live Demo →](https://pratikn03.github.io/Cis380/)**
 
-**[View Live Demo →](https://pratikn03.github.io/Cis380/)**## What You Get
+**[View Live Demo →](https://pratikn03.github.io/Cis380/)**
+
+## 🚀 Deployment
+See `docs/DEPLOY_RENDER.md` for Render backend + GitHub Pages frontend steps.
+
+## What You Get
 
 ## ✨ Key Features
 
@@ -56,7 +61,7 @@
 
 ┌─────────────────────────────────────────────────────────────────────────┐- **Dashboard** - Interactive command center UI
 
-│                         SentinelForge Platform                          │
+│                         Sentifargo Platform                          │
 
 ├─────────────────────────────────────────────────────────────────────────┤```mermaid
 
@@ -78,7 +83,7 @@
 
 │  Layer 3: Intelligence Engines                                          │
 
-│  ├── Fraud Engine    │  Cyber Engine   │  Behavior Engine              ││                    SentinelForge Platform                    │  ORCH --> RISK[Fraud/Cyber/Behavior + Fusion Risk]
+│  ├── Fraud Engine    │  Cyber Engine   │  Behavior Engine              ││                    Sentifargo Platform                    │  ORCH --> RISK[Fraud/Cyber/Behavior + Fusion Risk]
 
 │  ├── Voice Engine    │  Vision Engine  │  RAG Engine                   │
 
@@ -168,7 +173,7 @@ uvicorn app.main:app --reload --port 8000
 
 ```bashgit clone https://github.com/Pratikn03/Cis380.git```
 
-SENTINELFORGE_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
+Sentifargo_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
 
 ```cd Cis380
 
@@ -226,7 +231,7 @@ docker compose -f docker-compose.production.yml --profile monitoring up -d
 
 
 
-See [docs/PRODUCTION_DEPLOYMENT.md](docs/PRODUCTION_DEPLOYMENT.md) for full deployment checklist.cd ui-web/frontendSENTINELFORGE_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
+See [docs/PRODUCTION_DEPLOYMENT.md](docs/PRODUCTION_DEPLOYMENT.md) for full deployment checklist.cd ui-web/frontendSentifargo_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py
 
 
 
@@ -234,7 +239,7 @@ See [docs/PRODUCTION_DEPLOYMENT.md](docs/PRODUCTION_DEPLOYMENT.md) for full depl
 
 
 
-Most routes live under `/api/*`. If `AUTH_TOKEN` is set, send `Authorization: Bearer $AUTH_TOKEN`.npm run devUse the left sidebar for navigation. The recommended chat view is **"✨ SentinelForge (Unified Chat)"** (legacy chat UIs are still available from the Chat page).
+Most routes live under `/api/*`. If `AUTH_TOKEN` is set, send `Authorization: Bearer $AUTH_TOKEN`.npm run devUse the left sidebar for navigation. The recommended chat view is **"✨ Sentifargo (Unified Chat)"** (legacy chat UIs are still available from the Chat page).
 
 
 

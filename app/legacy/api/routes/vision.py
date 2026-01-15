@@ -3,7 +3,7 @@
 VISION API ROUTE - Image Classification & Real/Fake Detection
 ==============================================================================
 Author: Pratik Niroula
-Project: Universal Anomaly Intelligence System (UAIS)
+Project: Sentifargo (Sentifargo)
 
 WHAT THIS FILE DOES:
 --------------------
@@ -232,9 +232,9 @@ def _load_vision_predictor():
 
         device: "torch.device"
         # Default to CPU for maximum portability/stability (MPS can be flaky in some macOS setups).
-        # Override with SENTINELFORGE_VISION_DEVICE=cuda|mps|cpu if desired.
+        # Override with Sentifargo_VISION_DEVICE=cuda|mps|cpu if desired.
         requested = (
-            os.getenv("SENTINELFORGE_VISION_DEVICE") or os.getenv("UAIS_VISION_DEVICE") or ""
+            os.getenv("Sentifargo_VISION_DEVICE") or os.getenv("Sentifargo_VISION_DEVICE") or ""
         ).strip().lower()
         if requested:
             device = torch.device(requested)
@@ -449,7 +449,7 @@ async def vision_video_predict(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read upload: {exc}"
         ) from exc
 
-    with tempfile.TemporaryDirectory(prefix="sentinelforge_video_") as tmp:
+    with tempfile.TemporaryDirectory(prefix="Sentifargo_video_") as tmp:
         tmp_dir = Path(tmp)
         video_path = tmp_dir / (Path(file.filename).name if file.filename else "upload.mp4")
         frames_dir = tmp_dir / "frames"

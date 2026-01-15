@@ -1,4 +1,4 @@
-"""FastAPI endpoint to serve SentinelForge predictions (fraud, cyber, fusion, NLP, vision)."""
+"""FastAPI endpoint to serve Sentifargo predictions (fraud, cyber, fusion, NLP, vision)."""
 
 from base64 import b64decode
 from io import BytesIO
@@ -11,7 +11,7 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 
-app = FastAPI(title="SentinelForge API", version="1.3")
+app = FastAPI(title="Sentifargo API", version="1.3")
 
 project_root = Path(__file__).resolve().parents[2]
 fraud_model_path = project_root / "models" / "fraud" / "supervised" / "fraud_model.pkl"
@@ -133,7 +133,7 @@ class VisionRequest(BaseModel):
 @app.get("/")
 def root():
     return {
-        "message": "SentinelForge API active.",
+        "message": "Sentifargo API active.",
         "available": {
             "fraud": fraud_model_path.exists(),
             "cyber": cyber_model_path.exists(),

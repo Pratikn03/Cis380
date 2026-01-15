@@ -1,5 +1,5 @@
 """
-SentinelForge End-to-End Benchmark Suite
+Sentifargo End-to-End Benchmark Suite
 
 Provides automated evaluation scripts for:
 - Individual model performance
@@ -167,10 +167,10 @@ class IntentDetectionBenchmark(BaseBenchmark):
         start_time = time.time()
         
         try:
-            from app.agent import SentinelForgeOrchestrator, MemoryStore
+            from app.agent import SentifargoOrchestrator, MemoryStore
             from app.utils import LLMStub
             
-            orchestrator = SentinelForgeOrchestrator(
+            orchestrator = SentifargoOrchestrator(
                 llm_client=LLMStub(),
                 memory_store=MemoryStore()
             )
@@ -365,10 +365,10 @@ class LatencyBenchmark(BaseBenchmark):
     
     def run(self) -> BenchmarkResult:
         try:
-            from app.agent import SentinelForgeOrchestrator, MemoryStore
+            from app.agent import SentifargoOrchestrator, MemoryStore
             from app.utils import LLMStub
             
-            orchestrator = SentinelForgeOrchestrator(
+            orchestrator = SentifargoOrchestrator(
                 llm_client=LLMStub(),
                 memory_store=MemoryStore()
             )
@@ -534,7 +534,7 @@ class FusionBenchmark(BaseBenchmark):
 
 def run_all_benchmarks() -> BenchmarkSuite:
     """Run all benchmarks and return results."""
-    suite = BenchmarkSuite(suite_name="sentinelforge_e2e")
+    suite = BenchmarkSuite(suite_name="Sentifargo_e2e")
     
     benchmarks = [
         IntentDetectionBenchmark(),
@@ -570,7 +570,7 @@ def main():
     """CLI entry point."""
     import argparse
     
-    parser = argparse.ArgumentParser(description="SentinelForge Benchmark Suite")
+    parser = argparse.ArgumentParser(description="Sentifargo Benchmark Suite")
     parser.add_argument("--save", action="store_true", help="Save results to file")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     args = parser.parse_args()
@@ -578,7 +578,7 @@ def main():
     if args.verbose:
         logging.basicConfig(level=logging.INFO)
     
-    print("🚀 Running SentinelForge Benchmarks...\n")
+    print("🚀 Running Sentifargo Benchmarks...\n")
     
     suite = run_all_benchmarks()
     print(suite.summary())

@@ -125,7 +125,7 @@ def render_chat_page(
     messages: list[dict] = active_chat.get("messages") or []
 
     # ---- Header ----
-    st.markdown("## ✨ SentinelForge Chat")
+    st.markdown("## ✨ Sentifargo Chat")
     st.caption("Session-based chat with quick prompts. Runs fully local via FastAPI.")
 
     # ---- Right rail (controls + attachments) ----
@@ -186,7 +186,7 @@ def render_chat_page(
         st.download_button(
             "⬇️ Export chat (JSON)",
             data=export_payload,
-            file_name=f"sentinelforge_{active_id[:8]}.json",
+            file_name=f"Sentifargo_{active_id[:8]}.json",
             mime="application/json",
             key="ocx_export_chat",
         )
@@ -222,7 +222,7 @@ def render_chat_page(
                     with st.expander("Details", expanded=False):
                         st.json(meta)
 
-        prompt = st.chat_input("Message SentinelForge…", key="ocx_chat_input")
+        prompt = st.chat_input("Message Sentifargo…", key="ocx_chat_input")
         if not prompt:
             return
 

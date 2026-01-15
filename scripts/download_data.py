@@ -157,7 +157,7 @@ def download_cifar10() -> Path:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Download NLP (Enron) and Vision (CIFAR-10) datasets for SentinelForge."
+        description="Download NLP (Enron) and Vision (CIFAR-10) datasets for Sentifargo."
     )
     parser.add_argument("--enron", action="store_true", help="Download/prepare Enron email CSV.")
     parser.add_argument("--cifar10", action="store_true", help="Download CIFAR-10 image dataset.")

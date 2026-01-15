@@ -20,7 +20,7 @@ from app.utils.logger import get_logger
 from app.utils.llm_stub import LLMStub
 
 
-class SentinelForgeOrchestrator:
+class SentifargoOrchestrator:
     """Orchestrator routing requests to the appropriate AI module."""
 
     def __init__(
@@ -250,7 +250,25 @@ class SentinelForgeOrchestrator:
     def _detect_recommend_category(self, text: str) -> str:
         """Detect what category of recommendation the user wants."""
         # Clothing keywords
-        if any(kw in text for kw in ["cloth", "fashion", "wear", "outfit", "dress", "shirt", "pants", "jacket", "summer wear", "winter wear", "style"]):
+        if any(
+            kw in text
+            for kw in [
+                "cloth",
+                "clothing",
+                "apparel",
+                "fashion",
+                "wear",
+                "outfit",
+                "outfits",
+                "dress",
+                "shirt",
+                "pants",
+                "jacket",
+                "summer wear",
+                "winter wear",
+                "style",
+            ]
+        ):
             return "clothes"
         # Movie keywords
         if any(kw in text for kw in ["movie", "film", "watch", "cinema", "show", "series", "netflix", "streaming"]):

@@ -3,12 +3,12 @@
 MODEL REGISTRY - MLOps Model Versioning & Management
 ==============================================================================
 Author: Pratik Niroula
-Project: SentinelForge - Universal Anomaly Intelligence System
+Project: Sentifargo - Sentifargo
 
 PURPOSE:
 --------
 Provides versioned model registry for tracking, deploying, and managing
-ML models across the SentinelForge system.
+ML models across the Sentifargo system.
 
 FEATURES:
 ---------

@@ -1,4 +1,4 @@
-"""Tabular Variational Autoencoder utilities for SentinelForge generative experiments."""
+"""Tabular Variational Autoencoder utilities for Sentifargo generative experiments."""
 
 from __future__ import annotations
 

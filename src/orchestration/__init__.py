@@ -1,4 +1,4 @@
-"""Lightweight orchestration stubs for SentinelForge.
+"""Lightweight orchestration stubs for Sentifargo.
 
 These wrappers call the existing experiment scripts so that references to
 `src.orchestration.*` do not fail. They are intentionally thin to avoid heavy

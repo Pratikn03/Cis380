@@ -3,7 +3,7 @@
 VOICE MODEL NOISE ROBUSTNESS TESTS
 ==============================================================================
 Author: Pratik Niroula
-Project: SentinelForge - Universal Anomaly Intelligence System
+Project: Sentifargo - Sentifargo
 
 PURPOSE:
 --------

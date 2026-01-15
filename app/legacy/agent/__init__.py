@@ -1,1 +1,1 @@
-"""Agent package for SentinelForge orchestrator."""
+"""Agent package for Sentifargo orchestrator."""

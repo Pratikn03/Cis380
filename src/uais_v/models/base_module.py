@@ -1,4 +1,4 @@
-"""Base module placeholder for UAIS-V models.
+"""Base module placeholder for Sentifargo-V models.
 
 This is intentionally lightweight; extend as needed for specific domains.
 """

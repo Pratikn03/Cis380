@@ -1,1 +1,1 @@
-"""UAIS-V package."""
+"""Sentifargo-V package."""

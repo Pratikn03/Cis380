@@ -1,1 +1,1 @@
-"""Test suite for SentinelForge additions."""
+"""Test suite for Sentifargo additions."""

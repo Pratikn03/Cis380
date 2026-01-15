@@ -1,6 +1,6 @@
 project:
-  name: "SentinelForge"
-  description: "SentinelForge with 30-sequence module"
+  name: "Sentifargo"
+  description: "Sentifargo with 30-sequence module"
 paths:
   raw_dir: "data/raw"
   lake_dir: "data/lake"

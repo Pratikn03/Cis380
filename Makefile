@@ -5,7 +5,7 @@ PIP ?= $(PY) -m pip
 
 help:
 	@echo ""
-	@echo "SentinelForge - Common Commands"
+	@echo "Sentifargo - Common Commands"
 	@echo ""
 	@echo "  make install        Install Python deps (requirements.txt)"
 	@echo "  make test           Run pytest"
@@ -31,7 +31,7 @@ run:
 	$(PY) -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 streamlit:
-	SENTINELFORGE_BACKEND=$${SENTINELFORGE_BACKEND:-http://localhost:8000} $(PY) -m streamlit run app/streamlit_chatbot/app.py
+	Sentifargo_BACKEND=$${Sentifargo_BACKEND:-http://localhost:8000} $(PY) -m streamlit run app/streamlit_chatbot/app.py
 
 train-all:
 	$(PY) scripts/train_all.py
@@ -43,7 +43,7 @@ prod-check:
 	$(PY) scripts/check_production.py
 
 docker-build:
-	docker build -f Dockerfile.production --target production -t sentinelforge:prod .
+	docker build -f Dockerfile.production --target production -t Sentifargo:prod .
 
 docker-up:
 	docker compose up --build

@@ -48,6 +48,11 @@ export const recommendMultimodal = (payload: FormData) =>
     headers: { "Content-Type": "multipart/form-data" },
   });
 
+export const recommendClothes = (payload: FormData) =>
+  api.post("/api/recommend/clothes", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
 export const ragQuery = (payload: { query: string; top_k?: number }) =>
   api.post("/api/rag/query", payload);
 
@@ -55,6 +60,17 @@ export const ragUpload = (payload: FormData) =>
   api.post("/api/rag/upload", payload, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+
+export const dsaRagAsk = (payload: { query: string }) =>
+  api.post("/api/dsa-rag/ask", payload);
+
+export const dsaRagUpload = (payload: FormData) =>
+  api.post("/api/dsa-rag/upload", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+export const dsaRagIngest = (payload: { filename?: string; content?: string }) =>
+  api.post("/api/dsa-rag/ingest", payload);
 
 export const visionVideoPredict = (payload: FormData) =>
   api.post("/api/vision/video/predict", payload, {

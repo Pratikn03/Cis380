@@ -6,7 +6,7 @@ PORT="${PORT:-8000}"
 BASE="http://$HOST:$PORT"
 
 echo "===================="
-echo "SentinelForge TEST SUITE"
+echo "Sentifargo TEST SUITE"
 echo "===================="
 
 # ---------- 1) Basic structure checks ----------
@@ -75,7 +75,7 @@ fi
 
 # ---------- 5) Start backend and test endpoints ----------
 echo "[5/7] Backend smoke test"
-uvicorn app.main:app --host "$HOST" --port "$PORT" >/tmp/sentinelforge_uvicorn.log 2>&1 &
+uvicorn app.main:app --host "$HOST" --port "$PORT" >/tmp/Sentifargo_uvicorn.log 2>&1 &
 PID=$!
 
 cleanup() {
@@ -105,7 +105,7 @@ check_200() {
   if [ "$c" != "200" ]; then
     echo "❌ Expected 200 but got $c for $url"
     echo "---- backend log (tail) ----"
-    tail -n 60 /tmp/sentinelforge_uvicorn.log || true
+    tail -n 60 /tmp/Sentifargo_uvicorn.log || true
     exit 1
   fi
   echo "✅ 200 $url"

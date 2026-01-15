@@ -3,7 +3,7 @@
 CYBER TIMELINE VISUALIZATION API
 ==============================================================================
 Author: Pratik Niroula
-Project: SentinelForge - Universal Anomaly Intelligence System
+Project: Sentifargo - Sentifargo
 
 PURPOSE:
 --------

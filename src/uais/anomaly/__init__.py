@@ -1,1 +1,1 @@
-"""Anomaly detection models for SentinelForge."""
+"""Anomaly detection models for Sentifargo."""

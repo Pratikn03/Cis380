@@ -1,1 +1,1 @@
-"""Streamlit pages for SentinelForge Command Center."""
+"""Streamlit pages for Sentifargo Command Center."""

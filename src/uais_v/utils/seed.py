@@ -19,7 +19,7 @@ def set_global_seed(seed: int, deterministic_torch: bool = False) -> None:
         if deterministic_torch:
             torch.use_deterministic_algorithms(True)
     except Exception:
-        # Torch is optional for SentinelForge
+        # Torch is optional for Sentifargo
         pass
 
     if os.getenv("RUN_TF_TESTS") == "1":

@@ -12,6 +12,7 @@ This repository has a **single canonical UI + training entrypoints**.
 - **Train brand/logo YOLO:** `python -m src.train.train_brand_logo_detector`
 - **Build recommender vector index:** `python scripts/build_recommender_index.py`
 - **Production readiness check:** `python scripts/check_production.py`
+- **Training data audit:** `python scripts/training_data_audit.py`
 
 ### Experimental scripts
 

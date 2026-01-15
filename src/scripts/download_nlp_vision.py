@@ -1,5 +1,5 @@
 """
-Download NLP (Enron emails) and Vision (CIFAR-10) datasets for SentinelForge.
+Download NLP (Enron emails) and Vision (CIFAR-10) datasets for Sentifargo.
 
 - Enron emails (CSV) via Kaggle API, or manual placement fallback.
 - CIFAR-10 (Python version) via direct HTTP download.
@@ -208,7 +208,7 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Download NLP (Enron) and Vision (CIFAR-10) datasets for SentinelForge."
+        description="Download NLP (Enron) and Vision (CIFAR-10) datasets for Sentifargo."
     )
     parser.add_argument(
         "--enron",

@@ -1,4 +1,4 @@
-"""Import Celeb-DF/Celeb_V2 extracted frames into SentinelForge vision folders.
+"""Import Celeb-DF/Celeb_V2 extracted frames into Sentifargo vision folders.
 
 This keeps your original dataset intact and *copies or hardlinks* images into:
 
@@ -209,7 +209,7 @@ def run(*, src: Path, mode: str, cap: int | None, include_test: bool) -> dict[st
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Import Celeb_V2 frames into SentinelForge vision folders."
+        description="Import Celeb_V2 frames into Sentifargo vision folders."
     )
     parser.add_argument("--src", type=Path, default=Path("data/Celeb_V2"))
     parser.add_argument(

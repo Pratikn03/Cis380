@@ -1,4 +1,4 @@
-"""Centralized filesystem paths for SentinelForge."""
+"""Centralized filesystem paths for Sentifargo."""
 
 from pathlib import Path
 

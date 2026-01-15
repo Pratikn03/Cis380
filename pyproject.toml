@@ -3,12 +3,12 @@ requires = ["setuptools>=62", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sentinelforge"
+name = "sentifargo"
 version = "0.1.0"
-description = "SentinelForge multimodal AI platform."
+description = "Sentifargo multimodal AI platform."
 readme = "README.md"
 requires-python = ">=3.9"
-authors = [{ name = "SentinelForge Team" }]
+authors = [{ name = "Sentifargo Team" }]
 keywords = ["anomaly detection", "fraud", "cyber", "mlops", "streamlit"]
 classifiers = [
     "Programming Language :: Python :: 3",

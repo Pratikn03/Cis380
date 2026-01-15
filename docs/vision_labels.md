@@ -1,14 +1,14 @@
 # 📷 Vision Intelligence Label Schema
 
 **Author:** Pratik Niroula  
-**Project:** SentinelForge - Universal Anomaly Intelligence System  
+**Project:** Sentifargo - Sentifargo  
 **Last Updated:** January 7, 2026
 
 ---
 
 ## 📋 Overview
 
-This document defines the unified label schema for all vision-related models in SentinelForge. Consistent labeling ensures seamless integration across different model outputs and simplifies downstream processing.
+This document defines the unified label schema for all vision-related models in Sentifargo. Consistent labeling ensures seamless integration across different model outputs and simplifies downstream processing.
 
 ---
 

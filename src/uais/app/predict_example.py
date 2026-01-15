@@ -1,4 +1,4 @@
-"""Local inference example for SentinelForge."""
+"""Local inference example for Sentifargo."""
 
 import pandas as pd
 import joblib

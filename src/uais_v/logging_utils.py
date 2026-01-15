@@ -1,4 +1,4 @@
-"""Lightweight logging setup shared across SentinelForge."""
+"""Lightweight logging setup shared across Sentifargo."""
 
 import logging
 from typing import Optional

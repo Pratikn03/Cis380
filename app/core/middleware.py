@@ -1,5 +1,5 @@
 """
-SentinelForge Production Middleware & Error Handling
+Sentifargo Production Middleware & Error Handling
 Rate limiting, security headers, logging, and error handling
 """
 
@@ -17,7 +17,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-logger = logging.getLogger("sentinelforge.middleware")
+logger = logging.getLogger("Sentifargo.middleware")
 
 
 # ============================================
@@ -25,8 +25,8 @@ logger = logging.getLogger("sentinelforge.middleware")
 # ============================================
 
 
-class SentinelForgeException(Exception):
-    """Base exception for SentinelForge."""
+class SentifargoException(Exception):
+    """Base exception for Sentifargo."""
 
     def __init__(
         self,
@@ -42,7 +42,7 @@ class SentinelForgeException(Exception):
         super().__init__(self.message)
 
 
-class ValidationError(SentinelForgeException):
+class ValidationError(SentifargoException):
     """Validation error."""
 
     def __init__(self, message: str, details: dict | None = None):
@@ -54,7 +54,7 @@ class ValidationError(SentinelForgeException):
         )
 
 
-class AuthenticationError(SentinelForgeException):
+class AuthenticationError(SentifargoException):
     """Authentication error."""
 
     def __init__(self, message: str = "Authentication required"):
@@ -65,7 +65,7 @@ class AuthenticationError(SentinelForgeException):
         )
 
 
-class AuthorizationError(SentinelForgeException):
+class AuthorizationError(SentifargoException):
     """Authorization error."""
 
     def __init__(self, message: str = "Insufficient permissions"):
@@ -76,7 +76,7 @@ class AuthorizationError(SentinelForgeException):
         )
 
 
-class RateLimitError(SentinelForgeException):
+class RateLimitError(SentifargoException):
     """Rate limit exceeded error."""
 
     def __init__(self, retry_after: int = 60):
@@ -88,7 +88,7 @@ class RateLimitError(SentinelForgeException):
         )
 
 
-class ModelError(SentinelForgeException):
+class ModelError(SentifargoException):
     """ML model error."""
 
     def __init__(self, message: str, model_name: str | None = None):
@@ -100,7 +100,7 @@ class ModelError(SentinelForgeException):
         )
 
 
-class NotFoundError(SentinelForgeException):
+class NotFoundError(SentifargoException):
     """Resource not found error."""
 
     def __init__(self, resource: str, resource_id: str | None = None):
@@ -147,13 +147,13 @@ def create_error_response(
 def register_exception_handlers(app: FastAPI) -> None:
     """Register all exception handlers."""
 
-    @app.exception_handler(SentinelForgeException)
-    async def sentinelforge_exception_handler(
-        request: Request, exc: SentinelForgeException
+    @app.exception_handler(SentifargoException)
+    async def Sentifargo_exception_handler(
+        request: Request, exc: SentifargoException
     ) -> JSONResponse:
         request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
         logger.warning(
-            "SentinelForge exception: %s [%s] request_id=%s",
+            "Sentifargo exception: %s [%s] request_id=%s",
             exc.message,
             exc.error_code,
             request_id,

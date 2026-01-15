@@ -1,4 +1,4 @@
-"""Pydantic schemas for the SentinelForge local inference API."""
+"""Pydantic schemas for the Sentifargo local inference API."""
 
 from typing import Any, Dict, List
 

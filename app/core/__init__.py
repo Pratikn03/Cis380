@@ -1,11 +1,11 @@
 """
-SentinelForge Core Module
+Sentifargo Core Module
 Configuration, middleware, and health checks for production deployment
 """
 
 from app.core.config import Settings, get_settings, settings
 from app.core.middleware import (
-    SentinelForgeException,
+    SentifargoException,
     ValidationError,
     AuthenticationError,
     AuthorizationError,
@@ -22,7 +22,7 @@ __all__ = [
     "get_settings",
     "settings",
     # Exceptions
-    "SentinelForgeException",
+    "SentifargoException",
     "ValidationError",
     "AuthenticationError",
     "AuthorizationError",

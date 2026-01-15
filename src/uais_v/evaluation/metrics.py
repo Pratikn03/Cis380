@@ -1,4 +1,4 @@
-"""Binary/softmax metric helpers for SentinelForge models."""
+"""Binary/softmax metric helpers for Sentifargo models."""
 
 from typing import Dict
 

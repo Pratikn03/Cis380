@@ -1,4 +1,4 @@
-"""Convenience loaders for processed/raw datasets used by SentinelForge."""
+"""Convenience loaders for processed/raw datasets used by Sentifargo."""
 
 from pathlib import Path
 from typing import Optional

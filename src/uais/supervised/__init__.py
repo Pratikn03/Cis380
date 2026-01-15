@@ -1,1 +1,1 @@
-"""Supervised baselines for SentinelForge."""
+"""Supervised baselines for Sentifargo."""

@@ -50,8 +50,6 @@ Untitled*.ipynb
 *.sublime-workspace
 
 # Vim
-*.swp
-*.swo
 *~
 
 # ============================================
@@ -142,6 +140,7 @@ data/raw/
 data/interim/
 data/processed/
 data/embeddings/
+data/dsa_embeddings/
 data/monitoring/
 data/Celeb_V2/
 data/Video-2/
@@ -159,12 +158,12 @@ artifacts/*
 !artifacts/.gitkeep
 !artifacts/README.md
 !artifacts/brand/
-models/
-experiments/
+artifacts/brand/_dataset_subsets/
+/models/
+/experiments/
 runs/
 logs/
 *.log
-mlruns/
 
 # ============================================
 # Reports
@@ -199,7 +198,6 @@ reports/*.html
 *.tgz
 *.rar
 *.7z
-archive.zip
 
 # ============================================
 # Temporary Files
@@ -227,7 +225,6 @@ grafana/data/
 # ============================================
 # Docker
 # ============================================
-.dockerignore
 docker-compose.override.yml
 
 # ============================================
@@ -245,8 +242,6 @@ dmypy.json
 src/models/
 src/experiments/
 datasets/
-scripts/find_duplicates.py
-scripts/dedupe_data.sh
 
 # ============================================
 # Keep These

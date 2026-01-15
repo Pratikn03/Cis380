@@ -1,7 +1,7 @@
 #!/bin/bash
-# Launch SentinelForge Streamlit UI (Command Center)
+# Launch Sentifargo Streamlit UI (Command Center)
 
-echo "🧠 Starting SentinelForge - Streamlit Command Center"
+echo "🧠 Starting Sentifargo - Streamlit Command Center"
 echo "=================================================="
 echo ""
 
@@ -15,8 +15,8 @@ elif [ -d "venv" ]; then
 fi
 
 # Set backend URL
-export SENTINELFORGE_BACKEND=${SENTINELFORGE_BACKEND:-"http://localhost:8000"}
-echo "🔗 Backend URL: $SENTINELFORGE_BACKEND"
+export Sentifargo_BACKEND=${Sentifargo_BACKEND:-"http://localhost:8000"}
+echo "🔗 Backend URL: $Sentifargo_BACKEND"
 echo ""
 
 # Launch Streamlit

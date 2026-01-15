@@ -261,8 +261,8 @@ def main() -> int:
         "--device",
         type=str,
         default=(
-            os.getenv("SENTINELFORGE_FACE_EMOTION_DEVICE")
-            or os.getenv("UAIS_FACE_EMOTION_DEVICE")
+            os.getenv("Sentifargo_FACE_EMOTION_DEVICE")
+            or os.getenv("Sentifargo_FACE_EMOTION_DEVICE")
             or "auto"
         ),
     )
@@ -273,8 +273,8 @@ def main() -> int:
         "--label-map",
         type=str,
         default=(
-            os.getenv("SENTINELFORGE_FACE_EMOTION_LABEL_MAP")
-            or os.getenv("UAIS_FACE_EMOTION_LABEL_MAP")
+            os.getenv("Sentifargo_FACE_EMOTION_LABEL_MAP")
+            or os.getenv("Sentifargo_FACE_EMOTION_LABEL_MAP")
             or ""
         ),
         help="Optional JSON mapping from dataset folder names to emotion labels.",

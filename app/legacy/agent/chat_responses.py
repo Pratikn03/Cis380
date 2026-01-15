@@ -1,4 +1,4 @@
-"""Enhanced chat responses for SentinelForge offline mode with varied responses."""
+"""Enhanced chat responses for Sentifargo offline mode with varied responses."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import random
 # VARIED GREETING RESPONSES
 # ============================================================================
 GREETINGS = [
-    """Hello! I'm SentinelForge, your intelligent assistant!
+    """Hello! I'm Sentifargo, your intelligent assistant!
 
 I can help you with:
 • **Fraud Detection** - Analyze transaction risk patterns
@@ -20,7 +20,7 @@ I can help you with:
 
 Just type your question or try: "recommend a movie" or "what is fraud detection?" """,
 
-    """Hi there! Welcome to SentinelForge! 🛡️
+    """Hi there! Welcome to Sentifargo! 🛡️
 
 I'm your AI-powered security and recommendation assistant. Here's what I can do:
 • Detect fraud patterns in transactions
@@ -31,7 +31,7 @@ I'm your AI-powered security and recommendation assistant. Here's what I can do:
 
 What would you like to explore today?""",
 
-    """Welcome! I'm SentinelForge - built by Pratik Niroula! 👋
+    """Welcome! I'm Sentifargo - built by Pratik Niroula! 👋
 
 **Quick Actions:**
 → Say "recommend action movies" for suggestions
@@ -56,7 +56,7 @@ I work offline with smart responses - no API needed! What's on your mind?"""
 # VARIED HELP RESPONSES
 # ============================================================================
 HELP_RESPONSES = [
-    """**SentinelForge Capabilities** 🚀
+    """**Sentifargo Capabilities** 🚀
 
 **💬 Chat Features:**
 • Ask any question - I'll provide intelligent responses
@@ -104,7 +104,7 @@ Try asking: "What is fraud detection?" or "Recommend sci-fi movies" """,
 
 Just type your question naturally - I'll understand!""",
 
-    """**SentinelForge Help Guide** 📖
+    """**Sentifargo Help Guide** 📖
 
 I'm an offline-capable AI assistant. Here's how to use me:
 
@@ -134,9 +134,9 @@ I'm an offline-capable AI assistant. Here's how to use me:
 # VARIED ABOUT RESPONSES  
 # ============================================================================
 ABOUT_RESPONSES = [
-    """**About SentinelForge** 🛡️
+    """**About Sentifargo** 🛡️
 
-I'm SentinelForge - a comprehensive AI assistant built by **Pratik Niroula**!
+I'm Sentifargo - a comprehensive AI assistant built by **Pratik Niroula**!
 
 **My Capabilities:**
 • Natural language understanding
@@ -155,7 +155,7 @@ Built as part of a machine learning portfolio project showcasing anomaly detecti
 
     """**Who am I?** 🤖
 
-I'm **SentinelForge** - an AI assistant created by Pratik Niroula for the CIS380 project.
+I'm **Sentifargo** - an AI assistant created by Pratik Niroula for the CIS380 project.
 
 **What makes me special:**
 ✓ Work completely offline
@@ -172,7 +172,7 @@ I'm **SentinelForge** - an AI assistant created by Pratik Niroula for the CIS380
 
 I'm proof that AI can be smart without always needing the cloud!""",
 
-    """**SentinelForge Info** ℹ️
+    """**Sentifargo Info** ℹ️
 
 Created by: **Pratik Niroula**
 Purpose: ML Portfolio & Anomaly Detection Demo
@@ -198,7 +198,7 @@ This project demonstrates real-world ML applications in security and recommendat
 # VARIED TRAINING/DEMO RESPONSES
 # ============================================================================
 TRAINING_RESPONSES = [
-    """**Getting Started with SentinelForge** 🚀
+    """**Getting Started with Sentifargo** 🚀
 
 **Quick Start:**
 1. The server is running at `http://localhost:8000`

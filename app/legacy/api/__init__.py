@@ -1,1 +1,1 @@
-"""API package placeholder for SentinelForge routes."""
+"""API package placeholder for Sentifargo routes."""

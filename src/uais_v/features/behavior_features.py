@@ -1,4 +1,4 @@
-"""Wrappers around existing SentinelForge behavior feature builders."""
+"""Wrappers around existing Sentifargo behavior feature builders."""
 
 try:
     from uais.features.behavior_features import build_behavior_feature_table as _core_build

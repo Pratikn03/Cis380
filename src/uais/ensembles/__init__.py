@@ -1,1 +1,1 @@
-"""Ensembling helpers for SentinelForge."""
+"""Ensembling helpers for Sentifargo."""

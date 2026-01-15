@@ -28,10 +28,10 @@ cleanup() {
 trap cleanup EXIT
 
 echo "🚀 Starting backend: app.main:app on $HOST:$PORT"
-uvicorn app.main:app --host "$HOST" --port "$PORT" >/tmp/sentinelforge_demo_backend.log 2>&1 &
+uvicorn app.main:app --host "$HOST" --port "$PORT" >/tmp/Sentifargo_demo_backend.log 2>&1 &
 PID=$!
 sleep 2
 
-echo "✅ Backend up (log: /tmp/sentinelforge_demo_backend.log)"
-echo "🌐 Starting Streamlit UI (SENTINELFORGE_BACKEND=$BACKEND_URL)"
-SENTINELFORGE_BACKEND="$BACKEND_URL" streamlit run app/streamlit_chatbot/app.py
+echo "✅ Backend up (log: /tmp/Sentifargo_demo_backend.log)"
+echo "🌐 Starting Streamlit UI (Sentifargo_BACKEND=$BACKEND_URL)"
+Sentifargo_BACKEND="$BACKEND_URL" streamlit run app/streamlit_chatbot/app.py

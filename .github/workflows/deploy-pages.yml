@@ -1,4 +1,4 @@
-# Deploy SentinelForge Frontend to GitHub Pages
+# Deploy Sentifargo Frontend to GitHub Pages
 name: Deploy to GitHub Pages
 
 on:

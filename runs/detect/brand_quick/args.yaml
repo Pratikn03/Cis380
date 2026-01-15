@@ -103,4 +103,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: botsort.yaml
-save_dir: /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/runs/detect/brand_quick
+save_dir: /Users/pratik_n/Desktop/MyComputer/Sentifargo/runs/detect/brand_quick

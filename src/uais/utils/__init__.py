@@ -1,1 +1,1 @@
-"""Utility helpers shared across SentinelForge."""
+"""Utility helpers shared across Sentifargo."""

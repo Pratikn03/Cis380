@@ -85,14 +85,17 @@ class VectorStore:
             if idx >= len(self.metadata):
                 continue
             meta = self.metadata[idx]
-            results.append(
-                {
-                    "source": meta.get("source"),
-                    "text": meta.get("text"),
-                    "score": float(score),
-                    "chunk_id": meta.get("chunk_id"),
-                }
-            )
+            result = {
+                "source": meta.get("source"),
+                "text": meta.get("text"),
+                "score": float(score),
+                "chunk_id": meta.get("chunk_id"),
+            }
+            if "doc_id" in meta:
+                result["doc_id"] = meta.get("doc_id")
+            if "topic" in meta:
+                result["topic"] = meta.get("topic")
+            results.append(result)
         return results
 
     def _normalize(self, matrix: np.ndarray) -> np.ndarray:

@@ -1,4 +1,4 @@
-# GitHub Pages Deployment (SentinelForge Command Center)
+# GitHub Pages Deployment (Sentifargo Command Center)
 
 ## Prerequisites
 - Backend hosted separately (FastAPI is not deployable on GitHub Pages).

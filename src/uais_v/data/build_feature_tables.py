@@ -1,4 +1,4 @@
-"""Feature table builders delegating to existing SentinelForge modules."""
+"""Feature table builders delegating to existing Sentifargo modules."""
 
 from pathlib import Path
 from typing import Optional
