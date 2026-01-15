@@ -51,6 +51,11 @@ def _normalize_labels(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _has_label_columns(df: pd.DataFrame) -> bool:
+    lower_cols = {c.lower() for c in df.columns}
+    return any(col in lower_cols for col in ("label", "class", "target", "attack_cat"))
+
+
 def _find_cyber_csvs(raw_dir: Path) -> List[Path]:
     if not raw_dir.exists():
         raise FileNotFoundError(f"Cyber raw directory not found: {raw_dir}")
@@ -103,13 +108,24 @@ def load_cyber_data(
         if csv_files:
             print(f"Found {len(csv_files)} cyber CSV file(s) in {raw_dir}")
             dfs = []
+            remaining = n_rows
             for f in csv_files:
+                if remaining is not None and remaining <= 0:
+                    break
                 print(f"Loading {f.name} ...")
+                read_kwargs = {}
+                if remaining is not None:
+                    read_kwargs["nrows"] = remaining
                 try:
-                    df = pd.read_csv(f)
+                    df = pd.read_csv(f, **read_kwargs)
                 except UnicodeDecodeError:
-                    df = pd.read_csv(f, encoding="latin1")
+                    df = pd.read_csv(f, encoding="latin1", **read_kwargs)
+                if not _has_label_columns(df):
+                    print(f"[warn] Skipping {f.name} (no label columns)")
+                    continue
                 dfs.append(df)
+                if remaining is not None:
+                    remaining -= len(df)
             df_all = pd.concat(dfs, ignore_index=True)
             print("Full cyber raw shape:", df_all.shape)
 

@@ -34,12 +34,22 @@ def _synthetic_behavior(n_rows: int = 200) -> pd.DataFrame:
     return df
 
 
-def _load_ldap_dir(ldap_dir: Path) -> pd.DataFrame:
-    """Load all LDAP CSVs (CERT r4.2) and add a placeholder target."""
+def _load_ldap_dir(ldap_dir: Path, n_rows: Optional[int] = None) -> pd.DataFrame:
+    """Load LDAP CSVs (CERT r4.2) and add a placeholder target."""
     csv_files = sorted(ldap_dir.rglob("*.csv"))
     if not csv_files:
         raise FileNotFoundError(f"No CSV files found in {ldap_dir}")
-    frames = [pd.read_csv(f) for f in csv_files]
+    frames = []
+    remaining = n_rows
+    for f in csv_files:
+        if remaining is not None and remaining <= 0:
+            break
+        read_kwargs = {}
+        if remaining is not None:
+            read_kwargs["nrows"] = remaining
+        frames.append(pd.read_csv(f, **read_kwargs))
+        if remaining is not None:
+            remaining -= len(frames[-1])
     df = pd.concat(frames, ignore_index=True)
     # Standardize user column name for downstream features if present
     if "user_id" in df.columns and "user" not in df.columns:
@@ -83,7 +93,7 @@ def load_behavior_data(
     if not source_path.is_absolute():
         source_path = project_root / source_path
     if source_path.is_dir():
-        df = _load_ldap_dir(source_path)
+        df = _load_ldap_dir(source_path, n_rows=n_rows)
         print(f"Loaded LDAP behavior directory: {source_path} -> shape {df.shape}")
     else:
         if not source_path.exists():

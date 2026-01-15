@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import joblib
@@ -35,7 +36,12 @@ def main():
     target_col = cfg.get("data", {}).get("target", "label")
     drop_cols = cfg.get("data", {}).get("drop_columns")
 
-    df_raw = load_cyber_data(cfg)
+    sample_env = os.getenv("Sentifargo_CYBER_SAMPLE_SIZE")
+    sample_size = int(sample_env) if sample_env else None
+    if sample_size is not None and sample_size <= 0:
+        sample_size = None
+
+    df_raw = load_cyber_data(cfg, n_rows=sample_size)
     df_feats = build_cyber_feature_table(df_raw, target_column=target_col, drop_columns=drop_cols)
     X = df_feats.drop(columns=[target_col])
     y = df_feats[target_col].astype(int)

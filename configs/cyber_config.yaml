@@ -4,8 +4,8 @@ project_name: "Sentifargo - Cyber"
 data:
   # UNSW-NB15 binary label column
   target: label
-  # Prefer a single canonical file to avoid mixing mismatched CSV schemas in data/raw/cyber
-  path: data/raw/cyber/UNSW_NB15_training-set.csv
+  # Prefer the raw directory so we can load all UNSW-NB15 CSV splits present.
+  path: data/raw/cyber
   # Avoid leakage: attack_cat is highly correlated with label
   drop_columns: [id, attack_cat]
 
