@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-01-15 18:25:50 UTC",
+  "generated_at": "2026-01-15 20:34:22 UTC",
   "training_data": {
-    "generated_at": "2026-01-15 18:08:49 UTC",
+    "generated_at": "2026-01-15 20:14:07 UTC",
     "required": [
       {
         "name": "Fraud (creditcard.csv)",
@@ -318,6 +318,22 @@
   "dsa_rag": {
     "docs_dir": "data/dsa_docs",
     "embed_dir": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/dsa_embeddings",
-    "embed_dir_ready": true
+    "embed_dir_ready": true,
+    "doc_count": 37,
+    "topics": [
+      "arrays",
+      "bit_manipulation",
+      "dp",
+      "graphs",
+      "greedy",
+      "hashing",
+      "heaps",
+      "linked_lists",
+      "recursion_backtracking",
+      "searching_sorting",
+      "stack_queue",
+      "strings",
+      "trees"
+    ]
   }
 }

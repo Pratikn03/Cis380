@@ -1,6 +1,6 @@
 # Claim Evidence Report
 
-Generated: 2026-01-14 22:02:24
+Generated: 2026-01-15 14:14:10
 
 ## C1. Orchestrator routes a single request to the right subsystem
 
@@ -12,7 +12,7 @@ Generated: 2026-01-14 22:02:24
   - app/agent/orchestrator.py - app/agent/orchestrator.py:181: def _run_fraud(self, text: str) -> tuple[str, Dict[str, Any]]:
   - app/agent/orchestrator.py - app/agent/orchestrator.py:193: def _run_voice(self, text: str) -> tuple[str, Dict[str, Any]]:
   - app/api/chat.py - app/api/chat.py:8: from app.agent import MemoryStore, SentifargoOrchestrator
-  - app/api/chat.py - app/api/chat.py:12: orchestrator = SentifargoOrchestrator(llm_client=LLMStub(), memory_store=MemoryStore())
+  - app/api/chat.py - app/api/chat.py:12: orchestrator = SentifargoOrchestrator(llm_client=LLMStub(), memory_store=MemoryStore.from_env())
   - app/api/chat.py - app/api/chat.py:24: return orchestrator.handle(
 - Notes:
   - Import check: app.agent.orchestrator ok
@@ -31,16 +31,15 @@ Generated: 2026-01-14 22:02:24
 
 ## C3. DVC implemented
 
-- Status: PARTIAL
+- Status: PROVEN
 - Evidence:
   - dvc.yaml - dvc.yaml exists
   - dvc.yaml - dvc.yaml:5: stages:
-  - dvc.yaml - dvc.yaml:66: train_fraud_model:
-  - dvc.yaml - dvc.yaml:142: evaluate_all:
-  - dvc.yaml - dvc.yaml:143: cmd: python -m src.uais.evaluation.evaluate_all
-  - dvc.yaml - dvc.yaml:145: - src/uais/evaluation/evaluate_all.py
-- Notes:
-  - dvc.lock not found; pipeline may be unrun or not tracked
+  - dvc.yaml - dvc.yaml:6: train_fraud_model:
+  - dvc.yaml - dvc.yaml:64: evaluate_all:
+  - dvc.yaml - dvc.yaml:65: cmd: PYTHONPATH=src python -m uais.evaluation.evaluate_all
+  - dvc.yaml - dvc.yaml:67: - src/uais/evaluation/evaluate_all.py
+  - dvc.lock - dvc.lock exists
 
 ## C4. Offline-first
 
@@ -72,6 +71,8 @@ Generated: 2026-01-14 22:02:24
 
 - Status: MISSING
 - Evidence:
+  - reports/evaluation_summary.json - metrics file exists
+  - reports/model_comparison.json - metrics file exists
   - ui-web/frontend/src/pages/Home.tsx - ui-web/frontend/src/pages/Home.tsx:70: Building intelligent systems that detect anomalies, prevent fraud, and secure digital infrastructure through advanced machine learning.
   - ui-web/frontend/src/pages/Home.tsx - ui-web/frontend/src/pages/Home.tsx:97: { value: "99.2%", label: "Detection Accuracy" },
   - ui-web/frontend/src/pages/Home.tsx - ui-web/frontend/src/pages/Home.tsx:144: desc: "Multi-modal ensemble combining all detection engines for superior accuracy",
@@ -84,7 +85,7 @@ Generated: 2026-01-14 22:02:24
   - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:6: - **FastAPI backend** with modular routers (chat, RAG, recommender, fraud, cyber, behavior, risk, voice, vision, brand, STT, monitoring).
   - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:101: - Measurable claims (accuracy/latency/cost) backed by scripts + reports.
   - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:102: - Evaluation harness across modules (fraud/cyber/vision/voice/RAG) + regression tests.
-  - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:123: - Build a full evaluation harness across fraud/cyber/vision/voice/RAG with regression tests.
+  - docs/PROJECT_DESCRIPTION.md - docs/PROJECT_DESCRIPTION.md:126: - Build a full evaluation harness across fraud/cyber/vision/voice/RAG with regression tests.
 - Notes:
   - No metrics artifact with 99.2/0.992 found in reports
   - Claim appears in UI/docs copy; consider linking to a metrics file

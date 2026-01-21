@@ -1,0 +1,6 @@
+outs:
+- md5: 7fc8015033b6a204212c80eab750da76.dir
+  size: 15817
+  nfiles: 8
+  hash: md5
+  path: rag

@@ -1,6 +1,6 @@
 # Training Gap Analysis
 
-- Generated: 2026-01-15 18:25:50 UTC
+- Generated: 2026-01-15 20:34:22 UTC
 
 ## Data readiness (from TRAINING_DATA.json)
 
@@ -48,6 +48,8 @@
 ## DSA RAG index
 
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/dsa_embeddings` ready: **True**
+- Docs: **37**
+- Topics: arrays, bit_manipulation, dp, graphs, greedy, hashing, heaps, linked_lists, recursion_backtracking, searching_sorting, stack_queue, strings, trees
 
 ## DVC status
 
@@ -60,4 +62,4 @@
 - Behavior model: add more insider-style patterns if false positives remain high.
 - Voice emotion: augment with noise if `tests/test_voice_noise.py` fails.
 - Brand YOLO: multi-class (car/fashion) requires its own dataset + retrain. Use BRAND_DATA_YAML + BRAND_OUT_PATH, then set BRAND_MODEL_CAR_PATH/BRAND_MODEL_FASHION_PATH.
-- DSA RAG: expand docs beyond arrays/search/linked-lists/stack-queue as coverage grows.
+- DSA RAG: continue adding advanced topics (tries, segment trees, suffix arrays).

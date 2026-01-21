@@ -136,15 +136,17 @@ node_modules/
 # ============================================
 # Data
 # ============================================
-data/raw/
 data/interim/
-data/processed/
 data/embeddings/
 data/dsa_embeddings/
 data/monitoring/
 data/Celeb_V2/
 data/Video-2/
 data/video-2/
+
+# Allow DVC tracking for docs + rag outputs
+!data/raw/*.dvc
+!data/processed/*.dvc
 
 # Large image datasets
 data/raw/clothing_images/

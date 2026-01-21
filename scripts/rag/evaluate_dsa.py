@@ -22,7 +22,7 @@ def _read_jsonl(path: Path) -> List[Dict]:
 
 
 def main() -> None:
-    eval_dir = settings.output_dir / "eval"
+    eval_dir = Path("eval")
     queries_path = eval_dir / "queries.jsonl"
     qrels_path = eval_dir / "qrels.jsonl"
     queries = _read_jsonl(queries_path)
@@ -54,9 +54,14 @@ def main() -> None:
         )
 
     report = metrics.evaluate()
-    out_path = settings.output_dir / "metrics" / "rag_eval.json"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(report.to_dict(), indent=2), encoding="utf-8")
+    metrics_dir = Path("metrics")
+    reports_dir = Path("reports")
+    metrics_dir.mkdir(parents=True, exist_ok=True)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    (metrics_dir / "rag_eval.json").write_text(
+        json.dumps(report.to_dict(), indent=2), encoding="utf-8"
+    )
+    (reports_dir / "rag_eval.md").write_text(report.summary(), encoding="utf-8")
     print(report.summary())
 
 

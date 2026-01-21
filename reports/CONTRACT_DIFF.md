@@ -2,8 +2,8 @@
 
 ## Counts
 
-- OpenAPI routes served: **41**
-- UI routes referenced: **23**
+- OpenAPI routes served: **42**
+- UI routes referenced: **24**
 - UI routes missing in OpenAPI (likely 404): **0**
 - OpenAPI routes unused by UI: **18**
 

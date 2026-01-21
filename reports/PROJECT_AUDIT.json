@@ -49,12 +49,12 @@
     "ui-web",
     "venv"
   ],
-  "scan_started_at": "2026-01-14T22:23:03",
-  "scan_duration_s": 0.5961148738861084,
-  "files_scanned": 500,
-  "py_files_total": 340,
-  "py_files_analyzed": 340,
-  "total_bytes": 31013918,
+  "scan_started_at": "2026-01-15T14:13:32",
+  "scan_duration_s": 0.8160450458526611,
+  "files_scanned": 553,
+  "py_files_total": 352,
+  "py_files_analyzed": 352,
+  "total_bytes": 80336172,
   "fastapi_includes": [
     {
       "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py",
@@ -131,6 +131,14 @@
     {
       "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/full_project_audit.py",
       "expr": "{r.expr}"
+    },
+    {
+      "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/main.py",
+      "expr": "health_router"
+    },
+    {
+      "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/main.py",
+      "expr": "monitoring_router"
     }
   ],
   "fastapi_endpoints": [
@@ -475,6 +483,54 @@
       "router": "app",
       "method": "POST",
       "path": "/y"
+    },
+    {
+      "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/health.py",
+      "router": "router",
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/health.py",
+      "router": "router",
+      "method": "GET",
+      "path": "/ready"
+    },
+    {
+      "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/monitoring.py",
+      "router": "router",
+      "method": "GET",
+      "path": "/metrics"
+    },
+    {
+      "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/fraud.py",
+      "router": "router",
+      "method": "POST",
+      "path": "/score"
+    },
+    {
+      "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/logo.py",
+      "router": "router",
+      "method": "POST",
+      "path": "/predict"
+    },
+    {
+      "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/reco.py",
+      "router": "router",
+      "method": "POST",
+      "path": "/recommend"
+    },
+    {
+      "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/rag.py",
+      "router": "router",
+      "method": "POST",
+      "path": "/query"
+    },
+    {
+      "file": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/audio.py",
+      "router": "router",
+      "method": "POST",
+      "path": "/emotion"
     }
   ],
   "training_candidates": [
@@ -496,6 +552,7 @@
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/train_all_vision_full.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/train_production.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/training_data_audit.py",
+    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/training_gap_report.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_brand_logo_detector.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_face_emotion.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_video_temporal.py",
@@ -542,6 +599,17 @@
       ]
     },
     {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "files": [
+        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.dvc/tmp/btime",
+        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/dashboards/.gitkeep",
+        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/generative/__init__.py",
+        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/nlp/__init__.py",
+        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/vision/__init__.py",
+        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/tests/contract/.gitkeep"
+      ]
+    },
+    {
       "sha256": "192f0012c3ba0a005d643fd0e6bd4e1d8db7cca0af5b32e1830b98cecf5469b2",
       "files": [
         "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/2e8138b35e464c8aa2ddc0e74506b031/tags/mlflow.user",
@@ -559,16 +627,6 @@
         "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/77c133a832264a8a9c681c41a3e96d07/tags/mlflow.source.type",
         "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/tags/mlflow.source.type",
         "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/ae201b6ab42042d9a4b41024e0923e0d/tags/mlflow.source.type"
-      ]
-    },
-    {
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "files": [
-        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/dashboards/.gitkeep",
-        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/generative/__init__.py",
-        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/nlp/__init__.py",
-        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/vision/__init__.py",
-        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/tests/contract/.gitkeep"
       ]
     },
     {
@@ -603,6 +661,13 @@
         "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/rag/vector_store/.gitkeep",
         "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/universal_anomaly_intelligence.egg-info/dependency_links.txt"
       ]
+    },
+    {
+      "sha256": "b9a670c75c36fb5a96e87b51dbfc7b3462ec1bcce249e42df33c4d3bb159b48b",
+      "files": [
+        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.dvc/tmp/lock",
+        "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.dvc/tmp/rwlock.lock"
+      ]
     }
   ],
   "py_compile_errors": [],
@@ -626,8 +691,8 @@
     "artifacts": 5,
     "runs": 3727,
     "models": 92,
-    "configs": 18,
-    "reports": 38
+    "configs": 25,
+    "reports": 43
   },
   "missing_expected_data_dirs": [],
   "unreferenced_internal_modules": [
@@ -665,12 +730,10 @@
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/__init__.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/classic_chat.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/config.py",
-    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/cars.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/courses.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/electronics.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/electronics_catalog.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/news.py",
-    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/places.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/static_fallbacks.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/pages/__init__.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/pages/brand.py",
@@ -729,6 +792,8 @@
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/ensembles/__init__.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/ensembles/blending.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/ensembles/stacking.py",
+    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/evaluation/__init__.py",
+    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/evaluation/evaluate_all.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/explainability/__init__.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/explainability/explainer_utils.py",
     "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/explainability/gradcam_explainer.py",

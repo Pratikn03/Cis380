@@ -30,7 +30,7 @@
       },
       {
         "path": "app/api/chat.py",
-        "detail": "app/api/chat.py:12: orchestrator = SentifargoOrchestrator(llm_client=LLMStub(), memory_store=MemoryStore())"
+        "detail": "app/api/chat.py:12: orchestrator = SentifargoOrchestrator(llm_client=LLMStub(), memory_store=MemoryStore.from_env())"
       },
       {
         "path": "app/api/chat.py",
@@ -80,7 +80,7 @@
   {
     "claim_id": "C3",
     "claim": "DVC implemented",
-    "status": "partial",
+    "status": "proven",
     "evidence": [
       {
         "path": "dvc.yaml",
@@ -92,24 +92,26 @@
       },
       {
         "path": "dvc.yaml",
-        "detail": "dvc.yaml:66: train_fraud_model:"
+        "detail": "dvc.yaml:6: train_fraud_model:"
       },
       {
         "path": "dvc.yaml",
-        "detail": "dvc.yaml:142: evaluate_all:"
+        "detail": "dvc.yaml:64: evaluate_all:"
       },
       {
         "path": "dvc.yaml",
-        "detail": "dvc.yaml:143: cmd: python -m src.uais.evaluation.evaluate_all"
+        "detail": "dvc.yaml:65: cmd: PYTHONPATH=src python -m uais.evaluation.evaluate_all"
       },
       {
         "path": "dvc.yaml",
-        "detail": "dvc.yaml:145: - src/uais/evaluation/evaluate_all.py"
+        "detail": "dvc.yaml:67: - src/uais/evaluation/evaluate_all.py"
+      },
+      {
+        "path": "dvc.lock",
+        "detail": "dvc.lock exists"
       }
     ],
-    "notes": [
-      "dvc.lock not found; pipeline may be unrun or not tracked"
-    ]
+    "notes": []
   },
   {
     "claim_id": "C4",
@@ -197,6 +199,14 @@
     "status": "missing",
     "evidence": [
       {
+        "path": "reports/evaluation_summary.json",
+        "detail": "metrics file exists"
+      },
+      {
+        "path": "reports/model_comparison.json",
+        "detail": "metrics file exists"
+      },
+      {
         "path": "ui-web/frontend/src/pages/Home.tsx",
         "detail": "ui-web/frontend/src/pages/Home.tsx:70: Building intelligent systems that detect anomalies, prevent fraud, and secure digital infrastructure through advanced machine learning."
       },
@@ -246,7 +256,7 @@
       },
       {
         "path": "docs/PROJECT_DESCRIPTION.md",
-        "detail": "docs/PROJECT_DESCRIPTION.md:123: - Build a full evaluation harness across fraud/cyber/vision/voice/RAG with regression tests."
+        "detail": "docs/PROJECT_DESCRIPTION.md:126: - Build a full evaluation harness across fraud/cyber/vision/voice/RAG with regression tests."
       }
     ],
     "notes": [

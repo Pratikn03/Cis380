@@ -58,13 +58,14 @@
 - `POST` `/train` — `app/legacy/api/routes/vision.py`
 - `POST` `/video/predict` — `app/legacy/api/routes/vision.py`
 
-### OTHER — 53 endpoints
+### OTHER — 61 endpoints
 
 - `DELETE` `/items/{item_id}` — `.venv/lib/python3.13/site-packages/fastapi/applications.py`
 - `DELETE` `/items/{item_id}` — `.venv/lib/python3.13/site-packages/fastapi/routing.py`
 - `GET` `/` — `app/main.py`
 - `GET` `/api/health` — `app/main.py`
 - `GET` `/health` — `app/core/health.py`
+- `GET` `/health` — `src/api/health.py`
 - `GET` `/health/detailed` — `app/core/health.py`
 - `GET` `/health/live` — `app/core/health.py`
 - `GET` `/health/ready` — `app/core/health.py`
@@ -79,7 +80,9 @@
 - `GET` `/items/{item_id}` — `.venv/lib/python3.13/site-packages/fastapi/exceptions.py`
 - `GET` `/items/{item_id}` — `.venv/lib/python3.13/site-packages/fastapi/param_functions.py`
 - `GET` `/metrics` — `app/core/health.py`
+- `GET` `/metrics` — `src/api/monitoring.py`
 - `GET` `/ready` — `app/core/health.py`
+- `GET` `/ready` — `src/api/health.py`
 - `GET` `/users/` — `.venv/lib/python3.13/site-packages/fastapi/applications.py`
 - `GET` `/users/` — `.venv/lib/python3.13/site-packages/fastapi/routing.py`
 - `GET` `/users/` — `.venv/lib/python3.13/site-packages/fastapi/routing.py`
@@ -103,11 +106,16 @@
 - `PATCH` `time.sleep` — `.venv/lib/python3.13/site-packages/psutil/tests/test_testutils.py`
 - `PATCH` `time.sleep` — `.venv/lib/python3.13/site-packages/psutil/tests/test_testutils.py`
 - `PATCH` `time.sleep` — `.venv/lib/python3.13/site-packages/psutil/tests/test_testutils.py`
+- `POST` `/emotion` — `src/api/audio.py`
 - `POST` `/files/` — `.venv/lib/python3.13/site-packages/fastapi/datastructures.py`
 - `POST` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/applications.py`
 - `POST` `/items/` — `.venv/lib/python3.13/site-packages/fastapi/routing.py`
 - `POST` `/login` — `.venv/lib/python3.13/site-packages/fastapi/security/oauth2.py`
 - `POST` `/login` — `.venv/lib/python3.13/site-packages/fastapi/security/oauth2.py`
+- `POST` `/predict` — `src/api/logo.py`
+- `POST` `/query` — `src/api/rag.py`
+- `POST` `/recommend` — `src/api/reco.py`
+- `POST` `/score` — `src/api/fraud.py`
 - `POST` `/send-notification/{email}` — `.venv/lib/python3.13/site-packages/fastapi/background.py`
 - `POST` `/uploadfile/` — `.venv/lib/python3.13/site-packages/fastapi/datastructures.py`
 - `POST` `/y` — `scripts/truth_table_audit.py`

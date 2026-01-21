@@ -1,0 +1,6 @@
+task: fraud
+model:
+  type: lightgbm_or_xgboost_or_sklearn
+  seed: 42
+eval:
+  metrics: [roc_auc, pr_auc, f1]

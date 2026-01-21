@@ -13,6 +13,9 @@ help:
 	@echo "  make streamlit      Start Streamlit UI (app/streamlit_chatbot/app.py)"
 	@echo "  make train-all      Train core models (scripts/train_all.py)"
 	@echo "  make train-vision   Train vision stack (scripts/train_all_vision.py)"
+	@echo "  make rag-index      Build/rebuild DSA document index"
+	@echo "  make rag-eval       Run DSA retrieval evaluation"
+	@echo "  make rag-query      Query DSA index (QUERY=...)"
 	@echo "  make prod-check     Run production readiness checker"
 	@echo "  make docker-build   Build Docker production image"
 	@echo "  make docker-up      Docker Compose (dev) up --build"
@@ -38,6 +41,15 @@ train-all:
 
 train-vision:
 	$(PY) scripts/train_all_vision.py
+
+rag-index:
+	$(PY) -m src.cli rag index --rebuild
+
+rag-eval:
+	$(PY) scripts/rag/evaluate_dsa.py
+
+rag-query:
+	$(PY) -m src.cli rag query "$(QUERY)"
 
 prod-check:
 	$(PY) scripts/check_production.py

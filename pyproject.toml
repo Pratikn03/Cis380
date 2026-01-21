@@ -18,12 +18,12 @@ classifiers = [
 ]
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = {"" = "src", "app" = "app"}
 license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
-where = ["src"]
-include = ["uais*"]
+where = ["src", "."]
+include = ["uais*", "app*"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}

@@ -56,6 +56,14 @@ export const recommendClothes = (payload: FormData) =>
 
 export const ragAsk = (payload: { query: string }) => api.post("/api/rag/ask", payload);
 
+export const ragQuery = (payload: { query: string; top_k?: number; return_chunks?: boolean }) =>
+  api.post("/api/rag/query", payload);
+
+export const ragIndex = (rebuild = false) =>
+  api.post(`/api/rag/index?rebuild=${rebuild ? "true" : "false"}`);
+
+export const ragStatus = () => api.get("/api/rag/status");
+
 export const ragUpload = (payload: FormData) =>
   api.post("/api/rag/upload", payload, {
     headers: { "Content-Type": "multipart/form-data" },
