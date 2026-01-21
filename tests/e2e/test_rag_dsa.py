@@ -1,11 +1,22 @@
 import os
 
+import pytest
 import requests
 
 BASE = os.getenv("BASE_URL", "http://localhost:8000")
 
 
+def _server_up() -> bool:
+    try:
+        response = requests.get(BASE + "/api/health", timeout=3)
+        return response.status_code == 200
+    except Exception:
+        return False
+
+
 def test_dsa_doc_rag_roundtrip():
+    if not _server_up():
+        pytest.skip("API not running for e2e tests")
     ingest = requests.post(
         BASE + "/api/rag/ingest",
         json={

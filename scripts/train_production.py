@@ -491,6 +491,17 @@ def main():
             status = "✅" if acc >= 0.90 else "⚠️"
             print(f"{status} {model:15}: {acc:.2%}")
 
+    if os.getenv("GENERATE_MODEL_CARDS", "true").lower() not in {"0", "false", "no"}:
+        try:
+            from app.mlops.model_cards import generate_default_cards
+
+            cards = generate_default_cards()
+            print("📝 Model cards generated:")
+            for path in cards:
+                print(f"  - {path}")
+        except Exception as exc:
+            print(f"⚠️ Model card generation skipped: {exc}")
+
     print("=" * 60)
     print("🎉 All models ready for production!")
 

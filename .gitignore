@@ -141,13 +141,21 @@ ui-web/**/.cache/
 # ============================================
 # Data
 # ============================================
+data/raw/
+data/processed/
 data/interim/
+data/samples/
 data/embeddings/
 data/dsa_embeddings/
 data/monitoring/
 data/Celeb_V2/
 data/Video-2/
 data/video-2/
+data/*.db
+
+# Metrics outputs (keep rag_eval.json for evidence)
+metrics/
+!metrics/rag_eval.json
 
 # Allow DVC tracking for docs + rag outputs
 !data/raw/*.dvc

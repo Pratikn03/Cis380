@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from app.rag.config import settings
+from app.rag.loaders import load_document, scan_documents
 from app.rag.metrics import RetrievalMetrics
 from app.rag.retriever import retrieve_context
 
@@ -31,10 +32,24 @@ def main() -> None:
         print("[dsa-eval] Missing eval data. Expected eval/queries.jsonl and eval/qrels.jsonl")
         return
 
+    source_map = {}
+    for path in scan_documents(settings.docs_dir):
+        doc = load_document(path)
+        if not doc:
+            continue
+        source_map[str(path)] = doc.doc_id
+        source_map[path.name] = doc.doc_id
+
     qrel_map = {}
     for row in qrels:
         qid = row.get("query_id")
         rel = row.get("relevant_ids") or row.get("relevant_doc_ids") or []
+        rel_sources = row.get("relevant_sources") or []
+        if rel_sources:
+            for src in rel_sources:
+                doc_id = source_map.get(str(src)) or source_map.get(Path(str(src)).name)
+                if doc_id:
+                    rel.append(doc_id)
         if qid:
             qrel_map[qid] = rel
 

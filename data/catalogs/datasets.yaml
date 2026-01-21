@@ -1,0 +1,88 @@
+datasets:
+  - name: fraud_creditcard
+    domain: fraud
+    path: data/raw/fraud/creditcard.csv
+    format: csv
+    source: kaggle/creditcard
+    license: unknown
+    notes: Primary fraud supervision dataset.
+
+  - name: fraud_paysim
+    domain: fraud
+    path: data/raw/fraud/paysim
+    format: csv
+    source: kaggle/paysim
+    license: unknown
+    notes: Synthetic fraud dataset for offline training.
+
+  - name: cyber_unsw_nb15
+    domain: cyber
+    path: data/raw/cyber/UNSW_NB15_training-set.csv
+    format: csv
+    source: UNSW-NB15
+    license: unknown
+    notes: Network intrusion dataset.
+
+  - name: behavior_online_shoppers
+    domain: behavior
+    path: data/raw/behavior/online_shoppers_intention.csv
+    format: csv
+    source: UCI Online Shoppers
+    license: unknown
+    notes: Behavior anomaly dataset.
+
+  - name: vision_celeb_v2
+    domain: vision
+    path: data/Celeb_V2
+    format: images
+    source: Celeb-DF v2
+    license: unknown
+    notes: Real/fake face dataset.
+
+  - name: vision_video_deepfake
+    domain: vision
+    path: data/Video-2
+    format: video
+    source: DFDC subset
+    license: unknown
+    notes: Video temporal deepfake dataset.
+
+  - name: voice_ravdess
+    domain: voice
+    path: data/raw/voice/_ravdess
+    format: audio
+    source: RAVDESS
+    license: unknown
+    notes: Voice emotion dataset.
+
+  - name: voice_tess
+    domain: voice
+    path: data/raw/voice/_tess
+    format: audio
+    source: TESS
+    license: unknown
+    notes: Voice emotion dataset.
+
+  - name: brand_logodet
+    domain: brand
+    path: data/raw/brand/LogoDet-3K
+    format: images
+    source: LogoDet-3K
+    license: unknown
+    notes: Single-class logo detection dataset.
+
+  - name: recommender_movielens
+    domain: recommender
+    path: data/raw/recommendation
+    format: csv
+    source: MovieLens/Yelp
+    license: unknown
+    notes: Recommender catalogs and ratings.
+
+  - name: rag_docs
+    domain: rag
+    path: data/raw/docs
+    format: text
+    source: internal
+    license: internal
+    notes: DSA/RAG knowledge base documents.

@@ -104,6 +104,20 @@ class Run(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
+class ModelVersion(Base):
+    __tablename__ = "model_versions"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    model_name: Mapped[str] = mapped_column(String, index=True)
+    version: Mapped[str] = mapped_column(String, index=True)
+    run_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    metrics: Mapped[dict] = mapped_column(JSON, default=dict)
+    artifact_path: Mapped[str] = mapped_column(String, default="")
+    status: Mapped[str] = mapped_column(String, index=True, default="staging")
+    card_path: Mapped[str] = mapped_column(String, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class Job(Base):
     __tablename__ = "jobs"
 

@@ -5,28 +5,37 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.auth import require_roles
-from app.db.models import Run
+from app.db.models import ModelVersion
 from app.db.session import get_db
+from app.mlops.model_cards import write_model_card
 from app.services.audit import record_audit
 
 router = APIRouter(prefix="/models", tags=["models"], dependencies=[Depends(require_roles("admin", "analyst"))])
 
 
 class ModelCreate(BaseModel):
-    run_type: str = "model"
+    model_name: str
+    version: str = "latest"
+    run_id: str | None = None
     metrics: dict = {}
-    artifacts: dict = {}
+    artifact_path: str = ""
+    status: str = "staging"
+    dataset: str = "unknown"
 
 
 @router.get("")
 def list_models(db: Session = Depends(get_db)) -> list[dict]:
-    rows = db.query(Run).order_by(Run.created_at.desc()).all()
+    rows = db.query(ModelVersion).order_by(ModelVersion.created_at.desc()).all()
     return [
         {
             "id": r.id,
-            "run_type": r.run_type,
+            "model_name": r.model_name,
+            "version": r.version,
+            "run_id": r.run_id,
             "metrics": r.metrics,
-            "artifacts": r.artifacts,
+            "artifact_path": r.artifact_path,
+            "status": r.status,
+            "card_path": r.card_path,
             "created_at": r.created_at,
         }
         for r in rows
@@ -35,9 +44,33 @@ def list_models(db: Session = Depends(get_db)) -> list[dict]:
 
 @router.post("")
 def register_model(payload: ModelCreate, db: Session = Depends(get_db)) -> dict:
-    run = Run(run_type=payload.run_type, metrics=payload.metrics, artifacts=payload.artifacts)
-    db.add(run)
+    card_path = ""
+    try:
+        card_path = str(
+            write_model_card(
+                model_name=payload.model_name,
+                version=payload.version,
+                dataset=payload.dataset,
+                metrics=payload.metrics or {},
+                artifact_path=payload.artifact_path,
+                status=payload.status,
+                run_id=payload.run_id,
+            )
+        )
+    except Exception:
+        card_path = ""
+
+    model = ModelVersion(
+        model_name=payload.model_name,
+        version=payload.version,
+        run_id=payload.run_id,
+        metrics=payload.metrics or {},
+        artifact_path=payload.artifact_path,
+        status=payload.status,
+        card_path=card_path,
+    )
+    db.add(model)
     db.commit()
-    db.refresh(run)
-    record_audit(db, action="register_model", target=run.id)
-    return {"id": run.id}
+    db.refresh(model)
+    record_audit(db, action="register_model", target=model.id)
+    return {"id": model.id, "card_path": card_path}

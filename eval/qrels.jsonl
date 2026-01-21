@@ -1,3 +1,2 @@
-{"query_id":"q1","relevant_ids":["DOC_ID_HERE:1:0"]}
-{"query_id":"q2","relevant_ids":["DOC_ID_HERE:1:1"]}
-{"query_id":"q3","relevant_ids":["DOC_ID_HERE:2:0"]}
+{"query_id":"q1","relevant_sources":["test_doc.txt"]}
+{"query_id":"q2","relevant_sources":["test_rag_upload.txt"]}

@@ -18,3 +18,4 @@ done
 BASE_URL="${BASE_URL}" SCORECARD_STRICT="${SCORECARD_STRICT:-false}" python scripts/system_scorecard.py
 BASE_URL="${BASE_URL}" python scripts/rag/evaluate_dsa.py || true
 python scripts/rag/aggregate_daily.py || true
+python scripts/data/validate_catalog.py || true
