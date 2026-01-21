@@ -14,8 +14,6 @@ from app.models.recommender.multimodal.multimodal_predict import (
     multimodal_recommend,
 )
 from app.models.voice.emotion_predict import predict_emotion
-from app.rag.prompting import build_rag_prompt
-from app.rag.retriever import retrieve_context
 from app.utils.logger import get_logger
 from app.utils.llm_stub import LLMStub
 
@@ -158,25 +156,25 @@ class SentifargoOrchestrator:
         return self._run_chat(text, emotion, user_id)
 
     def _run_rag(self, text: str, emotion: dict[str, Any] | None) -> tuple[str, Dict[str, Any]]:
-        context = retrieve_context(text)
-        prompt = build_rag_prompt(text, context)
-        context_texts: list[str] = [str(chunk.get("text", "")) for chunk in context]
-        if emotion:
-            context_texts.append(f"Emotion: {emotion['emotion']} ({emotion['confidence']})")
-        answer = self.llm.generate(prompt, context_texts)
-        citations = [chunk.get("chunk_id") for chunk in context]
+        from app.rag.dsa_pipeline import answer_query
+
+        result = answer_query(text)
         meta = {
-            "citations": citations,
+            "citations": result.get("citations", []),
             "chunks": [
                 {
                     "source": chunk.get("source"),
-                    "score": chunk.get("score"),
+                    "score": chunk.get("hybrid_score", chunk.get("score")),
                     "chunk_id": chunk.get("chunk_id"),
+                    "page": chunk.get("page"),
                 }
-                for chunk in context
+                for chunk in result.get("sources", [])
             ],
+            "confidence": result.get("confidence", 0.0),
         }
-        return answer, meta
+        if emotion:
+            meta["emotion"] = emotion
+        return result.get("answer", ""), meta
 
     def _run_fraud(self, text: str) -> tuple[str, Dict[str, Any]]:
         import random

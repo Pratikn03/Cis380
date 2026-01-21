@@ -4,24 +4,19 @@ from pathlib import Path
 from typing import Iterable, List
 
 from app.rag.chunking import chunk_with_metadata
-from app.rag.embed import EmbeddingModel
-from app.rag.vector_store import VectorStore
-
-ROOT = Path(__file__).resolve().parents[1]
-DOCS_DIR = ROOT.parent / "data" / "docs"
-EMBED_DIR = ROOT.parent / "data" / "embeddings"
+from app.rag.config import settings
+from app.rag.dsa_pipeline import ingest_documents
 
 
 def _read_file(path: Path) -> str:
     suffix = path.suffix.lower()
-    if suffix in {".txt", ".md"}:
-        return path.read_text(encoding="utf-8")
-    if suffix == ".json":
-        return path.read_text(encoding="utf-8")
+    if suffix in {".txt", ".md", ".json", ".csv", ".html", ".htm"}:
+        return path.read_text(encoding="utf-8", errors="ignore")
     raise ValueError("Unsupported file type for ingestion: %s" % suffix)
 
 
 def ingest_from_paths(paths: Iterable[Path], chunk_size: int = 900, overlap: int = 150) -> int:
+    # Legacy path: chunk raw text files and build embeddings index
     all_chunks: List[dict] = []
     for path in paths:
         content = _read_file(path)
@@ -31,20 +26,10 @@ def ingest_from_paths(paths: Iterable[Path], chunk_size: int = 900, overlap: int
             all_chunks.append(chunk)
     if not all_chunks:
         return 0
-    texts = [chunk["text"] for chunk in all_chunks]
-    model = EmbeddingModel()
-    embeddings = model.embed(texts)
-    metadata = [
-        {"source": chunk["source"], "chunk_id": chunk["chunk_id"], "text": chunk["text"]}
-        for chunk in all_chunks
-    ]
-    store = VectorStore(EMBED_DIR)
-    store.set_embeddings(metadata, embeddings)
-    return len(metadata)
+    ingest_documents(list(paths))
+    return len(all_chunks)
 
 
 def ingest_all_docs() -> int:
-    if not DOCS_DIR.exists():
-        return 0
-    text_files = [p for p in DOCS_DIR.iterdir() if p.suffix.lower() in {".txt", ".md"}]
-    return ingest_from_paths(text_files)
+    stats = ingest_documents()
+    return stats.get("chunks", 0)

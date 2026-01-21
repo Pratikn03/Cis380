@@ -37,6 +37,7 @@ VIDEO_MIME_TYPES = {
 
 CSV_EXTENSIONS = {".csv"}
 TEXT_EXTENSIONS = {".txt", ".md"}
+DOC_EXTENSIONS = {".txt", ".md", ".pdf", ".docx", ".html", ".htm", ".json", ".csv"}
 
 
 def _max_bytes_from_mb(mb: int) -> int:

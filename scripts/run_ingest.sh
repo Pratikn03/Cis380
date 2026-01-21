@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-echo "Implement ingest hooks as needed (fraud/cyber/behavior)."
+
+echo "[ingest] Building DSA document index"
+python scripts/rag/build_index.py
