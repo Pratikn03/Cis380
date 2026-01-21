@@ -72,6 +72,28 @@ except Exception:
 PY
 )"
 
+if [ -z "$TOKEN" ]; then
+  curl -sS -X POST http://localhost:8000/api/v1/admin/bootstrap \
+    -H "Content-Type: application/json" \
+    -d "{\"username\":\"${ADMIN_USER}\",\"password\":\"${ADMIN_PASS}\"}" \
+    | tee "$OUT/06_bootstrap.json" || true
+  AUTH_JSON="$(curl -sS -X POST http://localhost:8000/api/v1/auth/login \
+    -H "Content-Type: application/json" \
+    -d "{\"username\":\"${ADMIN_USER}\",\"password\":\"${ADMIN_PASS}\"}" || true)"
+  export AUTH_JSON
+  TOKEN="$(python - <<'PY' 2>/dev/null || true
+import json, os, sys
+payload = os.environ.get("AUTH_JSON", "")
+try:
+    data = json.loads(payload) if payload else {}
+    token = data.get("access_token", "")
+    print(token)
+except Exception:
+    print("")
+PY
+)"
+fi
+
 curl_auth() {
   if [ -n "$TOKEN" ]; then
     curl "$@" -H "Authorization: Bearer ${TOKEN}"
@@ -102,6 +124,11 @@ else
 fi
 
 # ---------- 10) Reproducibility proof (pick ONE) ----------
+if [ ! -f "data/processed/fraud/features_v1.parquet" ]; then
+  (python src/pipeline/ingest.py --domain fraud || true) | tee "$OUT/10_ingest_fraud.txt"
+  (python src/pipeline/build_features.py --config configs/fraud_baseline.yaml || true) \
+    | tee "$OUT/10_build_features.txt"
+fi
 (python src/pipeline/train_models.py --config configs/fraud_baseline.yaml || true) \
   | tee "$OUT/10_train_run1.txt"
 (python src/pipeline/train_models.py --config configs/fraud_baseline.yaml || true) \

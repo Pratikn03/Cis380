@@ -94,7 +94,10 @@ def train_from_config(cfg_path: Path):
         X_temp, y_temp, test_size=1 - val_fraction, stratify=y_temp, random_state=random_state
     )
 
-    model_cfg = ModelCfg(**cfg.get("model", {}))
+    model_cfg_payload = dict(cfg.get("model", {}))
+    if "type" in model_cfg_payload and "model_type" not in model_cfg_payload:
+        model_cfg_payload["model_type"] = model_cfg_payload.pop("type")
+    model_cfg = ModelCfg(**model_cfg_payload)
 
     mlflow_run = _maybe_start_mlflow(cfg)
     try:
@@ -140,8 +143,21 @@ def train_from_config(cfg_path: Path):
 
     plots_dir = Path(cfg.get("plots", {}).get("output_dir", f"experiments/{domain}/plots"))
     plots_dir.mkdir(parents=True, exist_ok=True)
-    plot_roc_curve(y_test.values, y_test_prob, title=f"{domain} ROC", output_dir=plots_dir)
-    plot_pr_curve(y_test.values, y_test_prob, title=f"{domain} PR", output_dir=plots_dir)
+    plots_dir.mkdir(parents=True, exist_ok=True)
+    plot_roc_curve(
+        y_test.values,
+        y_test_prob,
+        title=f"{domain} ROC",
+        show=False,
+        save_path=str(plots_dir / f"{domain}_roc.png"),
+    )
+    plot_pr_curve(
+        y_test.values,
+        y_test_prob,
+        title=f"{domain} PR",
+        show=False,
+        save_path=str(plots_dir / f"{domain}_pr.png"),
+    )
     print(f"Saved plots to {plots_dir}")
 
     return metrics_all

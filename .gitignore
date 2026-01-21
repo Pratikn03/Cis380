@@ -84,7 +84,6 @@ nosetests.xml
 # ============================================
 build/
 dist/
-!ui-web/frontend/dist/
 *.egg-info/
 *.egg
 wheels/
@@ -148,6 +147,7 @@ data/samples/
 data/embeddings/
 data/dsa_embeddings/
 data/monitoring/
+data/lake/
 data/Celeb_V2/
 data/Video-2/
 data/video-2/
@@ -192,6 +192,9 @@ reports/deps.txt
 reports/importtime_app_main.txt
 reports/ruff_unused.txt
 reports/vulture.txt
+reports/audit_*/
+!reports/audit_20260121_110238/
+!reports/audit_20260121_110238/**
 ENGINEERING.md
 
 # ============================================

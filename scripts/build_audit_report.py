@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 
 def read(path: Path) -> str:
@@ -28,7 +29,8 @@ def main() -> None:
 
     results: dict[str, str] = {}
     results["repo_hygiene"] = "PASS" if pollution.strip() == "" else "FAIL"
-    results["tests"] = "PASS" if "failed" not in pytest_out.lower() else "FAIL"
+    failed_match = re.search(r"\b(\d+)\s+failed\b", pytest_out.lower())
+    results["tests"] = "PASS" if (not failed_match or failed_match.group(1) == "0") else "FAIL"
     results["api_health"] = (
         "PASS"
         if ("ok" in health.lower() or "status" in health.lower() or health.strip().startswith("{"))
@@ -36,9 +38,11 @@ def main() -> None:
     )
     results["openapi"] = "PASS" if "openapi" in openapi.lower() or openapi.strip().startswith("{") else "FAIL"
     results["metrics"] = "PASS" if "# help" in metrics.lower() else "FAIL"
-    results["rag_query"] = (
-        "PASS" if (rag.strip().startswith("{") and ("citations" in rag.lower() or "answer" in rag.lower())) else "FAIL"
-    )
+    rag_lower = rag.lower()
+    rag_ok = rag.strip().startswith("{") and ("citations" in rag_lower or "answer" in rag_lower or "sources" in rag_lower)
+    if "not authenticated" in rag_lower or "forbidden" in rag_lower:
+        rag_ok = False
+    results["rag_query"] = "PASS" if rag_ok else "FAIL"
     results["next_build"] = (
         "PASS"
         if ("compiled" in next_build.lower() or "success" in next_build.lower())
@@ -46,7 +50,11 @@ def main() -> None:
         else "FAIL"
     )
     results["dvc"] = "PASS" if "ERROR:" not in dvc_status else "FAIL"
-    results["reproducibility"] = "PASS" if (train1.strip() and train2.strip()) else "FAIL"
+    train_fail = any(
+        phrase in (train1 + train2).lower()
+        for phrase in ["traceback", "filenotfounderror", "error:", "exception"]
+    )
+    results["reproducibility"] = "PASS" if (train1.strip() and train2.strip() and not train_fail) else "FAIL"
 
     md = []
     md.append("# Sentifargo Full-System Audit Report\n")
