@@ -122,6 +122,34 @@ MODEL_ERRORS = Counter(
     ["model_type", "model_name", "error_type"],
 )
 
+# RAG metrics
+RAG_QUERY_COUNT = Counter(
+    "Sentifargo_rag_queries_total",
+    "Total RAG queries",
+    ["status"],
+)
+
+RAG_QUERY_LATENCY = Histogram(
+    "Sentifargo_rag_query_duration_seconds",
+    "RAG query latency in seconds",
+    ["status"],
+    buckets=[0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0],
+)
+
+# Job metrics
+JOB_COUNT = Counter(
+    "Sentifargo_jobs_total",
+    "Total async jobs",
+    ["job_type", "status"],
+)
+
+JOB_DURATION = Histogram(
+    "Sentifargo_job_duration_seconds",
+    "Async job duration in seconds",
+    ["job_type", "status"],
+    buckets=[1, 5, 15, 30, 60, 120, 300, 600, 1800],
+)
+
 # System metrics
 SYSTEM_INFO = Info(
     "Sentifargo_system",

@@ -3,11 +3,19 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, Mapping
 import os
+import time
 
 import joblib
 import numpy as np
 
 from app.fusion.engine import predict_fusion
+
+try:
+    from app.core.health import MODEL_ERRORS, MODEL_INFERENCE_COUNT, MODEL_INFERENCE_LATENCY
+except Exception:  # pragma: no cover - metrics optional
+    MODEL_ERRORS = None
+    MODEL_INFERENCE_COUNT = None
+    MODEL_INFERENCE_LATENCY = None
 
 MODEL_PATHS = {
     "cyber": Path("models/cyber/supervised/cyber_model.pkl"),
@@ -36,6 +44,20 @@ _HEURISTIC_ENABLED = os.getenv("RISK_HEURISTIC_FALLBACK", "true").lower() not in
 
 # Demo-only geo list to make scenarios visibly different. This is not a production signal.
 _DEMO_COUNTRY_RISK = {"NG", "BR", "AE"}
+
+
+def _record_risk_metrics(duration_seconds: float, error: Exception | None = None) -> None:
+    if MODEL_INFERENCE_COUNT is None or MODEL_INFERENCE_LATENCY is None:
+        return
+    model_type = "risk"
+    model_name = "risk_engine"
+    try:
+        if error is not None and MODEL_ERRORS is not None:
+            MODEL_ERRORS.labels(model_type, model_name, type(error).__name__).inc()
+        MODEL_INFERENCE_COUNT.labels(model_type, model_name).inc()
+        MODEL_INFERENCE_LATENCY.labels(model_type, model_name).observe(duration_seconds)
+    except Exception:
+        pass
 
 
 def _load_models() -> Dict[str, Any]:
@@ -158,58 +180,65 @@ def _fusion_score(
 
 
 def analyze_risk(payload: Mapping[str, Any]) -> Dict[str, Any]:
-    models = _load_models()
-    base = _build_feature_vector(payload)
+    start = time.perf_counter()
+    try:
+        models = _load_models()
+        base = _build_feature_vector(payload)
 
-    def _score(name: str) -> float:
-        model = models.get(name)
-        if model is None:
-            return 0.0
+        def _score(name: str) -> float:
+            model = models.get(name)
+            if model is None:
+                return 0.0
 
-        # Some sklearn estimators store the number of expected features.
-        expected = int(getattr(model, "n_features_in_", 0) or 0)
-        feats = _pad_features(base, expected) if expected else base
-        try:
-            score = _score_model(model, feats)
-        except Exception:
-            # If the model is strict about feature counts, fall back to a safe zero score.
-            return 0.0
-        return float(min(max(score, 0.0), 1.0))
+            # Some sklearn estimators store the number of expected features.
+            expected = int(getattr(model, "n_features_in_", 0) or 0)
+            feats = _pad_features(base, expected) if expected else base
+            try:
+                score = _score_model(model, feats)
+            except Exception:
+                # If the model is strict about feature counts, fall back to a safe zero score.
+                return 0.0
+            return float(min(max(score, 0.0), 1.0))
 
-    # Behavior (LOF) is often packaged as scaler + model.
-    def _score_behavior() -> float:
-        scaler = models.get("behavior_scaler")
-        lof = models.get("behavior_model")
-        if scaler is None or lof is None:
-            return _score("behavior")
-        expected = int(getattr(scaler, "n_features_in_", 0) or 0)
-        feats = _pad_features(base, expected) if expected else base
-        try:
-            Xs = scaler.transform(feats)
-            raw = float(lof.decision_function(Xs)[0])
-            score = 1.0 / (1.0 + np.exp(-raw))
-        except Exception:
-            return 0.0
-        return float(min(max(score, 0.0), 1.0))
+        # Behavior (LOF) is often packaged as scaler + model.
+        def _score_behavior() -> float:
+            scaler = models.get("behavior_scaler")
+            lof = models.get("behavior_model")
+            if scaler is None or lof is None:
+                return _score("behavior")
+            expected = int(getattr(scaler, "n_features_in_", 0) or 0)
+            feats = _pad_features(base, expected) if expected else base
+            try:
+                Xs = scaler.transform(feats)
+                raw = float(lof.decision_function(Xs)[0])
+                score = 1.0 / (1.0 + np.exp(-raw))
+            except Exception:
+                return 0.0
+            return float(min(max(score, 0.0), 1.0))
 
-    cyber_risk = _score("cyber")
-    behavior_risk = _score_behavior()
-    fraud_risk = _score("fraud")
+        cyber_risk = _score("cyber")
+        behavior_risk = _score_behavior()
+        fraud_risk = _score("fraud")
 
-    if _HEURISTIC_ENABLED:
-        heuristic = _heuristic_risk(payload)
-        cyber_risk = max(cyber_risk, heuristic["cyber_risk"])
-        behavior_risk = max(behavior_risk, heuristic["behavior_risk"])
-        fraud_risk = max(fraud_risk, heuristic["fraud_risk"])
+        if _HEURISTIC_ENABLED:
+            heuristic = _heuristic_risk(payload)
+            cyber_risk = max(cyber_risk, heuristic["cyber_risk"])
+            behavior_risk = max(behavior_risk, heuristic["behavior_risk"])
+            fraud_risk = max(fraud_risk, heuristic["fraud_risk"])
 
-    fusion_risk, fusion_meta = _fusion_score(
-        cyber_risk=cyber_risk, behavior_risk=behavior_risk, fraud_risk=fraud_risk
-    )
+        fusion_risk, fusion_meta = _fusion_score(
+            cyber_risk=cyber_risk, behavior_risk=behavior_risk, fraud_risk=fraud_risk
+        )
 
-    return {
-        "cyber_risk": cyber_risk,
-        "behavior_risk": behavior_risk,
-        "fraud_risk": fraud_risk,
-        "fusion_risk": fusion_risk,
-        "fusion_meta": fusion_meta,
-    }
+        result = {
+            "cyber_risk": cyber_risk,
+            "behavior_risk": behavior_risk,
+            "fraud_risk": fraud_risk,
+            "fusion_risk": fusion_risk,
+            "fusion_meta": fusion_meta,
+        }
+    except Exception as exc:
+        _record_risk_metrics(time.perf_counter() - start, error=exc)
+        raise
+    _record_risk_metrics(time.perf_counter() - start)
+    return result

@@ -8,7 +8,22 @@ export default function SettingsPage() {
           Manage tokens, storage endpoints, and observability toggles.
         </p>
       </div>
-      <div className="card">Add RBAC + secrets configuration here.</div>
+      <div className="card panel-grid">
+        <div>
+          <div className="card-title">MLflow</div>
+          <p className="muted mt-2">
+            Track experiments and artifacts in the MLflow UI.
+          </p>
+        </div>
+        <a
+          className="pill-btn"
+          href="http://localhost:5000"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Open MLflow UI
+        </a>
+      </div>
     </div>
   );
 }

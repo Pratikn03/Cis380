@@ -18,6 +18,8 @@ export default function JobsPage() {
 
   useEffect(() => {
     refresh();
+    const interval = setInterval(refresh, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const startRagIndex = async () => {

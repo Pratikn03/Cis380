@@ -23,3 +23,12 @@
 **/values.dev.yaml
 LICENSE
 README.md
+artifacts/
+data/
+experiments/
+logs/
+metrics/
+models/
+runs/
+ui-web/next/.next/
+ui-web/frontend/dist/

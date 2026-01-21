@@ -17,6 +17,12 @@ from app.rag.security import looks_like_prompt_injection, redact_pii
 from app.rag.telemetry import log_event
 from app.utils.llm_stub import LLMStub
 
+try:
+    from app.core.health import RAG_QUERY_COUNT, RAG_QUERY_LATENCY
+except Exception:  # pragma: no cover - metrics are optional in some envs
+    RAG_QUERY_COUNT = None
+    RAG_QUERY_LATENCY = None
+
 
 def ingest_documents(paths: Optional[List[Path]] = None, *, rebuild: bool = False) -> Dict[str, int]:
     docs_dir = settings.docs_dir
@@ -139,6 +145,16 @@ def ingest_documents(paths: Optional[List[Path]] = None, *, rebuild: bool = Fals
     }
 
 
+def _record_rag_metrics(status: str, latency_ms: float) -> None:
+    if RAG_QUERY_COUNT is None or RAG_QUERY_LATENCY is None:
+        return
+    try:
+        RAG_QUERY_COUNT.labels(status).inc()
+        RAG_QUERY_LATENCY.labels(status).observe(latency_ms / 1000.0)
+    except Exception:
+        pass
+
+
 def answer_query(query: str, *, top_k: Optional[int] = None) -> Dict[str, Any]:
     start = time.perf_counter()
     failure_reason = None
@@ -148,14 +164,16 @@ def answer_query(query: str, *, top_k: Optional[int] = None) -> Dict[str, Any]:
             ingest_documents()
         else:
             failure_reason = "no_index"
+            latency_ms = (time.perf_counter() - start) * 1000
             log_event(
                 {
                     "event": "rag_query",
                     "status": "no_index",
                     "query": query,
-                    "latency_ms": round((time.perf_counter() - start) * 1000, 2),
+                    "latency_ms": round(latency_ms, 2),
                 }
             )
+            _record_rag_metrics("no_index", latency_ms)
             return {
                 "answer": "No document index available. Please ingest documents first.",
                 "citations": [],
@@ -188,14 +206,16 @@ def answer_query(query: str, *, top_k: Optional[int] = None) -> Dict[str, Any]:
 
     if not merged:
         failure_reason = "no_evidence"
+        latency_ms = (time.perf_counter() - start) * 1000
         log_event(
             {
                 "event": "rag_query",
                 "status": "no_evidence",
                 "query": query,
-                "latency_ms": round((time.perf_counter() - start) * 1000, 2),
+                "latency_ms": round(latency_ms, 2),
             }
         )
+        _record_rag_metrics("no_evidence", latency_ms)
         return {
             "answer": "Not enough evidence in the documents.",
             "citations": [],
@@ -208,16 +228,18 @@ def answer_query(query: str, *, top_k: Optional[int] = None) -> Dict[str, Any]:
     avg_score = sum(item.get("hybrid_score", 0.0) for item in merged) / max(len(merged), 1)
     if max_score < settings.min_score or avg_score < settings.min_avg_score:
         failure_reason = "low_confidence"
+        latency_ms = (time.perf_counter() - start) * 1000
         log_event(
             {
                 "event": "rag_query",
                 "status": "low_confidence",
                 "query": query,
-                "latency_ms": round((time.perf_counter() - start) * 1000, 2),
+                "latency_ms": round(latency_ms, 2),
                 "top_score": max_score,
                 "avg_score": avg_score,
             }
         )
+        _record_rag_metrics("low_confidence", latency_ms)
         return {
             "answer": "Not enough evidence in the documents.",
             "citations": [],
@@ -263,6 +285,7 @@ def answer_query(query: str, *, top_k: Optional[int] = None) -> Dict[str, Any]:
         failure_reason=failure_reason,
         chunk_scores=[(c.get("chunk_id"), c.get("hybrid_score")) for c in merged],
     )
+    _record_rag_metrics("ok", latency_ms)
     return {
         "answer": answer,
         "citations": citations,
