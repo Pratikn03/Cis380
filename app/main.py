@@ -78,6 +78,8 @@ except Exception:
 # IMPORT API ROUTES - Each route handles a specific ML service
 # ==============================================================================
 from app.core import settings, setup_production_middleware  # noqa: E402
+from app.core.auth import bootstrap_admin, bootstrap_roles  # noqa: E402
+from app.db.session import SessionLocal  # noqa: E402
 from app.legacy.api.deps import require_auth  # noqa: E402
 from app.legacy.api.routes import behavior, chat, cyber, fraud, rag, recommend, vision  # noqa: E402
 
@@ -92,6 +94,7 @@ _app_dsa_algo_router = None   # DSA algorithm API
 _app_brand_router = None      # Brand/logo detection
 _app_stt_router = None        # Speech-to-text
 _app_vision_temporal_router = None  # Video/temporal analysis
+_api_v1_router = None
 
 # ==============================================================================
 # OPTIONAL ROUTER IMPORTS
@@ -126,6 +129,12 @@ try:  # pragma: no cover
 except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.api.rag router unavailable: %s", exc)
     _app_rag_router = None
+
+try:  # pragma: no cover
+    from app.api.v1.router import api_v1 as _api_v1_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.v1 router unavailable: %s", exc)
+    _api_v1_router = None
 
 # DSA RAG Router - Offline-first DSA document Q&A
 try:  # pragma: no cover
@@ -295,6 +304,10 @@ if _app_vision_temporal_router is not None:
         _app_vision_temporal_router, prefix="/api", dependencies=[Depends(require_auth)]
     )
 
+# Versioned API (Tier-6 contract)
+if _api_v1_router is not None:
+    app.include_router(_api_v1_router)
+
 # ==============================================================================
 # STARTUP TASKS - Best-effort index build for DSA RAG
 # ==============================================================================
@@ -307,6 +320,20 @@ if _dsa_rag_ensure_index is not None:
             _dsa_rag_ensure_index()
         except Exception as exc:  # pragma: no cover
             logger.warning("DSA RAG auto-ingest skipped: %s", exc)
+
+
+@app.on_event("startup")
+def _bootstrap_admin_user() -> None:
+    admin_username = os.getenv("ADMIN_USERNAME")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    if not admin_username or not admin_password:
+        return
+    try:
+        with SessionLocal() as db:
+            bootstrap_roles(db)
+            bootstrap_admin(db, admin_username, admin_password)
+    except Exception as exc:  # pragma: no cover
+        logger.warning("Admin bootstrap skipped: %s", exc)
 
 
 # ==============================================================================

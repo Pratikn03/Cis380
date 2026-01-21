@@ -38,6 +38,8 @@ class SecuritySettings(BaseModel):
     secret_key: str = Field(
         default_factory=lambda: secrets.token_hex(32), description="Application secret key"
     )
+    access_token_expire_minutes: int = Field(default=30, description="JWT access token TTL")
+    refresh_token_expire_days: int = Field(default=7, description="JWT refresh token TTL (days)")
     auth_token: str | None = Field(default=None, description="API authentication token")
     cors_origins: list[str] = Field(default=["*"], description="Allowed CORS origins")
     rate_limit_enabled: bool = Field(default=True)
@@ -167,6 +169,8 @@ def _load_settings_from_env() -> Settings:
         ),
         security=SecuritySettings(
             secret_key=os.getenv("SECRET_KEY", secrets.token_hex(32)),
+            access_token_expire_minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")),
+            refresh_token_expire_days=int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7")),
             auth_token=os.getenv("AUTH_TOKEN"),
             cors_origins=os.getenv("CORS_ORIGINS", "*").split(","),
             rate_limit_enabled=os.getenv("RATE_LIMIT_ENABLED", "true").lower() == "true",

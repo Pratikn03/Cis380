@@ -96,6 +96,42 @@ def ingest_documents(paths: Optional[List[Path]] = None, *, rebuild: bool = Fals
     _write_jsonl(settings.chunks_path, chunk_records)
 
     RagIndex.build(chunk_records, model_name=settings.embed_model)
+
+    try:
+        from app.db.models import Document, RagChunk
+        from app.db.session import SessionLocal
+
+        with SessionLocal() as db:
+            db.query(Document).delete()
+            db.query(RagChunk).delete()
+            db.add_all(
+                [
+                    Document(
+                        id=doc["doc_id"],
+                        filename=Path(str(doc["source"])).name,
+                        content_hash=doc["doc_id"],
+                        source=str(doc.get("source", "")),
+                    )
+                    for doc in doc_records
+                ]
+            )
+            db.add_all(
+                [
+                    RagChunk(
+                        chunk_id=chunk["chunk_id"],
+                        doc_id=chunk["doc_id"],
+                        meta={
+                            "source": chunk.get("source"),
+                            "page": chunk.get("page"),
+                            "filename": chunk.get("filename"),
+                        },
+                    )
+                    for chunk in chunk_records
+                ]
+            )
+            db.commit()
+    except Exception:
+        pass
     return {
         "documents": len(doc_records),
         "pages": len(page_records),
@@ -124,6 +160,7 @@ def answer_query(query: str, *, top_k: Optional[int] = None) -> Dict[str, Any]:
                 "answer": "No document index available. Please ingest documents first.",
                 "citations": [],
                 "confidence": 0.0,
+                "retrieval": {"top_score": 0.0, "avg_score": 0.0},
                 "sources": [],
             }
 
@@ -163,6 +200,7 @@ def answer_query(query: str, *, top_k: Optional[int] = None) -> Dict[str, Any]:
             "answer": "Not enough evidence in the documents.",
             "citations": [],
             "confidence": 0.0,
+            "retrieval": {"top_score": 0.0, "avg_score": 0.0},
             "sources": [],
         }
 
@@ -184,6 +222,7 @@ def answer_query(query: str, *, top_k: Optional[int] = None) -> Dict[str, Any]:
             "answer": "Not enough evidence in the documents.",
             "citations": [],
             "confidence": max_score,
+            "retrieval": {"top_score": round(max_score, 4), "avg_score": round(avg_score, 4)},
             "sources": [],
         }
 
@@ -212,6 +251,7 @@ def answer_query(query: str, *, top_k: Optional[int] = None) -> Dict[str, Any]:
     confidence = min(1.0, max_score + 0.15 * (len(merged) / max(settings.topk_final, 1)))
     latency_ms = (time.perf_counter() - start) * 1000
     retrieve_ms = (time.perf_counter() - start) * 1000 - generation_ms
+    retrieval = {"top_score": round(max_score, 4), "avg_score": round(avg_score, 4)}
     _log_query(
         query=query,
         answer=answer,
@@ -227,6 +267,7 @@ def answer_query(query: str, *, top_k: Optional[int] = None) -> Dict[str, Any]:
         "answer": answer,
         "citations": citations,
         "confidence": round(confidence, 4),
+        "retrieval": retrieval,
         "sources": merged,
         "latency_ms": round(latency_ms, 2),
     }

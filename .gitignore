@@ -11,6 +11,7 @@ __pycache__/
 # Virtual Environments (KEEP ALL)
 # ============================================
 .venv/
+.venv_integration/
 .venv-*/
 venv/
 env/
@@ -93,6 +94,10 @@ wheels/
 # Node / Frontend
 # ============================================
 node_modules/
+ui-web/**/dist/
+ui-web/**/.next/
+ui-web/**/.turbo/
+ui-web/**/.cache/
 
 # ============================================
 # ML/AI Specific
@@ -176,6 +181,13 @@ reports/duplicates_*.json
 reports/duplicates_move_*.sh
 reports/*.pdf
 reports/*.html
+reports/INTEGRATION_UNUSED_CODE.txt
+reports/deps.dot
+reports/deps.txt
+reports/importtime_app_main.txt
+reports/ruff_unused.txt
+reports/vulture.txt
+ENGINEERING.md
 
 # ============================================
 # Media Files
