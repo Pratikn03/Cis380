@@ -1,0 +1,526 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.5, pytest-8.3.4, pluggy-1.6.0
+rootdir: /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.7.0, hydra-core-1.3.2
+
+----------------------------- live log collection ------------------------------
+2026-01-21 07:46:58 [INFO] NumExpr defaulting to 10 threads.
+2026-01-21 07:47:00 [INFO] Production middleware configured successfully
+collected 91 items / 1 skipped
+
+tests/e2e/test_rag_dsa.py::test_dsa_doc_rag_roundtrip PASSED             [  1%]
+tests/e2e/test_smoke.py::test_health PASSED                              [  2%]
+tests/e2e/test_smoke.py::test_chat PASSED                                [  3%]
+tests/test_api_payloads.py::test_fusion_keys_sorted_for_payload PASSED   [  4%]
+tests/test_api_v1_contract.py::test_api_v1_contract_in_openapi PASSED    [  5%]
+tests/test_auth_password.py::test_password_hash_roundtrip 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:00 [WARNING] (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/opt/anaconda3/lib/python3.13/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+PASSED                                                                   [  6%]
+tests/test_behavior_logs_api.py::test_behavior_logs_endpoint_accepts_csv 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:00 [INFO] Request started: POST /api/behavior/logs request_id=4280d66e-b4fb-4619-b7c0-e9f21e40269a client=testclient
+2026-01-21 07:47:00 [INFO] Request completed: POST /api/behavior/logs status=200 duration=90.26ms request_id=4280d66e-b4fb-4619-b7c0-e9f21e40269a
+2026-01-21 07:47:00 [INFO] HTTP Request: POST http://testserver/api/behavior/logs?max_rows=1000&top_n=5 "HTTP/1.1 200 OK"
+PASSED                                                                   [  7%]
+tests/test_brand_routes_import.py::test_brand_route_import_does_not_require_weights PASSED [  8%]
+tests/test_build_30seq_dataset.py::test_build_sequences_writes_files PASSED [  9%]
+tests/test_build_recommender_index_script.py::test_build_recommender_index_script_runs PASSED [ 10%]
+tests/test_chat.py::test_chat_route 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:01 [INFO] Request started: POST /api/chat request_id=37d6dbc4-2709-4bba-b832-313b2a8ce99d client=testclient
+2026-01-21 07:47:01 [INFO] Request completed: POST /api/chat status=200 duration=173.78ms request_id=37d6dbc4-2709-4bba-b832-313b2a8ce99d
+2026-01-21 07:47:01 [INFO] HTTP Request: POST http://testserver/api/chat "HTTP/1.1 200 OK"
+PASSED                                                                   [ 12%]
+tests/test_chat_multimodal_stt.py::test_chat_multimodal_transcribe_flag_does_not_break 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:01 [INFO] Request started: POST /api/chat/multimodal request_id=ba889b64-13a6-41ac-b94c-65ee19f70a4a client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/chat/multimodal status=200 duration=1003.52ms request_id=ba889b64-13a6-41ac-b94c-65ee19f70a4a
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/chat/multimodal "HTTP/1.1 200 OK"
+PASSED                                                                   [ 13%]
+tests/test_clothes_catalog.py::test_recommend_clothes_includes_brand_and_title PASSED [ 14%]
+tests/test_clothes_catalog.py::test_recommend_clothes_works_without_preferred_tags PASSED [ 15%]
+tests/test_decision_engine.py::test_make_decision_blocks_on_high_fraud PASSED [ 16%]
+tests/test_decision_engine.py::test_make_decision_step_up_on_combined_risk PASSED [ 17%]
+tests/test_decision_engine.py::test_make_decision_allows_low_risk PASSED [ 18%]
+tests/test_dsa_algorithms_api.py::test_dsa_lca_api 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/lca request_id=c669152e-142c-4da4-857b-5d757f53be81 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/lca status=200 duration=1.37ms request_id=c669152e-142c-4da4-857b-5d757f53be81
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/lca "HTTP/1.1 200 OK"
+PASSED                                                                   [ 19%]
+tests/test_dsa_algorithms_api.py::test_dsa_segment_tree_api 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/segment-tree request_id=0e7521cf-c989-4786-bc97-c8b9c99f33f7 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/segment-tree status=200 duration=1.37ms request_id=0e7521cf-c989-4786-bc97-c8b9c99f33f7
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/segment-tree "HTTP/1.1 200 OK"
+PASSED                                                                   [ 20%]
+tests/test_dsa_algorithms_api.py::test_dsa_min_cost_max_flow_api 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/min-cost-max-flow request_id=68886443-f299-4839-8806-6a64add94d92 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/min-cost-max-flow status=200 duration=1.16ms request_id=68886443-f299-4839-8806-6a64add94d92
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/min-cost-max-flow "HTTP/1.1 200 OK"
+PASSED                                                                   [ 21%]
+tests/test_dsa_algorithms_api.py::test_dsa_graph_algorithms_api 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/bfs request_id=a1da4385-4c83-44f3-b33b-485f8491c5a1 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/bfs status=200 duration=1.63ms request_id=a1da4385-4c83-44f3-b33b-485f8491c5a1
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/bfs "HTTP/1.1 200 OK"
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/dfs request_id=20ebc426-8d62-4f67-ac27-69db034b31f2 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/dfs status=200 duration=1.13ms request_id=20ebc426-8d62-4f67-ac27-69db034b31f2
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/dfs "HTTP/1.1 200 OK"
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/shortest-paths request_id=8a288a45-7a56-4234-a285-4e0ab506fc0c client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/shortest-paths status=200 duration=1.17ms request_id=8a288a45-7a56-4234-a285-4e0ab506fc0c
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/shortest-paths "HTTP/1.1 200 OK"
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/mst request_id=96450044-d1da-4682-980a-457f09ad5b04 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/mst status=200 duration=0.97ms request_id=96450044-d1da-4682-980a-457f09ad5b04
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/mst "HTTP/1.1 200 OK"
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/scc request_id=7d7fcddc-bf49-46ee-b20d-2e5651dbcaeb client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/scc status=200 duration=1.17ms request_id=7d7fcddc-bf49-46ee-b20d-2e5651dbcaeb
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/scc "HTTP/1.1 200 OK"
+PASSED                                                                   [ 23%]
+tests/test_dsa_algorithms_api.py::test_dsa_segment_tree_min_api 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/segment-tree-min request_id=d61f361e-6cae-4c75-ba18-4cfb5b7b3af8 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/segment-tree-min status=200 duration=0.99ms request_id=d61f361e-6cae-4c75-ba18-4cfb5b7b3af8
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/segment-tree-min "HTTP/1.1 200 OK"
+PASSED                                                                   [ 24%]
+tests/test_dsa_algorithms_api.py::test_dsa_shortest_path_variants_api 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/shortest-paths/bellman-ford request_id=4f6ceae8-30ed-4faf-ae71-588529da8f2e client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/shortest-paths/bellman-ford status=200 duration=1.11ms request_id=4f6ceae8-30ed-4faf-ae71-588529da8f2e
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/shortest-paths/bellman-ford "HTTP/1.1 200 OK"
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/shortest-paths/floyd-warshall request_id=35234142-7078-4bcf-89cc-60d8f6f33c8c client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/shortest-paths/floyd-warshall status=200 duration=0.96ms request_id=35234142-7078-4bcf-89cc-60d8f6f33c8c
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/shortest-paths/floyd-warshall "HTTP/1.1 200 OK"
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/shortest-paths/zero-one-bfs request_id=4c7ccf90-591b-4c2c-a143-68bdaea80046 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/shortest-paths/zero-one-bfs status=200 duration=1.11ms request_id=4c7ccf90-591b-4c2c-a143-68bdaea80046
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/shortest-paths/zero-one-bfs "HTTP/1.1 200 OK"
+PASSED                                                                   [ 25%]
+tests/test_dsa_algorithms_api.py::test_dsa_trie_api 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/trie request_id=1fc7d67b-2b88-44a8-ad4d-90b7bce05865 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/trie status=200 duration=0.91ms request_id=1fc7d67b-2b88-44a8-ad4d-90b7bce05865
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/trie "HTTP/1.1 200 OK"
+PASSED                                                                   [ 26%]
+tests/test_dsa_algorithms_api.py::test_dsa_dp_api 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/dp request_id=0a561f2b-f8c5-4f27-9bd8-72f079c9e37c client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/dp status=200 duration=1.16ms request_id=0a561f2b-f8c5-4f27-9bd8-72f079c9e37c
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/dp "HTTP/1.1 200 OK"
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/dp request_id=92071e39-df82-4cc5-9c35-8e26f3876d13 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/dp status=200 duration=0.87ms request_id=92071e39-df82-4cc5-9c35-8e26f3876d13
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/dp "HTTP/1.1 200 OK"
+2026-01-21 07:47:02 [INFO] Request started: POST /api/dsa/algorithms/dp request_id=8b9d216c-301e-465b-b135-fbe71696a999 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/dsa/algorithms/dp status=200 duration=0.97ms request_id=8b9d216c-301e-465b-b135-fbe71696a999
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/dsa/algorithms/dp "HTTP/1.1 200 OK"
+PASSED                                                                   [ 27%]
+tests/test_face_emotion_endpoint.py::test_face_emotion_predict_no_file 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: POST /api/vision/face_emotion/predict request_id=ebd291a7-3910-4a6c-a578-08940afc6997 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/vision/face_emotion/predict status=422 duration=1.05ms request_id=ebd291a7-3910-4a6c-a578-08940afc6997
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/vision/face_emotion/predict "HTTP/1.1 422 Unprocessable Entity"
+PASSED                                                                   [ 28%]
+tests/test_face_emotion_endpoint.py::test_face_emotion_predict_invalid_file 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: POST /api/vision/face_emotion/predict request_id=cbd38c93-1644-4e95-852c-e5612c3bd84e client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/vision/face_emotion/predict status=400 duration=0.89ms request_id=cbd38c93-1644-4e95-852c-e5612c3bd84e
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/vision/face_emotion/predict "HTTP/1.1 400 Bad Request"
+PASSED                                                                   [ 29%]
+tests/test_fusion_run.py::test_generate_meta_features_and_train PASSED   [ 30%]
+tests/test_health.py::test_health_endpoint 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: GET /health request_id=61486f2d-7d99-4953-87ad-dc09c235d18e client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: GET /health status=200 duration=0.49ms request_id=61486f2d-7d99-4953-87ad-dc09c235d18e
+2026-01-21 07:47:02 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+PASSED                                                                   [ 31%]
+tests/test_health_endpoint.py::test_api_health_contract 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: GET /api/health request_id=2d91a679-2402-4374-8eb0-a9bb62ec3cb5 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: GET /api/health status=200 duration=1.44ms request_id=2d91a679-2402-4374-8eb0-a9bb62ec3cb5
+2026-01-21 07:47:02 [INFO] HTTP Request: GET http://testserver/api/health "HTTP/1.1 200 OK"
+PASSED                                                                   [ 32%]
+tests/test_monitoring.py::test_monitor_workflow 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:02 [INFO] Request started: POST /api/monitor/log request_id=10b3f3f9-487b-489b-87bb-e19fc58bd06c client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/monitor/log status=200 duration=1.05ms request_id=10b3f3f9-487b-489b-87bb-e19fc58bd06c
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/monitor/log "HTTP/1.1 200 OK"
+2026-01-21 07:47:02 [INFO] Request started: GET /api/monitor/summary request_id=18d82794-6c0d-45d1-aaa0-6a3da7ba17f0 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: GET /api/monitor/summary status=200 duration=1.13ms request_id=18d82794-6c0d-45d1-aaa0-6a3da7ba17f0
+2026-01-21 07:47:02 [INFO] HTTP Request: GET http://testserver/api/monitor/summary?window_n=10 "HTTP/1.1 200 OK"
+2026-01-21 07:47:02 [INFO] Request started: POST /api/monitor/baseline/build request_id=35784120-2674-443e-b24e-59387318d528 client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: POST /api/monitor/baseline/build status=200 duration=0.88ms request_id=35784120-2674-443e-b24e-59387318d528
+2026-01-21 07:47:02 [INFO] HTTP Request: POST http://testserver/api/monitor/baseline/build "HTTP/1.1 200 OK"
+2026-01-21 07:47:02 [INFO] Request started: GET /api/monitor/drift request_id=1f44fbac-22e0-4c67-a23c-cc537b5f649f client=testclient
+2026-01-21 07:47:02 [INFO] Request completed: GET /api/monitor/drift status=200 duration=6.20ms request_id=1f44fbac-22e0-4c67-a23c-cc537b5f649f
+2026-01-21 07:47:02 [INFO] HTTP Request: GET http://testserver/api/monitor/drift?window_n=10 "HTTP/1.1 200 OK"
+PASSED                                                                   [ 34%]
+tests/test_multi_sequence_30_torch.py::test_forward_pass_small_shape PASSED [ 35%]
+tests/test_nlp_tiny.py::test_distilbert_forward_smoke SKIPPED (could...) [ 36%]
+tests/test_paths.py::test_paths_exist PASSED                             [ 37%]
+tests/test_production.py::TestHealthEndpoints::test_health_check 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: GET /health request_id=89861c16-daae-453f-8747-a586ec6d0dd4 client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: GET /health status=200 duration=0.61ms request_id=89861c16-daae-453f-8747-a586ec6d0dd4
+2026-01-21 07:47:03 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+PASSED                                                                   [ 38%]
+tests/test_production.py::TestHealthEndpoints::test_liveness_check 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: GET /health/live request_id=f341cf73-6b9d-4036-a40e-a54bdf09f6d4 client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: GET /health/live status=200 duration=0.39ms request_id=f341cf73-6b9d-4036-a40e-a54bdf09f6d4
+2026-01-21 07:47:03 [INFO] HTTP Request: GET http://testserver/health/live "HTTP/1.1 200 OK"
+PASSED                                                                   [ 39%]
+tests/test_production.py::TestHealthEndpoints::test_readiness_check 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: GET /health/ready request_id=7ca42123-1af8-4a21-bb20-6ea8d6824814 client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: GET /health/ready status=200 duration=0.83ms request_id=7ca42123-1af8-4a21-bb20-6ea8d6824814
+2026-01-21 07:47:03 [INFO] HTTP Request: GET http://testserver/health/ready "HTTP/1.1 200 OK"
+PASSED                                                                   [ 40%]
+tests/test_production.py::TestHealthEndpoints::test_detailed_health 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: GET /health/detailed request_id=8135bee6-e9d7-4348-9e37-5dcb31b69ffa client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: GET /health/detailed status=200 duration=34.32ms request_id=8135bee6-e9d7-4348-9e37-5dcb31b69ffa
+2026-01-21 07:47:03 [INFO] HTTP Request: GET http://testserver/health/detailed "HTTP/1.1 200 OK"
+PASSED                                                                   [ 41%]
+tests/test_production.py::TestChatAPI::test_chat_endpoint 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: POST /api/chat request_id=252cf602-2ddd-474b-9507-29f99e4afcbf client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: POST /api/chat status=200 duration=1.16ms request_id=252cf602-2ddd-474b-9507-29f99e4afcbf
+2026-01-21 07:47:03 [INFO] HTTP Request: POST http://testserver/api/chat "HTTP/1.1 200 OK"
+PASSED                                                                   [ 42%]
+tests/test_production.py::TestChatAPI::test_chat_empty_message 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: POST /api/chat request_id=b5af94d4-13a5-4ae1-9c33-2a048de78887 client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: POST /api/chat status=422 duration=1.21ms request_id=b5af94d4-13a5-4ae1-9c33-2a048de78887
+2026-01-21 07:47:03 [INFO] HTTP Request: POST http://testserver/api/chat "HTTP/1.1 422 Unprocessable Entity"
+PASSED                                                                   [ 43%]
+tests/test_production.py::TestChatAPI::test_chat_with_rag 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: POST /api/chat request_id=70d18fee-1695-4fdc-96ae-6aa94f1b07e5 client=testclient
+2026-01-21 07:47:03 [WARNING] SHAP explanation failed: property 'feature_names_in_' of 'Pipeline' object has no setter
+2026-01-21 07:47:03 [INFO] Request completed: POST /api/chat status=200 duration=6.73ms request_id=70d18fee-1695-4fdc-96ae-6aa94f1b07e5
+2026-01-21 07:47:03 [INFO] HTTP Request: POST http://testserver/api/chat "HTTP/1.1 200 OK"
+PASSED                                                                   [ 45%]
+tests/test_production.py::TestFraudAPI::test_fraud_scoring 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: POST /api/fraud request_id=d3f2890e-fbdc-4a17-ad32-adb4f3473491 client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: POST /api/fraud status=200 duration=4.22ms request_id=d3f2890e-fbdc-4a17-ad32-adb4f3473491
+2026-01-21 07:47:03 [INFO] HTTP Request: POST http://testserver/api/fraud "HTTP/1.1 200 OK"
+PASSED                                                                   [ 46%]
+tests/test_production.py::TestFraudAPI::test_fraud_invalid_features 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: POST /api/fraud request_id=5b25fc0b-43b9-465e-a65f-d8a2e2660b00 client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: POST /api/fraud status=422 duration=1.30ms request_id=5b25fc0b-43b9-465e-a65f-d8a2e2660b00
+2026-01-21 07:47:03 [INFO] HTTP Request: POST http://testserver/api/fraud "HTTP/1.1 422 Unprocessable Entity"
+PASSED                                                                   [ 47%]
+tests/test_production.py::TestFraudAPI::test_fraud_empty_features 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: POST /api/fraud request_id=78e631d0-57cd-40b1-9354-f0726ac2b1d9 client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: POST /api/fraud status=200 duration=2.67ms request_id=78e631d0-57cd-40b1-9354-f0726ac2b1d9
+2026-01-21 07:47:03 [INFO] HTTP Request: POST http://testserver/api/fraud "HTTP/1.1 200 OK"
+PASSED                                                                   [ 48%]
+tests/test_production.py::TestCyberAPI::test_cyber_scoring 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: POST /api/cyber request_id=44659458-e389-4bc6-b960-296c86274284 client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: POST /api/cyber status=200 duration=21.47ms request_id=44659458-e389-4bc6-b960-296c86274284
+2026-01-21 07:47:03 [INFO] HTTP Request: POST http://testserver/api/cyber "HTTP/1.1 200 OK"
+PASSED                                                                   [ 49%]
+tests/test_production.py::TestBehaviorAPI::test_behavior_scoring 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: POST /api/behavior request_id=dd4ea225-35c7-45cf-9a02-9dbae32e2c28 client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: POST /api/behavior status=200 duration=3.08ms request_id=dd4ea225-35c7-45cf-9a02-9dbae32e2c28
+2026-01-21 07:47:03 [INFO] HTTP Request: POST http://testserver/api/behavior "HTTP/1.1 200 OK"
+PASSED                                                                   [ 50%]
+tests/test_production.py::TestVisionAPI::test_vision_predict_no_file 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: POST /api/vision/predict request_id=bc70ad38-c353-467b-b1aa-602c7edd4dd5 client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: POST /api/vision/predict status=400 duration=0.68ms request_id=bc70ad38-c353-467b-b1aa-602c7edd4dd5
+2026-01-21 07:47:03 [INFO] HTTP Request: POST http://testserver/api/vision/predict "HTTP/1.1 400 Bad Request"
+PASSED                                                                   [ 51%]
+tests/test_production.py::TestVisionAPI::test_vision_predict_invalid_file 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: POST /api/vision/predict request_id=6094ca55-acf3-4508-aae3-1c2054ca503b client=testclient
+2026-01-21 07:47:03 [INFO] Request completed: POST /api/vision/predict status=400 duration=1.38ms request_id=6094ca55-acf3-4508-aae3-1c2054ca503b
+2026-01-21 07:47:03 [INFO] HTTP Request: POST http://testserver/api/vision/predict "HTTP/1.1 400 Bad Request"
+PASSED                                                                   [ 52%]
+tests/test_production.py::TestRecommendAPI::test_recommend_movies 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:03 [INFO] Request started: POST /api/recommend request_id=665864ac-1add-467b-b024-f67f63ec0e46 client=testclient
+2026-01-21 07:47:05 [INFO] Request completed: POST /api/recommend status=200 duration=2580.47ms request_id=665864ac-1add-467b-b024-f67f63ec0e46
+2026-01-21 07:47:05 [INFO] HTTP Request: POST http://testserver/api/recommend "HTTP/1.1 200 OK"
+PASSED                                                                   [ 53%]
+tests/test_production.py::TestRecommendAPI::test_recommend_products 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:05 [INFO] Request started: POST /api/recommend request_id=f8c39f55-922c-4f04-908e-37c765ea445d client=testclient
+2026-01-21 07:47:05 [INFO] Request completed: POST /api/recommend status=200 duration=263.87ms request_id=f8c39f55-922c-4f04-908e-37c765ea445d
+2026-01-21 07:47:05 [INFO] HTTP Request: POST http://testserver/api/recommend "HTTP/1.1 200 OK"
+PASSED                                                                   [ 54%]
+tests/test_production.py::TestRAGAPI::test_rag_query 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:05 [INFO] Request started: POST /api/rag/query request_id=2a026852-4f7c-4f83-8ed2-17e8f50ba2be client=testclient
+2026-01-21 07:47:05 [INFO] Request completed: POST /api/rag/query status=200 duration=1.81ms request_id=2a026852-4f7c-4f83-8ed2-17e8f50ba2be
+2026-01-21 07:47:05 [INFO] HTTP Request: POST http://testserver/api/rag/query "HTTP/1.1 200 OK"
+PASSED                                                                   [ 56%]
+tests/test_production.py::TestRAGAPI::test_rag_upload_no_file 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:05 [INFO] Request started: POST /api/rag/upload request_id=40af2373-72ac-4e7c-bb1b-29472dcd84c7 client=testclient
+2026-01-21 07:47:05 [INFO] Request completed: POST /api/rag/upload status=422 duration=0.75ms request_id=40af2373-72ac-4e7c-bb1b-29472dcd84c7
+2026-01-21 07:47:05 [INFO] HTTP Request: POST http://testserver/api/rag/upload "HTTP/1.1 422 Unprocessable Entity"
+PASSED                                                                   [ 57%]
+tests/test_production.py::TestAuthentication::test_protected_endpoint_no_token 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:05 [INFO] Request started: GET /api/monitor/summary request_id=3097b5f7-88d5-4d27-be1c-7231b3841a02 client=testclient
+2026-01-21 07:47:05 [INFO] Request completed: GET /api/monitor/summary status=200 duration=3.30ms request_id=3097b5f7-88d5-4d27-be1c-7231b3841a02
+2026-01-21 07:47:05 [INFO] HTTP Request: GET http://testserver/api/monitor/summary "HTTP/1.1 200 OK"
+PASSED                                                                   [ 58%]
+tests/test_production.py::TestAuthentication::test_protected_endpoint_invalid_token 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:05 [INFO] Request started: GET /api/monitor/summary request_id=6789da23-ecbb-4b13-bbcf-98fb3c70e15c client=testclient
+2026-01-21 07:47:05 [INFO] Request completed: GET /api/monitor/summary status=200 duration=1.00ms request_id=6789da23-ecbb-4b13-bbcf-98fb3c70e15c
+2026-01-21 07:47:05 [INFO] HTTP Request: GET http://testserver/api/monitor/summary "HTTP/1.1 200 OK"
+PASSED                                                                   [ 59%]
+tests/test_production.py::TestRateLimiting::test_rate_limit_not_exceeded 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:05 [INFO] Request started: GET /health request_id=11c719e6-61ca-41c3-bb17-282ebb669f7f client=testclient
+2026-01-21 07:47:05 [INFO] Request completed: GET /health status=200 duration=0.29ms request_id=11c719e6-61ca-41c3-bb17-282ebb669f7f
+2026-01-21 07:47:05 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:05 [INFO] Request started: GET /health request_id=08af0167-6893-42fd-a865-c4bad818e4ba client=testclient
+2026-01-21 07:47:05 [INFO] Request completed: GET /health status=200 duration=0.28ms request_id=08af0167-6893-42fd-a865-c4bad818e4ba
+2026-01-21 07:47:05 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:05 [INFO] Request started: GET /health request_id=fbc5f5df-b22c-48fb-8cee-7b0b7cc83ac2 client=testclient
+2026-01-21 07:47:05 [INFO] Request completed: GET /health status=200 duration=0.59ms request_id=fbc5f5df-b22c-48fb-8cee-7b0b7cc83ac2
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=35a59bc5-ed71-4c33-a466-513bffd8c218 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=0.31ms request_id=35a59bc5-ed71-4c33-a466-513bffd8c218
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=ccab8aeb-cb5f-497a-b9a4-856e72d3b30c client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=0.31ms request_id=ccab8aeb-cb5f-497a-b9a4-856e72d3b30c
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+PASSED                                                                   [ 60%]
+tests/test_production.py::TestRateLimiting::test_rate_limit_header 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=f2b49ae7-a98e-4887-a71e-7257334c96d1 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=0.54ms request_id=f2b49ae7-a98e-4887-a71e-7257334c96d1
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+PASSED                                                                   [ 61%]
+tests/test_production.py::TestErrorHandling::test_404_endpoint 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: GET /api/nonexistent request_id=1d333a0e-62db-4e10-b608-f83ad57ae424 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /api/nonexistent status=404 duration=0.51ms request_id=1d333a0e-62db-4e10-b608-f83ad57ae424
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/api/nonexistent "HTTP/1.1 404 Not Found"
+PASSED                                                                   [ 62%]
+tests/test_production.py::TestErrorHandling::test_method_not_allowed 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: DELETE /health request_id=4112e16c-22db-4a4e-8b54-20b59ce7ea31 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: DELETE /health status=405 duration=0.30ms request_id=4112e16c-22db-4a4e-8b54-20b59ce7ea31
+2026-01-21 07:47:06 [INFO] HTTP Request: DELETE http://testserver/health "HTTP/1.1 405 Method Not Allowed"
+PASSED                                                                   [ 63%]
+tests/test_production.py::TestErrorHandling::test_invalid_json 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: POST /api/chat request_id=92b83916-cf24-442d-bcbe-1820af5c2af6 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/chat status=422 duration=0.58ms request_id=92b83916-cf24-442d-bcbe-1820af5c2af6
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/chat "HTTP/1.1 422 Unprocessable Entity"
+PASSED                                                                   [ 64%]
+tests/test_production.py::TestResponseFormat::test_json_response 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=23177915-0165-4442-a490-5b11651ca72b client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=0.36ms request_id=23177915-0165-4442-a490-5b11651ca72b
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+PASSED                                                                   [ 65%]
+tests/test_production.py::TestResponseFormat::test_request_id_header 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=d8eb235e-17f7-4851-9f1c-01a56e18518e client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=0.28ms request_id=d8eb235e-17f7-4851-9f1c-01a56e18518e
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+PASSED                                                                   [ 67%]
+tests/test_production.py::TestResponseFormat::test_cors_headers 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: OPTIONS /health request_id=e734d49d-bf9d-4398-8e44-0b4e2388c26e client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: OPTIONS /health status=405 duration=0.34ms request_id=e734d49d-bf9d-4398-8e44-0b4e2388c26e
+2026-01-21 07:47:06 [INFO] HTTP Request: OPTIONS http://testserver/health "HTTP/1.1 405 Method Not Allowed"
+PASSED                                                                   [ 68%]
+tests/test_production.py::TestPerformance::test_health_response_time 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=56da1f68-52b8-4c16-881f-02ea2b0582d7 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=0.41ms request_id=56da1f68-52b8-4c16-881f-02ea2b0582d7
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+PASSED                                                                   [ 69%]
+tests/test_production.py::TestPerformance::test_concurrent_requests 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=1195a78d-ecce-4e56-932f-fe0ed845415a client=testclient
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=cbb21e58-346a-475c-85b1-fd7365d8d630 client=testclient
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=ad376ec1-6e0b-4455-ac99-c6682154d8da client=testclient
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=e361ee9e-b62b-4949-ae5e-5954954f95bf client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=1.70ms request_id=cbb21e58-346a-475c-85b1-fd7365d8d630
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=02041957-0eaa-47b8-970c-3e90bc66404c client=testclient
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=db557d87-32e0-4ae9-9c44-bb8188327539 client=testclient
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=69545c44-94b4-4a7f-82d1-26a400210aec client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=2.20ms request_id=ad376ec1-6e0b-4455-ac99-c6682154d8da
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=57a38154-7f9c-4668-b65a-feffb4b893f7 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=3.85ms request_id=1195a78d-ecce-4e56-932f-fe0ed845415a
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=c580c50c-e3fa-455b-ab25-adefdd60ea30 client=testclient
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=f735bf0e-8dcf-4527-af51-21cdc1fdcd78 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=2.57ms request_id=e361ee9e-b62b-4949-ae5e-5954954f95bf
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=2.65ms request_id=02041957-0eaa-47b8-970c-3e90bc66404c
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=2.00ms request_id=db557d87-32e0-4ae9-9c44-bb8188327539
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=2.89ms request_id=69545c44-94b4-4a7f-82d1-26a400210aec
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=3.52ms request_id=57a38154-7f9c-4668-b65a-feffb4b893f7
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=3.20ms request_id=f735bf0e-8dcf-4527-af51-21cdc1fdcd78
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=3.53ms request_id=c580c50c-e3fa-455b-ab25-adefdd60ea30
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+PASSED                                                                   [ 70%]
+tests/test_production.py::TestIntegration::test_chat_workflow 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: GET /health request_id=474b578d-bfde-4ccb-bc59-d607a850d2c9 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /health status=200 duration=0.34ms request_id=474b578d-bfde-4ccb-bc59-d607a850d2c9
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] Request started: POST /api/chat request_id=6a1c5669-20dc-4b66-9a9f-a100bdc99e59 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/chat status=200 duration=0.90ms request_id=6a1c5669-20dc-4b66-9a9f-a100bdc99e59
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/chat "HTTP/1.1 200 OK"
+PASSED                                                                   [ 71%]
+tests/test_production.py::TestIntegration::test_multimodal_workflow 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: POST /api/chat/multimodal request_id=01e82144-9d5d-4e81-89e8-925df4517bad client=testclient
+2026-01-21 07:47:06 [INFO] Built RAG index with 29 passages.
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/chat/multimodal status=200 duration=6.92ms request_id=01e82144-9d5d-4e81-89e8-925df4517bad
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/chat/multimodal "HTTP/1.1 200 OK"
+PASSED                                                                   [ 72%]
+tests/test_production.py::TestMetrics::test_metrics_endpoint 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: GET /metrics request_id=0fc2d1de-721b-4ca7-9aa4-50b4cfbf0469 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: GET /metrics status=200 duration=2.95ms request_id=0fc2d1de-721b-4ca7-9aa4-50b4cfbf0469
+2026-01-21 07:47:06 [INFO] HTTP Request: GET http://testserver/metrics "HTTP/1.1 200 OK"
+PASSED                                                                   [ 73%]
+tests/test_production.py::TestConfiguration::test_settings_load PASSED   [ 74%]
+tests/test_production.py::TestConfiguration::test_settings_cached PASSED [ 75%]
+tests/test_production.py::TestMiddleware::test_exception_handling 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: POST /api/fraud request_id=c5e9ec6e-6ed7-4171-b661-c4d75d42fe00 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/fraud status=422 duration=0.66ms request_id=c5e9ec6e-6ed7-4171-b661-c4d75d42fe00
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/fraud "HTTP/1.1 422 Unprocessable Entity"
+PASSED                                                                   [ 76%]
+tests/test_rag.py::test_rag_ingest_and_chat 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: POST /api/rag/ingest request_id=6886ed5f-3111-4d3d-bb19-7477b142e6bb client=testclient
+2026-01-21 07:47:06 [INFO] Auto-selected chunking strategy: ChunkingStrategy.SENTENCE
+2026-01-21 07:47:06 [INFO] Auto-selected chunking strategy: ChunkingStrategy.SENTENCE
+2026-01-21 07:47:06 [INFO] Auto-selected chunking strategy: ChunkingStrategy.SENTENCE
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/rag/ingest status=200 duration=12.73ms request_id=6886ed5f-3111-4d3d-bb19-7477b142e6bb
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/rag/ingest "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] Request started: POST /api/chat request_id=8e5ee7cc-4dde-4c9b-bec9-b63283753520 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/chat status=200 duration=1.23ms request_id=8e5ee7cc-4dde-4c9b-bec9-b63283753520
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/chat "HTTP/1.1 200 OK"
+PASSED                                                                   [ 78%]
+tests/test_recommender.py::test_recommender_endpoints 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: POST /api/recommend request_id=61d44244-8a4b-4c74-a791-abbfa12d37cc client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/recommend status=200 duration=307.05ms request_id=61d44244-8a4b-4c74-a791-abbfa12d37cc
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/recommend "HTTP/1.1 200 OK"
+2026-01-21 07:47:06 [INFO] Request started: POST /api/recommend/explain request_id=bc5fd202-bdd2-4bf6-b1a1-6d7f31287839 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/recommend/explain status=200 duration=2.91ms request_id=bc5fd202-bdd2-4bf6-b1a1-6d7f31287839
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/recommend/explain "HTTP/1.1 200 OK"
+PASSED                                                                   [ 79%]
+tests/test_recommender_multimodal_api.py::test_recommender_multimodal_endpoint_returns_503_when_index_missing 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: POST /api/recommend/multimodal request_id=5b8fc021-0340-4339-8e86-2ae75ecdfe75 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/recommend/multimodal status=503 duration=0.97ms request_id=5b8fc021-0340-4339-8e86-2ae75ecdfe75
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/recommend/multimodal "HTTP/1.1 503 Service Unavailable"
+PASSED                                                                   [ 80%]
+tests/test_recommender_multimodal_api.py::test_recommender_multimodal_endpoint_accepts_text 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: POST /api/recommend/multimodal request_id=2899e805-1538-4a5f-a94a-4b427ced34b2 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/recommend/multimodal status=200 duration=0.68ms request_id=2899e805-1538-4a5f-a94a-4b427ced34b2
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/recommend/multimodal "HTTP/1.1 200 OK"
+PASSED                                                                   [ 81%]
+tests/test_recommender_multimodal_api.py::test_recommender_multimodal_endpoint_accepts_text_and_image 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: POST /api/recommend/multimodal request_id=5ebe419e-e21b-48fa-a7f8-2387a2c88c24 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/recommend/multimodal status=200 duration=1.14ms request_id=5ebe419e-e21b-48fa-a7f8-2387a2c88c24
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/recommend/multimodal "HTTP/1.1 200 OK"
+PASSED                                                                   [ 82%]
+tests/test_recommender_multimodal_catalog.py::test_unified_catalog_loads_multiple_domains PASSED [ 83%]
+tests/test_recommender_multimodal_import.py::test_multimodal_recommender_import_is_lightweight PASSED [ 84%]
+tests/test_risk_api.py::test_risk_analyze_endpoint_happy_path 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: POST /api/risk/analyze request_id=0be31f81-1869-443f-b0be-26323b6b9148 client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/risk/analyze status=200 duration=28.97ms request_id=0be31f81-1869-443f-b0be-26323b6b9148
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/risk/analyze "HTTP/1.1 200 OK"
+PASSED                                                                   [ 85%]
+tests/test_vision_resnet.py::test_resnet_forward_smoke PASSED            [ 86%]
+tests/test_voice_emotion.py::test_voice_emotion_endpoint 
+-------------------------------- live log call ---------------------------------
+2026-01-21 07:47:06 [INFO] Request started: POST /api/voice/emotion request_id=1a5fe6aa-bccd-43fb-b803-d3242c5fe43d client=testclient
+2026-01-21 07:47:06 [INFO] Request completed: POST /api/voice/emotion status=200 duration=17.14ms request_id=1a5fe6aa-bccd-43fb-b803-d3242c5fe43d
+2026-01-21 07:47:06 [INFO] HTTP Request: POST http://testserver/api/voice/emotion "HTTP/1.1 200 OK"
+PASSED                                                                   [ 87%]
+tests/test_voice_noise.py::TestNoiseGenerator::test_white_noise_shape PASSED [ 89%]
+tests/test_voice_noise.py::TestNoiseGenerator::test_pink_noise_generation PASSED [ 90%]
+tests/test_voice_noise.py::TestNoiseGenerator::test_babble_noise_generation PASSED [ 91%]
+tests/test_voice_noise.py::TestNoiseGenerator::test_add_noise_at_snr PASSED [ 92%]
+tests/test_voice_noise.py::TestMockVoiceModel::test_prediction_output PASSED [ 93%]
+tests/test_voice_noise.py::TestMockVoiceModel::test_noise_affects_accuracy PASSED [ 94%]
+tests/test_voice_noise.py::TestVoiceRobustnessTester::test_run_test_returns_results PASSED [ 95%]
+tests/test_voice_noise.py::TestVoiceRobustnessTester::test_result_fields PASSED [ 96%]
+tests/test_voice_noise.py::TestVoiceRobustnessTester::test_accuracy_degrades_with_noise PASSED [ 97%]
+tests/test_voice_noise.py::TestVoiceRobustnessTester::test_generate_report PASSED [ 98%]
+tests/test_voice_noise.py::TestRobustnessResult::test_to_dict PASSED     [100%]
+
+=============================== warnings summary ===============================
+../../../../../opt/anaconda3/lib/python3.13/site-packages/_pytest/config/__init__.py:1441
+  /opt/anaconda3/lib/python3.13/site-packages/_pytest/config/__init__.py:1441: PytestConfigWarning: Unknown config option: asyncio_mode
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+../../../../../opt/anaconda3/lib/python3.13/site-packages/_pytest/config/__init__.py:1441
+  /opt/anaconda3/lib/python3.13/site-packages/_pytest/config/__init__.py:1441: PytestConfigWarning: Unknown config option: timeout
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+tests/test_behavior_logs_api.py::test_behavior_logs_endpoint_accepts_csv
+tests/test_behavior_logs_api.py::test_behavior_logs_endpoint_accepts_csv
+tests/test_production.py::TestBehaviorAPI::test_behavior_scoring
+tests/test_risk_api.py::test_risk_analyze_endpoint_happy_path
+  /opt/anaconda3/lib/python3.13/site-packages/sklearn/base.py:493: UserWarning: X does not have valid feature names, but StandardScaler was fitted with feature names
+    warnings.warn(
+
+tests/test_production.py::TestCyberAPI::test_cyber_scoring
+tests/test_risk_api.py::test_risk_analyze_endpoint_happy_path
+  /opt/anaconda3/lib/python3.13/site-packages/sklearn/base.py:493: UserWarning: X does not have valid feature names, but HistGradientBoostingClassifier was fitted with feature names
+    warnings.warn(
+
+tests/test_production.py::TestRecommendAPI::test_recommend_movies
+  /opt/anaconda3/lib/python3.13/site-packages/sklearn/base.py:376: InconsistentVersionWarning: Trying to unpickle estimator DummyClassifier from version 1.7.2 when using version 1.5.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+  https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+    warnings.warn(
+
+tests/test_production.py::TestRecommendAPI::test_recommend_movies
+  /opt/anaconda3/lib/python3.13/site-packages/sklearn/base.py:376: InconsistentVersionWarning: Trying to unpickle estimator DecisionTreeRegressor from version 1.7.2 when using version 1.5.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+  https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+    warnings.warn(
+
+tests/test_production.py::TestRecommendAPI::test_recommend_movies
+  /opt/anaconda3/lib/python3.13/site-packages/sklearn/base.py:376: InconsistentVersionWarning: Trying to unpickle estimator GradientBoostingClassifier from version 1.7.2 when using version 1.5.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+  https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_multi_sequence_30_tf.py:8: Set RUN_TF_TESTS=1 to execute TensorFlow tests
+SKIPPED [1] tests/test_nlp_tiny.py:6: could not import 'transformers': No module named 'transformers'
+================= 90 passed, 2 skipped, 11 warnings in 10.02s ==================
