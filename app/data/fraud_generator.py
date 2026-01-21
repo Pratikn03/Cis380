@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import random
 import string
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
@@ -531,11 +531,11 @@ if __name__ == "__main__":
     transactions = generator.generate(n_samples=10000, fraud_ratio=0.05)
     
     stats = generator.get_statistics(transactions)
-    print(f"\n📊 Dataset Statistics:")
+    print("\n📊 Dataset Statistics:")
     print(f"   Total: {stats['total_transactions']:,}")
     print(f"   Fraud: {stats['fraud_count']:,} ({stats['fraud_ratio']:.2%})")
     print(f"   Legitimate: {stats['legitimate_count']:,}")
-    print(f"\n🔴 Fraud by Type:")
+    print("\n🔴 Fraud by Type:")
     for fraud_type, count in stats['fraud_by_type'].items():
         print(f"   {fraud_type}: {count}")
     

@@ -43,7 +43,7 @@ from collections import defaultdict
 from dataclasses import dataclass, asdict
 import random
 
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query
 
 
 router = APIRouter(prefix="/api/cyber/timeline", tags=["cyber-timeline"])

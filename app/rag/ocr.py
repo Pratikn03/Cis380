@@ -12,12 +12,11 @@ from __future__ import annotations
 
 import io
 import logging
-import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, List, Optional, Tuple, Union
+from typing import BinaryIO, Dict, List, Optional, Tuple, Union
 
 logger = logging.getLogger(__name__)
 

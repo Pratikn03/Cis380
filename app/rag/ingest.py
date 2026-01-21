@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Iterable, List
 
 from app.rag.chunking import chunk_with_metadata
-from app.rag.config import settings
 from app.rag.dsa_pipeline import ingest_documents
 
 

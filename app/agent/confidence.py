@@ -30,7 +30,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional
-from collections import Counter
 
 
 @dataclass

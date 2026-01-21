@@ -57,9 +57,10 @@ def solve_lca(payload: LcaRequest) -> LcaResponse:
 
 
 class SegmentOp(BaseModel):
+    model_config = {"populate_by_name": True}
     type: Literal["add", "sum"]
-    l: int = Field(..., ge=0)
-    r: int = Field(..., ge=0)
+    left: int = Field(..., ge=0, alias="l")
+    right: int = Field(..., ge=0, alias="r")
     value: Optional[float] = None
 
 
@@ -76,14 +77,14 @@ def run_segment_tree(payload: SegmentTreeRequest) -> dict[str, object]:
         tree = SegmentTreeLazy(payload.values)
         results = []
         for idx, op in enumerate(payload.ops):
-            if op.l > op.r:
-                raise ValueError("l must be <= r")
+            if op.left > op.right:
+                raise ValueError("left must be <= right")
             if op.type == "add":
                 if op.value is None:
                     raise ValueError("add operation requires value")
-                tree.range_add(op.l, op.r, op.value)
+                tree.range_add(op.left, op.right, op.value)
             else:
-                value = tree.range_sum(op.l, op.r)
+                value = tree.range_sum(op.left, op.right)
                 results.append({"op_index": idx, "value": value})
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -123,9 +124,10 @@ def solve_min_cost_max_flow(payload: MinCostMaxFlowRequest) -> dict[str, int]:
 
 
 class SegmentTreeMinOp(BaseModel):
+    model_config = {"populate_by_name": True}
     type: Literal["set", "min"]
-    l: int = Field(..., ge=0)
-    r: int = Field(..., ge=0)
+    left: int = Field(..., ge=0, alias="l")
+    right: int = Field(..., ge=0, alias="r")
     value: Optional[float] = None
 
 
@@ -142,16 +144,16 @@ def run_segment_tree_min(payload: SegmentTreeMinRequest) -> dict[str, object]:
         tree = SegmentTreeMin(payload.values)
         results = []
         for idx, op in enumerate(payload.ops):
-            if op.l > op.r:
-                raise ValueError("l must be <= r")
+            if op.left > op.right:
+                raise ValueError("left must be <= right")
             if op.type == "set":
                 if op.value is None:
                     raise ValueError("set operation requires value")
-                if op.l != op.r:
-                    raise ValueError("set operation requires l == r (point update)")
-                tree.update(op.l, op.value)
+                if op.left != op.right:
+                    raise ValueError("set operation requires left == right (point update)")
+                tree.update(op.left, op.value)
             else:
-                value = tree.range_min(op.l, op.r)
+                value = tree.range_min(op.left, op.right)
                 results.append({"op_index": idx, "value": value})
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

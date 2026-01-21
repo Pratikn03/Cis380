@@ -40,16 +40,14 @@ import json
 import smtplib
 import threading
 import queue
-import time
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from enum import Enum
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable, Set
+from typing import Dict, List, Optional, Any, Callable
 from urllib.request import Request, urlopen
 from urllib.error import URLError
 import uuid

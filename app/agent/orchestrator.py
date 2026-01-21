@@ -202,8 +202,6 @@ class SentifargoOrchestrator:
 
     def _run_recommend(self, text: str, user_id: str) -> tuple[str, Dict[str, Any]]:
         import random
-        import re
-        
         text_lower = text.lower()
         
         # Detect recommendation category from query
