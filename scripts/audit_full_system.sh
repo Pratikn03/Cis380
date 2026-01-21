@@ -22,7 +22,8 @@ echo "Writing audit output to: $OUT"
 
 # ---------- 1) Repo hygiene (tracked pollution scan) ----------
 git status -sb | tee "$OUT/01_git_status.txt" || true
-git ls-files | rg -n "node_modules|dist|\\.next|mlartifacts|mlruns|runs|data/raw|data/processed|data/embeddings|models|logs" \
+git ls-files | rg -n "^(ui-web/.*/(node_modules|dist|\\.next|\\.turbo|\\.cache)/|mlartifacts/|runs/|mlruns/|src/mlruns/|data/raw/|data/processed/|data/embeddings/|models/|logs/)" \
+  | rg -v "\\.dvc$|\\.gitignore$" \
   | tee "$OUT/01_tracked_pollution_hits.txt" || true
 
 # ---------- 2) Static checks ----------
