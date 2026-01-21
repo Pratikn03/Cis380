@@ -1,0 +1,3 @@
+local   
+/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.dvc/cache 
+(default)

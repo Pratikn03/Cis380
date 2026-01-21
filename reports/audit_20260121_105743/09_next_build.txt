@@ -1,0 +1,43 @@
+
+added 365 packages, and audited 366 packages in 6s
+
+143 packages are looking for funding
+  run `npm fund` for details
+
+2 low severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> next@0.1.0 build
+> next build
+
+▲ Next.js 16.1.4 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1435.4ms
+  Running TypeScript ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/11) ...
+  Generating static pages using 9 workers (2/11) 
+  Generating static pages using 9 workers (5/11) 
+  Generating static pages using 9 workers (8/11) 
+✓ Generating static pages using 9 workers (11/11) in 131.7ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /datasets
+├ ○ /jobs
+├ ○ /login
+├ ○ /models
+├ ○ /rag
+├ ○ /risk
+└ ○ /settings
+
+
+○  (Static)  prerendered as static content
+

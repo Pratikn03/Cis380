@@ -192,9 +192,6 @@ reports/deps.txt
 reports/importtime_app_main.txt
 reports/ruff_unused.txt
 reports/vulture.txt
-reports/audit_*/
-!reports/audit_20260121_110238/
-!reports/audit_20260121_110238/**
 ENGINEERING.md
 
 # ============================================
