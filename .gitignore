@@ -161,16 +161,13 @@ data/processed/brand_yolo/
 # ============================================
 # Artifacts & Outputs
 # ============================================
-artifacts/*
-!artifacts/.gitkeep
-!artifacts/README.md
-!artifacts/brand/
-artifacts/brand/_dataset_subsets/
-/models/
-/experiments/
+artifacts/
+models/
 runs/
 logs/
-*.log
+mlruns/
+mlartifacts/
+experiments/
 
 # ============================================
 # Reports
@@ -194,78 +191,6 @@ ENGINEERING.md
 # ============================================
 
 # ============================================
-# Curated model artifacts (track with Git LFS)
-# ============================================
-!models/
-models/*
-
-# Fraud
-!models/fraud/
-models/fraud/*
-!models/fraud/supervised/
-models/fraud/supervised/*
-!models/fraud/supervised/fraud_model.pkl
-
-# Cyber
-!models/cyber/
-models/cyber/*
-!models/cyber/supervised/
-models/cyber/supervised/*
-!models/cyber/supervised/cyber_model.pkl
-
-# Behavior
-!models/behavior/
-models/behavior/*
-!models/behavior/behavior_autoencoder.pkl
-!models/behavior/behavior_lof.pkl
-
-# Recommender
-!models/recommender/
-models/recommender/*
-!models/recommender/recommender_model.pkl
-!models/recommender/recommender_meta.joblib
-!models/recommender/movielens_model.pkl
-!models/recommender/movielens_meta.joblib
-
-# Vision
-!models/vision/
-models/vision/*
-!models/vision/resnet/
-models/vision/resnet/*
-!models/vision/resnet/model.pt
-!models/vision/resnet/classes.txt
-!models/vision/face_emotion/
-models/vision/face_emotion/*
-!models/vision/face_emotion/model.pt
-!models/vision/face_emotion/classes.txt
-!models/vision/video_temporal_model.pkl
-
-# Fusion + voice
-!models/fusion/
-models/fusion/*
-!models/fusion/fusion_meta_model.pkl
-!models/voice_emotion.pkl
-
-# Artifacts
-!artifacts/
-artifacts/*
-!artifacts/brand/
-artifacts/brand/*
-!artifacts/brand/yolo_logo_det.pt
-!artifacts/vision_temporal/
-artifacts/vision_temporal/*
-!artifacts/vision_temporal/temporal_lstm.pt
-*.mp4
-*.avi
-*.mov
-*.mkv
-*.wav
-*.mp3
-*.m4a
-*.ogg
-*.flac
-
-# ============================================
 # Archives
 # ============================================
 *.zip
@@ -286,6 +211,10 @@ temp/
 *.bak
 *.swp
 *.swo
+
+# ============================================
+# Logs and Misc
+backend.log
 
 # ============================================
 # MLflow
