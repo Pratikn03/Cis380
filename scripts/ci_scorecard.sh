@@ -16,3 +16,4 @@ for _ in {1..20}; do
 done
 
 BASE_URL="${BASE_URL}" SCORECARD_STRICT="${SCORECARD_STRICT:-false}" python scripts/system_scorecard.py
+BASE_URL="${BASE_URL}" python scripts/rag/evaluate_dsa.py || true

@@ -6,6 +6,8 @@ import {
   brandPredict,
   cyberScore,
   fraudScore,
+  ragAsk,
+  ragUpload,
   recommendClothes,
   visionPredict,
   visionVideoPredict,
@@ -14,6 +16,7 @@ import {
 
 type ToolId =
   | "chat"
+  | "docs"
   | "vision"
   | "brand"
   | "audio"
@@ -22,7 +25,7 @@ type ToolId =
   | "behavior"
   | "video"
   | "clothes";
-type FileToolId = "vision" | "brand" | "audio" | "video" | "clothes";
+type FileToolId = "vision" | "brand" | "audio" | "video" | "clothes" | "docs";
 type FeatureToolId = "fraud" | "cyber" | "behavior";
 
 interface RecommendationItem {
@@ -34,7 +37,8 @@ type DsaSource = {
   topic?: string;
   source?: string;
   doc_id?: string;
-  chunk_id?: number;
+  chunk_id?: string | number;
+  page?: number;
   snippet?: string;
   score_final?: number;
 };
@@ -103,6 +107,11 @@ type ScoreResponse = {
 
 const toolOptions: Array<{ id: ToolId; label: string; description: string }> = [
   { id: "chat", label: "AI Chat", description: "Ask questions or get recommendations." },
+  {
+    id: "docs",
+    label: "Docs (DSA)",
+    description: "Upload docs and query the Document Search Assistant.",
+  },
   { id: "vision", label: "Vision", description: "Analyze images for authenticity and labels." },
   {
     id: "brand",
@@ -142,6 +151,11 @@ const fileToolConfig: Record<FileToolId, { label: string; accept: string; helper
     label: "Video analysis",
     accept: "video/*",
     helper: "MP4, MOV, AVI, MKV up to 100MB",
+  },
+  docs: {
+    label: "Document upload",
+    accept: ".pdf,.docx,.txt,.md,.html,.htm,.json,.csv",
+    helper: "PDF, DOCX, TXT, MD, HTML, JSON, CSV up to 10MB",
   },
 };
 
@@ -336,6 +350,7 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [featureInput, setFeatureInput] = useState("");
   const [outfitQuery, setOutfitQuery] = useState("");
+  const [docQuery, setDocQuery] = useState("");
   const [brandKind, setBrandKind] = useState("logo");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState("");
@@ -376,6 +391,7 @@ export default function Chat() {
     setFeatureInput("");
     setOutfitQuery("");
     setImageUrl("");
+    setDocQuery("");
   }, [activeTool]);
 
   const checkConnection = async () => {
@@ -558,6 +574,65 @@ export default function Chat() {
   const handleRunTool = async () => {
     if (isLoading) return;
 
+    if (activeTool === "docs") {
+      if (!selectedFile && !docQuery.trim()) {
+        appendMessage({
+          role: "assistant",
+          content: "Upload a document or enter a question for the document assistant.",
+        });
+        return;
+      }
+      setIsLoading(true);
+      try {
+        if (selectedFile) {
+          appendMessage({ role: "user", content: `Document: ${selectedFile.name}` });
+          const payload = new FormData();
+          payload.append("file", selectedFile);
+          const { data } = await ragUpload(payload);
+          appendMessage({
+            role: "assistant",
+            content: `Indexed ${data.documents ?? 0} documents, ${data.pages ?? 0} pages, ${data.chunks ?? 0} chunks.`,
+          });
+          setSelectedFile(null);
+        }
+        if (docQuery.trim()) {
+          const question = docQuery.trim();
+          appendMessage({ role: "user", content: `DSA query: ${question}` });
+          const { data } = await ragAsk({ query: question });
+          const rawSources = Array.isArray(data.sources) ? data.sources : [];
+          const rawCitations = Array.isArray(data.citations) ? data.citations : [];
+          const sources = rawSources.map((src) => ({
+            source: src.source,
+            doc_id: src.doc_id,
+            chunk_id: src.chunk_id,
+            page: src.page,
+            snippet: src.text ? String(src.text).replace(/\n/g, " ").slice(0, 220) : undefined,
+          }));
+          const citations = rawCitations.map((item) =>
+            String(item?.chunk_id ?? item?.doc_id ?? item)
+          );
+          appendMessage({
+            role: "assistant",
+            content: data.answer || "No response received",
+            meta: {
+              sources,
+              citations,
+              dsa: true,
+            },
+          });
+          setDocQuery("");
+        }
+      } catch (error) {
+        appendMessage({
+          role: "assistant",
+          content: `Error: ${getErrorMessage(error)}`,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     const isClothesTool = activeTool === "clothes";
     const isFileToolLocal =
       activeTool === "vision" ||
@@ -719,7 +794,9 @@ export default function Chat() {
   };
 
   const activeConfig = toolOptions.find((tool) => tool.id === activeTool);
+  const isDocsTool = activeTool === "docs";
   const isFileTool =
+    isDocsTool ||
     activeTool === "vision" ||
     activeTool === "brand" ||
     activeTool === "audio" ||
@@ -734,8 +811,15 @@ export default function Chat() {
   const canRecordAudio = activeTool === "audio";
   const clothesReady =
     activeTool === "clothes" ? Boolean(selectedFile || hasImageUrl || outfitQuery.trim()) : true;
+  const docsReady = isDocsTool ? Boolean(selectedFile || docQuery.trim()) : true;
   const fileReady =
-    !isFileTool || (activeTool === "clothes" ? clothesReady : Boolean(selectedFile || hasImageUrl));
+    !isFileTool
+      ? true
+      : isDocsTool
+        ? docsReady
+        : activeTool === "clothes"
+          ? clothesReady
+          : Boolean(selectedFile || hasImageUrl);
 
   // Statistics
   const userMessages = messages.filter(m => m.role === "user").length;
@@ -1004,6 +1088,24 @@ export default function Chat() {
                   />
                   <p className="text-xs text-slate-500 mt-2">
                     Use an image, text, or both to get better outfit matches.
+                  </p>
+                </div>
+              )}
+
+              {activeTool === "docs" && (
+                <div className="mt-4">
+                  <label className="text-xs uppercase tracking-wide text-slate-500 block mb-2">
+                    Document question
+                  </label>
+                  <input
+                    type="text"
+                    value={docQuery}
+                    onChange={(event) => setDocQuery(event.target.value)}
+                    placeholder="Ask about the uploaded documents..."
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 text-sm focus:border-emerald-500 focus:outline-none"
+                  />
+                  <p className="text-xs text-slate-500 mt-2">
+                    Upload a doc to index it, then ask a grounded question.
                   </p>
                 </div>
               )}

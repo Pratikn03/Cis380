@@ -63,10 +63,29 @@ def _silent_wav_bytes(duration_s: float = 0.5, sample_rate: int = 16000) -> byte
     return buf.getvalue()
 
 
+def _seed_dsa_docs(sections: list[str]) -> None:
+    payload = {
+        "filename": "scorecard_seed.txt",
+        "content": "Sentifargo DSA answers questions using indexed documents with citations.",
+    }
+    try:
+        response = requests.post(BASE + "/api/rag/ingest", json=payload, timeout=30)
+        sections.append("## DSA Seed")
+        sections.append(f"- status: **{response.status_code}**")
+        sections.append(f"- sample: `{_sample_payload(response).replace('`', '')}`")
+        sections.append("")
+    except Exception as exc:
+        sections.append("## DSA Seed")
+        sections.append(f"- failed: {exc}")
+        sections.append("")
+
+
 def main() -> None:
     strict = os.getenv("SCORECARD_STRICT", "false").lower() in {"1", "true", "yes"}
     sections = ["# System Scorecard (Tier-6)", ""]
     failures: list[str] = []
+
+    _seed_dsa_docs(sections)
 
     checks = [
         ("Health", "GET", "/api/health", None, None),
@@ -93,6 +112,7 @@ def main() -> None:
             None,
             {"file": ("sample.wav", _silent_wav_bytes(), "audio/wav")},
         ),
+        ("DSA Docs", "POST", "/api/rag/ask", {"query": "How does Sentifargo DSA answer questions?"}, None),
     ]
 
     sections.append("## Latency (p50/p95) + Status")

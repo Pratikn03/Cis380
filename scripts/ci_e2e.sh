@@ -15,4 +15,4 @@ for _ in {1..20}; do
   sleep 1
 done
 
-BASE_URL="${BASE_URL}" pytest tests/e2e/test_smoke.py -q
+BASE_URL="${BASE_URL}" pytest tests/e2e -q
