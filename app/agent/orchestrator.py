@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import time
 from typing import Any, Dict, Mapping, Optional
 
@@ -7,6 +8,15 @@ from app.agent.decision_engine import DecisionEngine
 from app.agent.memory import MemoryStore
 from app.agent.confidence import score_intent
 from app.agent.audit_logger import get_audit_logger
+from app.legacy.agent.chat_responses import (
+    get_about_response,
+    get_greeting_response,
+    get_help_response,
+    get_topic_response,
+    is_about_request,
+    is_greeting,
+    is_help_request,
+)
 from app.models.recommender.explain import explain_recommendation
 from app.models.recommender.predict import recommend
 from app.models.recommender.multimodal.multimodal_predict import (
@@ -16,6 +26,9 @@ from app.models.recommender.multimodal.multimodal_predict import (
 from app.models.voice.emotion_predict import predict_emotion
 from app.utils.logger import get_logger
 from app.utils.llm_stub import LLMStub
+from app.services.risk_engine import analyze_risk
+from app.services.decision_engine import make_decision
+from app.services.explainer import explain_decision
 
 
 class SentifargoOrchestrator:
@@ -119,7 +132,7 @@ class SentifargoOrchestrator:
                     "meta": {"error": str(exc)},
                 }
 
-        answer, meta = self._invoke_route(route, text, emotion_data, user_id)
+        answer, meta = self._invoke_route(route, text, emotion_data, user_id, intent_result, attachments)
         self.memory.add_turn(user_id, text, answer)
         if emotion_data:
             meta["emotion"] = emotion_data
@@ -143,17 +156,27 @@ class SentifargoOrchestrator:
         }
 
     def _invoke_route(
-        self, route: str, text: str, emotion: dict[str, Any] | None, user_id: str
+        self, route: str, text: str, emotion: dict[str, Any] | None, user_id: str, intent: Dict[str, Any] | None = None, attachments: Mapping[str, Any] | None = None
     ) -> tuple[str, Dict[str, Any]]:
         if route == "rag":
             return self._run_rag(text, emotion)
         if route == "fraud":
             return self._run_fraud(text)
+        if route == "cyber":
+            return self._run_cyber(text)
+        if route == "behavior":
+            return self._run_behavior(text)
+        if route == "risk":
+            return self._run_risk(text)
         if route == "voice_emotion":
             return self._run_voice(text)
         if route == "recommend":
             return self._run_recommend(text, user_id)
-        return self._run_chat(text, emotion, user_id)
+        if route == "vision":
+            return self._run_vision(text, attachments)
+        if route == "brand":
+            return self._run_brand(text, attachments)
+        return self._run_chat(text, emotion, user_id, intent)
 
     def _run_rag(self, text: str, emotion: dict[str, Any] | None) -> tuple[str, Dict[str, Any]]:
         from app.rag.dsa_pipeline import answer_query
@@ -187,6 +210,119 @@ class SentifargoOrchestrator:
         ]
         risk, score, msg = random.choice(risk_levels)
         return f"Fraud Analysis: {msg}", {"risk": risk, "score": score}
+
+    def _run_cyber(self, text: str) -> tuple[str, Dict[str, Any]]:
+        payload = self._risk_payload_from_message(text)
+        scores = analyze_risk(payload)
+        score = scores.get("cyber_risk", 0.0)
+        msg = "Cyber threat level is normal."
+        if score > 0.7:
+            msg = "High cyber threat detected! Immediate attention required."
+        elif score > 0.4:
+            msg = "Elevated cyber risk detected."
+        return f"Cyber Analysis: {msg}", {"score": score, "details": scores}
+
+    def _run_behavior(self, text: str) -> tuple[str, Dict[str, Any]]:
+        payload = self._risk_payload_from_message(text)
+        scores = analyze_risk(payload)
+        score = scores.get("behavior_risk", 0.0)
+        msg = "User behavior appears normal."
+        if score > 0.7:
+            msg = "Anomalous behavior detected! Deviation from baseline."
+        elif score > 0.4:
+            msg = "Slight behavioral anomalies observed."
+        return f"Behavior Analysis: {msg}", {"score": score, "details": scores}
+
+    def _run_risk(self, text: str) -> tuple[str, Dict[str, Any]]:
+        payload = self._risk_payload_from_message(text)
+        scores = analyze_risk(payload)
+        decision = make_decision(
+            scores.get("cyber_risk", 0.0),
+            scores.get("behavior_risk", 0.0),
+            scores.get("fraud_risk", 0.0),
+        )
+        explanation = explain_decision(
+            risks=scores,
+            decision=decision.decision,
+            context=[f"{k}={v}" for k, v in payload.items() if k in ["login_country", "transaction_amount", "device_known"]]
+        )
+        answer = f"Unified Risk Analysis:\nDecision: **{decision.decision}**\n\n{explanation}"
+        return answer, {"scores": scores, "decision": decision.decision, "explanation": explanation}
+
+    def _run_vision(self, text: str, attachments: Mapping[str, Any] | None) -> tuple[str, Dict[str, Any]]:
+        if not attachments or not attachments.get("image"):
+            return "Please attach an image for vision analysis.", {"available": False}
+        
+        image_content = attachments.get("image")
+        if not isinstance(image_content, (bytes, bytearray)):
+             return "Invalid image attachment.", {"available": False}
+
+        try:
+            from app.vision_local.analyze import analyze_image_bytes
+            analysis = analyze_image_bytes(bytes(image_content))
+            label = analysis.get("label", "unknown")
+            conf = analysis.get("confidence", 0.0)
+            return f"Vision Analysis: Detected **{label}** ({conf:.1%}).", {"analysis": analysis}
+        except Exception as e:
+            self.logger.warning(f"Vision analysis failed: {e}")
+            return "Vision analysis failed.", {"error": str(e)}
+
+    def _run_brand(self, text: str, attachments: Mapping[str, Any] | None) -> tuple[str, Dict[str, Any]]:
+        if not attachments or not attachments.get("image"):
+            return "Please attach an image for brand detection.", {"available": False}
+        
+        image_content = attachments.get("image")
+        if not isinstance(image_content, (bytes, bytearray)):
+             return "Invalid image attachment.", {"available": False}
+
+        try:
+            from src.vision.brand.recognizer import predict_image_bytes
+            detections = predict_image_bytes(bytes(image_content), conf=0.25)
+            if detections:
+                brands = sorted(list(set([d["brand"] for d in detections])))
+                brand_str = ", ".join(brands)
+                
+                # Connect to recommendations
+                recs = []
+                try:
+                    from app.streamlit_chatbot.handlers.electronics import recommend_electronics
+                    for b in brands:
+                        # Try common electronics domains
+                        for domain in ["phones", "laptops", "headphones"]:
+                            items = recommend_electronics(domain=domain, query=b, limit=2)
+                            if items:
+                                recs.extend(items)
+                except Exception:
+                    pass
+                
+                try:
+                    from app.streamlit_chatbot.handlers.clothes import recommend_clothes
+                    for b in brands:
+                        items = recommend_clothes(query=b, top_k=2)
+                        if items:
+                            recs.extend(items)
+                except Exception:
+                    pass
+
+                answer = f"Brand Detection: Found **{brand_str}**."
+                if recs:
+                    answer += "\n\n**Related Products:**\n"
+                    # Simple deduplication by title
+                    seen = set()
+                    for item in recs:
+                        title = item.get("title", "Item")
+                        if title not in seen:
+                            seen.add(title)
+                            price = item.get("price") or item.get("price_usd")
+                            meta = f" (${price})" if price else ""
+                            answer += f"• {title}{meta}\n"
+                    
+                return answer, {"detections": detections, "recommendations": recs}
+            else:
+                return "No brands detected in the image.", {"detections": []}
+        except Exception as e:
+            self.logger.warning(f"Brand detection failed: {e}")
+            return "Brand detection failed.", {"error": str(e)}
 
     def _run_voice(self, text: str) -> tuple[str, Dict[str, Any]]:
         import random
@@ -352,6 +488,23 @@ class SentifargoOrchestrator:
     
     def _recommend_news(self, text: str) -> tuple[str, Dict[str, Any]]:
         """News recommendations."""
+        try:
+            from app.streamlit_chatbot.handlers.news import recommend_news
+            items = recommend_news(query=text, top_n=5)
+            if items:
+                answer = "📰 **News Recommendations:**\n\n"
+                for item in items:
+                    title = item.get("title", "")
+                    reason = item.get("reason", "")
+                    url = item.get("url", "")
+                    answer += f"• **{title}**\n  _{reason}_\n"
+                    if url:
+                        answer += f"  [Read more]({url})\n"
+                    answer += "\n"
+                return answer, {"items": items, "category": "news"}
+        except Exception as e:
+            self.logger.warning(f"News handler failed: {e}")
+
         items = [
             {"title": "Tech Giants Report Quarterly Earnings", "source": "TechCrunch", "reason": "Major market impact"},
             {"title": "Climate Summit Reaches New Agreement", "source": "Reuters", "reason": "Global policy shift"},
@@ -366,6 +519,22 @@ class SentifargoOrchestrator:
     
     def _recommend_courses(self, text: str) -> tuple[str, Dict[str, Any]]:
         """Course recommendations."""
+        try:
+            from app.streamlit_chatbot.handlers.courses import recommend_courses
+            items = recommend_courses(query=text, limit=5)
+            if items:
+                answer = "📚 **Course Recommendations:**\n\n"
+                for item in items:
+                    title = item.get("title", "")
+                    platform = item.get("platform", "Online")
+                    rating = item.get("rating", "")
+                    tags = item.get("tags", "")
+                    reason = f"Rating: {rating}/5. Tags: {tags}"
+                    answer += f"• **{title}** on {platform}\n  _{reason}_\n\n"
+                return answer, {"items": items, "category": "courses"}
+        except Exception as e:
+            self.logger.warning(f"Courses handler failed: {e}")
+
         items = [
             {"title": "Machine Learning Specialization", "platform": "Coursera", "reason": "Industry-leading curriculum"},
             {"title": "Full Stack Web Development", "platform": "Udemy", "reason": "Practical project-based learning"},
@@ -403,6 +572,23 @@ class SentifargoOrchestrator:
     
     def _recommend_electronics(self, text: str) -> tuple[str, Dict[str, Any]]:
         """Electronics recommendations."""
+        try:
+            from app.streamlit_chatbot.handlers.electronics import recommend_electronics
+            domain = "phones"
+            if "laptop" in text.lower(): domain = "laptops"
+            elif "headphone" in text.lower() or "earbud" in text.lower(): domain = "headphones"
+            
+            items = recommend_electronics(domain=domain, query=text, limit=5)
+            if items:
+                answer = "📱 **Electronics Recommendations:**\n\n"
+                for item in items:
+                    title = item.get("title", "")
+                    reason = item.get("reason", "")
+                    answer += f"• **{title}**\n  _{reason}_\n\n"
+                return answer, {"items": items, "category": "electronics"}
+        except Exception as e:
+            self.logger.warning(f"Electronics handler failed: {e}")
+
         items = [
             {"title": "MacBook Air M3", "category": "Laptop", "reason": "Best battery life and performance"},
             {"title": "iPhone 15 Pro", "category": "Smartphone", "reason": "Powerful camera and chip"},
@@ -439,8 +625,28 @@ class SentifargoOrchestrator:
         return answer, {"items": items, "category": "places"}
 
     def _run_chat(
-        self, text: str, emotion: dict[str, Any] | None, user_id: str
+        self, text: str, emotion: dict[str, Any] | None, user_id: str, intent: Dict[str, Any] | None = None
     ) -> tuple[str, Dict[str, Any]]:
+        # 1. Check legacy static responses (Greetings, Help, About)
+        if is_greeting(text):
+            return get_greeting_response(), {"source": "legacy_static"}
+        if is_help_request(text):
+            return get_help_response(), {"source": "legacy_static"}
+        if is_about_request(text):
+            return get_about_response(), {"source": "legacy_static"}
+
+        # 2. Check Knowledge Base using Confidence Scorer
+        if intent and intent.get("confidence", 0) > 0.6:
+            topic = intent.get("intent")
+            # Map behavior -> anomaly for legacy KB
+            if topic == "behavior":
+                topic = "anomaly"
+            
+            kb_response = get_topic_response(topic)
+            if kb_response:
+                return kb_response, {"source": "legacy_kb", "topic": topic, "confidence": intent.get("confidence")}
+
+        # 3. Fallback to LLM
         prompt = text
         if emotion:
             prompt = f"Emotion detected: {emotion['emotion']} ({emotion['confidence']}).\n" + prompt
@@ -448,3 +654,28 @@ class SentifargoOrchestrator:
         answer = self.llm.generate(prompt, history=history)
         meta = {"source": "chat", "memory_turns": len(history)}
         return answer, meta
+
+    def _risk_payload_from_message(self, message: str) -> dict[str, Any]:
+        """Extract risk parameters from natural language message."""
+        payload = {
+            "transaction_amount": 0.0,
+            "clicks_per_minute": 10.0,
+            "files_accessed": 0,
+            "device_known": True,
+            "login_time": 12.0,
+            "login_country": "US",
+        }
+        
+        # Extract numbers
+        nums = [float(x) for x in re.findall(r"[-+]?(?:\d*\.?\d+)", message)]
+        if nums:
+            payload["transaction_amount"] = nums[0]
+        
+        # Extract country (simple heuristic)
+        countries = ["US", "UK", "CA", "DE", "FR", "IN", "CN", "JP", "BR", "NG", "RU"]
+        for country in countries:
+            if country in message.upper():
+                payload["login_country"] = country
+                break
+                
+        return payload

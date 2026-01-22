@@ -1,56 +1,29 @@
-from __future__ import annotations
+"""
+Brand recognition API endpoints.
+"""
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from src.vision.brand.recognizer import predict_image_bytes
 
-from app.utils.uploads import (
-    IMAGE_EXTENSIONS,
-    IMAGE_MIME_TYPES,
-    MAX_IMAGE_BYTES,
-    read_image_payload,
-)
-
-router = APIRouter(prefix="/api/vision/brand", tags=["vision", "brand"])
+router = APIRouter(prefix="/api/vision/brand", tags=["brand"])
 
 
 @router.post("/predict")
 async def predict_brand(
-    file: UploadFile | None = File(default=None),
-    image_url: str | None = Form(default=None),
-    image_base64: str | None = Form(default=None),
-    conf: float = 0.25,
-    kind: str = "logo",
+    file: UploadFile = File(...),
+    conf: float = Query(0.25, ge=0.0, le=1.0, description="Confidence threshold"),
+    kind: str = Query("logo", description="Model kind (logo, car, fashion)"),
 ):
-    """Predict brand logos from an uploaded image or remote payload.
-
-    Returns a list of detections: {brand, confidence, bbox:[x1,y1,x2,y2]}.
+    """
+    Detect brands/logos in an uploaded image.
     """
     try:
-        image_bytes = await read_image_payload(
-            file=file,
-            image_url=image_url,
-            image_base64=image_base64,
-            allowed_exts=IMAGE_EXTENSIONS,
-            allowed_mimes=IMAGE_MIME_TYPES,
-            max_bytes=MAX_IMAGE_BYTES,
-            kind="image",
-        )
-    except HTTPException:
-        raise
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Could not read upload: {exc}") from exc
-
-    try:
-        from src.vision.brand.recognizer import available_model_kinds, model_path, predict_image_bytes
-
+        image_bytes = await file.read()
         detections = predict_image_bytes(image_bytes, conf=conf, kind=kind)
         return {
+            "filename": file.filename,
             "detections": detections,
-            "model_path": model_path(kind=kind),
-            "model_kind": kind,
-            "available_kinds": available_model_kinds(),
+            "count": len(detections),
         }
-    except RuntimeError as exc:
-        # Model missing or ultralytics missing. Mark service unavailable.
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Brand detection failed: {e}")

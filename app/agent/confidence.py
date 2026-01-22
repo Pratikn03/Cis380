@@ -199,8 +199,10 @@ class IntentConfidenceScorer:
                         matched.append(f"pattern:{pattern.pattern[:20]}")
             
             # Normalize score
-            max_possible = sum(keywords.values()) + len(self._compiled_patterns.get(intent, [])) * 0.5
-            normalized = min(score / max(max_possible * 0.3, 1), 1.0)  # 30% of max = full confidence
+            # Saturation threshold: A score of 2.5 (e.g., ~2-3 keywords or 1 strong keyword + pattern)
+            # is considered 100% confidence. This prevents penalizing intents with large keyword lists.
+            SATURATION_THRESHOLD = 2.5
+            normalized = min(score / SATURATION_THRESHOLD, 1.0)
             
             intent_scores[intent] = (normalized, matched)
         
