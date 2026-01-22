@@ -12,11 +12,12 @@ catboost>=1.2.0
 shap>=0.44.0
 lime>=0.2.0.1
 pydantic>=1.10.0
-streamlit>=1.28.0
+streamlit>=1.39.0
 torch>=2.1.0
 # TensorFlow is optional and not available as `tensorflow-cpu` on macOS or Linux arm64 via pip.
 # Install TensorFlow separately (e.g., via conda) if you need the TF training scripts.
 tensorflow-cpu>=2.11.0; platform_system != "Darwin" and platform_machine != "aarch64" and platform_machine != "arm64" and python_version < "3.13"
+torchaudio>=2.1.0
 mlflow>=2.14.0
 prefect>=2.14.0
 joblib>=1.3.0

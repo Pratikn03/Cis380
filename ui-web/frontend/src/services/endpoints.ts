@@ -44,6 +44,11 @@ export const visionPredict = (payload: FormData) =>
     headers: { "Content-Type": "multipart/form-data" },
   });
 
+export const faceEmotionPredict = (payload: FormData) =>
+  api.post("/api/vision/face_emotion/predict", payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
 export const recommendMultimodal = (payload: FormData) =>
   api.post("/api/recommend/multimodal", payload, {
     headers: { "Content-Type": "multipart/form-data" },

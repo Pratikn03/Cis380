@@ -36,7 +36,8 @@ def _build_model(arch: str, *, num_classes: int, pretrained: bool):
 
     a = (arch or "small_cnn").strip().lower()
     if a == "resnet18":
-        weights = models.ResNet18_Weights.DEFAULT if pretrained else None
+        # Inference loads a full checkpoint, so avoid downloading weights at runtime.
+        weights = None
         model = models.resnet18(weights=weights)
         in_feat = int(model.fc.in_features)
         model.fc = nn.Linear(in_feat, num_classes)
@@ -181,4 +182,3 @@ def predict_face_emotion(*, image_bytes: bytes, filename: str | None = None, top
         "model_path": str(MODEL_PATH),
         "model_meta": meta,
     }
-

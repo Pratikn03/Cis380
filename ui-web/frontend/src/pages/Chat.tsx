@@ -5,6 +5,7 @@ import {
   behaviorScore,
   brandPredict,
   cyberScore,
+  faceEmotionPredict,
   fraudScore,
   ragAsk,
   ragUpload,
@@ -66,6 +67,17 @@ type VisionResponse = {
   label?: string;
   confidence?: number;
   top_k?: VisionTopKEntry[];
+};
+
+type FaceEmotionTopKEntry = {
+  emotion?: string;
+  prob?: number;
+};
+
+type FaceEmotionResponse = {
+  emotion?: string;
+  confidence?: number;
+  top_k?: FaceEmotionTopKEntry[];
 };
 
 type BrandDetection = {
@@ -330,6 +342,34 @@ const formatVisionResponse = (data: VisionResponse): string => {
     });
   }
   return lines.join("\n");
+};
+
+const formatFaceEmotionResponse = (data: FaceEmotionResponse): string => {
+  const lines = ["Face emotion"];
+  const emotion = data.emotion ? String(data.emotion) : "Unknown";
+  lines.push(`Emotion: ${emotion}`);
+  const confidence = normalizeConfidence(data.confidence);
+  if (confidence !== undefined) {
+    lines.push(`Confidence: ${confidence}%`);
+  }
+  const topK = Array.isArray(data.top_k) ? data.top_k : [];
+  if (topK.length > 0) {
+    lines.push("Top emotions:");
+    topK.slice(0, 3).forEach((entry) => {
+      const entryLabel = entry?.emotion ? String(entry.emotion) : "Unknown";
+      const prob = normalizeConfidence(entry?.prob);
+      lines.push(`- ${entryLabel}${prob !== undefined ? ` (${prob}%)` : ""}`);
+    });
+  }
+  return lines.join("\n");
+};
+
+const formatFaceEmotionError = (error: unknown): string => {
+  const detail = getErrorMessage(error);
+  if (detail.toLowerCase().includes("face emotion model not found")) {
+    return "Face emotion: unavailable (model not trained)";
+  }
+  return `Face emotion: unavailable (${detail})`;
 };
 
 const formatBrandResponse = (data: BrandResponse): string => {
@@ -806,7 +846,22 @@ export default function Chat() {
         }
         if (activeTool === "vision") {
           const { data } = await visionPredict(payload);
-          appendMessage({ role: "assistant", content: formatVisionResponse(data as VisionResponse) });
+          let message = formatVisionResponse(data as VisionResponse);
+          if (selectedFile) {
+            try {
+              const facePayload = new FormData();
+              facePayload.append("file", selectedFile as File);
+              const { data: faceData } = await faceEmotionPredict(facePayload);
+              message = `${message}\n\n${formatFaceEmotionResponse(
+                faceData as FaceEmotionResponse
+              )}`;
+            } catch (error) {
+              message = `${message}\n\n${formatFaceEmotionError(error)}`;
+            }
+          } else if (hasImageUrl) {
+            message = `${message}\n\nFace emotion: unavailable (requires uploaded image file)`;
+          }
+          appendMessage({ role: "assistant", content: message });
         }
         if (activeTool === "brand") {
           const { data } = await brandPredict(payload, brandKind);
