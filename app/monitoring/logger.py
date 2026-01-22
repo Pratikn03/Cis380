@@ -1,27 +1,27 @@
-from __future__ import annotations
-
 import json
 from pathlib import Path
-from typing import Any, Dict, List
-
-
-def append_jsonl(path: Path, obj: Dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    line = json.dumps(obj)
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(line + "\n")
-
+from typing import List, Dict, Any, Union
 
 def read_last_n_jsonl(path: Path, n: int) -> List[Dict[str, Any]]:
     if not path.exists():
         return []
-    with path.open("r", encoding="utf-8") as handle:
-        lines = handle.readlines()[-n:]
-    return [json.loads(line) for line in lines if line.strip()]
+    data = []
+    try:
+        with open(path, "r") as f:
+            lines = f.readlines()
+            for line in lines[-n:]:
+                if line.strip():
+                    data.append(json.loads(line))
+    except Exception:
+        pass
+    return data
 
-
-def safe_write_json(path: Path, data: Dict[str, Any]) -> None:
+def append_jsonl(path: Path, data: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    temp_path = path.with_suffix(".tmp")
-    temp_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
-    temp_path.replace(path)
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(data) + "\n")
+
+def safe_write_json(path: Path, data: Union[Dict, List]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)

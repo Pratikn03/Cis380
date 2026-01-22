@@ -301,6 +301,45 @@ def solve_scc(payload: SccRequest) -> dict[str, object]:
     return result
 
 
+class TopologicalSortRequest(BaseModel):
+    n: int = Field(..., ge=1, le=200000)
+    edges: List[EdgePair]
+
+
+@router.post("/algorithms/topological-sort")
+def solve_topological_sort(payload: TopologicalSortRequest) -> dict[str, object]:
+    try:
+        n = payload.n
+        adj = [[] for _ in range(n)]
+        in_degree = [0] * n
+        for e in payload.edges:
+            if not (0 <= e.u < n and 0 <= e.v < n):
+                raise ValueError(f"Node index out of bounds: {e.u} or {e.v} (n={n})")
+            adj[e.u].append(e.v)
+            in_degree[e.v] += 1
+
+        queue = [i for i in range(n) if in_degree[i] == 0]
+        result = []
+        head = 0
+
+        while head < len(queue):
+            u = queue[head]
+            head += 1
+            result.append(u)
+
+            for v in adj[u]:
+                in_degree[v] -= 1
+                if in_degree[v] == 0:
+                    queue.append(v)
+
+        if len(result) != n:
+            return {"status": "cycle_detected", "result": []}
+
+        return {"status": "success", "result": result}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 class TrieOp(BaseModel):
     op: Literal["insert", "search", "starts_with", "delete"]
     text: str

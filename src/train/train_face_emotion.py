@@ -33,7 +33,7 @@ from pathlib import Path
 
 
 _DEFAULT_OUT_DIR = Path("models/vision/face_emotion")
-_EXPECTED_EMOTIONS = ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"]
+_EXPECTED_EMOTIONS = ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral", "contempt"]
 _DEFAULT_NUMERIC_LABEL_MAP_1_TO_7 = {
     # Common FER-style mapping with labels starting at 1.
     "1": "angry",
@@ -293,16 +293,38 @@ def main() -> int:
 
     try:
         import torch
+        import torch.distributed as dist
         from torch import nn
+        from torch.nn.parallel import DistributedDataParallel as DDP
         from torch.utils.data import DataLoader, Subset
+        from torch.utils.data.distributed import DistributedSampler
         from torchvision import datasets, transforms
     except Exception as exc:
         raise RuntimeError(f"Missing torch/torchvision deps: {exc}") from exc
 
+    # DDP Setup
+    is_ddp = "RANK" in os.environ and "WORLD_SIZE" in os.environ
+    if is_ddp:
+        dist.init_process_group(backend="nccl" if torch.cuda.is_available() else "gloo")
+        rank = int(os.environ["RANK"])
+        local_rank = int(os.environ["LOCAL_RANK"])
+        world_size = int(os.environ["WORLD_SIZE"])
+        if torch.cuda.is_available():
+            torch.cuda.set_device(local_rank)
+            device = torch.device(f"cuda:{local_rank}")
+        else:
+            device = torch.device("cpu")
+    else:
+        rank = 0
+        local_rank = 0
+        world_size = 1
+        device = torch.device(_resolve_device(str(args.device)))
+
     split = _detect_split_roots(data_dir)
     img_size = int(args.image_size)
     if args.arch == "resnet18" and img_size < 128:
-        print("[face-emotion] Note: resnet18 typically performs better with image-size >= 160.")
+        if rank == 0:
+            print("[face-emotion] Note: resnet18 typically performs better with image-size >= 160.")
 
     def _to_rgb(im):
         return im.convert("RGB")
@@ -368,13 +390,14 @@ def main() -> int:
     if found != expected:
         missing = sorted(expected.difference(found))
         extra = sorted(found.difference(expected))
-        print("[face-emotion] Warning: dataset classes do not match the canonical 7 emotions.")
-        print(f"  expected: {sorted(expected)}")
-        print(f"  found:    {sorted(found)}")
-        if missing:
-            print(f"  missing:  {missing}")
-        if extra:
-            print(f"  extra:    {extra}")
+        if rank == 0:
+            print("[face-emotion] Warning: dataset classes do not match the canonical 7 emotions.")
+            print(f"  expected: {sorted(expected)}")
+            print(f"  found:    {sorted(found)}")
+            if missing:
+                print(f"  missing:  {missing}")
+            if extra:
+                print(f"  extra:    {extra}")
 
     # Apply optional caps.
     if int(args.max_train) > 0:
@@ -386,23 +409,36 @@ def main() -> int:
         keep = _maybe_limit_indices(idxs, max_items=int(args.max_val), seed=int(args.seed) + 1)
         val_ds = Subset(val_ds, keep)
 
+    if is_ddp:
+        train_sampler = DistributedSampler(train_ds, num_replicas=world_size, rank=rank, shuffle=True)
+        val_sampler = DistributedSampler(val_ds, num_replicas=world_size, rank=rank, shuffle=False)
+    else:
+        train_sampler = None
+        val_sampler = None
+
     train_loader = DataLoader(
         train_ds,
         batch_size=int(args.batch_size),
-        shuffle=True,
+        shuffle=(train_sampler is None),
+        sampler=train_sampler,
         num_workers=int(args.num_workers),
+        pin_memory=(device.type == "cuda"),
     )
     val_loader = DataLoader(
         val_ds,
         batch_size=int(args.batch_size),
         shuffle=False,
+        sampler=val_sampler,
         num_workers=int(args.num_workers),
+        pin_memory=(device.type == "cuda"),
     )
 
-    device = torch.device(_resolve_device(str(args.device)))
     model = _build_model(
         str(args.arch), num_classes=len(classes), pretrained=bool(args.pretrained)
     ).to(device)
+
+    if is_ddp:
+        model = DDP(model, device_ids=[local_rank] if device.type == "cuda" else None)
 
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(
@@ -411,30 +447,36 @@ def main() -> int:
         weight_decay=float(args.weight_decay),
     )
 
-    print(
-        "[face-emotion] config:",
-        {
-            "data_dir": str(data_dir),
-            "train_root": str(split.train_root),
-            "val_root": str(split.val_root) if split.val_root is not None else None,
-            "raw_classes": raw_classes,
-            "classes": classes,
-            "arch": args.arch,
-            "pretrained": bool(args.pretrained),
-            "image_size": img_size,
-            "epochs": int(args.epochs),
-            "batch_size": int(args.batch_size),
-            "device": str(device),
-            "train_samples": len(train_ds),
-            "val_samples": len(val_ds),
-        },
-    )
+    if rank == 0:
+        print(
+            "[face-emotion] config:",
+            {
+                "data_dir": str(data_dir),
+                "train_root": str(split.train_root),
+                "val_root": str(split.val_root) if split.val_root is not None else None,
+                "raw_classes": raw_classes,
+                "classes": classes,
+                "arch": args.arch,
+                "pretrained": bool(args.pretrained),
+                "image_size": img_size,
+                "epochs": int(args.epochs),
+                "batch_size": int(args.batch_size),
+                "device": str(device),
+                "train_samples": len(train_ds),
+                "val_samples": len(val_ds),
+                "ddp": is_ddp,
+                "world_size": world_size,
+            },
+        )
 
     best_val_acc = -1.0
     best_state = None
     history: list[dict[str, float]] = []
 
     for epoch in range(1, int(args.epochs) + 1):
+        if is_ddp:
+            train_sampler.set_epoch(epoch)
+
         tr_loss, tr_acc = _train_one_epoch(
             model=model,
             loader=train_loader,
@@ -443,22 +485,37 @@ def main() -> int:
             loss_fn=loss_fn,
         )
         va_loss, va_acc = _evaluate(model=model, loader=val_loader, device=device, loss_fn=loss_fn)
-        history.append(
-            {
-                "epoch": float(epoch),
-                "train_loss": float(tr_loss),
-                "train_acc": float(tr_acc),
-                "val_loss": float(va_loss),
-                "val_acc": float(va_acc),
-            }
-        )
-        print(
-            f"[face-emotion] epoch {epoch}/{int(args.epochs)} "
-            f"train_loss={tr_loss:.4f} train_acc={tr_acc:.3f} val_loss={va_loss:.4f} val_acc={va_acc:.3f}"
-        )
-        if va_acc >= best_val_acc:
-            best_val_acc = float(va_acc)
-            best_state = {k: v.detach().cpu() for k, v in model.state_dict().items()}
+
+        if is_ddp:
+            metrics = torch.tensor([tr_loss, tr_acc, va_loss, va_acc], device=device)
+            dist.all_reduce(metrics, op=dist.ReduceOp.SUM)
+            metrics /= world_size
+            tr_loss, tr_acc, va_loss, va_acc = metrics.tolist()
+
+        if rank == 0:
+            history.append(
+                {
+                    "epoch": float(epoch),
+                    "train_loss": float(tr_loss),
+                    "train_acc": float(tr_acc),
+                    "val_loss": float(va_loss),
+                    "val_acc": float(va_acc),
+                }
+            )
+            print(
+                f"[face-emotion] epoch {epoch}/{int(args.epochs)} "
+                f"train_loss={tr_loss:.4f} train_acc={tr_acc:.3f} val_loss={va_loss:.4f} val_acc={va_acc:.3f}"
+            )
+            if va_acc >= best_val_acc:
+                best_val_acc = float(va_acc)
+                raw_model = model.module if is_ddp else model
+                best_state = {k: v.detach().cpu() for k, v in raw_model.state_dict().items()}
+
+    if is_ddp:
+        dist.destroy_process_group()
+
+    if rank != 0:
+        return 0
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -467,7 +524,8 @@ def main() -> int:
     metrics_path = out_dir / "metrics.json"
 
     if best_state is None:
-        best_state = {k: v.detach().cpu() for k, v in model.state_dict().items()}
+        raw_model = model.module if is_ddp else model
+        best_state = {k: v.detach().cpu() for k, v in raw_model.state_dict().items()}
 
     torch.save(
         {

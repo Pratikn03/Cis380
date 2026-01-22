@@ -601,14 +601,14 @@ export default function Chat() {
           const { data } = await ragAsk({ query: question });
           const rawSources = Array.isArray(data.sources) ? data.sources : [];
           const rawCitations = Array.isArray(data.citations) ? data.citations : [];
-          const sources = rawSources.map((src) => ({
+          const sources = rawSources.map((src: any) => ({
             source: src.source,
             doc_id: src.doc_id,
             chunk_id: src.chunk_id,
             page: src.page,
             snippet: src.text ? String(src.text).replace(/\n/g, " ").slice(0, 220) : undefined,
           }));
-          const citations = rawCitations.map((item) =>
+          const citations = rawCitations.map((item: any) =>
             String(item?.chunk_id ?? item?.doc_id ?? item)
           );
           appendMessage({

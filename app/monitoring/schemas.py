@@ -1,10 +1,11 @@
-from __future__ import annotations
+from typing import Dict, Any, Optional
+from pydantic import BaseModel
 
-from datetime import datetime, timezone
-from typing import Dict, Any
-
-from pydantic import BaseModel, Field
-
+class DriftReport(BaseModel):
+    window: str
+    drift_score: float
+    per_feature: Dict[str, Dict[str, float]]
+    status: str
 
 class FraudLogEvent(BaseModel):
     timestamp: str
@@ -15,26 +16,17 @@ class FraudLogEvent(BaseModel):
     prediction_score: float
     prediction_label: str
     latency_ms: float
+    ground_truth: Optional[int] = None
 
-
-class DriftReport(BaseModel):
+class RiskSummary(BaseModel):
     window: str
-    drift_score: float
-    per_feature: Dict[str, Dict[str, float]]
-    status: str
-    generated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-
+    risk_score: float
+    details: Dict[str, Any]
 
 class RiskLogEvent(BaseModel):
     timestamp: str
     request_id: str
-    scenario: str | None = None
+    scenario: str
     payload: Dict[str, Any]
     risk_scores: Dict[str, float]
     decision: str
-
-
-class RiskSummary(BaseModel):
-    total_events: int
-    decision_counts: Dict[str, int]
-    avg_risks: Dict[str, float]

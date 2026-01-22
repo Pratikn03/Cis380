@@ -93,7 +93,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
             { value: "154K+", label: "Images Processed" },
-            { value: "6", label: "ML Models" },
+            { value: "9+", label: "ML Models" },
             { value: "99.2%", label: "Detection Accuracy" },
             { value: "5+", label: "Integrated APIs" },
           ].map((stat, i) => (
@@ -121,7 +121,7 @@ export default function Home() {
               },
               {
                 title: "Vision Analysis",
-                desc: "Image classification for detecting manipulated media and synthetic content",
+                desc: "Deepfake detection, facial emotion recognition, and brand logo identification",
                 icon: "👁️",
               },
               {
@@ -172,7 +172,7 @@ export default function Home() {
               { name: "TypeScript", category: "Frontend" },
               { name: "PyTorch", category: "ML" },
               { name: "scikit-learn", category: "ML" },
-              { name: "PostgreSQL", category: "Database" },
+              { name: "YOLOv8", category: "Vision" },
               { name: "Docker", category: "DevOps" },
             ].map((tech, i) => (
               <div

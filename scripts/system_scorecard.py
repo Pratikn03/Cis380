@@ -124,7 +124,17 @@ def main() -> None:
             None,
             {"file": ("test_logo.png", _dummy_image_bytes(), "image/png")},
         ),
+        (
+            "Face Emotion",
+            "POST",
+            "/api/vision/face_emotion/predict",
+            None,
+            {"file": ("face.png", _dummy_image_bytes(), "image/png")},
+        ),
         ("DSA Docs", "POST", "/api/rag/ask", {"query": "How does Sentifargo DSA answer questions?"}, None),
+        ("Monitor Summary", "GET", "/api/monitor/summary", None, None),
+        ("Monitor Drift", "GET", "/api/monitor/drift", None, None),
+        ("Risk Summary", "GET", "/api/monitor/risk_summary", None, None),
     ]
 
     sections.append("## Latency (p50/p95) + Status")

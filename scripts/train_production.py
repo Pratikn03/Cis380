@@ -459,6 +459,37 @@ def train_brand_model():
 
 
 # ============================================================
+# 7. FACE EMOTION MODEL - CNN
+# ============================================================
+def train_face_emotion_model():
+    print_header("Training FACE EMOTION Model (CNN)")
+
+    data_dir = ROOT / "data/raw/vision/face_emotion"
+    if not data_dir.exists():
+        print(f"⚠️ Data dir not found: {data_dir}")
+        return None
+
+    try:
+        import subprocess
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "src.train.train_face_emotion",
+                "--data-dir",
+                str(data_dir),
+                "--epochs",
+                "5",
+            ],
+            check=True,
+            cwd=str(ROOT),
+        )
+        return True
+    except Exception as exc:
+        print(f"⚠️ Face emotion training failed: {exc}")
+        return False
+
+# ============================================================
 # MAIN
 # ============================================================
 def main():
@@ -476,6 +507,7 @@ def main():
     results["voice_emotion"] = train_voice_emotion_model()
     results["text"], results["intent"] = train_nlp_models()
     results["brand"] = train_brand_model()
+    results["face_emotion"] = train_face_emotion_model()
 
     # Summary
     print("\n" + "=" * 60)
