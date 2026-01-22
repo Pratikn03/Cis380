@@ -1,4 +1,5 @@
 """MLOps Module - Model Registry and Versioning."""
+
 from app.mlops.registry import (
     ModelRegistry,
     ModelVersion,

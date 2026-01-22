@@ -1108,11 +1108,15 @@ def main():
     )
 
     backend_url = (
-        os.environ.get("Sentifargo_BACKEND")
-        or os.environ.get("OMNICHATX_BACKEND")
-        or os.environ.get("OMNINEX_BACKEND")
-        or "http://localhost:8000"
-    ).strip().rstrip("/")
+        (
+            os.environ.get("Sentifargo_BACKEND")
+            or os.environ.get("OMNICHATX_BACKEND")
+            or os.environ.get("OMNINEX_BACKEND")
+            or "http://localhost:8000"
+        )
+        .strip()
+        .rstrip("/")
+    )
 
     # Health check on startup
     try:

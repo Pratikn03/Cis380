@@ -132,10 +132,16 @@ def render_chat_page(
     chat_col, rail_col = st.columns([3, 1])
     with rail_col:
         st.markdown("### Controls")
-        user_id = (st.text_input("User id", value="streamlit", key="ocx_user_id") or "streamlit").strip()
+        user_id = (
+            st.text_input("User id", value="streamlit", key="ocx_user_id") or "streamlit"
+        ).strip()
         use_rag = st.toggle("Use RAG", value=True, key="ocx_use_rag")
-        transcribe_audio = st.toggle("Transcribe audio (STT)", value=False, key="ocx_transcribe_audio")
-        stt_language = st.text_input("STT language (optional)", value="", key="ocx_stt_language").strip()
+        transcribe_audio = st.toggle(
+            "Transcribe audio (STT)", value=False, key="ocx_transcribe_audio"
+        )
+        stt_language = st.text_input(
+            "STT language (optional)", value="", key="ocx_stt_language"
+        ).strip()
         show_meta = st.toggle("Show response details", value=False, key="ocx_show_meta")
 
         st.divider()
@@ -154,7 +160,9 @@ def render_chat_page(
             if up_img is not None:
                 st.session_state.ocx_chat_attach_image = up_img.getvalue()
             if st.session_state.ocx_chat_attach_image:
-                st.image(st.session_state.ocx_chat_attach_image, caption="Attached image", width=260)
+                st.image(
+                    st.session_state.ocx_chat_attach_image, caption="Attached image", width=260
+                )
                 if st.button("Remove image", key="ocx_remove_image"):
                     st.session_state.ocx_chat_attach_image = None
                     st.rerun()
@@ -237,9 +245,17 @@ def render_chat_page(
             with st.spinner("Thinking…"):
                 files: dict[str, tuple[str, bytes, str]] = {}
                 if st.session_state.ocx_chat_attach_image:
-                    files["image"] = ("image.jpg", st.session_state.ocx_chat_attach_image, "image/jpeg")
+                    files["image"] = (
+                        "image.jpg",
+                        st.session_state.ocx_chat_attach_image,
+                        "image/jpeg",
+                    )
                 if st.session_state.ocx_chat_attach_audio:
-                    files["audio"] = ("audio.wav", st.session_state.ocx_chat_attach_audio, "audio/wav")
+                    files["audio"] = (
+                        "audio.wav",
+                        st.session_state.ocx_chat_attach_audio,
+                        "audio/wav",
+                    )
 
                 if files:
                     res = call_multipart(

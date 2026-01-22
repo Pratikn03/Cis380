@@ -120,9 +120,7 @@ def _offline_assistant(message: str) -> str:
     has_voice = any(line.lower().startswith("voice emotion:") for line in context_lines)
     has_vision = any(line.lower().startswith("vision label:") for line in context_lines)
     has_face = any(line.lower().startswith("face emotion:") for line in context_lines)
-    tags_line = next(
-        (line for line in context_lines if line.lower().startswith("image tags:")), ""
-    )
+    tags_line = next((line for line in context_lines if line.lower().startswith("image tags:")), "")
     image_tags = tags_line.split(":", 1)[1].strip() if tags_line else ""
 
     # Prefer local docs (RAG) for the base message.
@@ -263,7 +261,9 @@ def _risk_payload_from_message(message: str) -> dict[str, object]:
         if val is not None:
             payload["device_known"] = val
     if "country" in pairs or "login_country" in pairs:
-        payload["login_country"] = (pairs.get("country") or pairs.get("login_country") or "US").upper()
+        payload["login_country"] = (
+            pairs.get("country") or pairs.get("login_country") or "US"
+        ).upper()
 
     payload["used_defaults"] = not bool(pairs)
     return payload
@@ -648,9 +648,7 @@ class SentifargoOrchestrator:
         }
         return answer, meta
 
-    def _vision_summary(
-        self, *, attachments: dict[str, Any] | None
-    ) -> tuple[str, dict[str, Any]]:
+    def _vision_summary(self, *, attachments: dict[str, Any] | None) -> tuple[str, dict[str, Any]]:
         if not attachments:
             return (
                 "No image or video attached. Use /api/chat/multimodal or /api/vision/predict.",
@@ -661,21 +659,15 @@ class SentifargoOrchestrator:
         meta: dict[str, Any] = {"available": True}
         if attachments.get("vision_image"):
             vi = attachments["vision_image"]
-            lines.append(
-                f"Image label: {vi.get('label')} (confidence {vi.get('confidence')})"
-            )
+            lines.append(f"Image label: {vi.get('label')} (confidence {vi.get('confidence')})")
             meta["vision_image"] = vi
         if attachments.get("vision_video"):
             vv = attachments["vision_video"]
-            lines.append(
-                f"Video label: {vv.get('label')} (confidence {vv.get('confidence')})"
-            )
+            lines.append(f"Video label: {vv.get('label')} (confidence {vv.get('confidence')})")
             meta["vision_video"] = vv
         if attachments.get("face_emotion"):
             fe = attachments["face_emotion"]
-            lines.append(
-                f"Face emotion: {fe.get('emotion')} (confidence {fe.get('confidence')})"
-            )
+            lines.append(f"Face emotion: {fe.get('emotion')} (confidence {fe.get('confidence')})")
             meta["face_emotion"] = fe
         if attachments.get("image_tags"):
             tags = attachments["image_tags"]
@@ -691,9 +683,7 @@ class SentifargoOrchestrator:
         answer = "Vision analysis results:\n- " + "\n- ".join(lines)
         return answer, meta
 
-    def _brand_summary(
-        self, *, attachments: dict[str, Any] | None
-    ) -> tuple[str, dict[str, Any]]:
+    def _brand_summary(self, *, attachments: dict[str, Any] | None) -> tuple[str, dict[str, Any]]:
         if not attachments or not attachments.get("brand_detections"):
             return (
                 "No brand detections available. Upload a logo image via /api/chat/multimodal or /api/vision/brand/predict.",
@@ -709,9 +699,7 @@ class SentifargoOrchestrator:
         answer = "Brand/logo detections:\n- " + "\n- ".join(lines)
         return answer, {"available": True, "detections": detections}
 
-    def _voice_summary(
-        self, *, attachments: dict[str, Any] | None
-    ) -> tuple[str, dict[str, Any]]:
+    def _voice_summary(self, *, attachments: dict[str, Any] | None) -> tuple[str, dict[str, Any]]:
         if not attachments or not attachments.get("voice"):
             return (
                 "No audio attached. Upload audio via /api/chat/multimodal or /voice/emotion.",

@@ -136,7 +136,9 @@ def merge_dedupe(items: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]
             merged[key] = item
             continue
         existing = merged[key]
-        existing["score_dense"] = max(existing.get("score_dense", 0.0), item.get("score_dense", 0.0))
+        existing["score_dense"] = max(
+            existing.get("score_dense", 0.0), item.get("score_dense", 0.0)
+        )
         existing["score_bm25"] = max(existing.get("score_bm25", 0.0), item.get("score_bm25", 0.0))
         existing["retrievers"] = set(existing.get("retrievers", set())) | set(
             item.get("retrievers", set())

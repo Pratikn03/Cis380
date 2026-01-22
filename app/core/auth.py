@@ -14,12 +14,8 @@ from app.db.models import Role, User
 from app.db.session import get_db
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(
-    settings.security.__dict__.get("access_token_expire_minutes", 30)
-)
-REFRESH_TOKEN_EXPIRE_DAYS = int(
-    settings.security.__dict__.get("refresh_token_expire_days", 7)
-)
+ACCESS_TOKEN_EXPIRE_MINUTES = int(settings.security.__dict__.get("access_token_expire_minutes", 30))
+REFRESH_TOKEN_EXPIRE_DAYS = int(settings.security.__dict__.get("refresh_token_expire_days", 7))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
@@ -71,7 +67,9 @@ def get_current_user(
         if not user_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     except JWTError as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        ) from exc
 
     user = db.get(User, user_id)
     if not user or not user.is_active:

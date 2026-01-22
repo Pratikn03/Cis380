@@ -27,7 +27,9 @@ class RagQueryRequest(BaseModel):
 
 
 @router.post("/upload")
-async def upload_docs(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict[str, Any]:
+async def upload_docs(
+    file: UploadFile = File(...), db: Session = Depends(get_db)
+) -> dict[str, Any]:
     validate_upload(
         file,
         allowed_exts=DOC_EXTENSIONS,

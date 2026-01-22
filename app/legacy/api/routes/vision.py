@@ -235,8 +235,10 @@ def _load_vision_predictor():
         # Default to CPU for maximum portability/stability (MPS can be flaky in some macOS setups).
         # Override with Sentifargo_VISION_DEVICE=cuda|mps|cpu if desired.
         requested = (
-            os.getenv("Sentifargo_VISION_DEVICE") or os.getenv("Sentifargo_VISION_DEVICE") or ""
-        ).strip().lower()
+            (os.getenv("Sentifargo_VISION_DEVICE") or os.getenv("Sentifargo_VISION_DEVICE") or "")
+            .strip()
+            .lower()
+        )
         if requested:
             device = torch.device(requested)
         else:

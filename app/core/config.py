@@ -17,7 +17,9 @@ from pydantic import BaseModel, Field, field_validator
 class DatabaseSettings(BaseModel):
     """Database configuration."""
 
-    url: str = Field(default="sqlite:///./data/Sentifargo.db", description="Database connection URL")
+    url: str = Field(
+        default="sqlite:///./data/Sentifargo.db", description="Database connection URL"
+    )
     pool_size: int = Field(default=5, ge=1, le=50)
     max_overflow: int = Field(default=10, ge=0)
     echo: bool = Field(default=False, description="Echo SQL statements")

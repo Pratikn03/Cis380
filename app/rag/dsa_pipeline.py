@@ -24,7 +24,9 @@ except Exception:  # pragma: no cover - metrics are optional in some envs
     RAG_QUERY_LATENCY = None
 
 
-def ingest_documents(paths: Optional[List[Path]] = None, *, rebuild: bool = False) -> Dict[str, int]:
+def ingest_documents(
+    paths: Optional[List[Path]] = None, *, rebuild: bool = False
+) -> Dict[str, int]:
     docs_dir = settings.docs_dir
     if not docs_dir.exists() and settings.legacy_docs_dir.exists():
         docs_dir = settings.legacy_docs_dir
@@ -347,5 +349,7 @@ def _log_query(
         "chunk_scores": chunk_scores,
     }
     log_event(payload)
+
+
 if TYPE_CHECKING:
     from app.rag.loaders import DocumentContent

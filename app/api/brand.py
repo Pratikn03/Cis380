@@ -1,6 +1,7 @@
 """
 Brand recognition API endpoints.
 """
+
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 
 from src.vision.brand.recognizer import predict_image_bytes

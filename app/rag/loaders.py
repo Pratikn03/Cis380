@@ -112,8 +112,7 @@ def load_document(path: Path) -> Optional[DocumentContent]:
                 processor = DocumentProcessor()
                 content = processor.process(path)
                 pages = [
-                    DocumentPage(page_num=page.page_num, text=page.text)
-                    for page in content.pages
+                    DocumentPage(page_num=page.page_num, text=page.text) for page in content.pages
                 ]
             except Exception:
                 pages = []
@@ -121,10 +120,7 @@ def load_document(path: Path) -> Optional[DocumentContent]:
         try:
             processor = DocumentProcessor()
             content = processor.process(path)
-            pages = [
-                DocumentPage(page_num=page.page_num, text=page.text)
-                for page in content.pages
-            ]
+            pages = [DocumentPage(page_num=page.page_num, text=page.text) for page in content.pages]
         except Exception:
             pages = []
     if not pages:
@@ -144,5 +140,6 @@ def scan_documents(root: Path) -> List[Path]:
     return [
         path
         for path in root.rglob("*")
-        if path.is_file() and (path.suffix.lower() in SUPPORTED_EXTS or path.suffix.lower() in IMAGE_EXTS)
+        if path.is_file()
+        and (path.suffix.lower() in SUPPORTED_EXTS or path.suffix.lower() in IMAGE_EXTS)
     ]

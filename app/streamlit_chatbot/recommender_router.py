@@ -39,7 +39,9 @@ def _detect_intent(text: str) -> Tuple[str, str]:
     t = text.lower()
     tokens = set(re.findall(r"[a-z0-9]+", t))
 
-    if tokens.intersection({"clothes", "outfit", "outfits", "clothing", "fashion", "wear", "apparel"}):
+    if tokens.intersection(
+        {"clothes", "outfit", "outfits", "clothing", "fashion", "wear", "apparel"}
+    ):
         return "clothes", text
 
     phone_terms = {
@@ -256,6 +258,7 @@ def route_recommendation(text: str, preference: dict | None = None) -> Dict[str,
 
     # Generate varied answer text
     import random
+
     intros = [
         f"Here are some {category.lower()} picks:",
         f"I found these great {category.lower()} for you:",
@@ -263,7 +266,7 @@ def route_recommendation(text: str, preference: dict | None = None) -> Dict[str,
         f"Based on your request, here are some {category.lower()}:",
         f"You might enjoy these {category.lower()}:",
     ]
-    
+
     answer_lines = [random.choice(intros)]
     for i, item in enumerate(items[:5], 1):
         title = item.get("title", "Unknown")
@@ -272,7 +275,7 @@ def route_recommendation(text: str, preference: dict | None = None) -> Dict[str,
             answer_lines.append(f"{i}. {title} — {reason}")
         else:
             answer_lines.append(f"{i}. {title}")
-    
+
     answer = "\n".join(answer_lines)
 
     return {

@@ -39,9 +39,7 @@ class SegmentTreeLazy:
             raise ValueError("invalid update range")
         self._range_add(1, 0, self.size - 1, left, right, float(value))
 
-    def _range_add(
-        self, idx: int, seg_l: int, seg_r: int, ql: int, qr: int, value: float
-    ) -> None:
+    def _range_add(self, idx: int, seg_l: int, seg_r: int, ql: int, qr: int, value: float) -> None:
         if ql <= seg_l and seg_r <= qr:
             self.tree[idx] += value * (seg_r - seg_l + 1)
             self.lazy[idx] += value

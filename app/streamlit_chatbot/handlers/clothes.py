@@ -72,9 +72,13 @@ def _load_catalog(path: Path = DEFAULT_CATALOG) -> list[ClothingItem]:
                         float(obj.get("price_usd")) if obj.get("price_usd") is not None else None
                     ),
                     season=(str(obj.get("season")) if obj.get("season") is not None else None),
-                    material=(str(obj.get("material")) if obj.get("material") is not None else None),
+                    material=(
+                        str(obj.get("material")) if obj.get("material") is not None else None
+                    ),
                     style=(str(obj.get("style")) if obj.get("style") is not None else None),
-                    occasion=(str(obj.get("occasion")) if obj.get("occasion") is not None else None),
+                    occasion=(
+                        str(obj.get("occasion")) if obj.get("occasion") is not None else None
+                    ),
                     color=(str(obj.get("color")) if obj.get("color") is not None else None),
                     fit=(str(obj.get("fit")) if obj.get("fit") is not None else None),
                 )

@@ -108,9 +108,7 @@ def render_risk_command_center(
                 key=FIELD_KEYS["login_country"],
             )
         with c2:
-            device_known = st.checkbox(
-                "Device Known", value=True, key=FIELD_KEYS["device_known"]
-            )
+            device_known = st.checkbox("Device Known", value=True, key=FIELD_KEYS["device_known"])
         with c3:
             login_time = st.slider(
                 "Login Time (hour)",

@@ -41,10 +41,7 @@ class BM25Index:
                 df[tok] = df.get(tok, 0) + 1
         n_docs = len(doc_freqs)
         avgdl = sum(doc_lens) / n_docs if n_docs else 0.0
-        idf = {
-            tok: math.log(1 + (n_docs - freq + 0.5) / (freq + 0.5))
-            for tok, freq in df.items()
-        }
+        idf = {tok: math.log(1 + (n_docs - freq + 0.5) / (freq + 0.5)) for tok, freq in df.items()}
         return cls(doc_ids=doc_ids, doc_freqs=doc_freqs, doc_lens=doc_lens, idf=idf, avgdl=avgdl)
 
     def search(self, query: str, top_k: int = 10) -> List[Tuple[int, float]]:
@@ -60,7 +57,9 @@ class BM25Index:
                 tf = freqs.get(tok, 0)
                 if tf == 0:
                     continue
-                denom = tf + self.k1 * (1 - self.b + self.b * (self.doc_lens[i] / (self.avgdl or 1.0)))
+                denom = tf + self.k1 * (
+                    1 - self.b + self.b * (self.doc_lens[i] / (self.avgdl or 1.0))
+                )
                 score = tok_idf * (tf * (self.k1 + 1) / denom)
                 scores[i] += score
         ranked = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)

@@ -129,6 +129,7 @@ def _heuristic_risk(payload: Mapping[str, Any]) -> dict[str, float]:
 
     def clamp(value: float) -> float:
         return float(min(max(value, 0.0), 1.0))
+
     return {
         "cyber_risk": clamp(cyber),
         "behavior_risk": clamp(behavior),

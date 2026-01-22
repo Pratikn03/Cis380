@@ -9,7 +9,9 @@ from app.db.models import Dataset
 from app.db.session import get_db
 from app.services.audit import record_audit
 
-router = APIRouter(prefix="/datasets", tags=["datasets"], dependencies=[Depends(require_roles("admin", "analyst"))])
+router = APIRouter(
+    prefix="/datasets", tags=["datasets"], dependencies=[Depends(require_roles("admin", "analyst"))]
+)
 
 
 class DatasetCreate(BaseModel):

@@ -277,9 +277,7 @@ class MstRequest(BaseModel):
 @router.post("/algorithms/mst")
 def solve_mst(payload: MstRequest) -> dict[str, object]:
     try:
-        result = kruskal_mst(
-            payload.n, [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges]
-        )
+        result = kruskal_mst(payload.n, [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges])
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return result
@@ -293,9 +291,7 @@ class SccRequest(BaseModel):
 @router.post("/algorithms/scc")
 def solve_scc(payload: SccRequest) -> dict[str, object]:
     try:
-        result = scc_kosaraju(
-            payload.n, [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges]
-        )
+        result = scc_kosaraju(payload.n, [GraphWeightedEdge(e.u, e.v, e.w) for e in payload.edges])
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return result

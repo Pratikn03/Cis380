@@ -197,7 +197,10 @@ async def chat_multimodal(
                     brand_kind = "logo"
                     if any(k in brand_text for k in ("car", "vehicle", "auto", "automotive")):
                         brand_kind = "car"
-                    elif any(k in brand_text for k in ("fashion", "clothes", "clothing", "shoe", "sneaker")):
+                    elif any(
+                        k in brand_text
+                        for k in ("fashion", "clothes", "clothing", "shoe", "sneaker")
+                    ):
                         brand_kind = "fashion"
 
                     detections = predict_image_bytes(image_bytes, conf=0.25, kind=brand_kind)

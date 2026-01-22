@@ -163,13 +163,17 @@ def main():
         return
 
     if nav == "🎯 Recommendations":
-        render_command_center(backend_url=backend_url, call_model=call_model, call_multipart=call_multipart)
+        render_command_center(
+            backend_url=backend_url, call_model=call_model, call_multipart=call_multipart
+        )
         return
 
     if nav == "🎥 Media":
         media_tabs = st.tabs(["Live (Mic/Webcam)", "Voice Chat", "Uploads", "Brand Recognition"])
         with media_tabs[0]:
-            render_live_page(backend_url=backend_url, call_multipart=call_multipart, auth_headers=_auth_headers)
+            render_live_page(
+                backend_url=backend_url, call_multipart=call_multipart, auth_headers=_auth_headers
+            )
         with media_tabs[1]:
             render_voice_chat_page(
                 backend_url=backend_url,
@@ -223,11 +227,15 @@ def main():
                 "`/api/monitor/events`."
             )
 
-            window_n = st.slider("Window size (events)", min_value=10, max_value=5000, value=250, step=10)
+            window_n = st.slider(
+                "Window size (events)", min_value=10, max_value=5000, value=250, step=10
+            )
             refresh = st.button("Refresh metrics", key="monitor_refresh", type="secondary")
 
             if refresh or "monitor_summary" not in st.session_state:
-                st.session_state.monitor_summary = call_get("/api/monitor/summary", params={"window_n": window_n})
+                st.session_state.monitor_summary = call_get(
+                    "/api/monitor/summary", params={"window_n": window_n}
+                )
 
             summary = st.session_state.get("monitor_summary") or {}
             if isinstance(summary, dict) and "error" in summary:
@@ -235,12 +243,17 @@ def main():
             else:
                 paths = (summary or {}).get("paths") if isinstance(summary, dict) else None
                 if isinstance(paths, dict):
-                    st.caption(f"Fraud log: `{paths.get('fraud_log')}` • Risk log: `{paths.get('risk_log')}`")
+                    st.caption(
+                        f"Fraud log: `{paths.get('fraud_log')}` • Risk log: `{paths.get('risk_log')}`"
+                    )
 
                 c1, c2, c3 = st.columns(3)
                 c1.metric("Fraud events", str((summary or {}).get("count", 0)))
                 c2.metric("Avg fraud score", f"{float((summary or {}).get('avg_score', 0.0)):.3f}")
-                c3.metric("Avg fraud latency (ms)", f"{float((summary or {}).get('avg_latency', 0.0)):.1f}")
+                c3.metric(
+                    "Avg fraud latency (ms)",
+                    f"{float((summary or {}).get('avg_latency', 0.0)):.1f}",
+                )
 
                 risk = (summary or {}).get("risk") if isinstance(summary, dict) else None
                 if isinstance(risk, dict):
@@ -258,8 +271,12 @@ def main():
             st.divider()
             st.subheader("Recent events (tail)")
             kind = st.selectbox("Log kind", ["risk", "fraud"], index=0, key="monitor_kind")
-            tail_n = st.slider("Tail N", min_value=5, max_value=500, value=50, step=5, key="monitor_tail_n")
-            events_res = call_get("/api/monitor/events", params={"kind": kind, "window_n": tail_n}, timeout=30.0)
+            tail_n = st.slider(
+                "Tail N", min_value=5, max_value=500, value=50, step=5, key="monitor_tail_n"
+            )
+            events_res = call_get(
+                "/api/monitor/events", params={"kind": kind, "window_n": tail_n}, timeout=30.0
+            )
             if isinstance(events_res, dict) and "error" in events_res:
                 st.error(events_res["error"])
             else:

@@ -71,12 +71,16 @@ def refresh(payload: RefreshRequest, db: Session = Depends(get_db)) -> TokenResp
     from app.core import settings
 
     try:
-        claims = jwt.decode(payload.refresh_token, settings.security.secret_key, algorithms=["HS256"])
+        claims = jwt.decode(
+            payload.refresh_token, settings.security.secret_key, algorithms=["HS256"]
+        )
         if claims.get("type") != "refresh":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
         user_id = claims.get("sub")
     except JWTError as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        ) from exc
 
     user = db.get(User, user_id)
     if not user or not user.is_active:

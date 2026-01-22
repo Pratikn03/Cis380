@@ -19,7 +19,6 @@ I can help you with:
 • **Document Search** - Search uploaded docs (RAG)
 
 Just type your question or try: "recommend a movie" or "what is fraud detection?" """,
-
     """Hi there! Welcome to Sentifargo! 🛡️
 
 I'm your AI-powered security and recommendation assistant. Here's what I can do:
@@ -30,7 +29,6 @@ I'm your AI-powered security and recommendation assistant. Here's what I can do:
 • Search through your documents
 
 What would you like to explore today?""",
-
     """Welcome! I'm Sentifargo - built by Pratik Niroula! 👋
 
 **Quick Actions:**
@@ -39,7 +37,6 @@ What would you like to explore today?""",
 → Say "help" to see all my capabilities
 
 I specialize in security analytics, machine learning, and intelligent recommendations. How can I assist you?""",
-
     """Hey! Great to see you! I'm your intelligent assistant.
 
 **Popular commands:**
@@ -48,7 +45,7 @@ I specialize in security analytics, machine learning, and intelligent recommenda
 • "What is machine learning?"
 • "Tell me about cybersecurity"
 
-I work offline with smart responses - no API needed! What's on your mind?"""
+I work offline with smart responses - no API needed! What's on your mind?""",
 ]
 
 
@@ -79,7 +76,6 @@ HELP_RESPONSES = [
 • Data Science concepts
 
 Try asking: "What is fraud detection?" or "Recommend sci-fi movies" """,
-
     """**What can I help you with?** 🤖
 
 **1. Movie Recommendations**
@@ -103,7 +99,6 @@ Try asking: "What is fraud detection?" or "Recommend sci-fi movies" """,
    • Best practices
 
 Just type your question naturally - I'll understand!""",
-
     """**Sentifargo Help Guide** 📖
 
 I'm an offline-capable AI assistant. Here's how to use me:
@@ -126,12 +121,12 @@ I'm an offline-capable AI assistant. Here's how to use me:
 **💡 Pro Tips:**
 • I give different answers each time - try asking again!
 • Be specific for better results
-• I work 100% offline - no internet needed!"""
+• I work 100% offline - no internet needed!""",
 ]
 
 
 # ============================================================================
-# VARIED ABOUT RESPONSES  
+# VARIED ABOUT RESPONSES
 # ============================================================================
 ABOUT_RESPONSES = [
     """**About Sentifargo** 🛡️
@@ -152,7 +147,6 @@ I'm Sentifargo - a comprehensive AI assistant built by **Pratik Niroula**!
 • 150K+ training samples
 
 Built as part of a machine learning portfolio project showcasing anomaly detection and intelligent systems.""",
-
     """**Who am I?** 🤖
 
 I'm **Sentifargo** - an AI assistant created by Pratik Niroula for the CIS380 project.
@@ -171,7 +165,6 @@ I'm **Sentifargo** - an AI assistant created by Pratik Niroula for the CIS380 pr
 • Natural language understanding
 
 I'm proof that AI can be smart without always needing the cloud!""",
-
     """**Sentifargo Info** ℹ️
 
 Created by: **Pratik Niroula**
@@ -190,7 +183,7 @@ Purpose: ML Portfolio & Anomaly Detection Demo
 • Models: PyTorch, scikit-learn
 • Database: 154K+ images, 60K movies
 
-This project demonstrates real-world ML applications in security and recommendations."""
+This project demonstrates real-world ML applications in security and recommendations.""",
 ]
 
 
@@ -216,7 +209,6 @@ TRAINING_RESPONSES = [
 • "What is anomaly detection?"
 
 No setup needed - just start chatting!""",
-
     """**What's Next?** 🎯
 
 **You can do right now:**
@@ -234,7 +226,7 @@ No setup needed - just start chatting!""",
 • `/api/chat` - Chat endpoint
 • Check out the React frontend!
 
-What would you like to try?"""
+What would you like to try?""",
 ]
 
 
@@ -250,7 +242,6 @@ FALLBACK_RESPONSES = [
 • **Machine learning** - "How does ML work?"
 
 Try rephrasing your question or ask about one of these topics!""",
-
     """That's an interesting question! While I don't have details on that specific topic, here's what I'm great at:
 
 🎬 **Recommendations**: "Recommend action movies"
@@ -258,7 +249,6 @@ Try rephrasing your question or ask about one of these topics!""",
 🧠 **ML/AI**: "Explain deep learning"
 
 Feel free to ask about any of these!""",
-
     """I searched my knowledge base but couldn't find that specific information.
 
 **Here's what I know well:**
@@ -273,7 +263,6 @@ Feel free to ask about any of these!""",
 • "How does fraud detection work?"
 
 I'll give you a great answer on these topics!""",
-
     """I'm not sure about that one, but I'd love to help with something else!
 
 **My specialties:**
@@ -282,7 +271,7 @@ I'll give you a great answer on these topics!""",
 → Machine learning explanations
 → Anomaly detection methods
 
-What else would you like to know?"""
+What else would you like to know?""",
 ]
 
 
@@ -308,7 +297,6 @@ Fraud detection uses machine learning to identify suspicious patterns in transac
 • Device fingerprint changes
 
 Our models achieve 99.2% detection accuracy!""",
-
         """**How Fraud Detection Works** 💡
 
 Modern fraud detection systems analyze multiple signals in real-time:
@@ -330,7 +318,6 @@ Modern fraud detection systems analyze multiple signals in real-time:
 • Isolation Forests
 
 The key is combining multiple weak signals into strong predictions.""",
-
         """**Fraud Detection in Practice** 🔍
 
 Real-world fraud detection involves:
@@ -355,9 +342,8 @@ Real-world fraud detection involves:
    - Models need retraining
    - Feedback loops
 
-This project includes a fraud model trained on 100K+ transactions!"""
+This project includes a fraud model trained on 100K+ transactions!""",
     ],
-    
     "cyber": [
         """**Cybersecurity Fundamentals** 🔐
 
@@ -376,7 +362,6 @@ Cybersecurity protects systems, networks, and data from digital attacks.
 • Insider threats
 
 Defense requires multiple layers of protection!""",
-
         """**Understanding Cyber Threats** ⚠️
 
 Modern cyber threats include:
@@ -399,7 +384,6 @@ Modern cyber threats include:
 • Incident response planning
 
 Stay vigilant and keep systems updated!""",
-
         """**Cybersecurity Best Practices** ✅
 
 Protect yourself and your organization:
@@ -423,9 +407,8 @@ Protect yourself and your organization:
 • Network monitoring
 • Threat intelligence
 
-Security is a continuous process, not a destination!"""
+Security is a continuous process, not a destination!""",
     ],
-    
     "machine learning": [
         """**Machine Learning Explained** 🧠
 
@@ -449,7 +432,6 @@ Machine learning enables computers to learn from data without explicit programmi
 • Natural language processing
 
 ML is transforming every industry!""",
-
         """**How Machine Learning Works** ⚙️
 
 The ML process involves:
@@ -477,7 +459,6 @@ The ML process involves:
    - Retrain as needed
 
 This project uses ML for fraud detection, recommendations, and more!""",
-
         """**Deep Learning & Neural Networks** 🔮
 
 Deep learning uses multi-layer neural networks:
@@ -502,9 +483,8 @@ Deep learning excels at:
 • Computer vision
 • Natural language processing
 • Speech recognition
-• Game playing (AlphaGo!)"""
+• Game playing (AlphaGo!)""",
     ],
-    
     "anomaly": [
         """**Anomaly Detection Explained** 📊
 
@@ -528,7 +508,6 @@ Anomaly detection identifies unusual patterns that don't conform to expected beh
 • Balancing false positives/negatives
 
 This project specializes in anomaly detection!""",
-
         """**Types of Anomalies** 🎯
 
 Anomalies come in different forms:
@@ -551,7 +530,6 @@ Anomalies come in different forms:
 • Semi-supervised - Few labeled examples
 
 Understanding anomaly types helps choose the right detection method!""",
-
         """**Anomaly Detection in Practice** 🔧
 
 Real-world anomaly detection involves:
@@ -576,9 +554,8 @@ Real-world anomaly detection involves:
    - Reduce false positives
    - Handle new patterns
 
-This project includes anomaly detection for fraud, cyber, and behavior!"""
+This project includes anomaly detection for fraud, cyber, and behavior!""",
     ],
-
     "recommend": [
         """**How Recommendations Work** 🎬
 
@@ -602,7 +579,6 @@ Our recommendation system uses multiple techniques:
 • Popularity scores
 
 Try "recommend action movies" or "movies like Inception"!""",
-
         """**Recommendation Systems Explained** 💡
 
 How we suggest content:
@@ -623,8 +599,8 @@ How we suggest content:
 • Similar movie lookup
 • Randomized results (different each time!)
 
-Ask for recommendations and get fresh suggestions every time!"""
-    ]
+Ask for recommendations and get fresh suggestions every time!""",
+    ],
 }
 
 
@@ -667,7 +643,18 @@ def is_greeting(text: str) -> bool:
     lower = text.lower()
     return any(
         k in lower
-        for k in ("hello", "hi ", "hey", "greet", "good morning", "good afternoon", "good evening", "howdy", "what's up", "sup")
+        for k in (
+            "hello",
+            "hi ",
+            "hey",
+            "greet",
+            "good morning",
+            "good afternoon",
+            "good evening",
+            "howdy",
+            "what's up",
+            "sup",
+        )
     )
 
 
@@ -675,7 +662,16 @@ def is_help_request(text: str) -> bool:
     """Check if text is asking for help."""
     lower = text.lower()
     return any(
-        k in lower for k in ("help", "what can you do", "capabilities", "features", "how to use", "how do i", "what do you do")
+        k in lower
+        for k in (
+            "help",
+            "what can you do",
+            "capabilities",
+            "features",
+            "how to use",
+            "how do i",
+            "what do you do",
+        )
     )
 
 
@@ -701,7 +697,18 @@ def is_training_request(text: str) -> bool:
 def is_about_request(text: str) -> bool:
     """Check if text is asking about the bot."""
     lower = text.lower()
-    return any(k in lower for k in ("about", "who are you", "what are you", "your name", "who made", "who built", "who created"))
+    return any(
+        k in lower
+        for k in (
+            "about",
+            "who are you",
+            "what are you",
+            "your name",
+            "who made",
+            "who built",
+            "who created",
+        )
+    )
 
 
 def get_enhanced_response(message: str) -> str | None:
@@ -723,7 +730,7 @@ def get_enhanced_response(message: str) -> str | None:
 
     if is_about_request(message):
         return get_about_response()
-    
+
     # Check knowledge base for topic-specific responses
     topic_response = get_topic_response(message)
     if topic_response:

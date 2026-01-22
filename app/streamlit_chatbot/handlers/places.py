@@ -80,9 +80,7 @@ def recommend_places(
     local_items = _load_catalog()
     if local_items:
         tokens = _tokenize(query)
-        ranked = sorted(
-            local_items, key=lambda item: _score_item(item, tokens, city), reverse=True
-        )
+        ranked = sorted(local_items, key=lambda item: _score_item(item, tokens, city), reverse=True)
         picked = ranked[:top_n]
         out = []
         for item in picked:
@@ -95,7 +93,11 @@ def recommend_places(
             if not reason and tags:
                 reason = "Tags: " + ", ".join(str(t) for t in tags[:4])
             if best_season:
-                reason = f"{reason} · Best season: {best_season}" if reason else f"Best season: {best_season}"
+                reason = (
+                    f"{reason} · Best season: {best_season}"
+                    if reason
+                    else f"Best season: {best_season}"
+                )
             if vibe:
                 reason = f"{reason} · Vibe: {vibe}" if reason else f"Vibe: {vibe}"
             out.append({"title": title, "reason": reason, "location": location})

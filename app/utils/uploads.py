@@ -96,7 +96,9 @@ def _validate_remote_url(url: str) -> tuple[str, str]:
     except ValueError:
         pass
     allowlist = _allowed_media_hosts()
-    if allowlist and not any(host == allowed or host.endswith(f".{allowed}") for allowed in allowlist):
+    if allowlist and not any(
+        host == allowed or host.endswith(f".{allowed}") for allowed in allowlist
+    ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Remote host not in ALLOWED_MEDIA_HOSTS.",

@@ -1,11 +1,13 @@
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
 
+
 class DriftReport(BaseModel):
     window: str
     drift_score: float
     per_feature: Dict[str, Dict[str, float]]
     status: str
+
 
 class FraudLogEvent(BaseModel):
     timestamp: str
@@ -18,10 +20,12 @@ class FraudLogEvent(BaseModel):
     latency_ms: float
     ground_truth: Optional[int] = None
 
+
 class RiskSummary(BaseModel):
     window: str
     risk_score: float
     details: Dict[str, Any]
+
 
 class RiskLogEvent(BaseModel):
     timestamp: str

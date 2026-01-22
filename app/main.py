@@ -84,15 +84,15 @@ from app.legacy.api.deps import require_auth  # noqa: E402
 from app.legacy.api.routes import behavior, chat, cyber, fraud, rag, recommend, vision  # noqa: E402
 
 # Initialize optional router variables (set to None if module not available)
-_app_risk_router = None       # Unified risk scoring
-_app_monitor_router = None    # System monitoring
-_app_voice_router = None      # Voice/audio analysis
-_app_tts_router = None        # Text-to-speech
-_app_rag_router = None        # Document Q&A (Retrieval Augmented Generation)
-_app_dsa_rag_router = None    # DSA RAG (offline-first)
-_app_dsa_algo_router = None   # DSA algorithm API
-_app_brand_router = None      # Brand/logo detection
-_app_stt_router = None        # Speech-to-text
+_app_risk_router = None  # Unified risk scoring
+_app_monitor_router = None  # System monitoring
+_app_voice_router = None  # Voice/audio analysis
+_app_tts_router = None  # Text-to-speech
+_app_rag_router = None  # Document Q&A (Retrieval Augmented Generation)
+_app_dsa_rag_router = None  # DSA RAG (offline-first)
+_app_dsa_algo_router = None  # DSA algorithm API
+_app_brand_router = None  # Brand/logo detection
+_app_stt_router = None  # Speech-to-text
 _app_vision_temporal_router = None  # Video/temporal analysis
 _api_v1_router = None
 
@@ -215,9 +215,9 @@ if not logger.handlers:
 # ==============================================================================
 # Counter: Counts total number of HTTP requests (increments only)
 REQUEST_COUNTER = Counter(
-    "omnichatx_http_requests_total",        # Metric name
+    "omnichatx_http_requests_total",  # Metric name
     "Total HTTP requests handled by OmniChatX API",  # Description
-    ["method", "path", "status"],           # Labels: GET/POST, /api/fraud, 200/404
+    ["method", "path", "status"],  # Labels: GET/POST, /api/fraud, 200/404
 )
 
 # Histogram: Tracks request duration distribution
@@ -232,7 +232,7 @@ REQUEST_LATENCY = Histogram(
 # ==============================================================================
 app = FastAPI(
     title="OmniChatX API",  # Shown in API docs at /docs
-    version="0.2",          # API version
+    version="0.2",  # API version
 )
 
 # ==============================================================================
@@ -267,13 +267,13 @@ if ui_dir.exists():
 # REGISTER API ROUTERS - Each router handles specific endpoints
 # ==============================================================================
 # Legacy routers (no authentication required for demo)
-app.include_router(chat.router)      # /chat - Chatbot conversations
-app.include_router(rag.router)       # /rag - Document Q&A
-app.include_router(recommend.router) # /recommend - Recommendations
+app.include_router(chat.router)  # /chat - Chatbot conversations
+app.include_router(rag.router)  # /rag - Document Q&A
+app.include_router(recommend.router)  # /recommend - Recommendations
 app.include_router(behavior.router)  # /behavior - User behavior analysis
-app.include_router(fraud.router)     # /fraud - Fraud detection
-app.include_router(cyber.router)     # /cyber - Cybersecurity threats
-app.include_router(vision.router)    # /vision - Image analysis
+app.include_router(fraud.router)  # /fraud - Fraud detection
+app.include_router(cyber.router)  # /cyber - Cybersecurity threats
+app.include_router(vision.router)  # /vision - Image analysis
 
 # Health check router (production monitoring)
 if _health_router is not None:
@@ -312,6 +312,7 @@ if _api_v1_router is not None:
 # STARTUP TASKS - Best-effort index build for DSA RAG
 # ==============================================================================
 if _dsa_rag_ensure_index is not None:
+
     @app.on_event("startup")
     def _dsa_rag_startup() -> None:
         if _dsa_rag_settings is None or not _dsa_rag_settings.AUTO_INGEST:
@@ -343,34 +344,34 @@ def _bootstrap_admin_user() -> None:
 async def log_requests(request: Request, call_next):
     """
     Middleware that logs every HTTP request and tracks metrics.
-    
+
     This runs BEFORE and AFTER every API call:
     1. Records start time
     2. Processes the actual request
     3. Logs the result and duration
     4. Updates Prometheus metrics
-    
+
     Example log output:
         2024-01-15T10:30:45 INFO omnichatx GET /api/health -> 200 (0.005s)
     """
-    start = time.time()                    # Start timing
-    response = await call_next(request)    # Process the request
-    duration = time.time() - start         # Calculate duration
-    
+    start = time.time()  # Start timing
+    response = await call_next(request)  # Process the request
+    duration = time.time() - start  # Calculate duration
+
     path = request.url.path
-    
+
     # Update Prometheus metrics
     REQUEST_COUNTER.labels(request.method, path, response.status_code).inc()
     REQUEST_LATENCY.labels(request.method, path).observe(duration)
-    
+
     # Log the request (optional; set LOG_REQUESTS=true to enable)
     if os.getenv("LOG_REQUESTS", "false").lower() == "true":
         logger.info(
-            "%s %s -> %s (%.3fs)",    # Format string
-            request.method,           # GET, POST, etc.
-            path,                     # /api/fraud
-            response.status_code,     # 200, 404, etc.
-            duration,                 # Time in seconds
+            "%s %s -> %s (%.3fs)",  # Format string
+            request.method,  # GET, POST, etc.
+            path,  # /api/fraud
+            response.status_code,  # 200, 404, etc.
+            duration,  # Time in seconds
         )
     return response
 
@@ -381,17 +382,17 @@ async def log_requests(request: Request, call_next):
 def _module_available(module_name: str) -> bool:
     """
     Check if a Python module can be imported without actually importing it.
-    
+
     This is faster than trying to import because:
     - Some modules (torch, faiss) take seconds to import
     - We just want to know if they're installed
-    
+
     Args:
         module_name: Name of the module (e.g., "torch", "faiss")
-        
+
     Returns:
         bool: True if module is installed, False otherwise
-        
+
     Example:
         >>> _module_available("torch")
         True  # If PyTorch is installed
@@ -409,12 +410,12 @@ def _module_available(module_name: str) -> bool:
 def api_health():
     """
     Health check endpoint that returns system status and capabilities.
-    
+
     Used by:
     - Monitoring systems (Kubernetes, Docker health checks)
     - Frontend to display system status
     - DevOps to verify deployment
-    
+
     Returns:
         dict: System status including:
             - status: "ok" if healthy
@@ -423,7 +424,7 @@ def api_health():
             - python: Python version info
             - platform: OS information
             - optional_features: Available ML capabilities
-    
+
     Example response:
         {
             "status": "ok",
@@ -460,9 +461,9 @@ def api_health():
             "implementation": platform.python_implementation(),
         },
         "platform": {
-            "system": platform.system(),      # "Darwin" (macOS), "Linux", "Windows"
-            "release": platform.release(),    # OS version
-            "machine": platform.machine(),    # "arm64", "x86_64"
+            "system": platform.system(),  # "Darwin" (macOS), "Linux", "Windows"
+            "release": platform.release(),  # OS version
+            "machine": platform.machine(),  # "arm64", "x86_64"
         },
         "optional_features": optional_features,
     }
@@ -472,7 +473,7 @@ def api_health():
 def root_redirect():
     """
     Root endpoint - Redirects to the UI or returns API info.
-    
+
     Behavior:
     - If UI is built: Redirects to /ui/ (React frontend)
     - If UI not built: Returns a simple JSON message
@@ -487,7 +488,7 @@ def root_redirect():
 # ==============================================================================
 if __name__ == "__main__":
     import uvicorn
-    
+
     # Start the server on all interfaces (0.0.0.0) port 8000
     # This allows access from other devices on the network
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -55,16 +55,16 @@ class SentifargoOrchestrator:
     ) -> Dict[str, Any]:
         # Start timing for latency tracking
         start_time = time.perf_counter()
-        
+
         # Score intent confidence
         intent_result = score_intent(text)
-        
+
         has_audio = bool(attachments and attachments.get("audio"))
         has_image = bool(attachments and attachments.get("image"))
         route = self.decision_engine.decide_route(
             text, use_rag=use_rag, has_audio=has_audio, has_image=has_image
         )
-        
+
         # Log the request
         request_id = self.audit.log_request(
             user_id=user_id,
@@ -74,12 +74,17 @@ class SentifargoOrchestrator:
                 "intent_confidence": intent_result,
                 "has_audio": has_audio,
                 "has_image": has_image,
-            }
+            },
         )
-        
+
         self.logger.info(
             "Routing request",
-            extra={"user_id": user_id, "route": route, "length": len(text), "confidence": intent_result.get("confidence", 0)},
+            extra={
+                "user_id": user_id,
+                "route": route,
+                "length": len(text),
+                "confidence": intent_result.get("confidence", 0),
+            },
         )
         emotion_data = None
         if has_audio:
@@ -108,7 +113,7 @@ class SentifargoOrchestrator:
                         rec_meta["visual"] = analyze_image_bytes(image_bytes)
                 except Exception:
                     pass
-                
+
                 # Calculate latency and log response
                 latency_ms = (time.perf_counter() - start_time) * 1000
                 self.audit.log_response(
@@ -116,9 +121,9 @@ class SentifargoOrchestrator:
                     answer="Multimodal recommendation",
                     confidence=intent_result.get("confidence", 0),
                     latency_ms=latency_ms,
-                    route=route
+                    route=route,
                 )
-                
+
                 return {
                     "route": "recommend",
                     "answer": "Here are recommendations based on your image and prompt.",
@@ -132,11 +137,13 @@ class SentifargoOrchestrator:
                     "meta": {"error": str(exc)},
                 }
 
-        answer, meta = self._invoke_route(route, text, emotion_data, user_id, intent_result, attachments)
+        answer, meta = self._invoke_route(
+            route, text, emotion_data, user_id, intent_result, attachments
+        )
         self.memory.add_turn(user_id, text, answer)
         if emotion_data:
             meta["emotion"] = emotion_data
-        
+
         # Calculate latency and log response
         latency_ms = (time.perf_counter() - start_time) * 1000
         self.audit.log_response(
@@ -144,19 +151,25 @@ class SentifargoOrchestrator:
             answer=answer,
             confidence=intent_result.get("confidence", 0),
             latency_ms=latency_ms,
-            route=route
+            route=route,
         )
-        
+
         return {
-            "route": route, 
-            "answer": answer, 
+            "route": route,
+            "answer": answer,
             "meta": meta,
             "intent_confidence": intent_result,
             "latency_ms": round(latency_ms, 2),
         }
 
     def _invoke_route(
-        self, route: str, text: str, emotion: dict[str, Any] | None, user_id: str, intent: Dict[str, Any] | None = None, attachments: Mapping[str, Any] | None = None
+        self,
+        route: str,
+        text: str,
+        emotion: dict[str, Any] | None,
+        user_id: str,
+        intent: Dict[str, Any] | None = None,
+        attachments: Mapping[str, Any] | None = None,
     ) -> tuple[str, Dict[str, Any]]:
         if route == "rag":
             return self._run_rag(text, emotion)
@@ -201,6 +214,7 @@ class SentifargoOrchestrator:
 
     def _run_fraud(self, text: str) -> tuple[str, Dict[str, Any]]:
         import random
+
         risk_levels = [
             ("low", 0.12, "Transaction appears normal with standard patterns."),
             ("low", 0.18, "No unusual activity detected in this transaction."),
@@ -244,21 +258,28 @@ class SentifargoOrchestrator:
         explanation = explain_decision(
             risks=scores,
             decision=decision.decision,
-            context=[f"{k}={v}" for k, v in payload.items() if k in ["login_country", "transaction_amount", "device_known"]]
+            context=[
+                f"{k}={v}"
+                for k, v in payload.items()
+                if k in ["login_country", "transaction_amount", "device_known"]
+            ],
         )
         answer = f"Unified Risk Analysis:\nDecision: **{decision.decision}**\n\n{explanation}"
         return answer, {"scores": scores, "decision": decision.decision, "explanation": explanation}
 
-    def _run_vision(self, text: str, attachments: Mapping[str, Any] | None) -> tuple[str, Dict[str, Any]]:
+    def _run_vision(
+        self, text: str, attachments: Mapping[str, Any] | None
+    ) -> tuple[str, Dict[str, Any]]:
         if not attachments or not attachments.get("image"):
             return "Please attach an image for vision analysis.", {"available": False}
-        
+
         image_content = attachments.get("image")
         if not isinstance(image_content, (bytes, bytearray)):
-             return "Invalid image attachment.", {"available": False}
+            return "Invalid image attachment.", {"available": False}
 
         try:
             from app.vision_local.analyze import analyze_image_bytes
+
             analysis = analyze_image_bytes(bytes(image_content))
             label = analysis.get("label", "unknown")
             conf = analysis.get("confidence", 0.0)
@@ -267,25 +288,29 @@ class SentifargoOrchestrator:
             self.logger.warning(f"Vision analysis failed: {e}")
             return "Vision analysis failed.", {"error": str(e)}
 
-    def _run_brand(self, text: str, attachments: Mapping[str, Any] | None) -> tuple[str, Dict[str, Any]]:
+    def _run_brand(
+        self, text: str, attachments: Mapping[str, Any] | None
+    ) -> tuple[str, Dict[str, Any]]:
         if not attachments or not attachments.get("image"):
             return "Please attach an image for brand detection.", {"available": False}
-        
+
         image_content = attachments.get("image")
         if not isinstance(image_content, (bytes, bytearray)):
-             return "Invalid image attachment.", {"available": False}
+            return "Invalid image attachment.", {"available": False}
 
         try:
             from src.vision.brand.recognizer import predict_image_bytes
+
             detections = predict_image_bytes(bytes(image_content), conf=0.25)
             if detections:
                 brands = sorted(list(set([d["brand"] for d in detections])))
                 brand_str = ", ".join(brands)
-                
+
                 # Connect to recommendations
                 recs = []
                 try:
                     from app.streamlit_chatbot.handlers.electronics import recommend_electronics
+
                     for b in brands:
                         # Try common electronics domains
                         for domain in ["phones", "laptops", "headphones"]:
@@ -294,9 +319,10 @@ class SentifargoOrchestrator:
                                 recs.extend(items)
                 except Exception:
                     pass
-                
+
                 try:
                     from app.streamlit_chatbot.handlers.clothes import recommend_clothes
+
                     for b in brands:
                         items = recommend_clothes(query=b, top_k=2)
                         if items:
@@ -316,7 +342,7 @@ class SentifargoOrchestrator:
                             price = item.get("price") or item.get("price_usd")
                             meta = f" (${price})" if price else ""
                             answer += f"• {title}{meta}\n"
-                    
+
                 return answer, {"detections": detections, "recommendations": recs}
             else:
                 return "No brands detected in the image.", {"detections": []}
@@ -326,6 +352,7 @@ class SentifargoOrchestrator:
 
     def _run_voice(self, text: str) -> tuple[str, Dict[str, Any]]:
         import random
+
         emotions = [
             ("neutral", 0.82, "Calm, balanced tone detected."),
             ("happy", 0.75, "Positive, upbeat emotional state."),
@@ -338,11 +365,12 @@ class SentifargoOrchestrator:
 
     def _run_recommend(self, text: str, user_id: str) -> tuple[str, Dict[str, Any]]:
         import random
+
         text_lower = text.lower()
-        
+
         # Detect recommendation category from query
         category = self._detect_recommend_category(text_lower)
-        
+
         # Route to appropriate handler
         if category == "clothes":
             return self._recommend_clothes(text)
@@ -358,11 +386,11 @@ class SentifargoOrchestrator:
             return self._recommend_electronics(text)
         elif category == "places":
             return self._recommend_places(text)
-        
+
         # Default: generic recommendations
         items = recommend(user_id=user_id, top_k=5)
         titles = [item["title"] for item in items]
-        
+
         templates = [
             "Here are some great picks for you:",
             "Based on your request, I recommend:",
@@ -372,13 +400,13 @@ class SentifargoOrchestrator:
         ]
         intro = random.choice(templates)
         answer = f"{intro}\n" + "\n".join(f"• {t}" for t in titles[:5])
-        
+
         explanations = [
             {"item_id": item["item_id"], "text": explain_recommendation(user_id, item["item_id"])}
             for item in items
         ]
         return answer, {"items": items, "explanations": explanations}
-    
+
     def _detect_recommend_category(self, text: str) -> str:
         """Detect what category of recommendation the user wants."""
         # Clothing keywords
@@ -403,29 +431,65 @@ class SentifargoOrchestrator:
         ):
             return "clothes"
         # Movie keywords
-        if any(kw in text for kw in ["movie", "film", "watch", "cinema", "show", "series", "netflix", "streaming"]):
+        if any(
+            kw in text
+            for kw in ["movie", "film", "watch", "cinema", "show", "series", "netflix", "streaming"]
+        ):
             return "movies"
         # News keywords
-        if any(kw in text for kw in ["news", "article", "headline", "breaking", "current events", "latest"]):
+        if any(
+            kw in text
+            for kw in ["news", "article", "headline", "breaking", "current events", "latest"]
+        ):
             return "news"
         # Course keywords
-        if any(kw in text for kw in ["course", "learn", "tutorial", "class", "training", "education", "study"]):
+        if any(
+            kw in text
+            for kw in ["course", "learn", "tutorial", "class", "training", "education", "study"]
+        ):
             return "courses"
         # Car keywords
-        if any(kw in text for kw in ["car", "vehicle", "suv", "sedan", "truck", "automobile", "drive"]):
+        if any(
+            kw in text for kw in ["car", "vehicle", "suv", "sedan", "truck", "automobile", "drive"]
+        ):
             return "cars"
         # Electronics keywords
-        if any(kw in text for kw in ["laptop", "phone", "computer", "tablet", "electronic", "gadget", "tech", "device"]):
+        if any(
+            kw in text
+            for kw in [
+                "laptop",
+                "phone",
+                "computer",
+                "tablet",
+                "electronic",
+                "gadget",
+                "tech",
+                "device",
+            ]
+        ):
             return "electronics"
         # Travel/Places keywords
-        if any(kw in text for kw in ["travel", "vacation", "destination", "place", "visit", "trip", "hotel", "flight"]):
+        if any(
+            kw in text
+            for kw in [
+                "travel",
+                "vacation",
+                "destination",
+                "place",
+                "visit",
+                "trip",
+                "hotel",
+                "flight",
+            ]
+        ):
             return "places"
         return "generic"
-    
+
     def _recommend_clothes(self, text: str) -> tuple[str, Dict[str, Any]]:
         """Clothing recommendations."""
         try:
             from app.streamlit_chatbot.handlers.clothes import recommend_clothes
+
             items = recommend_clothes(age=None, query=text, top_k=5)
             if items:
                 answer = "👕 **Clothing Recommendations:**\n\n"
@@ -439,28 +503,37 @@ class SentifargoOrchestrator:
                 return answer, {"items": items, "category": "clothes"}
         except Exception as e:
             self.logger.warning(f"Clothes handler failed: {e}")
-        
+
         # Fallback
         return self._fallback_clothes(text)
-    
+
     def _fallback_clothes(self, text: str) -> tuple[str, Dict[str, Any]]:
         """Fallback clothing recommendations."""
         items = [
-            {"title": "Classic White T-Shirt", "brand": "Uniqlo", "reason": "Versatile summer essential"},
+            {
+                "title": "Classic White T-Shirt",
+                "brand": "Uniqlo",
+                "reason": "Versatile summer essential",
+            },
             {"title": "Linen Blend Shorts", "brand": "H&M", "reason": "Breathable for hot weather"},
             {"title": "Canvas Sneakers", "brand": "Converse", "reason": "Timeless casual style"},
             {"title": "Floral Summer Dress", "brand": "Zara", "reason": "Perfect for warm days"},
-            {"title": "Lightweight Denim Jacket", "brand": "Levi's", "reason": "Great for layering"},
+            {
+                "title": "Lightweight Denim Jacket",
+                "brand": "Levi's",
+                "reason": "Great for layering",
+            },
         ]
         answer = "👕 **Clothing Recommendations:**\n\n"
         for item in items:
             answer += f"• **{item['title']}** by {item['brand']}\n  _{item['reason']}_\n\n"
         return answer, {"items": items, "category": "clothes"}
-    
+
     def _recommend_movies(self, text: str) -> tuple[str, Dict[str, Any]]:
         """Movie recommendations."""
         try:
             from app.streamlit_chatbot.handlers.movies import recommend_movies
+
             items = recommend_movies(query=text, top_n=5)
             if items:
                 answer = "🎬 **Movie Recommendations:**\n\n"
@@ -472,24 +545,37 @@ class SentifargoOrchestrator:
                 return answer, {"items": items, "category": "movies"}
         except Exception as e:
             self.logger.warning(f"Movies handler failed: {e}")
-        
+
         # Fallback
         items = [
-            {"title": "Inception", "genre": "Sci-Fi/Thriller", "reason": "Mind-bending plot with stunning visuals"},
-            {"title": "The Shawshank Redemption", "genre": "Drama", "reason": "Timeless classic about hope"},
+            {
+                "title": "Inception",
+                "genre": "Sci-Fi/Thriller",
+                "reason": "Mind-bending plot with stunning visuals",
+            },
+            {
+                "title": "The Shawshank Redemption",
+                "genre": "Drama",
+                "reason": "Timeless classic about hope",
+            },
             {"title": "Interstellar", "genre": "Sci-Fi", "reason": "Epic space exploration story"},
             {"title": "Parasite", "genre": "Thriller", "reason": "Oscar-winning masterpiece"},
-            {"title": "The Dark Knight", "genre": "Action", "reason": "Best superhero film ever made"},
+            {
+                "title": "The Dark Knight",
+                "genre": "Action",
+                "reason": "Best superhero film ever made",
+            },
         ]
         answer = "🎬 **Movie Recommendations:**\n\n"
         for item in items:
             answer += f"• **{item['title']}** ({item['genre']})\n  _{item['reason']}_\n\n"
         return answer, {"items": items, "category": "movies"}
-    
+
     def _recommend_news(self, text: str) -> tuple[str, Dict[str, Any]]:
         """News recommendations."""
         try:
             from app.streamlit_chatbot.handlers.news import recommend_news
+
             items = recommend_news(query=text, top_n=5)
             if items:
                 answer = "📰 **News Recommendations:**\n\n"
@@ -506,21 +592,42 @@ class SentifargoOrchestrator:
             self.logger.warning(f"News handler failed: {e}")
 
         items = [
-            {"title": "Tech Giants Report Quarterly Earnings", "source": "TechCrunch", "reason": "Major market impact"},
-            {"title": "Climate Summit Reaches New Agreement", "source": "Reuters", "reason": "Global policy shift"},
-            {"title": "AI Breakthrough in Medical Diagnosis", "source": "Nature", "reason": "Healthcare innovation"},
-            {"title": "Space Exploration Mission Update", "source": "NASA", "reason": "Scientific milestone"},
-            {"title": "Economic Outlook for 2025", "source": "Bloomberg", "reason": "Financial planning insights"},
+            {
+                "title": "Tech Giants Report Quarterly Earnings",
+                "source": "TechCrunch",
+                "reason": "Major market impact",
+            },
+            {
+                "title": "Climate Summit Reaches New Agreement",
+                "source": "Reuters",
+                "reason": "Global policy shift",
+            },
+            {
+                "title": "AI Breakthrough in Medical Diagnosis",
+                "source": "Nature",
+                "reason": "Healthcare innovation",
+            },
+            {
+                "title": "Space Exploration Mission Update",
+                "source": "NASA",
+                "reason": "Scientific milestone",
+            },
+            {
+                "title": "Economic Outlook for 2025",
+                "source": "Bloomberg",
+                "reason": "Financial planning insights",
+            },
         ]
         answer = "📰 **News Recommendations:**\n\n"
         for item in items:
             answer += f"• **{item['title']}** - {item['source']}\n  _{item['reason']}_\n\n"
         return answer, {"items": items, "category": "news"}
-    
+
     def _recommend_courses(self, text: str) -> tuple[str, Dict[str, Any]]:
         """Course recommendations."""
         try:
             from app.streamlit_chatbot.handlers.courses import recommend_courses
+
             items = recommend_courses(query=text, limit=5)
             if items:
                 answer = "📚 **Course Recommendations:**\n\n"
@@ -536,17 +643,37 @@ class SentifargoOrchestrator:
             self.logger.warning(f"Courses handler failed: {e}")
 
         items = [
-            {"title": "Machine Learning Specialization", "platform": "Coursera", "reason": "Industry-leading curriculum"},
-            {"title": "Full Stack Web Development", "platform": "Udemy", "reason": "Practical project-based learning"},
-            {"title": "Data Science Professional Certificate", "platform": "edX", "reason": "Harvard-backed program"},
-            {"title": "Python for Everybody", "platform": "Coursera", "reason": "Great for beginners"},
-            {"title": "AWS Cloud Practitioner", "platform": "AWS Training", "reason": "High demand certification"},
+            {
+                "title": "Machine Learning Specialization",
+                "platform": "Coursera",
+                "reason": "Industry-leading curriculum",
+            },
+            {
+                "title": "Full Stack Web Development",
+                "platform": "Udemy",
+                "reason": "Practical project-based learning",
+            },
+            {
+                "title": "Data Science Professional Certificate",
+                "platform": "edX",
+                "reason": "Harvard-backed program",
+            },
+            {
+                "title": "Python for Everybody",
+                "platform": "Coursera",
+                "reason": "Great for beginners",
+            },
+            {
+                "title": "AWS Cloud Practitioner",
+                "platform": "AWS Training",
+                "reason": "High demand certification",
+            },
         ]
         answer = "📚 **Course Recommendations:**\n\n"
         for item in items:
             answer += f"• **{item['title']}** on {item['platform']}\n  _{item['reason']}_\n\n"
         return answer, {"items": items, "category": "courses"}
-    
+
     def _recommend_cars(self, text: str) -> tuple[str, Dict[str, Any]]:
         """Car recommendations."""
         try:
@@ -556,11 +683,31 @@ class SentifargoOrchestrator:
         except Exception as exc:
             self.logger.warning("Cars handler failed: %s", exc)
             items = [
-                {"title": "Tesla Model 3", "type": "Electric Sedan", "reason": "Best range and tech features"},
-                {"title": "Toyota RAV4 Hybrid", "type": "Hybrid SUV", "reason": "Reliable and fuel efficient"},
-                {"title": "Honda Civic", "type": "Compact Sedan", "reason": "Affordable and dependable"},
-                {"title": "Ford Mustang Mach-E", "type": "Electric SUV", "reason": "Sporty EV with great performance"},
-                {"title": "BMW 3 Series", "type": "Luxury Sedan", "reason": "Premium driving experience"},
+                {
+                    "title": "Tesla Model 3",
+                    "type": "Electric Sedan",
+                    "reason": "Best range and tech features",
+                },
+                {
+                    "title": "Toyota RAV4 Hybrid",
+                    "type": "Hybrid SUV",
+                    "reason": "Reliable and fuel efficient",
+                },
+                {
+                    "title": "Honda Civic",
+                    "type": "Compact Sedan",
+                    "reason": "Affordable and dependable",
+                },
+                {
+                    "title": "Ford Mustang Mach-E",
+                    "type": "Electric SUV",
+                    "reason": "Sporty EV with great performance",
+                },
+                {
+                    "title": "BMW 3 Series",
+                    "type": "Luxury Sedan",
+                    "reason": "Premium driving experience",
+                },
             ]
         answer = "🚗 **Car Recommendations:**\n\n"
         for item in items:
@@ -569,15 +716,18 @@ class SentifargoOrchestrator:
             reason = item.get("reason") or ""
             answer += f"• **{title}** ({car_type})\n  _{reason}_\n\n"
         return answer, {"items": items, "category": "cars"}
-    
+
     def _recommend_electronics(self, text: str) -> tuple[str, Dict[str, Any]]:
         """Electronics recommendations."""
         try:
             from app.streamlit_chatbot.handlers.electronics import recommend_electronics
+
             domain = "phones"
-            if "laptop" in text.lower(): domain = "laptops"
-            elif "headphone" in text.lower() or "earbud" in text.lower(): domain = "headphones"
-            
+            if "laptop" in text.lower():
+                domain = "laptops"
+            elif "headphone" in text.lower() or "earbud" in text.lower():
+                domain = "headphones"
+
             items = recommend_electronics(domain=domain, query=text, limit=5)
             if items:
                 answer = "📱 **Electronics Recommendations:**\n\n"
@@ -590,17 +740,37 @@ class SentifargoOrchestrator:
             self.logger.warning(f"Electronics handler failed: {e}")
 
         items = [
-            {"title": "MacBook Air M3", "category": "Laptop", "reason": "Best battery life and performance"},
-            {"title": "iPhone 15 Pro", "category": "Smartphone", "reason": "Powerful camera and chip"},
-            {"title": "Sony WH-1000XM5", "category": "Headphones", "reason": "Industry-leading noise cancellation"},
-            {"title": "iPad Pro 12.9", "category": "Tablet", "reason": "Professional-grade display"},
-            {"title": "Samsung Galaxy S24 Ultra", "category": "Smartphone", "reason": "Best Android experience"},
+            {
+                "title": "MacBook Air M3",
+                "category": "Laptop",
+                "reason": "Best battery life and performance",
+            },
+            {
+                "title": "iPhone 15 Pro",
+                "category": "Smartphone",
+                "reason": "Powerful camera and chip",
+            },
+            {
+                "title": "Sony WH-1000XM5",
+                "category": "Headphones",
+                "reason": "Industry-leading noise cancellation",
+            },
+            {
+                "title": "iPad Pro 12.9",
+                "category": "Tablet",
+                "reason": "Professional-grade display",
+            },
+            {
+                "title": "Samsung Galaxy S24 Ultra",
+                "category": "Smartphone",
+                "reason": "Best Android experience",
+            },
         ]
         answer = "📱 **Electronics Recommendations:**\n\n"
         for item in items:
             answer += f"• **{item['title']}** ({item['category']})\n  _{item['reason']}_\n\n"
         return answer, {"items": items, "category": "electronics"}
-    
+
     def _recommend_places(self, text: str) -> tuple[str, Dict[str, Any]]:
         """Travel/Places recommendations."""
         try:
@@ -610,11 +780,31 @@ class SentifargoOrchestrator:
         except Exception as exc:
             self.logger.warning("Places handler failed: %s", exc)
             items = [
-                {"title": "Kyoto, Japan", "type": "Cultural", "reason": "Ancient temples and beautiful gardens"},
-                {"title": "Santorini, Greece", "type": "Beach/Romantic", "reason": "Stunning sunsets and architecture"},
-                {"title": "Machu Picchu, Peru", "type": "Adventure", "reason": "Historic wonder with breathtaking views"},
-                {"title": "Iceland", "type": "Nature", "reason": "Northern lights and unique landscapes"},
-                {"title": "Barcelona, Spain", "type": "City", "reason": "Art, architecture, and vibrant nightlife"},
+                {
+                    "title": "Kyoto, Japan",
+                    "type": "Cultural",
+                    "reason": "Ancient temples and beautiful gardens",
+                },
+                {
+                    "title": "Santorini, Greece",
+                    "type": "Beach/Romantic",
+                    "reason": "Stunning sunsets and architecture",
+                },
+                {
+                    "title": "Machu Picchu, Peru",
+                    "type": "Adventure",
+                    "reason": "Historic wonder with breathtaking views",
+                },
+                {
+                    "title": "Iceland",
+                    "type": "Nature",
+                    "reason": "Northern lights and unique landscapes",
+                },
+                {
+                    "title": "Barcelona, Spain",
+                    "type": "City",
+                    "reason": "Art, architecture, and vibrant nightlife",
+                },
             ]
         answer = "✈️ **Travel Recommendations:**\n\n"
         for item in items:
@@ -625,7 +815,11 @@ class SentifargoOrchestrator:
         return answer, {"items": items, "category": "places"}
 
     def _run_chat(
-        self, text: str, emotion: dict[str, Any] | None, user_id: str, intent: Dict[str, Any] | None = None
+        self,
+        text: str,
+        emotion: dict[str, Any] | None,
+        user_id: str,
+        intent: Dict[str, Any] | None = None,
     ) -> tuple[str, Dict[str, Any]]:
         # 1. Check legacy static responses (Greetings, Help, About)
         if is_greeting(text):
@@ -641,10 +835,14 @@ class SentifargoOrchestrator:
             # Map behavior -> anomaly for legacy KB
             if topic == "behavior":
                 topic = "anomaly"
-            
+
             kb_response = get_topic_response(topic)
             if kb_response:
-                return kb_response, {"source": "legacy_kb", "topic": topic, "confidence": intent.get("confidence")}
+                return kb_response, {
+                    "source": "legacy_kb",
+                    "topic": topic,
+                    "confidence": intent.get("confidence"),
+                }
 
         # 3. Fallback to LLM
         prompt = text
@@ -665,17 +863,17 @@ class SentifargoOrchestrator:
             "login_time": 12.0,
             "login_country": "US",
         }
-        
+
         # Extract numbers
         nums = [float(x) for x in re.findall(r"[-+]?(?:\d*\.?\d+)", message)]
         if nums:
             payload["transaction_amount"] = nums[0]
-        
+
         # Extract country (simple heuristic)
         countries = ["US", "UK", "CA", "DE", "FR", "IN", "CN", "JP", "BR", "NG", "RU"]
         for country in countries:
             if country in message.upper():
                 payload["login_country"] = country
                 break
-                
+
         return payload

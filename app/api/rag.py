@@ -105,7 +105,9 @@ async def rag_status() -> Dict[str, Any]:
         )
     if settings.chunks_path.exists():
         chunk_count = sum(
-            1 for line in settings.chunks_path.read_text(encoding="utf-8").splitlines() if line.strip()
+            1
+            for line in settings.chunks_path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
         )
     return {
         "docs_dir": str(settings.docs_dir),

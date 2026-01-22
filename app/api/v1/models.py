@@ -10,7 +10,9 @@ from app.db.session import get_db
 from app.mlops.model_cards import write_model_card
 from app.services.audit import record_audit
 
-router = APIRouter(prefix="/models", tags=["models"], dependencies=[Depends(require_roles("admin", "analyst"))])
+router = APIRouter(
+    prefix="/models", tags=["models"], dependencies=[Depends(require_roles("admin", "analyst"))]
+)
 
 
 class ModelCreate(BaseModel):

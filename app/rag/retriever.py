@@ -45,11 +45,15 @@ def merge_hybrid_results(
         key = str(item.get("chunk_id") or item.get("source"))
         if key in merged:
             merged[key]["bm25_score"] = norm_score
-            merged[key]["hybrid_score"] = alpha * float(merged[key].get("dense_score", 0.0)) + (
-                1 - alpha
-            ) * norm_score
+            merged[key]["hybrid_score"] = (
+                alpha * float(merged[key].get("dense_score", 0.0)) + (1 - alpha) * norm_score
+            )
         else:
-            merged[key] = {**item, "bm25_score": norm_score, "hybrid_score": (1 - alpha) * norm_score}
+            merged[key] = {
+                **item,
+                "bm25_score": norm_score,
+                "hybrid_score": (1 - alpha) * norm_score,
+            }
 
     ranked = sorted(merged.values(), key=lambda x: float(x.get("hybrid_score", 0.0)), reverse=True)
     return ranked[:top_k]

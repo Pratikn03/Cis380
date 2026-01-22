@@ -49,9 +49,9 @@ HOW FRAUD DETECTION WORKS:
 
 from pathlib import Path
 
-import joblib       # For loading saved sklearn/xgboost models (.pkl files)
+import joblib  # For loading saved sklearn/xgboost models (.pkl files)
 import numpy as np  # For numerical array operations
-import pandas as pd # For creating DataFrames with feature names
+import pandas as pd  # For creating DataFrames with feature names
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel  # For request validation
 
@@ -73,7 +73,7 @@ router = APIRouter(prefix="/api/fraud", tags=["fraud"], dependencies=[Depends(re
 class FraudRequest(BaseModel):
     """
     Request body schema for fraud prediction.
-    
+
     The 'features' field should contain numerical values representing
     transaction characteristics. Common features include:
     - Transaction amount (normalized)
@@ -82,10 +82,11 @@ class FraudRequest(BaseModel):
     - Transaction count in last hour
     - Distance from home location
     - etc.
-    
+
     Example:
         {"features": [0.5, -1.2, 3.4, 0.0, 1.8, ...]}
     """
+
     features: list[float]  # List of numerical feature values
 
 
@@ -96,22 +97,22 @@ class FraudRequest(BaseModel):
 _model_path = Path("models") / "fraud" / "supervised" / "fraud_model.pkl"
 
 # Cache variables - model is loaded once and reused
-_fraud_model = None           # The loaded model object
+_fraud_model = None  # The loaded model object
 _fraud_model_error: str | None = None  # Error message if loading failed
 
 
 def _get_fraud_model():
     """
     Load and return the fraud detection model.
-    
+
     This function implements lazy loading:
     - Model is only loaded when first needed
     - Once loaded, it's cached in memory for reuse
     - If loading fails, error is stored to avoid repeated attempts
-    
+
     Returns:
         model: The loaded sklearn/xgboost model, or None if unavailable
-        
+
     Why lazy loading?
     - Faster server startup (don't load all models immediately)
     - Memory efficient (models only loaded when needed)
@@ -121,11 +122,11 @@ def _get_fraud_model():
     # Return cached model if already loaded
     if _fraud_model is not None:
         return _fraud_model
-    
+
     # Check if model file exists
     if not _model_path.exists():
         return None
-    
+
     # Don't retry if previous load failed
     if _fraud_model_error is not None:
         return None
@@ -176,7 +177,7 @@ def predict_fraud(req: FraudRequest):
     """
     # Load the fraud model
     fraud_model = _get_fraud_model()
-    
+
     # Return error if model not available
     if fraud_model is None:
         detail = "Fraud model not found."
@@ -186,14 +187,14 @@ def predict_fraud(req: FraudRequest):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=detail,
         )
-    
+
     try:
         # ==============================================================
         # PREPARE INPUT DATA
         # ==============================================================
         # Get feature names from model (if it has them)
         cols = list(getattr(fraud_model, "feature_names_in_", []))
-        
+
         if cols:
             # Model has named features - create DataFrame with correct columns
             # Initialize all values to 0.0
@@ -220,17 +221,17 @@ def predict_fraud(req: FraudRequest):
         else:
             # Regression model or simple classifier - get raw prediction
             score = float(fraud_model.predict(X)[0])
-        
+
         # ==============================================================
         # RETURN RESULTS
         # ==============================================================
         return {
-            "score": score,                               # Fraud probability
-            "input_features": len(req.features),          # Features received
+            "score": score,  # Fraud probability
+            "input_features": len(req.features),  # Features received
             "expected_features": len(cols) if cols else None,  # Features expected
-            "feature_names": cols or None,                # Feature names
+            "feature_names": cols or None,  # Feature names
         }
-        
+
     except Exception as exc:
         # Handle any errors during inference
         raise HTTPException(

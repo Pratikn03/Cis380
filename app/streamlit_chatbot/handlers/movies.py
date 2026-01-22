@@ -277,7 +277,7 @@ def _extract_title_terms(query: str) -> list[str]:
 
 def _recommend_movies_offline(query: str, top_n: int) -> list[dict]:
     import random
-    
+
     items = _load_movielens_items()
     if not items:
         return movies_fallback(query)
