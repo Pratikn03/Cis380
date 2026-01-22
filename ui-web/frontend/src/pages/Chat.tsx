@@ -346,6 +346,10 @@ const formatScoreResponse = (label: string, data: ScoreResponse, provided: numbe
 };
 
 export default function Chat() {
+  const initialBackendUrl =
+    localStorage.getItem("backendUrl") ||
+    import.meta.env.VITE_API_BASE ||
+    "http://localhost:8000";
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [featureInput, setFeatureInput] = useState("");
@@ -356,9 +360,7 @@ export default function Chat() {
   const [imageUrl, setImageUrl] = useState("");
   const [activeTool, setActiveTool] = useState<ToolId>("chat");
   const [isLoading, setIsLoading] = useState(false);
-  const [backendUrl, setBackendUrl] = useState(
-    localStorage.getItem("backendUrl") || "http://localhost:8000"
-  );
+  const [backendUrl, setBackendUrl] = useState(initialBackendUrl);
   const [isConnected, setIsConnected] = useState(false);
   const [useRag, setUseRag] = useState(true);
   const [useDsaRag, setUseDsaRag] = useState(
@@ -373,6 +375,8 @@ export default function Chat() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const isHttpsPage = typeof window !== "undefined" && window.location.protocol === "https:";
+  const isInsecureBackend = isHttpsPage && backendUrl.startsWith("http://");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -384,6 +388,10 @@ export default function Chat() {
 
   useEffect(() => {
     checkConnection();
+  }, [backendUrl]);
+
+  useEffect(() => {
+    api.defaults.baseURL = backendUrl;
   }, [backendUrl]);
 
   useEffect(() => {
@@ -864,6 +872,12 @@ export default function Chat() {
                 className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 text-sm focus:border-emerald-500 focus:outline-none"
                 placeholder="http://localhost:8000"
               />
+              {isInsecureBackend ? (
+                <p className="mt-2 text-xs text-amber-400">
+                  This page is HTTPS. Use an HTTPS backend URL (e.g. ngrok) or the
+                  browser will block requests.
+                </p>
+              ) : null}
             </div>
             <div className="flex items-center gap-2 pt-5">
               <div
