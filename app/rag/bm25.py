@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
-
 TOKEN_RE = re.compile(r"[A-Za-z0-9]+")
 
 

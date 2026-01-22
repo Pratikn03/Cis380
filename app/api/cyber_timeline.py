@@ -22,10 +22,10 @@ API ENDPOINTS:
 --------------
     GET /api/cyber/timeline
     - Returns events grouped by time window
-    
+
     GET /api/cyber/timeline/patterns
     - Returns detected attack patterns
-    
+
     GET /api/cyber/timeline/sources
     - Returns source IP/location breakdown
 
@@ -44,7 +44,6 @@ from dataclasses import dataclass, asdict
 import random
 
 from fastapi import APIRouter, Query
-
 
 router = APIRouter(prefix="/api/cyber/timeline", tags=["cyber-timeline"])
 

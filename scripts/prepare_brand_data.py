@@ -23,7 +23,6 @@ from vision.brand.data_utils import (  # noqa: E402
     write_yolo_label,
 )
 
-
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 
 

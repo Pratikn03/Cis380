@@ -65,7 +65,7 @@ def _silent_wav_bytes(duration_s: float = 0.5, sample_rate: int = 16000) -> byte
 
 def _dummy_image_bytes() -> bytes:
     # Minimal 1x1 PNG
-    return b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
+    return b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
 
 
 def _seed_dsa_docs(sections: list[str]) -> None:
@@ -131,7 +131,13 @@ def main() -> None:
             None,
             {"file": ("face.png", _dummy_image_bytes(), "image/png")},
         ),
-        ("DSA Docs", "POST", "/api/rag/ask", {"query": "How does Sentifargo DSA answer questions?"}, None),
+        (
+            "DSA Docs",
+            "POST",
+            "/api/rag/ask",
+            {"query": "How does Sentifargo DSA answer questions?"},
+            None,
+        ),
         ("Monitor Summary", "GET", "/api/monitor/summary", None, None),
         ("Monitor Drift", "GET", "/api/monitor/drift", None, None),
         ("Risk Summary", "GET", "/api/monitor/risk_summary", None, None),

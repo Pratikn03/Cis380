@@ -1,5 +1,7 @@
 from fastapi import APIRouter
+
 router = APIRouter(prefix="/api/reco", tags=["reco"])
+
 
 @router.post("/recommend")
 def recommend(payload: dict):

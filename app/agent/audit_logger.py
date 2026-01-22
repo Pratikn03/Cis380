@@ -28,16 +28,16 @@ LOG LEVELS:
 USAGE:
 ------
     from app.agent.audit_logger import AuditLogger
-    
+
     logger = AuditLogger()
-    
+
     # Log a request
     request_id = logger.log_request(
         user_id="user123",
         text="check transaction for fraud",
         route="fraud"
     )
-    
+
     # Log the response
     logger.log_response(
         request_id=request_id,

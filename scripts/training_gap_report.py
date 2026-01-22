@@ -49,14 +49,20 @@ def _summarize_dsa_docs(root: Path) -> dict[str, Any]:
     docs_dir = root / "data" / "dsa_docs"
     if not docs_dir.exists():
         return {"docs_dir": "data/dsa_docs", "doc_count": 0, "topics": []}
-    doc_paths = [p for p in docs_dir.rglob("*") if p.is_file() and p.suffix.lower() in {".md", ".txt"}]
-    topics = sorted({p.relative_to(docs_dir).parts[0] for p in doc_paths if p.relative_to(docs_dir).parts})
+    doc_paths = [
+        p for p in docs_dir.rglob("*") if p.is_file() and p.suffix.lower() in {".md", ".txt"}
+    ]
+    topics = sorted(
+        {p.relative_to(docs_dir).parts[0] for p in doc_paths if p.relative_to(docs_dir).parts}
+    )
     return {"docs_dir": "data/dsa_docs", "doc_count": len(doc_paths), "topics": topics}
 
 
 def main() -> int:
     if not TRAINING_DATA.exists():
-        raise SystemExit("Missing reports/TRAINING_DATA.json. Run scripts/training_data_audit.py first.")
+        raise SystemExit(
+            "Missing reports/TRAINING_DATA.json. Run scripts/training_data_audit.py first."
+        )
 
     training_data = json.loads(TRAINING_DATA.read_text(encoding="utf-8"))
     required = training_data.get("required", [])
@@ -137,7 +143,9 @@ def main() -> int:
     lines.append("")
 
     lines.append("## DSA RAG index\n")
-    lines.append(f"- `{payload['dsa_rag']['embed_dir']}` ready: **{payload['dsa_rag']['embed_dir_ready']}**")
+    lines.append(
+        f"- `{payload['dsa_rag']['embed_dir']}` ready: **{payload['dsa_rag']['embed_dir_ready']}**"
+    )
     lines.append(f"- Docs: **{payload['dsa_rag']['doc_count']}**")
     if payload["dsa_rag"]["topics"]:
         topics = ", ".join(payload["dsa_rag"]["topics"])
@@ -151,16 +159,22 @@ def main() -> int:
 
     lines.append("## Accuracy + training recommendations\n")
     lines.append("- Video temporal: retrain if new real/fake videos are added; monitor LSTM drift.")
-    lines.append("- Behavior model: add more insider-style patterns if false positives remain high.")
+    lines.append(
+        "- Behavior model: add more insider-style patterns if false positives remain high."
+    )
     lines.append("- Voice emotion: augment with noise if `tests/test_voice_noise.py` fails.")
     lines.append(
         "- Brand YOLO: multi-class (car/fashion) requires its own dataset + retrain."
         " Use BRAND_DATA_YAML + BRAND_OUT_PATH, then set BRAND_MODEL_CAR_PATH/BRAND_MODEL_FASHION_PATH."
     )
     if len(payload["dsa_rag"]["topics"]) <= 4:
-        lines.append("- DSA RAG: expand docs beyond arrays/search/linked-lists/stack-queue as coverage grows.")
+        lines.append(
+            "- DSA RAG: expand docs beyond arrays/search/linked-lists/stack-queue as coverage grows."
+        )
     else:
-        lines.append("- DSA RAG: continue adding advanced topics (tries, segment trees, suffix arrays).")
+        lines.append(
+            "- DSA RAG: continue adding advanced topics (tries, segment trees, suffix arrays)."
+        )
     lines.append("")
 
     OUT_MD.write_text("\n".join(lines), encoding="utf-8")

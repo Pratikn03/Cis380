@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List
 
-
 _MODEL_CACHE: dict[str, object] = {}
 _MODEL_ERROR: dict[str, str] = {}
 
@@ -17,7 +16,7 @@ def _normalize_kind(kind: str | None) -> str:
 def _model_registry() -> dict[str, Path]:
     default_logo = Path("artifacts/brand/yolo_logo_det.pt")
     logo_path = os.getenv("BRAND_MODEL_LOGO_PATH")
-    
+
     # Fallback: If default artifact missing, check for local training run
     if not logo_path and not default_logo.exists():
         local_run = Path("runs/detect/train/weights/best.pt")
@@ -29,7 +28,9 @@ def _model_registry() -> dict[str, Path]:
     return {
         "logo": Path(logo_path),
         "car": Path(os.getenv("BRAND_MODEL_CAR_PATH", "artifacts/brand/yolo_car_brand.pt")),
-        "fashion": Path(os.getenv("BRAND_MODEL_FASHION_PATH", "artifacts/brand/yolo_fashion_brand.pt")),
+        "fashion": Path(
+            os.getenv("BRAND_MODEL_FASHION_PATH", "artifacts/brand/yolo_fashion_brand.pt")
+        ),
     }
 
 

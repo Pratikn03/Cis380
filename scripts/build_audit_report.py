@@ -12,7 +12,9 @@ def main() -> None:
     reports = Path("reports")
     audit_dirs = sorted([p for p in reports.glob("audit_*") if p.is_dir()])
     if not audit_dirs:
-        raise SystemExit("No audit_* folder found in reports/. Run scripts/audit_full_system.sh first.")
+        raise SystemExit(
+            "No audit_* folder found in reports/. Run scripts/audit_full_system.sh first."
+        )
     out = audit_dirs[-1]
 
     env = read(out / "00_env.txt")
@@ -36,10 +38,14 @@ def main() -> None:
         if ("ok" in health.lower() or "status" in health.lower() or health.strip().startswith("{"))
         else "FAIL"
     )
-    results["openapi"] = "PASS" if "openapi" in openapi.lower() or openapi.strip().startswith("{") else "FAIL"
+    results["openapi"] = (
+        "PASS" if "openapi" in openapi.lower() or openapi.strip().startswith("{") else "FAIL"
+    )
     results["metrics"] = "PASS" if "# help" in metrics.lower() else "FAIL"
     rag_lower = rag.lower()
-    rag_ok = rag.strip().startswith("{") and ("citations" in rag_lower or "answer" in rag_lower or "sources" in rag_lower)
+    rag_ok = rag.strip().startswith("{") and (
+        "citations" in rag_lower or "answer" in rag_lower or "sources" in rag_lower
+    )
     if "not authenticated" in rag_lower or "forbidden" in rag_lower:
         rag_ok = False
     results["rag_query"] = "PASS" if rag_ok else "FAIL"
@@ -54,7 +60,9 @@ def main() -> None:
         phrase in (train1 + train2).lower()
         for phrase in ["traceback", "filenotfounderror", "error:", "exception"]
     )
-    results["reproducibility"] = "PASS" if (train1.strip() and train2.strip() and not train_fail) else "FAIL"
+    results["reproducibility"] = (
+        "PASS" if (train1.strip() and train2.strip() and not train_fail) else "FAIL"
+    )
 
     md = []
     md.append("# Sentifargo Full-System Audit Report\n")

@@ -61,7 +61,9 @@ def _write_md(path: Path, baseline: dict, augmented: dict, delta: dict) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Compare behavior false-positive rates before/after augmentation.")
+    ap = argparse.ArgumentParser(
+        description="Compare behavior false-positive rates before/after augmentation."
+    )
     ap.add_argument("--reports-dir", default="reports")
     ap.add_argument("--metrics-dir", default="experiments/behavior/metrics")
     ap.add_argument(
@@ -81,7 +83,9 @@ def main() -> int:
         default=0.05,
         help="Insider injection ratio for augmented run.",
     )
-    ap.add_argument("--use-existing", action="store_true", help="Skip retraining; reuse existing metrics files.")
+    ap.add_argument(
+        "--use-existing", action="store_true", help="Skip retraining; reuse existing metrics files."
+    )
     args = ap.parse_args()
 
     repo_root = Path(__file__).resolve().parents[1]

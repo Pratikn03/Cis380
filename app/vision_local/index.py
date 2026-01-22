@@ -5,7 +5,6 @@ from typing import Any
 
 import numpy as np
 
-
 try:
     import faiss  # type: ignore
 

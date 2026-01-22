@@ -33,7 +33,6 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
 

@@ -22,12 +22,14 @@ EXCLUDE_DIRS = {
     "ui-web/frontend/.cache",
 }
 
+
 def is_excluded(p: Path) -> bool:
     s = p.as_posix()
     for d in EXCLUDE_DIRS:
         if d in s:
             return True
     return False
+
 
 def collect_ui_api_refs() -> Set[str]:
     refs = set()
@@ -54,16 +56,20 @@ def collect_ui_api_refs() -> Set[str]:
                 refs.add(m.group(1))
     return refs
 
+
 def load_openapi(path: Path) -> Set[str]:
     data = json.loads(path.read_text(encoding="utf-8"))
     paths = set(data.get("paths", {}).keys())
     return paths
 
+
 def main():
     openapi_path = ROOT / "reports/openapi.json"
     if not openapi_path.exists():
         print("❌ reports/openapi.json not found.")
-        print("Run the server then: curl -s http://localhost:8000/openapi.json > reports/openapi.json")
+        print(
+            "Run the server then: curl -s http://localhost:8000/openapi.json > reports/openapi.json"
+        )
         sys.exit(1)
 
     ui_refs = sorted(collect_ui_api_refs())
@@ -72,8 +78,8 @@ def main():
     ui_set = set(ui_refs)
     api_set = set(api_paths)
 
-    missing = sorted(ui_set - api_set)      # UI references not served
-    unused = sorted(api_set - ui_set)       # served routes never referenced by UI (not always bad)
+    missing = sorted(ui_set - api_set)  # UI references not served
+    unused = sorted(api_set - ui_set)  # served routes never referenced by UI (not always bad)
 
     out = []
     out.append("# API Contract Diff Report\n")
@@ -93,7 +99,10 @@ def main():
     report_path = ROOT / "reports/CONTRACT_DIFF.md"
     report_path.write_text("\n".join(out), encoding="utf-8")
     print("✅ wrote reports/CONTRACT_DIFF.md")
-    print(f"OpenAPI={len(api_set)} UIrefs={len(ui_set)} Missing={len(missing)} Unused={len(unused)}")
+    print(
+        f"OpenAPI={len(api_set)} UIrefs={len(ui_set)} Missing={len(missing)} Unused={len(unused)}"
+    )
+
 
 if __name__ == "__main__":
     main()

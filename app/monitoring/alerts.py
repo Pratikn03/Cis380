@@ -29,7 +29,7 @@ FEATURES:
 USAGE:
 ------
     from app.monitoring.alerts import AlertSeverityScorer, Alert
-    
+
     scorer = AlertSeverityScorer()
     alert = scorer.create_alert(
         alert_type="fraud",

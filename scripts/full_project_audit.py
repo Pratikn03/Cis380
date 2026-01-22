@@ -11,33 +11,101 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 DEFAULT_EXCLUDE_DIRS = {
-    ".git", ".venv", "venv", "__pycache__", ".mypy_cache", ".pytest_cache",
-    "node_modules", "dist", "build", ".next", ".cache",
-    ".idea", ".vscode",
-    "data", "models", "reports", "runs", "ui-web",
-    "artifacts", "experiments", "notebooks", "logs",
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".mypy_cache",
+    ".pytest_cache",
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    ".cache",
+    ".idea",
+    ".vscode",
+    "data",
+    "models",
+    "reports",
+    "runs",
+    "ui-web",
+    "artifacts",
+    "experiments",
+    "notebooks",
+    "logs",
 }
 
 ANALYSIS_EXCLUDE_DIRS = {
-    ".git", ".venv", "venv", "__pycache__", ".mypy_cache", ".pytest_cache",
-    "node_modules", "dist", "build", ".next", ".cache",
-    ".idea", ".vscode",
-    "data", "models", "reports", "runs", "ui-web",
-    "artifacts", "experiments", "notebooks", "logs",
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".mypy_cache",
+    ".pytest_cache",
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    ".cache",
+    ".idea",
+    ".vscode",
+    "data",
+    "models",
+    "reports",
+    "runs",
+    "ui-web",
+    "artifacts",
+    "experiments",
+    "notebooks",
+    "logs",
 }
 
 FULL_SCAN = os.getenv("FULL_PROJECT_SCAN", "false").lower() == "true"
 EXCLUDE_DIRS = {".git"} if FULL_SCAN else DEFAULT_EXCLUDE_DIRS
 
-FASTAPI_DECORATORS = ("get","post","put","delete","patch","options","head")
+FASTAPI_DECORATORS = ("get", "post", "put", "delete", "patch", "options", "head")
 TRAIN_HINTS = [
-    "train(", "fit(", "Trainer", "DataLoader", "torch", "pytorch", "tensorflow", "keras",
-    "ultralytics", "YOLO", "yolov8", "yolo", "mAP", "coco",
-    "autogluon", "lightautoml", "h2o", "H2OAutoML", "flaml", "xgboost", "lightgbm", "catboost",
-    "librosa", "torchaudio", "mfcc", "spectrogram", "wav2vec",
+    "train(",
+    "fit(",
+    "Trainer",
+    "DataLoader",
+    "torch",
+    "pytorch",
+    "tensorflow",
+    "keras",
+    "ultralytics",
+    "YOLO",
+    "yolov8",
+    "yolo",
+    "mAP",
+    "coco",
+    "autogluon",
+    "lightautoml",
+    "h2o",
+    "H2OAutoML",
+    "flaml",
+    "xgboost",
+    "lightgbm",
+    "catboost",
+    "librosa",
+    "torchaudio",
+    "mfcc",
+    "spectrogram",
+    "wav2vec",
 ]
 
-RAG_HINTS = ["langchain","chromadb","Chroma","FAISS","OpenAIEmbeddings","vectorstore","retriever","rerank","rewrite"]
+RAG_HINTS = [
+    "langchain",
+    "chromadb",
+    "Chroma",
+    "FAISS",
+    "OpenAIEmbeddings",
+    "vectorstore",
+    "retriever",
+    "rerank",
+    "rewrite",
+]
+
 
 @dataclass
 class Endpoint:
@@ -46,15 +114,18 @@ class Endpoint:
     method: str
     path: str
 
+
 @dataclass
 class RouterInclude:
     file: str
     expr: str
 
+
 @dataclass
 class DupGroup:
     sha256: str
     files: List[str]
+
 
 @dataclass
 class Audit:
@@ -82,17 +153,20 @@ class Audit:
     docker_files: List[str]
     ci_files: List[str]
 
-    data_dirs: Dict[str,int]
+    data_dirs: Dict[str, int]
     missing_expected_data_dirs: List[str]
 
     unreferenced_internal_modules: List[str]
     notes: List[str]
 
+
 def is_excluded_dir(d: str) -> bool:
     return d in EXCLUDE_DIRS
 
+
 def path_has_dir(p: Path, targets: Set[str]) -> bool:
     return any(part in targets for part in p.parts)
+
 
 def walk(root: Path) -> List[Path]:
     out: List[Path] = []
@@ -101,6 +175,7 @@ def walk(root: Path) -> List[Path]:
         for fn in filenames:
             out.append(Path(dirpath) / fn)
     return out
+
 
 def read_text(p: Path, limit: Optional[int] = 400_000) -> str:
     try:
@@ -111,17 +186,19 @@ def read_text(p: Path, limit: Optional[int] = 400_000) -> str:
     except Exception:
         return ""
 
-def sha256_file(p: Path, max_bytes: int = 2*1024*1024) -> Optional[str]:
+
+def sha256_file(p: Path, max_bytes: int = 2 * 1024 * 1024) -> Optional[str]:
     try:
         if p.stat().st_size > max_bytes:
             return None
         h = hashlib.sha256()
         with p.open("rb") as f:
-            for chunk in iter(lambda: f.read(1024*1024), b""):
+            for chunk in iter(lambda: f.read(1024 * 1024), b""):
                 h.update(chunk)
         return h.hexdigest()
     except Exception:
         return None
+
 
 def detect_fastapi(p: Path) -> Tuple[List[RouterInclude], List[Endpoint]]:
     t = read_text(p)
@@ -134,19 +211,24 @@ def detect_fastapi(p: Path) -> Tuple[List[RouterInclude], List[Endpoint]]:
 
     dec_re = re.compile(r"@(\w+)\.(" + "|".join(FASTAPI_DECORATORS) + r")\(\s*([\"'])(.+?)\3", re.I)
     for m in dec_re.finditer(t):
-        eps.append(Endpoint(file=str(p), router=m.group(1), method=m.group(2).upper(), path=m.group(4)))
+        eps.append(
+            Endpoint(file=str(p), router=m.group(1), method=m.group(2).upper(), path=m.group(4))
+        )
 
     return inc, eps
+
 
 def looks_like_training(p: Path) -> bool:
     t = read_text(p, 250_000).lower()
     hits = sum(1 for h in TRAIN_HINTS if h.lower() in t)
     return hits >= 3 or ("yolo" in t and "train" in t) or ("autogluon" in t and "fit" in t)
 
+
 def looks_like_rag(p: Path) -> bool:
     t = read_text(p, 250_000)
     hits = sum(1 for h in RAG_HINTS if h in t)
     return hits >= 2
+
 
 def compile_check(py_files: List[Path]) -> List[str]:
     errs = []
@@ -158,22 +240,28 @@ def compile_check(py_files: List[Path]) -> List[str]:
             errs.append(f"{p}: {type(e).__name__}: {e}")
     return errs
 
+
 def import_graph_unreferenced(py_files: List[Path], root: Path) -> List[str]:
     module_map: Dict[str, Path] = {}
     for p in py_files:
         rel = p.relative_to(root).as_posix()
-        if rel.startswith(("app/","src/")) and rel.endswith(".py"):
+        if rel.startswith(("app/", "src/")) and rel.endswith(".py"):
             mod = rel[:-3].replace("/", ".")
             if mod.endswith(".__init__"):
-                mod = mod[:-len(".__init__")]
+                mod = mod[: -len(".__init__")]
             module_map[mod] = p
 
     referenced: Set[Path] = set()
     entry_like: Set[Path] = set()
-    entry_names = {"main.py","app.py","server.py","wsgi.py","asgi.py"}
+    entry_names = {"main.py", "app.py", "server.py", "wsgi.py", "asgi.py"}
     for p in py_files:
         rel = p.as_posix()
-        if p.name in entry_names or "/scripts/" in rel or p.name.startswith("run_") or p.name.endswith("_cli.py"):
+        if (
+            p.name in entry_names
+            or "/scripts/" in rel
+            or p.name.startswith("run_")
+            or p.name.endswith("_cli.py")
+        ):
             entry_like.add(p)
 
     for p in py_files:
@@ -186,12 +274,12 @@ def import_graph_unreferenced(py_files: List[Path], root: Path) -> List[str]:
             if isinstance(node, ast.Import):
                 for a in node.names:
                     nm = a.name
-                    if nm.startswith(("app.","src.")):
+                    if nm.startswith(("app.", "src.")):
                         if nm in module_map:
                             referenced.add(module_map[nm])
             elif isinstance(node, ast.ImportFrom):
                 nm = node.module or ""
-                if nm.startswith(("app.","src.")):
+                if nm.startswith(("app.", "src.")):
                     # try exact or parent
                     parts = nm.split(".")
                     while parts:
@@ -213,6 +301,7 @@ def import_graph_unreferenced(py_files: List[Path], root: Path) -> List[str]:
             unref.append(str(path))
     return sorted(unref)
 
+
 def count_files_limited(path: Path, limit: int) -> Tuple[int, bool]:
     cnt = 0
     for dirpath, _, filenames in os.walk(path):
@@ -222,9 +311,10 @@ def count_files_limited(path: Path, limit: int) -> Tuple[int, bool]:
                 return limit, True
     return cnt, False
 
-def summarize_data(root: Path, limit: int = 5000) -> Tuple[Dict[str,int], List[str], List[str]]:
-    expected = ["data/raw","data/processed","artifacts","runs","models","configs","reports"]
-    summary: Dict[str,int] = {}
+
+def summarize_data(root: Path, limit: int = 5000) -> Tuple[Dict[str, int], List[str], List[str]]:
+    expected = ["data/raw", "data/processed", "artifacts", "runs", "models", "configs", "reports"]
+    summary: Dict[str, int] = {}
     missing: List[str] = []
     truncated: List[str] = []
     for d in expected:
@@ -238,6 +328,7 @@ def summarize_data(root: Path, limit: int = 5000) -> Tuple[Dict[str,int], List[s
             truncated.append(d)
     return summary, missing, truncated
 
+
 def find_files_by_names(files: List[Path], names: List[str]) -> List[str]:
     out = []
     for p in files:
@@ -245,13 +336,15 @@ def find_files_by_names(files: List[Path], names: List[str]) -> List[str]:
             out.append(str(p))
     return sorted(out)
 
+
 def find_ci_files(files: List[Path]) -> List[str]:
     out = []
     for p in files:
         s = p.as_posix()
-        if ".github/workflows/" in s or s.endswith((".gitlab-ci.yml",".circleci/config.yml")):
+        if ".github/workflows/" in s or s.endswith((".gitlab-ci.yml", ".circleci/config.yml")):
             out.append(str(p))
     return sorted(out)
+
 
 def main():
     root = Path(".").resolve()
@@ -267,13 +360,13 @@ def main():
     total_bytes = sum(p.stat().st_size for p in files)
 
     # duplicates
-    hash_map: Dict[str,List[str]] = {}
+    hash_map: Dict[str, List[str]] = {}
     for p in files:
-        h = sha256_file(p, max_bytes=2*1024*1024)
+        h = sha256_file(p, max_bytes=2 * 1024 * 1024)
         if not h:
             continue
         hash_map.setdefault(h, []).append(str(p))
-    dups = [DupGroup(sha256=h, files=sorted(v)) for h,v in hash_map.items() if len(v) >= 2]
+    dups = [DupGroup(sha256=h, files=sorted(v)) for h, v in hash_map.items() if len(v) >= 2]
     dups.sort(key=lambda g: (-len(g.files), g.sha256))
 
     # fastapi
@@ -294,8 +387,22 @@ def main():
     compile_errors = compile_check(py_files_analyzed)
 
     # other infra files
-    reqs = [str(p) for p in files if p.name in {"requirements.txt","pyproject.toml","poetry.lock","Pipfile","Pipfile.lock"}]
-    docker = find_files_by_names(files, ["Dockerfile","docker-compose.yml","docker-compose.yaml","Dockerfile.production","Dockerfile.prod"])
+    reqs = [
+        str(p)
+        for p in files
+        if p.name
+        in {"requirements.txt", "pyproject.toml", "poetry.lock", "Pipfile", "Pipfile.lock"}
+    ]
+    docker = find_files_by_names(
+        files,
+        [
+            "Dockerfile",
+            "docker-compose.yml",
+            "docker-compose.yaml",
+            "Dockerfile.production",
+            "Dockerfile.prod",
+        ],
+    )
     ci = find_ci_files(files)
 
     # data summary
@@ -306,11 +413,17 @@ def main():
 
     notes = []
     if not includes and not endpoints:
-        notes.append("No FastAPI include_router/endpoints detected (maybe different patterns/framework).")
+        notes.append(
+            "No FastAPI include_router/endpoints detected (maybe different patterns/framework)."
+        )
     if compile_errors:
-        notes.append("Python compile errors found. Fix these first; they usually break integration.")
+        notes.append(
+            "Python compile errors found. Fix these first; they usually break integration."
+        )
     if dups:
-        notes.append("Duplicate files found with identical content hash (safe to consolidate later).")
+        notes.append(
+            "Duplicate files found with identical content hash (safe to consolidate later)."
+        )
     if unref:
         notes.append("Unreferenced internal modules found (may indicate duplicates/dead code).")
     if missing_data_dirs:
@@ -347,14 +460,18 @@ def main():
     )
 
     Path("reports").mkdir(parents=True, exist_ok=True)
-    Path("reports/PROJECT_AUDIT.json").write_text(json.dumps(asdict(audit), indent=2, ensure_ascii=False), encoding="utf-8")
+    Path("reports/PROJECT_AUDIT.json").write_text(
+        json.dumps(asdict(audit), indent=2, ensure_ascii=False), encoding="utf-8"
+    )
 
     # Markdown report
     md = []
     md.append("# Full Project Audit Report\n")
     md.append(f"- Root: `{audit.root}`")
     md.append(f"- Full scan: **{audit.full_scan}**")
-    md.append(f"- Scan exclusions: `{', '.join(audit.scan_exclusions) if audit.scan_exclusions else 'none'}`")
+    md.append(
+        f"- Scan exclusions: `{', '.join(audit.scan_exclusions) if audit.scan_exclusions else 'none'}`"
+    )
     md.append(
         f"- Analysis exclusions: `{', '.join(audit.analysis_exclusions) if audit.analysis_exclusions else 'none'}`"
     )
@@ -379,7 +496,7 @@ def main():
 
     md.append("## Data / Artifacts Summary (file counts)\n")
     if audit.data_dirs:
-        for k,v in audit.data_dirs.items():
+        for k, v in audit.data_dirs.items():
             md.append(f"- `{k}`: **{v}** files")
     if audit.missing_expected_data_dirs:
         md.append("\nMissing expected dirs (not always fatal):")
@@ -460,7 +577,7 @@ def main():
     print(f"Python compile errors: {len(compile_errors)}")
     print(f"Unreferenced internal modules: {len(unref)} (heuristic)")
     if audit.data_dirs:
-        print("Data summary:", ", ".join([f"{k}={v}" for k,v in audit.data_dirs.items()]))
+        print("Data summary:", ", ".join([f"{k}={v}" for k, v in audit.data_dirs.items()]))
     if audit.missing_expected_data_dirs:
         print("Missing expected dirs:", ", ".join(audit.missing_expected_data_dirs))
     if notes:
@@ -471,6 +588,7 @@ def main():
     print(" - reports/PROJECT_AUDIT.md")
     print(" - reports/PROJECT_AUDIT.json")
     print("===========================================================\n")
+
 
 if __name__ == "__main__":
     main()

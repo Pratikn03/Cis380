@@ -21,10 +21,10 @@ CHANNELS:
 USAGE:
 ------
     from app.services.alert_service import AlertService, Alert
-    
+
     service = AlertService()
     service.add_webhook("https://hooks.slack.com/...")
-    
+
     alert = Alert(
         alert_type="fraud",
         severity="high",
@@ -51,7 +51,6 @@ from typing import Dict, List, Optional, Any, Callable
 from urllib.request import Request, urlopen
 from urllib.error import URLError
 import uuid
-
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

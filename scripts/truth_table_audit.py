@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple
 
 ROOT = Path(".").resolve()
 
+
 def read_text(p: Path, limit=500_000) -> str:
     try:
         b = p.read_bytes()
@@ -15,20 +16,22 @@ def read_text(p: Path, limit=500_000) -> str:
     except Exception:
         return ""
 
-def find_endpoints(py: Path) -> List[Tuple[str,str,str]]:
+
+def find_endpoints(py: Path) -> List[Tuple[str, str, str]]:
     """
     returns (method, path, file)
     """
     t = read_text(py)
-    out=[]
+    out = []
     # @router.get("/x") / @app.post("/y")
     dec_re = re.compile(r"@(\w+)\.(get|post|put|delete|patch)\(\s*([\"'])(.+?)\3", re.I)
     for m in dec_re.finditer(t):
         out.append((m.group(2).upper(), m.group(4), str(py.relative_to(ROOT))))
     return out
 
+
 def classify_file(rel: str) -> str:
-    s = rel.replace("\\","/")
+    s = rel.replace("\\", "/")
     if s.startswith("app/legacy/"):
         return "LEGACY"
     if s.startswith("app/api/"):
@@ -45,7 +48,8 @@ def classify_file(rel: str) -> str:
         return "STREAMLIT_UI"
     return "OTHER"
 
-def grep_model_loads() -> List[Tuple[str,str]]:
+
+def grep_model_loads() -> List[Tuple[str, str]]:
     patterns = [
         r"joblib\.load\(",
         r"pickle\.load\(",
@@ -54,7 +58,7 @@ def grep_model_loads() -> List[Tuple[str,str]]:
         r"mlflow\.pyfunc\.load_model\(",
         r"onnxruntime\.InferenceSession\(",
     ]
-    hits=[]
+    hits = []
     for p in ROOT.rglob("*.py"):
         rel = str(p.relative_to(ROOT))
         txt = read_text(p, 250_000)
@@ -64,11 +68,12 @@ def grep_model_loads() -> List[Tuple[str,str]]:
                 break
     return hits
 
-def grep_ui_calls() -> List[Tuple[str,str]]:
+
+def grep_ui_calls() -> List[Tuple[str, str]]:
     """
     Find which API endpoints UI references: http://.../api/..., requests.post/get, fetch, etc.
     """
-    hits=[]
+    hits = []
     for p in ROOT.rglob("*.py"):
         rel = str(p.relative_to(ROOT))
         if not rel.startswith("app/streamlit_chatbot/"):
@@ -78,7 +83,7 @@ def grep_ui_calls() -> List[Tuple[str,str]]:
             hits.append((rel, m.group(0)))
     # also check frontend TS/TSX
     for p in ROOT.rglob("*"):
-        if p.suffix.lower() not in {".ts",".tsx",".js"}:
+        if p.suffix.lower() not in {".ts", ".tsx", ".js"}:
             continue
         rel = str(p.relative_to(ROOT))
         if not rel.startswith("ui-web/"):
@@ -88,30 +93,31 @@ def grep_ui_calls() -> List[Tuple[str,str]]:
             hits.append((rel, m.group(0)))
     return hits
 
+
 def main():
     # endpoints
-    all_eps=[]
+    all_eps = []
     for p in ROOT.rglob("*.py"):
         eps = find_endpoints(p)
         all_eps.extend(eps)
 
     # group endpoints by category
-    grouped: Dict[str, List[Tuple[str,str,str]]] = {}
-    for method,path,file in all_eps:
+    grouped: Dict[str, List[Tuple[str, str, str]]] = {}
+    for method, path, file in all_eps:
         cat = classify_file(file)
-        grouped.setdefault(cat, []).append((method,path,file))
+        grouped.setdefault(cat, []).append((method, path, file))
 
     model_loads = grep_model_loads()
     ui_calls = grep_ui_calls()
 
     # write markdown
-    md=[]
+    md = []
     md.append("# Truth Table Audit (Current vs Legacy vs Training vs UI)\n")
     md.append("## Endpoint Inventory (grouped)\n")
     for cat in sorted(grouped.keys()):
         items = grouped[cat]
         md.append(f"### {cat} — {len(items)} endpoints\n")
-        for method,path,file in sorted(items)[:120]:
+        for method, path, file in sorted(items)[:120]:
             md.append(f"- `{method}` `{path}` — `{file}`")
         md.append("")
     md.append("## Model Loading Evidence (runtime loads)\n")
@@ -124,12 +130,13 @@ def main():
     for rel, ep in ui_calls[:200]:
         md.append(f"- `{rel}` references `{ep}`")
     md.append("")
-    out = ROOT/"reports/TRUTH_TABLE.md"
+    out = ROOT / "reports/TRUTH_TABLE.md"
     out.write_text("\n".join(md), encoding="utf-8")
     print("✅ wrote reports/TRUTH_TABLE.md")
-    print("Counts:", {k: len(v) for k,v in grouped.items()})
+    print("Counts:", {k: len(v) for k, v in grouped.items()})
     print("Model-load hits:", len(model_loads))
     print("UI api refs:", len(ui_calls))
+
 
 if __name__ == "__main__":
     main()

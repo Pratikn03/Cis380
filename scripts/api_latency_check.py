@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Simple API latency checker for Sentifargo FastAPI endpoints."""
+
 import time
 import argparse
 import requests

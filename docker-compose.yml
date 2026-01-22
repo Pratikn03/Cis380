@@ -7,8 +7,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_URL=redis://redis:6379/0
     env_file:
       - .env
     volumes:

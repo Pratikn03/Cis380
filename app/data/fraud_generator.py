@@ -22,7 +22,7 @@ PATTERNS SUPPORTED:
 USAGE:
 ------
     from app.data.fraud_generator import FraudDataGenerator
-    
+
     generator = FraudDataGenerator(seed=42)
     data = generator.generate(n_samples=10000, fraud_ratio=0.05)
 """

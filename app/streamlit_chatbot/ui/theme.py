@@ -276,15 +276,13 @@ def sidebar_panel(*, backend_url: str) -> str:
         st.sidebar.error("Backend unreachable ❌")
 
     with st.sidebar.expander("Quick tips", expanded=True):
-        st.markdown(
-            """
+        st.markdown("""
             - **Recommendations**: movies/electronics/news + image/text similarity.
             - **Live Agent**: GPT-like chat (uses `OPENAI_API_KEY` if set).
             - **Voice Chat**: upload speech, transcribe via STT, and ask Sentifargo hands-free.
             - **Audio/Video/Vision**: mic/webcam + uploads (voice + image + video).
             - **Fraud/Cyber/Behavior**: risk command center + direct scoring.
-            """
-        )
+            """)
         st.caption(f"Backend: {backend_url or 'N/A'}")
 
     return backend_url

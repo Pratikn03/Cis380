@@ -171,16 +171,14 @@ def render_classic_chat(
 
         st.divider()
         st.markdown("### 🎯 Capabilities")
-        st.markdown(
-            """
+        st.markdown("""
         - 💳 **Fraud Detection**
         - 🛡️ **Cyber Security**
         - 🎤 **Voice Emotion**
         - 👁️ **Vision Analysis**
         - 🎬 **Video Analysis**
         - 📊 **Recommendations**
-        """
-        )
+        """)
 
         st.divider()
         st.markdown("### ⚙️ Settings")

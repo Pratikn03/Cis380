@@ -5,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Iterable
 
-
 CARD_ROOT = Path("docs/model_cards")
 
 

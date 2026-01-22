@@ -41,7 +41,6 @@ import shutil as _shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-
 CREMA_PATTERN = re.compile(
     r"^(?P<speaker>\d{4})_(?P<sent>[A-Z]{3})_(?P<emotion>[A-Z]{3})_(?P<intensity>[A-Z]{2})\.(?P<ext>flv|mp4|avi|mkv|wav)$",
     re.IGNORECASE,

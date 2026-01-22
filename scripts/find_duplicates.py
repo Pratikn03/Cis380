@@ -43,6 +43,7 @@ def sha256_file(path: Path, chunk=1024 * 1024) -> str:
             h.update(b)
     return h.hexdigest()
 
+
 def should_include(p: Path) -> bool:
     if p.is_symlink():
         return False
@@ -50,6 +51,7 @@ def should_include(p: Path) -> bool:
         return False
     ext = p.suffix.lower()
     return ext in INCLUDE_EXT
+
 
 def main():
     roots = sys.argv[1:] or ["data"]
@@ -96,37 +98,38 @@ def main():
     for size, h, hs in dup_groups:
         keep = str(hs[0])
         dups = [str(x) for x in hs[1:]]
-        data.append({
-            "size_bytes": size,
-            "sha256": h,
-            "keep": keep,
-            "duplicates": dups,
-            "count": len(hs)
-        })
-    out_json.write_text(json.dumps({
-        "scanned_roots": roots,
-        "included_ext": sorted(INCLUDE_EXT),
-        "duplicate_groups": data
-    }, indent=2), encoding="utf-8")
+        data.append(
+            {"size_bytes": size, "sha256": h, "keep": keep, "duplicates": dups, "count": len(hs)}
+        )
+    out_json.write_text(
+        json.dumps(
+            {"scanned_roots": roots, "included_ext": sorted(INCLUDE_EXT), "duplicate_groups": data},
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     with out_csv.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["group_size_bytes","sha256","keep_path","duplicate_path"])
+        w.writerow(["group_size_bytes", "sha256", "keep_path", "duplicate_path"])
         for g in data:
             for d in g["duplicates"]:
                 w.writerow([g["size_bytes"], g["sha256"], g["keep"], d])
     out_mv.write_text("#!/usr/bin/env bash\nset -euo pipefail\n", encoding="utf-8")
-    out_mv.write_text(out_mv.read_text(encoding="utf-8") + "TS=$(date +%Y%m%d_%H%M%S)\n", encoding="utf-8")
-    out_mv.write_text(out_mv.read_text(encoding="utf-8") + 'TRASH="data/_duplicates_trash/$TS"\nmkdir -p "$TRASH"\n\n', encoding="utf-8")
+    out_mv.write_text(
+        out_mv.read_text(encoding="utf-8") + "TS=$(date +%Y%m%d_%H%M%S)\n", encoding="utf-8"
+    )
+    out_mv.write_text(
+        out_mv.read_text(encoding="utf-8")
+        + 'TRASH="data/_duplicates_trash/$TS"\nmkdir -p "$TRASH"\n\n',
+        encoding="utf-8",
+    )
     for g in data:
         for d in g["duplicates"]:
             dp = Path(d)
             try:
                 rel = dp.relative_to("data")
-                dest_dir = f'$TRASH/{rel.parent.as_posix()}'
-                cmd = (
-                    f'mkdir -p "{dest_dir}"\n'
-                    f'mv -n "{dp.as_posix()}" "{dest_dir}/"\n'
-                )
+                dest_dir = f"$TRASH/{rel.parent.as_posix()}"
+                cmd = f'mkdir -p "{dest_dir}"\n' f'mv -n "{dp.as_posix()}" "{dest_dir}/"\n'
             except Exception:
                 cmd = f'mv -n "{dp.as_posix()}" "$TRASH/"\n'
             out_mv.write_text(out_mv.read_text(encoding="utf-8") + cmd, encoding="utf-8")
@@ -142,5 +145,7 @@ def main():
     print("Next:")
     print(f"  - Dry-run review: open {out_csv}")
     print(f"  - To MOVE duplicates into trash: bash {out_mv}")
+
+
 if __name__ == "__main__":
     main()

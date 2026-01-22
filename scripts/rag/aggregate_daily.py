@@ -38,15 +38,15 @@ def main() -> None:
     summary = {}
     for day, items in by_day.items():
         latencies = [ev.get("latency_ms", 0.0) for ev in items]
-        confidences = [ev.get("confidence", 0.0) for ev in items if ev.get("confidence") is not None]
+        confidences = [
+            ev.get("confidence", 0.0) for ev in items if ev.get("confidence") is not None
+        ]
         failures = [ev.get("failure_reason") for ev in items if ev.get("failure_reason")]
         summary[day] = {
             "count": len(items),
             "avg_latency_ms": round(sum(latencies) / max(len(latencies), 1), 2),
             "avg_confidence": round(sum(confidences) / max(len(confidences), 1), 4),
-            "failures": {
-                reason: failures.count(reason) for reason in sorted(set(failures))
-            },
+            "failures": {reason: failures.count(reason) for reason in sorted(set(failures))},
         }
 
     metrics_path = Path("metrics") / "rag_daily.json"

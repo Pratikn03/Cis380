@@ -21,18 +21,18 @@ FEATURES:
 USAGE:
 ------
     from app.monitoring.latency import LatencyMonitor, track_latency
-    
+
     monitor = LatencyMonitor()
-    
+
     # Track a request
     with monitor.track("fraud_inference"):
         result = fraud_model.predict(data)
-    
+
     # Or use decorator
     @track_latency("endpoint_name")
     def my_endpoint():
         ...
-    
+
     # Get stats
     stats = monitor.get_stats("fraud_inference")
 """

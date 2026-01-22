@@ -29,7 +29,6 @@ from uais_v.models.video_temporal import (
     vectorize_temporal_features,
 )
 
-
 VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
 
 
@@ -215,9 +214,7 @@ def main() -> int:
         "--device",
         type=str,
         default=(
-            os.getenv("Sentifargo_VISION_DEVICE")
-            or os.getenv("Sentifargo_VISION_DEVICE")
-            or "cpu"
+            os.getenv("Sentifargo_VISION_DEVICE") or os.getenv("Sentifargo_VISION_DEVICE") or "cpu"
         ),
     )
     parser.add_argument("--out", type=Path, default=VIDEO_TEMPORAL_MODEL_PATH)

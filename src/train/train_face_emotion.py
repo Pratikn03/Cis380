@@ -31,7 +31,6 @@ import random
 from dataclasses import dataclass
 from pathlib import Path
 
-
 _DEFAULT_OUT_DIR = Path("models/vision/face_emotion")
 _EXPECTED_EMOTIONS = ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral", "contempt"]
 _DEFAULT_NUMERIC_LABEL_MAP_1_TO_7 = {
@@ -410,7 +409,9 @@ def main() -> int:
         val_ds = Subset(val_ds, keep)
 
     if is_ddp:
-        train_sampler = DistributedSampler(train_ds, num_replicas=world_size, rank=rank, shuffle=True)
+        train_sampler = DistributedSampler(
+            train_ds, num_replicas=world_size, rank=rank, shuffle=True
+        )
         val_sampler = DistributedSampler(val_ds, num_replicas=world_size, rank=rank, shuffle=False)
     else:
         train_sampler = None

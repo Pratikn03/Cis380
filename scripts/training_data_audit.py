@@ -286,7 +286,9 @@ def main() -> int:
     val_path = _resolve_yaml_path(brand_prepared, brand_yaml.get("val"))
     train_exists = bool(train_path and train_path.exists())
     val_exists = bool(val_path and val_path.exists())
-    train_count, train_capped = _count_ext(train_path, IMAGE_EXTS, limit=5000) if train_path else (0, False)
+    train_count, train_capped = (
+        _count_ext(train_path, IMAGE_EXTS, limit=5000) if train_path else (0, False)
+    )
     val_count, val_capped = _count_ext(val_path, IMAGE_EXTS, limit=5000) if val_path else (0, False)
     brand_status, brand_note = _brand_status(brand_raw_ok, brand_prepared_ok)
     if brand_prepared_ok:

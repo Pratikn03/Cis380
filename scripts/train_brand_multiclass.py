@@ -28,7 +28,12 @@ def main() -> int:
 
     data_yaml = args.data_yaml
     if data_yaml is None:
-        cmd = [sys.executable, str(project_root / "scripts" / "prepare_brand_data.py"), "--kind", args.kind]
+        cmd = [
+            sys.executable,
+            str(project_root / "scripts" / "prepare_brand_data.py"),
+            "--kind",
+            args.kind,
+        ]
         if args.src_root:
             cmd.extend(["--src_root", args.src_root])
         if args.out_root:

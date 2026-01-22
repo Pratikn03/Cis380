@@ -13,7 +13,6 @@ from app.rag_dsa.ingest import build_chunks, ensure_index, load_docs
 from app.rag_dsa.online import answer_online, online_enabled
 from app.rag_dsa.utils import cache_get, cache_set, stable_hash, tokenize, unique_preserve
 
-
 _CHATGPT_LINK = "https://chat.openai.com/"
 
 _REWRITE_HINTS = {

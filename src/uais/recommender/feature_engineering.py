@@ -8,7 +8,6 @@ import numpy as np
 
 from .utils import safe_float
 
-
 META_FEATURE_NAMES: List[str] = [
     "fraud_score",
     "cyber_score",

@@ -3,6 +3,7 @@
 Sentifargo Production Readiness Check
 Verifies all production configuration files are in place
 """
+
 import os
 import sys
 from pathlib import Path

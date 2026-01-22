@@ -1,5 +1,7 @@
 from fastapi import APIRouter
+
 router = APIRouter(prefix="/api/rag", tags=["rag"])
+
 
 @router.post("/query")
 def query(payload: dict):

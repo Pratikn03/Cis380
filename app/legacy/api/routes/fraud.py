@@ -15,10 +15,10 @@ This file provides the API endpoint for fraud detection. It:
 API ENDPOINT:
 -------------
     POST /api/fraud
-    
+
     Request Body:
         {"features": [0.5, -1.2, 3.4, ...]}  # List of numerical features
-    
+
     Response:
         {
             "score": 0.87,              # Fraud probability (0-1)
@@ -37,7 +37,7 @@ HOW FRAUD DETECTION WORKS:
     2. Normalize features to same scale as training data
     3. Pass through trained model (XGBoost gradient boosting)
     4. Model outputs probability of fraud based on patterns learned
-    
+
     Key fraud indicators the model looks for:
     - Unusual transaction amounts
     - Odd transaction times (e.g., 3 AM)

@@ -5,7 +5,6 @@ from typing import Dict, Iterable
 import numpy as np
 import pandas as pd
 
-
 _PATTERN_MULTIPLIERS: Dict[str, float] = {
     "duration": 4.0,
     "time": 4.0,

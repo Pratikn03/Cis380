@@ -9,7 +9,6 @@ from typing import List, Optional
 
 from app.rag.ocr import DocumentProcessor
 
-
 SUPPORTED_EXTS = {".pdf", ".docx", ".txt", ".md", ".html", ".htm", ".json", ".csv"}
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff"}
 

@@ -35,7 +35,9 @@ def _split_indices(n: int, seed: int, val_ratio: float) -> tuple[list[int], list
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Train TemporalDeepfakeLSTM (video temporal model).")
+    parser = argparse.ArgumentParser(
+        description="Train TemporalDeepfakeLSTM (video temporal model)."
+    )
     parser.add_argument("--data-root", type=Path, default=Path("data/raw/vision/video"))
     parser.add_argument("--clip-len", type=int, default=16)
     parser.add_argument("--size", type=int, default=224)
@@ -57,7 +59,9 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    dataset = VideoClipDataset(str(args.data_root), clip_len=int(args.clip_len), size=int(args.size))
+    dataset = VideoClipDataset(
+        str(args.data_root), clip_len=int(args.clip_len), size=int(args.size)
+    )
     if len(dataset) == 0:
         raise SystemExit(f"No videos found under {args.data_root}/real or {args.data_root}/fake")
 
@@ -68,19 +72,29 @@ def main() -> int:
         keep = real_idx + fake_idx
         dataset = Subset(dataset, keep)
 
-    train_idx, val_idx = _split_indices(len(dataset), seed=int(args.seed), val_ratio=float(args.val_ratio))
+    train_idx, val_idx = _split_indices(
+        len(dataset), seed=int(args.seed), val_ratio=float(args.val_ratio)
+    )
     train_ds = Subset(dataset, train_idx)
     val_ds = Subset(dataset, val_idx)
 
     device = torch.device(_resolve_device(args.device))
-    model = TemporalDeepfakeLSTM(hidden=256, backbone="mobilenet_v3_small", freeze_backbone=True).to(device)
+    model = TemporalDeepfakeLSTM(
+        hidden=256, backbone="mobilenet_v3_small", freeze_backbone=True
+    ).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=float(args.lr))
     criterion = nn.BCEWithLogitsLoss()
 
-    train_loader = DataLoader(train_ds, batch_size=int(args.batch_size), shuffle=True, num_workers=0)
+    train_loader = DataLoader(
+        train_ds, batch_size=int(args.batch_size), shuffle=True, num_workers=0
+    )
     val_loader = DataLoader(val_ds, batch_size=int(args.batch_size), shuffle=False, num_workers=0)
 
-    metrics = {"epochs": int(args.epochs), "train_samples": len(train_ds), "val_samples": len(val_ds)}
+    metrics = {
+        "epochs": int(args.epochs),
+        "train_samples": len(train_ds),
+        "val_samples": len(val_ds),
+    }
 
     for epoch in range(int(args.epochs)):
         model.train()

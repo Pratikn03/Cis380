@@ -10,7 +10,6 @@ from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Iterable, List, Optional
 
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -140,7 +139,9 @@ def claim_mlflow_registry() -> ClaimResult:
     registry = ROOT / "app/mlops/registry.py"
 
     if mlflow_utils.exists():
-        for hit in find_lines(mlflow_utils, [r"mlflow\.set_tracking_uri", r"mlflow\.set_experiment"]):
+        for hit in find_lines(
+            mlflow_utils, [r"mlflow\.set_tracking_uri", r"mlflow\.set_experiment"]
+        ):
             add_evidence(result, mlflow_utils, hit)
     if mlflow_cfg.exists():
         add_evidence(result, mlflow_cfg, "mlflow_config.yaml exists")

@@ -20,8 +20,8 @@ def _split_csv(*, csv_path: Path, out_dir: Path, seed: int, train: float, val: f
     n_val = int(n * val)
 
     train_df = df.iloc[:n_train]
-    val_df = df.iloc[n_train:n_train + n_val]
-    test_df = df.iloc[n_train + n_val:]
+    val_df = df.iloc[n_train : n_train + n_val]
+    test_df = df.iloc[n_train + n_val :]
 
     train_path = out_dir / "train.csv"
     val_path = out_dir / "val.csv"
@@ -87,8 +87,8 @@ def main() -> None:
     n_train = int(n * args.train)
     n_val = int(n * args.val)
     train = files[:n_train]
-    val = files[n_train:n_train + n_val]
-    test = files[n_train + n_val:]
+    val = files[n_train : n_train + n_val]
+    test = files[n_train + n_val :]
 
     splits = {"train": train, "val": val, "test": test, "seed": args.seed}
     (out / "splits.json").write_text(json.dumps(splits, indent=2))

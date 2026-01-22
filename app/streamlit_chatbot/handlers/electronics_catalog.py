@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-
 ELECTRONICS_CATALOG: Dict[str, List[dict]] = {
     "phones": [
         {

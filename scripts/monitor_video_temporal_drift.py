@@ -12,7 +12,6 @@ import numpy as np
 
 from app.monitoring.drift import classify_status, psi
 
-
 VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
 
 
@@ -137,7 +136,10 @@ def main() -> int:
     ap.add_argument("--root", default="data/raw/vision/video")
     ap.add_argument("--real-dir", default=None)
     ap.add_argument("--fake-dir", default=None)
-    ap.add_argument("--model-path", default=os.getenv("TEMPORAL_MODEL_PATH", "artifacts/vision_temporal/temporal_lstm.pt"))
+    ap.add_argument(
+        "--model-path",
+        default=os.getenv("TEMPORAL_MODEL_PATH", "artifacts/vision_temporal/temporal_lstm.pt"),
+    )
     ap.add_argument("--baseline", default="reports/vision_temporal_lstm_baseline.json")
     ap.add_argument("--report", default="reports/vision_temporal_lstm_drift.json")
     ap.add_argument("--max-per-class", type=int, default=60)

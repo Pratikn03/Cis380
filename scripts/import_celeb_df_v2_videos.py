@@ -30,7 +30,6 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-
 VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv"}
 
 

@@ -432,9 +432,13 @@ def render_unified_chat(
         st.markdown("### ⚙️ Settings")
 
         use_rag = st.toggle("📚 Enable RAG", value=True, help="Use Retrieval-Augmented Generation")
-        enable_vision = st.toggle("👁️ Vision Analysis", value=True, help="Analyze images and videos")
+        enable_vision = st.toggle(
+            "👁️ Vision Analysis", value=True, help="Analyze images and videos"
+        )
         enable_voice = st.toggle("🎤 Voice Emotion", value=True, help="Analyze audio emotion")
-        enable_risk = st.toggle("🛡️ Risk Detection", value=True, help="Fraud/Cyber/Behavior scoring")
+        enable_risk = st.toggle(
+            "🛡️ Risk Detection", value=True, help="Fraud/Cyber/Behavior scoring"
+        )
         enable_recommendations = st.toggle(
             "🎯 Recommendations", value=True, help="Movie/Product suggestions"
         )

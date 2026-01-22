@@ -3,6 +3,7 @@
 PRODUCTION TRAINING SCRIPT
 Train ALL models using REAL datasets for production deployment.
 """
+
 from __future__ import annotations
 
 import os
@@ -471,6 +472,7 @@ def train_face_emotion_model():
 
     try:
         import subprocess
+
         subprocess.run(
             [
                 sys.executable,
@@ -488,6 +490,7 @@ def train_face_emotion_model():
     except Exception as exc:
         print(f"⚠️ Face emotion training failed: {exc}")
         return False
+
 
 # ============================================================
 # MAIN

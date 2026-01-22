@@ -19,7 +19,7 @@ CONFIDENCE LEVELS:
 USAGE:
 ------
     from app.agent.confidence import IntentConfidenceScorer
-    
+
     scorer = IntentConfidenceScorer()
     result = scorer.score("check this transaction for fraud")
     # Returns: {"intent": "fraud", "confidence": 0.92, "level": "high"}

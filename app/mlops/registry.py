@@ -22,9 +22,9 @@ FEATURES:
 USAGE:
 ------
     from app.mlops.registry import ModelRegistry
-    
+
     registry = ModelRegistry()
-    
+
     # Register a new model
     registry.register_model(
         name="fraud_detector",
@@ -32,10 +32,10 @@ USAGE:
         path="models/fraud/model_v2.pkl",
         metrics={"accuracy": 0.992, "f1": 0.85}
     )
-    
+
     # Get production model
     model_info = registry.get_production_model("fraud_detector")
-    
+
     # Promote to production
     registry.promote_model("fraud_detector", "2.1.0", "production")
 """
@@ -50,7 +50,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Literal
 import hashlib
 import threading
-
 
 ModelStage = Literal["development", "staging", "production", "archived"]
 
