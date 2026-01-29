@@ -161,7 +161,9 @@ def bootstrap(
     if not expected_token:
         raise HTTPException(status_code=403, detail="Bootstrap disabled")
     if bootstrap_token != expected_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid bootstrap token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid bootstrap token"
+        )
     if db.query(User).count() > 0:
         raise HTTPException(status_code=400, detail="Bootstrap already completed")
     admin = bootstrap_admin(db, payload.username, payload.password)
