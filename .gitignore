@@ -181,6 +181,8 @@ data/processed/brand_yolo/
 # ============================================
 artifacts/
 models/
+!models/whisper_large/
+!models/whisper_large/**
 runs/
 logs/
 mlruns/
@@ -192,6 +194,8 @@ experiments/
 # ============================================
 reports/**
 !reports/.gitkeep
+!reports/whisper_large/
+!reports/whisper_large/**
 reports/benchmarks.md
 reports/duplicates_*.csv
 reports/duplicates_*.json

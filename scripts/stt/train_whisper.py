@@ -34,6 +34,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, default=Path("models/whisper_stt"))
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument(
+        "--grad-accum",
+        type=int,
+        default=1,
+        help="Gradient accumulation steps (effective batch = batch_size * grad_accum).",
+    )
     parser.add_argument("--learning-rate", type=float, default=1e-5)
     parser.add_argument("--max-steps", type=int, default=0)
     parser.add_argument("--fp16", action="store_true", help="Enable fp16 if supported.")
@@ -78,9 +84,7 @@ def main() -> None:
         import datasets
         import numpy as np
         import torch
-        from datasets import Audio
         from transformers import (
-            DataCollatorSpeechSeq2SeqWithPadding,
             Seq2SeqTrainer,
             Seq2SeqTrainingArguments,
             WhisperForConditionalGeneration,
@@ -111,7 +115,6 @@ def main() -> None:
             return {"audio": str((base_dir / batch["audio"]).resolve())}
 
         dataset = dataset.map(make_abs)
-        dataset = dataset.cast_column("audio", Audio(sampling_rate=16000))
         return dataset
 
     train_dataset = load_manifest(args.train_manifest)
@@ -132,13 +135,36 @@ def main() -> None:
         noise = rng.normal(0.0, np.sqrt(noise_power), size=audio_array.shape)
         return audio_array + noise
 
+    try:
+        import soundfile as sf
+    except Exception as exc:
+        raise SystemExit(
+            "soundfile is required for STT training. Install with: pip install soundfile"
+        ) from exc
+
+    try:
+        import librosa
+    except Exception:
+        librosa = None
+
+    def load_audio(path: str) -> tuple["np.ndarray", int]:
+        audio_array, sr = sf.read(path)
+        if audio_array.ndim > 1:
+            audio_array = np.mean(audio_array, axis=1)
+        if sr != 16000:
+            if librosa is None:
+                raise SystemExit("librosa is required to resample non-16k audio.")
+            audio_array = librosa.resample(audio_array, orig_sr=sr, target_sr=16000)
+            sr = 16000
+        return audio_array.astype("float32"), sr
+
     def prepare_batch(batch):
-        audio = batch["audio"]
-        audio_array = audio["array"]
+        audio_path = batch["audio"]
+        audio_array, sr = load_audio(audio_path)
         if args.augment and rng.random() < args.noise_prob:
             snr = rng.uniform(args.noise_min_snr, args.noise_max_snr)
             audio_array = add_noise(audio_array, snr)
-        inputs = processor.feature_extractor(audio_array, sampling_rate=audio["sampling_rate"])
+        inputs = processor.feature_extractor(audio_array, sampling_rate=sr)
         batch["input_features"] = inputs.input_features[0]
         text = batch["text"] or ""
         if args.normalize:
@@ -157,12 +183,48 @@ def main() -> None:
         num_proc=args.num_workers,
     )
 
-    data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
+    try:
+        from transformers import DataCollatorSpeechSeq2SeqWithPadding
+
+        data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
+    except Exception:
+        import torch
+
+        class DataCollatorSpeechSeq2SeqWithPadding:
+            """Minimal speech collator compatible with Transformers 5.x."""
+
+            def __init__(self, processor):
+                self.processor = processor
+
+            def __call__(self, features):
+                input_features = [{"input_features": f["input_features"]} for f in features]
+                batch = self.processor.feature_extractor.pad(
+                    input_features, return_tensors="pt"
+                )
+                label_features = [{"input_ids": f["labels"]} for f in features]
+                labels_batch = self.processor.tokenizer.pad(label_features, return_tensors="pt")
+                labels = labels_batch["input_ids"].masked_fill(
+                    labels_batch["attention_mask"].ne(1), -100
+                )
+                batch["labels"] = labels
+                return batch
+
+        data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor)
+
+    device_label = (
+        "cuda"
+        if torch.cuda.is_available()
+        else "mps"
+        if hasattr(torch.backends, "mps") and torch.backends.mps.is_available()
+        else "cpu"
+    )
+    print(f"[stt_train] device={device_label}")
 
     training_args = Seq2SeqTrainingArguments(
         output_dir=str(args.output_dir),
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=args.batch_size,
+        gradient_accumulation_steps=max(1, int(args.grad_accum)),
         learning_rate=args.learning_rate,
         num_train_epochs=args.epochs,
         max_steps=args.max_steps if args.max_steps > 0 else None,
