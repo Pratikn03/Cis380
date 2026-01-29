@@ -28,6 +28,7 @@ USAGE:
 from __future__ import annotations
 
 import re
+import math
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional
 
@@ -274,9 +275,66 @@ class IntentConfidenceScorer:
         ],
     }
 
+    # Tier 1 Upgrade: Semantic Anchors
+    # In a real implementation, these would be pre-computed vector embeddings.
+    # Here we define the "canonical" phrases that represent each intent.
+    SEMANTIC_ANCHORS: Dict[str, List[str]] = {
+        "fraud": [
+            "I want to report a suspicious charge",
+            "someone stole my card",
+            "unauthorized transaction",
+        ],
+        "cyber": ["system under attack", "firewall breach detected", "malware found on server"],
+        "behavior": [
+            "user acting strangely",
+            "employee accessing unauthorized files",
+            "login from unusual location",
+        ],
+        "voice_emotion": [
+            "analyze this audio file",
+            "detect anger in voice",
+            "sentiment of the call",
+        ],
+        "vision": [
+            "scan this image for deepfakes",
+            "is this photo real or fake",
+            "detect brand logo",
+        ],
+        "recommend": ["suggest a movie", "what should I buy", "recommend a laptop"],
+        "rag": ["search the policy documents", "how do I reset password", "lookup error code"],
+    }
+
     def __init__(self):
         """Initialize the confidence scorer."""
         self._compile_patterns()
+        self._embedding_model = None
+        # self._load_embedding_model() # Uncomment to load actual ML model
+
+    def _load_embedding_model(self):
+        """Lazy load a lightweight embedding model (e.g., all-MiniLM-L6-v2)."""
+        try:
+            # from sentence_transformers import SentenceTransformer
+            # self._embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+            pass
+        except ImportError:
+            pass
+
+    def _compute_semantic_similarity(self, text: str, anchors: List[str]) -> float:
+        """
+        Compute semantic similarity between text and anchor phrases.
+        (Mock implementation of cosine similarity for demonstration)
+        """
+        text_words = set(text.lower().split())
+        max_sim = 0.0
+        for anchor in anchors:
+            anchor_words = set(anchor.lower().split())
+            intersection = text_words.intersection(anchor_words)
+            sim = len(intersection) / (
+                math.sqrt(len(text_words)) * math.sqrt(len(anchor_words)) + 1e-9
+            )
+            if sim > max_sim:
+                max_sim = sim
+        return max_sim
 
     def _compile_patterns(self) -> None:
         """Pre-compile regex patterns for efficiency."""
@@ -304,6 +362,13 @@ class IntentConfidenceScorer:
             score = 0.0
             matched = []
 
+            # 1. Semantic Similarity (Tier 1 Feature)
+            if intent in self.SEMANTIC_ANCHORS:
+                semantic_score = self._compute_semantic_similarity(
+                    text, self.SEMANTIC_ANCHORS[intent]
+                )
+                score += semantic_score * 2.0  # High weight for semantic match
+
             # Keyword matching
             for word, weight in keywords.items():
                 if word in words:
@@ -320,7 +385,7 @@ class IntentConfidenceScorer:
             # Normalize score
             # Saturation threshold: A score of 2.5 (e.g., ~2-3 keywords or 1 strong keyword + pattern)
             # is considered 100% confidence. This prevents penalizing intents with large keyword lists.
-            SATURATION_THRESHOLD = 2.5
+            SATURATION_THRESHOLD = 3.0  # Increased threshold to account for semantic score
             normalized = min(score / SATURATION_THRESHOLD, 1.0)
 
             intent_scores[intent] = (normalized, matched)

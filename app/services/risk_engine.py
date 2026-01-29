@@ -11,6 +11,11 @@ import numpy as np
 from app.fusion.engine import predict_fusion
 
 try:
+    from app.utils.gemini_client import GeminiClient
+except ImportError:
+    GeminiClient = None
+
+try:
     from app.core.health import MODEL_ERRORS, MODEL_INFERENCE_COUNT, MODEL_INFERENCE_LATENCY
 except Exception:  # pragma: no cover - metrics optional
     MODEL_ERRORS = None
@@ -180,6 +185,24 @@ def _fusion_score(
         return 0.0, {"available": False, "path": None, "error": str(exc), "inputs": inputs}
 
 
+def _analyze_complex_patterns(payload: Mapping[str, Any]) -> Dict[str, Any]:
+    """Use Gemini to analyze complex fraud patterns if available."""
+    if not GeminiClient or not os.getenv("GEMINI_API_KEY"):
+        return {}
+
+    try:
+        client = GeminiClient()
+        # Filter payload to relevant keys for LLM to reduce token usage/noise
+        context_str = ", ".join(
+            f"{k}={v}" for k, v in payload.items() if isinstance(v, (str, int, float, bool))
+        )
+        prompt = f"Analyze this transaction for complex fraud patterns (e.g. structuring, money laundering): {context_str}. Return a brief risk assessment."
+        analysis = client.generate(prompt)
+        return {"gemini_analysis": analysis}
+    except Exception:
+        return {}
+
+
 def analyze_risk(payload: Mapping[str, Any]) -> Dict[str, Any]:
     start = time.perf_counter()
     try:
@@ -231,12 +254,15 @@ def analyze_risk(payload: Mapping[str, Any]) -> Dict[str, Any]:
             cyber_risk=cyber_risk, behavior_risk=behavior_risk, fraud_risk=fraud_risk
         )
 
+        gemini_result = _analyze_complex_patterns(payload)
+
         result = {
             "cyber_risk": cyber_risk,
             "behavior_risk": behavior_risk,
             "fraud_risk": fraud_risk,
             "fusion_risk": fusion_risk,
             "fusion_meta": fusion_meta,
+            **gemini_result,
         }
     except Exception as exc:
         _record_risk_metrics(time.perf_counter() - start, error=exc)

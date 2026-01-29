@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import os
 import time
 from typing import Any, Dict, Mapping, Optional
 
@@ -26,6 +27,11 @@ from app.models.recommender.multimodal.multimodal_predict import (
 from app.models.voice.emotion_predict import predict_emotion
 from app.utils.logger import get_logger
 from app.utils.llm_stub import LLMStub
+
+try:
+    from app.utils.gemini_client import GeminiClient
+except ImportError:
+    GeminiClient = None
 from app.services.risk_engine import analyze_risk
 from app.services.decision_engine import make_decision
 from app.services.explainer import explain_decision
@@ -36,11 +42,16 @@ class SentifargoOrchestrator:
 
     def __init__(
         self,
-        llm_client: Optional[LLMStub] = None,
+        llm_client: Optional[Any] = None,
         memory_store: Optional[MemoryStore] = None,
         decision_engine: Optional[DecisionEngine] = None,
     ) -> None:
-        self.llm = llm_client or LLMStub()
+        if llm_client:
+            self.llm = llm_client
+        elif GeminiClient and os.getenv("GEMINI_API_KEY"):
+            self.llm = GeminiClient()
+        else:
+            self.llm = LLMStub()
         self.memory = memory_store or MemoryStore.from_env()
         self.decision_engine = decision_engine or DecisionEngine()
         self.logger = get_logger(self.__class__.__name__)
@@ -407,6 +418,25 @@ class SentifargoOrchestrator:
         ]
         return answer, {"items": items, "explanations": explanations}
 
+    def _try_semantic_fallback(self, text: str, category: str) -> tuple[str, Dict[str, Any]] | None:
+        """Attempt to use semantic search when specific handlers fail."""
+        try:
+            # We use the text query to find semantically similar items via the core engine
+            rec_meta = multimodal_recommend(image_bytes=None, text=text, top_k=5)
+            items = rec_meta.get("items", [])
+            if not items:
+                return None
+
+            answer = f"🔍 **{category.capitalize()} Recommendations (Semantic Match):**\n\n"
+            for item in items:
+                title = item.get("title", "Item")
+                score = item.get("score", 0.0)
+                answer += f"• **{title}** (Confidence: {score:.2f})\n"
+
+            return answer, {"items": items, "category": category, "source": "semantic_fallback"}
+        except Exception:
+            return None
+
     def _detect_recommend_category(self, text: str) -> str:
         """Detect what category of recommendation the user wants."""
         # Clothing keywords
@@ -504,6 +534,11 @@ class SentifargoOrchestrator:
         except Exception as e:
             self.logger.warning(f"Clothes handler failed: {e}")
 
+        # Try semantic fallback (ML-based) before hardcoded list
+        semantic = self._try_semantic_fallback(text, "clothes")
+        if semantic:
+            return semantic
+
         # Fallback
         return self._fallback_clothes(text)
 
@@ -545,6 +580,11 @@ class SentifargoOrchestrator:
                 return answer, {"items": items, "category": "movies"}
         except Exception as e:
             self.logger.warning(f"Movies handler failed: {e}")
+
+        # Try semantic fallback (ML-based) before hardcoded list
+        semantic = self._try_semantic_fallback(text, "movies")
+        if semantic:
+            return semantic
 
         # Fallback
         items = [
@@ -738,6 +778,11 @@ class SentifargoOrchestrator:
                 return answer, {"items": items, "category": "electronics"}
         except Exception as e:
             self.logger.warning(f"Electronics handler failed: {e}")
+
+        # Try semantic fallback (ML-based) before hardcoded list
+        semantic = self._try_semantic_fallback(text, "electronics")
+        if semantic:
+            return semantic
 
         items = [
             {

@@ -7,7 +7,6 @@ from app.utils.uploads import (
     AUDIO_EXTENSIONS,
     AUDIO_MIME_TYPES,
     MAX_AUDIO_BYTES,
-    read_upload_bytes,
     validate_upload,
 )
 
@@ -15,7 +14,8 @@ router = APIRouter(prefix="/voice")
 
 
 @router.post("/emotion")
-async def voice_emotion(file: UploadFile = File(...)) -> dict[str, object]:
+def voice_emotion(file: UploadFile = File(...)) -> dict[str, object]:
+    # Changed from async def to def to run in threadpool (CPU-bound task)
     validate_upload(
         file,
         allowed_exts=AUDIO_EXTENSIONS,
@@ -23,7 +23,17 @@ async def voice_emotion(file: UploadFile = File(...)) -> dict[str, object]:
         max_bytes=MAX_AUDIO_BYTES,
         kind="audio",
     )
-    audio_bytes = await read_upload_bytes(file, max_bytes=MAX_AUDIO_BYTES, kind="audio")
+    # Note: We cannot await inside a sync def.
+    # Ideally, read bytes async, then offload processing.
+    # For simplicity in FastAPI, keeping it sync reads file in threadpool.
+    audio_bytes = file.file.read(MAX_AUDIO_BYTES + 1)
+    if not audio_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded audio file was empty.")
+    if len(audio_bytes) > MAX_AUDIO_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Audio exceeds upload limit ({MAX_AUDIO_BYTES} bytes).",
+        )
     try:
         payload = predict_emotion(audio_bytes=audio_bytes, filename=file.filename)
     except FileNotFoundError as exc:
