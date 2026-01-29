@@ -1,0 +1,19 @@
+/opt/anaconda3/lib/python3.13/site-packages/faster_whisper/feature_extractor.py:224: RuntimeWarning: divide by zero encountered in matmul
+  mel_spec = self.mel_filters @ magnitudes
+/opt/anaconda3/lib/python3.13/site-packages/faster_whisper/feature_extractor.py:224: RuntimeWarning: overflow encountered in matmul
+  mel_spec = self.mel_filters @ magnitudes
+/opt/anaconda3/lib/python3.13/site-packages/faster_whisper/feature_extractor.py:224: RuntimeWarning: invalid value encountered in matmul
+  mel_spec = self.mel_filters @ magnitudes
+[stt_eval] wrote summary: reports/stt_eval_full.json
+{
+  "samples": 7442,
+  "errors": 0,
+  "avg_wer": 0.04900724331656828,
+  "avg_cer": 0.03167537119269618,
+  "avg_latency_sec": 1.0644348949255615,
+  "language": "en",
+  "model": "base",
+  "split": "all",
+  "manifest": "data/raw/stt/manifest.with_splits.csv",
+  "evaluation_mode": "full"
+}

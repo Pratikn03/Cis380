@@ -1,0 +1,12 @@
+{
+  "response": {
+    "route": "chat",
+    "answer_preview": "Welcome! I'm Sentifargo - built by Pratik Niroula! \ud83d\udc4b\n\n**Quick Actions:**\n\u2192 Say \"recommend action movies\" for suggestions\n\u2192 Ask \"what is anomaly detection?\" to learn\n\u2192 Say \"help\" to see all my capabili",
+    "latency_ms": 0.9
+  },
+  "audit_log": {
+    "path": "logs/audit/audit_2026-01-09.jsonl",
+    "entries": 243
+  },
+  "error": null
+}

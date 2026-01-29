@@ -1,0 +1,31 @@
+{
+  "source": {
+    "rows": 16743,
+    "cols": 10,
+    "user_top": {
+      "CEL0561": 18,
+      "QRM0739": 18,
+      "ESH0283": 18,
+      "WBC0192": 18,
+      "PLH0715": 18,
+      "KJG0910": 18,
+      "DBW0483": 18,
+      "KBC0054": 18
+    },
+    "department_top": {
+      "3 - Assembly": 3189,
+      "2 - Sales": 2618,
+      "3 - FieldService": 2611,
+      "3 - Engineering": 2174,
+      "1 - Research": 1712,
+      "2 - SoftwareManagement": 1666,
+      "6 - Security": 932,
+      "missing": 252
+    }
+  },
+  "splits": {
+    "train": 11720,
+    "val": 2511,
+    "test": 2512
+  }
+}

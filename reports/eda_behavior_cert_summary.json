@@ -1,0 +1,54 @@
+{
+  "cert_r4_2": {
+    "file_count": 8
+  },
+  "ldap": {
+    "file_count": 18,
+    "samples": {
+      "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/behavior/r4.2/LDAP/2009-12.csv": {
+        "rows_sampled": 1000,
+        "cols": 9,
+        "columns": [
+          "employee_name",
+          "user_id",
+          "email",
+          "role",
+          "business_unit",
+          "functional_unit",
+          "department",
+          "team",
+          "supervisor"
+        ],
+        "department_top": {
+          "3 - Assembly": 188,
+          "2 - Sales": 157,
+          "3 - FieldService": 157,
+          "3 - Engineering": 129,
+          "2 - SoftwareManagement": 101
+        }
+      },
+      "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/behavior/r4.2/LDAP/2010-01.csv": {
+        "rows_sampled": 1000,
+        "cols": 9,
+        "columns": [
+          "employee_name",
+          "user_id",
+          "email",
+          "role",
+          "business_unit",
+          "functional_unit",
+          "department",
+          "team",
+          "supervisor"
+        ],
+        "department_top": {
+          "3 - Assembly": 188,
+          "2 - Sales": 157,
+          "3 - FieldService": 157,
+          "3 - Engineering": 129,
+          "2 - SoftwareManagement": 101
+        }
+      }
+    }
+  }
+}

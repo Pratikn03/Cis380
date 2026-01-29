@@ -6,23 +6,23 @@
     "evidence": [
       {
         "path": "app/agent/orchestrator.py",
-        "detail": "app/agent/orchestrator.py:53: route = self.decision_engine.decide_route("
+        "detail": "app/agent/orchestrator.py:64: route = self.decision_engine.decide_route("
       },
       {
         "path": "app/agent/orchestrator.py",
-        "detail": "app/agent/orchestrator.py:147: def _invoke_route("
+        "detail": "app/agent/orchestrator.py:165: def _invoke_route("
       },
       {
         "path": "app/agent/orchestrator.py",
-        "detail": "app/agent/orchestrator.py:160: def _run_rag(self, text: str, emotion: dict[str, Any] | None) -> tuple[str, Dict[str, Any]]:"
+        "detail": "app/agent/orchestrator.py:194: def _run_rag(self, text: str, emotion: dict[str, Any] | None) -> tuple[str, Dict[str, Any]]:"
       },
       {
         "path": "app/agent/orchestrator.py",
-        "detail": "app/agent/orchestrator.py:181: def _run_fraud(self, text: str) -> tuple[str, Dict[str, Any]]:"
+        "detail": "app/agent/orchestrator.py:215: def _run_fraud(self, text: str) -> tuple[str, Dict[str, Any]]:"
       },
       {
         "path": "app/agent/orchestrator.py",
-        "detail": "app/agent/orchestrator.py:193: def _run_voice(self, text: str) -> tuple[str, Dict[str, Any]]:"
+        "detail": "app/agent/orchestrator.py:353: def _run_voice(self, text: str) -> tuple[str, Dict[str, Any]]:"
       },
       {
         "path": "app/api/chat.py",
@@ -48,19 +48,19 @@
     "evidence": [
       {
         "path": "src/uais/utils/mlflow_utils.py",
-        "detail": "src/uais/utils/mlflow_utils.py:33: mlflow.set_tracking_uri(uri)"
+        "detail": "src/uais/utils/mlflow_utils.py:36: mlflow.set_tracking_uri(uri)"
       },
       {
         "path": "src/uais/utils/mlflow_utils.py",
-        "detail": "src/uais/utils/mlflow_utils.py:34: mlflow.set_experiment(experiment_name)"
+        "detail": "src/uais/utils/mlflow_utils.py:37: mlflow.set_experiment(experiment_name)"
       },
       {
         "path": "src/uais/utils/mlflow_utils.py",
-        "detail": "src/uais/utils/mlflow_utils.py:40: mlflow.set_tracking_uri(local_uri.as_uri())"
+        "detail": "src/uais/utils/mlflow_utils.py:43: mlflow.set_tracking_uri(local_uri.as_uri())"
       },
       {
         "path": "src/uais/utils/mlflow_utils.py",
-        "detail": "src/uais/utils/mlflow_utils.py:41: mlflow.set_experiment(experiment_name)"
+        "detail": "src/uais/utils/mlflow_utils.py:44: mlflow.set_experiment(experiment_name)"
       },
       {
         "path": "mlflow_config.yaml",
@@ -68,7 +68,7 @@
       },
       {
         "path": "app/mlops/registry.py",
-        "detail": "app/mlops/registry.py:96: class ModelRegistry:"
+        "detail": "app/mlops/registry.py:97: class ModelRegistry:"
       },
       {
         "path": "app/mlops/registry.py",
@@ -184,11 +184,11 @@
       },
       {
         "path": "app/core/health.py",
-        "detail": "app/core/health.py:526: @router.get(\"/metrics\")"
+        "detail": "app/core/health.py:554: @router.get(\"/metrics\")"
       },
       {
         "path": "app/core/health.py",
-        "detail": "app/core/health.py:527: async def prometheus_metrics() -> Response:"
+        "detail": "app/core/health.py:555: async def prometheus_metrics() -> Response:"
       }
     ],
     "notes": []
@@ -205,18 +205,6 @@
       {
         "path": "reports/model_comparison.json",
         "detail": "metrics file exists"
-      },
-      {
-        "path": "ui-web/frontend/src/pages/Home.tsx",
-        "detail": "ui-web/frontend/src/pages/Home.tsx:70: Building intelligent systems that detect anomalies, prevent fraud, and secure digital infrastructure through advanced machine learning."
-      },
-      {
-        "path": "ui-web/frontend/src/pages/Home.tsx",
-        "detail": "ui-web/frontend/src/pages/Home.tsx:97: { value: \"99.2%\", label: \"Detection Accuracy\" },"
-      },
-      {
-        "path": "ui-web/frontend/src/pages/Home.tsx",
-        "detail": "ui-web/frontend/src/pages/Home.tsx:144: desc: \"Multi-modal ensemble combining all detection engines for superior accuracy\","
       },
       {
         "path": "ui-web/frontend/src/pages/CommandCenter.tsx",

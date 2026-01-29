@@ -1,16 +1,16 @@
 # Claim Evidence Report
 
-Generated: 2026-01-15 14:14:10
+Generated: 2026-01-24 00:15:39
 
 ## C1. Orchestrator routes a single request to the right subsystem
 
 - Status: PROVEN
 - Evidence:
-  - app/agent/orchestrator.py - app/agent/orchestrator.py:53: route = self.decision_engine.decide_route(
-  - app/agent/orchestrator.py - app/agent/orchestrator.py:147: def _invoke_route(
-  - app/agent/orchestrator.py - app/agent/orchestrator.py:160: def _run_rag(self, text: str, emotion: dict[str, Any] | None) -> tuple[str, Dict[str, Any]]:
-  - app/agent/orchestrator.py - app/agent/orchestrator.py:181: def _run_fraud(self, text: str) -> tuple[str, Dict[str, Any]]:
-  - app/agent/orchestrator.py - app/agent/orchestrator.py:193: def _run_voice(self, text: str) -> tuple[str, Dict[str, Any]]:
+  - app/agent/orchestrator.py - app/agent/orchestrator.py:64: route = self.decision_engine.decide_route(
+  - app/agent/orchestrator.py - app/agent/orchestrator.py:165: def _invoke_route(
+  - app/agent/orchestrator.py - app/agent/orchestrator.py:194: def _run_rag(self, text: str, emotion: dict[str, Any] | None) -> tuple[str, Dict[str, Any]]:
+  - app/agent/orchestrator.py - app/agent/orchestrator.py:215: def _run_fraud(self, text: str) -> tuple[str, Dict[str, Any]]:
+  - app/agent/orchestrator.py - app/agent/orchestrator.py:353: def _run_voice(self, text: str) -> tuple[str, Dict[str, Any]]:
   - app/api/chat.py - app/api/chat.py:8: from app.agent import MemoryStore, SentifargoOrchestrator
   - app/api/chat.py - app/api/chat.py:12: orchestrator = SentifargoOrchestrator(llm_client=LLMStub(), memory_store=MemoryStore.from_env())
   - app/api/chat.py - app/api/chat.py:24: return orchestrator.handle(
@@ -21,12 +21,12 @@ Generated: 2026-01-15 14:14:10
 
 - Status: PARTIAL
 - Evidence:
-  - src/uais/utils/mlflow_utils.py - src/uais/utils/mlflow_utils.py:33: mlflow.set_tracking_uri(uri)
-  - src/uais/utils/mlflow_utils.py - src/uais/utils/mlflow_utils.py:34: mlflow.set_experiment(experiment_name)
-  - src/uais/utils/mlflow_utils.py - src/uais/utils/mlflow_utils.py:40: mlflow.set_tracking_uri(local_uri.as_uri())
-  - src/uais/utils/mlflow_utils.py - src/uais/utils/mlflow_utils.py:41: mlflow.set_experiment(experiment_name)
+  - src/uais/utils/mlflow_utils.py - src/uais/utils/mlflow_utils.py:36: mlflow.set_tracking_uri(uri)
+  - src/uais/utils/mlflow_utils.py - src/uais/utils/mlflow_utils.py:37: mlflow.set_experiment(experiment_name)
+  - src/uais/utils/mlflow_utils.py - src/uais/utils/mlflow_utils.py:43: mlflow.set_tracking_uri(local_uri.as_uri())
+  - src/uais/utils/mlflow_utils.py - src/uais/utils/mlflow_utils.py:44: mlflow.set_experiment(experiment_name)
   - mlflow_config.yaml - mlflow_config.yaml exists
-  - app/mlops/registry.py - app/mlops/registry.py:96: class ModelRegistry:
+  - app/mlops/registry.py - app/mlops/registry.py:97: class ModelRegistry:
   - app/mlops/registry.py - app/mlops/registry.py:158: def register_model(
 
 ## C3. DVC implemented
@@ -64,8 +64,8 @@ Generated: 2026-01-15 14:14:10
   - docker-compose.production.yml - docker-compose.production.yml:146: grafana:
   - docker-compose.production.yml - docker-compose.production.yml:147: image: grafana/grafana:10.2.0
   - app/core/health.py - app/core/health.py:21: from prometheus_client import (
-  - app/core/health.py - app/core/health.py:526: @router.get("/metrics")
-  - app/core/health.py - app/core/health.py:527: async def prometheus_metrics() -> Response:
+  - app/core/health.py - app/core/health.py:554: @router.get("/metrics")
+  - app/core/health.py - app/core/health.py:555: async def prometheus_metrics() -> Response:
 
 ## C6. 99.2% fraud accuracy
 
@@ -73,9 +73,6 @@ Generated: 2026-01-15 14:14:10
 - Evidence:
   - reports/evaluation_summary.json - metrics file exists
   - reports/model_comparison.json - metrics file exists
-  - ui-web/frontend/src/pages/Home.tsx - ui-web/frontend/src/pages/Home.tsx:70: Building intelligent systems that detect anomalies, prevent fraud, and secure digital infrastructure through advanced machine learning.
-  - ui-web/frontend/src/pages/Home.tsx - ui-web/frontend/src/pages/Home.tsx:97: { value: "99.2%", label: "Detection Accuracy" },
-  - ui-web/frontend/src/pages/Home.tsx - ui-web/frontend/src/pages/Home.tsx:144: desc: "Multi-modal ensemble combining all detection engines for superior accuracy",
   - ui-web/frontend/src/pages/CommandCenter.tsx - ui-web/frontend/src/pages/CommandCenter.tsx:4: { label: "Detection Accuracy", value: "99.2%" },
   - ui-web/frontend/src/pages/CommandCenter.tsx - ui-web/frontend/src/pages/CommandCenter.tsx:53: Sentifargo is a comprehensive AI-powered anomaly detection and intelligent recommendation platform built by Pratik Niroula as part of the CIS 380 course project. The system demonstrates practical applications of machine learning in security, fraud detection, and personalized recommendations.
   - ui-web/frontend/src/pages/CommandCenter.tsx - ui-web/frontend/src/pages/CommandCenter.tsx:58: - 99.2% accuracy in fraud detection

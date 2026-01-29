@@ -1,0 +1,10 @@
+{
+  "contract_diff_exit": null,
+  "artifact_gate_exit": 0,
+  "ci_gate_exit": 7,
+  "reports": {
+    "CONTRACT_DIFF.md": "reports/CONTRACT_DIFF.md",
+    "ARTIFACT_GATE.md": "reports/ARTIFACT_GATE.md",
+    "ARTIFACT_GATE.json": "reports/ARTIFACT_GATE.json"
+  }
+}

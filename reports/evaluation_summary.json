@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-01-15T15:36:12Z",
+  "models": [
+    {
+      "name": "fraud",
+      "accuracy": 0.9988413328183702,
+      "f1": 0.7079646017699115,
+      "roc_auc": 0.8920228612559301
+    },
+    {
+      "name": "cyber",
+      "accuracy": 0.959425,
+      "f1": 0.9717891223861918,
+      "roc_auc": 0.9938023973491984
+    },
+    {
+      "name": "behavior",
+      "accuracy": 0.9492335257814055,
+      "autoencoder_accuracy": 0.9490344415687836,
+      "lof_accuracy": 0.9492335257814055
+    },
+    {
+      "name": "recommender",
+      "accuracy": 1.0
+    }
+  ]
+}

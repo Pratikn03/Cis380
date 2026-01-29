@@ -1,6 +1,6 @@
 # Training Data Audit
 
-- Generated: 2026-01-15 20:14:07 UTC
+- Generated: 2026-01-24 06:15:34 UTC
 
 ## Required (production training)
 
@@ -20,16 +20,16 @@
   - columns: 18
   - columns_sample: Administrative, Administrative_Duration, Informational, Informational_Duration, ProductRelated, ProductRelated_Duration, BounceRates, ExitRates
 - **Voice emotion (wav folders)** — `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice` — **ok**
-  - happy: 1863 wav, probe=ok
-  - sad: 1863 wav, probe=ok
-  - angry: 1863 wav, probe=ok
-  - neutral: 1775 wav, probe=ok
-- **Brand (LogoDet-3K raw)** — `['/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/brand/LogoDet-3K', '/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/brand/logodet3k']` — **ok**
+  - happy: 1271 wav, probe=ok
+  - sad: 1270 wav, probe=ok
+  - angry: 2542 wav, probe=ok
+  - neutral: 1087 wav, probe=ok
+- **Brand (LogoDet-3K raw)** — `['/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/brand/LogoDet-3K']` — **ok**
 - **Brand (prepared YOLO dataset)** — `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/brands.yaml` — **ok**
   - note: prepared dataset present
   - train_images: 5000 (capped)
   - val_images: 5000 (capped)
-  - yaml: train=/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/images/train, val=/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/images/val, names=1
+  - yaml: train=/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/images/train, val=/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/images/val, names=2991
 
 ## Optional (extended training)
 
@@ -38,7 +38,7 @@
   - fake_images: 5000 (capped)
 - **Celeb_V2 (deepfake)** — `['/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/Celeb_V2/Train', '/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/Celeb_V2/Val']` — **ok**
   - train_images: 5000 (capped)
-  - val_images: 5000 (capped)
+  - val_images: 652
 - **Face emotion (image)** — `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/vision/face_emotion` — **ok**
   - image_count: 5000 (capped)
 - **Video temporal (real/fake)** — `['/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/vision/video/real', '/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/vision/video/fake']` — **ok**

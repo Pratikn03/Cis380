@@ -1,0 +1,26 @@
+{
+  "yolo": {
+    "train": {
+      "images": 156941,
+      "labels": 142674
+    },
+    "val": {
+      "images": 15852,
+      "labels": 15852
+    },
+    "class_count": 2991,
+    "classes_preview": [
+      "10 Cane",
+      "1519 Tequila",
+      "241 Pizza",
+      "2XU",
+      "2xist",
+      "3D-GOLD",
+      "3nod",
+      "3t cycling",
+      "42 Below",
+      "4Kids"
+    ]
+  },
+  "metrics": {}
+}

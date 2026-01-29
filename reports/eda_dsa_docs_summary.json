@@ -1,0 +1,22 @@
+{
+  "dsa_docs": {
+    "category_count": 14,
+    "_assets": 2,
+    "arrays": 3,
+    "bit_manipulation": 1,
+    "dp": 5,
+    "graphs": 7,
+    "greedy": 2,
+    "hashing": 1,
+    "heaps": 2,
+    "linked_lists": 3,
+    "recursion_backtracking": 2,
+    "searching_sorting": 3,
+    "stack_queue": 3,
+    "strings": 1,
+    "trees": 9
+  },
+  "dsa_embeddings": {
+    "file_count": 4
+  }
+}

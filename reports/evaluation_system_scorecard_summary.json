@@ -1,0 +1,7 @@
+{
+  "scorecard_exit": 0,
+  "scorecard_path": "reports/SYSTEM_SCORECARD.md",
+  "audit_reports": [
+    "reports/audit_20260121_131830/AUDIT_REPORT.md"
+  ]
+}

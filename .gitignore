@@ -25,6 +25,7 @@ venv.bak/
 .env
 .env.local
 .env.*.local
+.env.backup.*
 !.env.example
 !.env.production.example
 
@@ -45,6 +46,7 @@ venv.bak/
 */.ipynb_checkpoints/*
 Untitled*.ipynb
 *-checkpoint.ipynb
+notebooks/_executed/
 
 # Sublime Text
 *.sublime-project
@@ -52,6 +54,10 @@ Untitled*.ipynb
 
 # Vim
 *~
+
+# Local tooling artifacts
+.virtual_documents/
+anaconda_projects/
 
 # ============================================
 # Operating System
@@ -140,6 +146,10 @@ ui-web/**/.cache/
 # ============================================
 # Data
 # ============================================
+data/**
+!data/README.md
+!data/**/.gitkeep
+!data/**/*.dvc
 data/raw/
 data/processed/
 data/interim/
@@ -180,6 +190,8 @@ experiments/
 # ============================================
 # Reports
 # ============================================
+reports/**
+!reports/.gitkeep
 reports/benchmarks.md
 reports/duplicates_*.csv
 reports/duplicates_*.json

@@ -1,0 +1,29 @@
+{
+  "splits": {
+    "angry": {
+      "train": 1779,
+      "val": 381,
+      "test": 382
+    },
+    "fearful": {
+      "train": 889,
+      "val": 191,
+      "test": 191
+    },
+    "happy": {
+      "train": 889,
+      "val": 191,
+      "test": 191
+    },
+    "neutral": {
+      "train": 760,
+      "val": 163,
+      "test": 164
+    },
+    "sad": {
+      "train": 889,
+      "val": 190,
+      "test": 191
+    }
+  }
+}

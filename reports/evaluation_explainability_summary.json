@@ -1,0 +1,21 @@
+{
+  "plots": [
+    "experiments/vision/plots/gradcam.png",
+    "experiments/fraud/plots/roc_supervised.png",
+    "experiments/fraud/plots/shap_summary.png",
+    "experiments/fraud/plots/pr_supervised.png",
+    "experiments/fraud/plots/pr_hybrid.png",
+    "experiments/fraud/plots/roc_hybrid.png",
+    "experiments/fraud/plots/fraud_pr.png",
+    "experiments/fraud/plots/fraud_roc.png",
+    "experiments/cyber/plots/shap_summary.png",
+    "experiments/behavior/plots/saliency.csv",
+    "experiments/fusion/plots/.gitkeep"
+  ],
+  "saliency": {
+    "columns": [
+      "timestep",
+      "saliency"
+    ]
+  }
+}

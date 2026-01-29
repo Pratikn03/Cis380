@@ -1,0 +1,57 @@
+{
+  "metrics": {
+    "roc_auc": 0.8528694261147771,
+    "pr_auc": 0.41202125773939324,
+    "f1": 0.45161290322580644,
+    "precision": 0.4375,
+    "recall": 0.4666666666666667,
+    "accuracy": 0.9949238578680203,
+    "cv_roc_auc_mean": 0.827380069518858
+  },
+  "scores_preview": [
+    {
+      "fusion_score": 3.4799412170369175e-08,
+      "label": 0
+    },
+    {
+      "fusion_score": 0.0087810535053233,
+      "label": 0
+    },
+    {
+      "fusion_score": 2.1615761297214563e-09,
+      "label": 0
+    },
+    {
+      "fusion_score": 8.332940105947483e-08,
+      "label": 0
+    },
+    {
+      "fusion_score": 0.1899358474412334,
+      "label": 0
+    },
+    {
+      "fusion_score": 0.1789686394275779,
+      "label": 0
+    },
+    {
+      "fusion_score": 0.1864700329576186,
+      "label": 0
+    },
+    {
+      "fusion_score": 0.1719631532605431,
+      "label": 0
+    },
+    {
+      "fusion_score": 0.1908577741134158,
+      "label": 0
+    },
+    {
+      "fusion_score": 0.1689796028345552,
+      "label": 0
+    }
+  ],
+  "model": {
+    "path": "models/fusion/fusion_meta_model.pkl",
+    "size_mb": 0.0
+  }
+}

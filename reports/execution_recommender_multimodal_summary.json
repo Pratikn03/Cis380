@@ -1,0 +1,37 @@
+{
+  "index": [
+    "data/embeddings/recommender_vectors.npy",
+    "data/embeddings/recommender_meta.json"
+  ],
+  "artifacts": {
+    "recommender_model.pkl": 0.17,
+    "recommender_meta.joblib": 0.0
+  },
+  "metrics": {
+    "ALLOW": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3332.0
+    },
+    "BLOCK": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 17.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3349.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3349.0
+    }
+  }
+}

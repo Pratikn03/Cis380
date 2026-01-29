@@ -1,0 +1,26 @@
+{
+  "processed": {
+    "train": {
+      "real": 70001,
+      "fake": 70001
+    },
+    "val": {
+      "real": 19787,
+      "fake": 19641
+    }
+  },
+  "celeb_v2": {
+    "Train": {
+      "real": 709,
+      "fake": 4513
+    },
+    "Val": {
+      "real": 81,
+      "fake": 571
+    },
+    "Test": {
+      "real": 99,
+      "fake": 555
+    }
+  }
+}

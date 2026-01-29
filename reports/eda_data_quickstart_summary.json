@@ -1,0 +1,70 @@
+{
+  "folders": {
+    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw": {
+      "exists": true,
+      "items": 10
+    },
+    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed": {
+      "exists": true,
+      "items": 4
+    },
+    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/docs": {
+      "exists": true,
+      "items": 7
+    },
+    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/dsa_docs": {
+      "exists": true,
+      "items": 15
+    },
+    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/models": {
+      "exists": true,
+      "items": 11
+    },
+    "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/experiments": {
+      "exists": true,
+      "items": 8
+    }
+  },
+  "reports": {
+    "missing_required": 0
+  },
+  "experiments": {
+    "report_summary": {
+      "fraud": {
+        "metrics": {
+          "roc_auc": "0.976",
+          "pr_auc": "0.8613",
+          "f1": "0.8721",
+          "precision": "0.974",
+          "recall": "0.7895",
+          "accuracy": "0.9996"
+        },
+        "runtime": {
+          "train_time_sec": 2.593,
+          "predict_proba_sec_per_run": 0.056
+        }
+      },
+      "cyber": {
+        "metrics": {
+          "roc_auc": "1.0",
+          "pr_auc": "1.0",
+          "f1": "1.0",
+          "precision": "1.0",
+          "recall": "1.0",
+          "accuracy": "1.0",
+          "cv_roc_auc_mean": "1.0",
+          "cv_scores": "[1.0, 1.0, 1.0]",
+          "roc_auc_ci_lower": "0.9999999999999999",
+          "roc_auc_ci_upper": "1.0"
+        },
+        "runtime": {
+          "train_time_sec": 3.7272149579948746,
+          "predict_proba_sec_per_run": 0.0701696541975252
+        }
+      },
+      "behavior": {},
+      "vision": {},
+      "fusion": {}
+    }
+  }
+}

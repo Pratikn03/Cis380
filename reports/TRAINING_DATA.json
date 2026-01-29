@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-15 20:14:07 UTC",
+  "generated_at": "2026-01-24 06:15:34 UTC",
   "required": [
     {
       "name": "Fraud (creditcard.csv)",
@@ -73,12 +73,12 @@
       "name": "Voice emotion (wav folders)",
       "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice",
       "status": "ok",
-      "total_wav": 7364,
+      "total_wav": 6170,
       "details": [
         {
           "emotion": "happy",
           "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/happy",
-          "wav_count": 1863,
+          "wav_count": 1271,
           "count_capped": false,
           "status": "ok",
           "probe": {
@@ -91,20 +91,20 @@
         {
           "emotion": "sad",
           "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/sad",
-          "wav_count": 1863,
+          "wav_count": 1270,
           "count_capped": false,
           "status": "ok",
           "probe": {
             "ok": true,
-            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/sad/tess__OAF_Sad__OAF_chat_sad.wav",
+            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/sad/1078_IWL_SAD_XX.wav",
             "channels": 1,
-            "sample_rate": 24414
+            "sample_rate": 16000
           }
         },
         {
           "emotion": "angry",
           "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/angry",
-          "wav_count": 1863,
+          "wav_count": 2542,
           "count_capped": false,
           "status": "ok",
           "probe": {
@@ -117,7 +117,7 @@
         {
           "emotion": "neutral",
           "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/neutral",
-          "wav_count": 1775,
+          "wav_count": 1087,
           "count_capped": false,
           "status": "ok",
           "probe": {
@@ -146,7 +146,7 @@
         "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo",
         "train": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/images/train",
         "val": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/images/val",
-        "names_count": 1
+        "names_count": 2991
       },
       "train_exists": true,
       "val_exists": true,
@@ -177,9 +177,9 @@
       ],
       "status": "ok",
       "train_images": 5000,
-      "val_images": 5000,
+      "val_images": 652,
       "train_capped": true,
-      "val_capped": true
+      "val_capped": false
     },
     {
       "name": "Face emotion (image)",

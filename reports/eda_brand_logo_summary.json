@@ -1,0 +1,28 @@
+{
+  "brand_root": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/brand/LogoDet-3K",
+  "category_counts": {
+    "Clothes": 604,
+    "Electronic": 224,
+    "Food": 932,
+    "Leisure": 111,
+    "Medical": 47,
+    "Necessities": 432,
+    "Others": 371,
+    "Sports": 66,
+    "Transportation": 213
+  },
+  "sample_images": [
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/63.jpg",
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/77.jpg",
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/76.jpg",
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/60.jpg",
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/48.jpg",
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/75.jpg",
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/71.jpg",
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/65.jpg",
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/66.jpg",
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/72.jpg",
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/73.jpg",
+    "data/raw/brand/LogoDet-3K/Food/Appletiser/9.jpg"
+  ]
+}

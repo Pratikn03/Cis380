@@ -1,0 +1,33 @@
+{
+  "metrics": {
+    "0": {
+      "precision": 0.734118009868421,
+      "recall": 0.7064147583955686,
+      "f1-score": 0.72,
+      "support": 20219.0
+    },
+    "1": {
+      "precision": 0.7110591900311527,
+      "recall": 0.7384864263687376,
+      "f1-score": 0.724513329200248,
+      "support": 19781.0
+    },
+    "accuracy": 0.722275,
+    "macro avg": {
+      "precision": 0.7225885999497869,
+      "recall": 0.7224505923821531,
+      "f1-score": 0.722256664600124,
+      "support": 40000.0
+    },
+    "weighted avg": {
+      "precision": 0.7227148469883959,
+      "recall": 0.722275,
+      "f1-score": 0.7222319541227528,
+      "support": 40000.0
+    }
+  },
+  "artifacts": {
+    "movielens_model.pkl": 0.13,
+    "movielens_meta.joblib": 0.33
+  }
+}

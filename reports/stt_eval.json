@@ -1,0 +1,12 @@
+{
+  "samples": 7442,
+  "errors": 0,
+  "avg_wer": 0.14380094956552897,
+  "avg_cer": 0.09764201180487125,
+  "avg_latency_sec": 1.05432779778261,
+  "language": "en",
+  "model": "base",
+  "split": "all",
+  "manifest": "data/raw/stt/manifest.with_splits.csv",
+  "evaluation_mode": "by_sentence_code"
+}

@@ -1,0 +1,99 @@
+{
+  "catalogs": {
+    "items.csv": {
+      "rows": 27278,
+      "cols": 4,
+      "columns": [
+        "movieId",
+        "title",
+        "tags",
+        "popularity"
+      ]
+    },
+    "books.csv": {
+      "rows": 10000,
+      "cols": 6,
+      "columns": [
+        "book_id",
+        "title",
+        "authors",
+        "average_rating",
+        "ratings_count",
+        "tags"
+      ]
+    },
+    "games.csv": {
+      "rows": 50872,
+      "cols": 7,
+      "columns": [
+        "app_id",
+        "title",
+        "tags",
+        "rating",
+        "positive_ratio",
+        "user_reviews",
+        "price_final"
+      ]
+    },
+    "places.csv": {
+      "rows": 15,
+      "cols": 6,
+      "columns": [
+        "place_id",
+        "title",
+        "category",
+        "city",
+        "country",
+        "tags"
+      ]
+    },
+    "phones.csv": {
+      "rows": 6,
+      "cols": 6,
+      "columns": [
+        "itemId",
+        "title",
+        "price",
+        "rating",
+        "popularity",
+        "tags"
+      ]
+    },
+    "laptops.csv": {
+      "rows": 6,
+      "cols": 6,
+      "columns": [
+        "itemId",
+        "title",
+        "price",
+        "rating",
+        "popularity",
+        "tags"
+      ]
+    },
+    "headphones.csv": {
+      "rows": 6,
+      "cols": 6,
+      "columns": [
+        "itemId",
+        "title",
+        "price",
+        "rating",
+        "popularity",
+        "tags"
+      ]
+    },
+    "cameras.csv": {
+      "rows": 6,
+      "cols": 6,
+      "columns": [
+        "itemId",
+        "title",
+        "price",
+        "rating",
+        "popularity",
+        "tags"
+      ]
+    }
+  }
+}

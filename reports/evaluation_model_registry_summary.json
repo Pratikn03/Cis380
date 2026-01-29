@@ -1,0 +1,79 @@
+{
+  "models_dir": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/models",
+  "counts": {
+    "total_files": 92
+  },
+  "by_ext": {
+    ".jpg": 32,
+    ".pkl": 18,
+    ".pt": 14,
+    ".yaml": 7,
+    ".png": 6,
+    "no_ext": 5,
+    ".txt": 3,
+    ".json": 2,
+    ".joblib": 2,
+    ".csv": 2
+  },
+  "largest": [
+    {
+      "path": "models/behavior.pkl",
+      "size_mb": 219.66
+    },
+    {
+      "path": "models/behavior/behavior_best.pkl",
+      "size_mb": 219.66
+    },
+    {
+      "path": "models/vision/real_fake_classifier.pt",
+      "size_mb": 42.71
+    },
+    {
+      "path": "models/vision/face_emotion/model.pt",
+      "size_mb": 42.71
+    },
+    {
+      "path": "models/vision/resnet_smoke/model.pt",
+      "size_mb": 42.71
+    },
+    {
+      "path": "models/vision/resnet/model.pt",
+      "size_mb": 42.71
+    },
+    {
+      "path": "models/behavior/behavior_supervised.pkl",
+      "size_mb": 29.32
+    },
+    {
+      "path": "models/behavior/behavior_rf.pkl",
+      "size_mb": 19.79
+    }
+  ],
+  "expected": {
+    "voice_emotion.pkl": {
+      "exists": true,
+      "path": "models/voice_emotion.pkl",
+      "size_mb": 11.0
+    },
+    "voice_emotion_nn.pt": {
+      "exists": true,
+      "path": "models/voice_emotion_nn.pt",
+      "size_mb": 0.02
+    },
+    "face_emotion_model": {
+      "exists": true,
+      "path": "models/vision/face_emotion/model.pt",
+      "size_mb": 42.71
+    },
+    "face_emotion_metrics": {
+      "exists": true,
+      "path": "models/vision/face_emotion/metrics.json",
+      "size_mb": 0.01
+    },
+    "fusion_meta_model": {
+      "exists": true,
+      "path": "models/fusion/fusion_meta_model.pkl",
+      "size_mb": 0.0
+    }
+  }
+}

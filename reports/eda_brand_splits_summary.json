@@ -1,0 +1,14 @@
+{
+  "yolo": {
+    "train": {
+      "images": 156941,
+      "labels": 142674,
+      "missing_labels": 14267
+    },
+    "val": {
+      "images": 15852,
+      "labels": 15852,
+      "missing_labels": 0
+    }
+  }
+}

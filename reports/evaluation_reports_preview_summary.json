@@ -1,0 +1,30 @@
+{
+  "recent_reports": [
+    "reports/evaluation_vision_brand_summary.json",
+    "reports/evaluation_voice_stt_tts_summary.json",
+    "reports/evaluation_chat_orchestrator_summary.json",
+    "reports/evaluation_dsa_algorithms_summary.json",
+    "reports/evaluation_contract_gate_summary.json",
+    "reports/openapi.json",
+    "reports/ARTIFACT_GATE.md",
+    "reports/ARTIFACT_GATE.json",
+    "reports/evaluation_system_scorecard_summary.json",
+    "reports/SYSTEM_SCORECARD.md",
+    "reports/evaluation_model_registry_summary.json",
+    "reports/evaluation_dsa_rag_summary.json"
+  ],
+  "sizes": {
+    "evaluation_vision_brand_summary.json": 0.0,
+    "evaluation_voice_stt_tts_summary.json": 0.0,
+    "evaluation_chat_orchestrator_summary.json": 0.0,
+    "evaluation_dsa_algorithms_summary.json": 0.001,
+    "evaluation_contract_gate_summary.json": 0.0,
+    "openapi.json": 0.0,
+    "ARTIFACT_GATE.md": 0.001,
+    "ARTIFACT_GATE.json": 0.004,
+    "evaluation_system_scorecard_summary.json": 0.0,
+    "SYSTEM_SCORECARD.md": 0.003,
+    "evaluation_model_registry_summary.json": 0.002,
+    "evaluation_dsa_rag_summary.json": 0.0
+  }
+}
