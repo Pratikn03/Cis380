@@ -20,12 +20,14 @@ DOMAIN_FILES = {
     "phones": RECOMMENDATION_DIR / "phones.csv",
     "laptops": RECOMMENDATION_DIR / "laptops.csv",
     "headphones": RECOMMENDATION_DIR / "headphones.csv",
+    "cameras": RECOMMENDATION_DIR / "cameras.csv",
 }
 
 _DOMAIN_BRANDS: dict[str, set[str]] = {
     "phones": {"google", "samsung", "apple", "oneplus", "motorola"},
     "laptops": {"dell", "lenovo", "apple", "asus", "acer", "hp"},
     "headphones": {"sony", "bose", "apple", "anker", "sennheiser"},
+    "cameras": {"canon", "sony", "nikon", "fujifilm", "panasonic"},
 }
 
 _SUSPICIOUS_BRANDS = {

@@ -28,7 +28,8 @@ class RiskPayload(BaseModel):
 
 
 @router.post("/risk/analyze")
-async def risk_analyze(payload: RiskPayload, explain: bool = True) -> dict[str, Any]:
+def risk_analyze(payload: RiskPayload, explain: bool = True) -> dict[str, Any]:
+    # Changed from async def to def to run in threadpool (CPU-bound task)
     payload_data = payload.model_dump()
     scores = analyze_risk(payload_data)
     decision = make_decision(
@@ -47,6 +48,8 @@ async def risk_analyze(payload: RiskPayload, explain: bool = True) -> dict[str, 
     }
     if "fusion_meta" in scores:
         out["fusion_meta"] = scores.get("fusion_meta")
+    if "gemini_analysis" in scores:
+        out["gemini_analysis"] = scores.get("gemini_analysis")
 
     if explain:
         out["explanation"] = explain_decision(

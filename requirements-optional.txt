@@ -1,6 +1,15 @@
 # Optional dependencies (install only if you need the feature):
 #   pip install -r requirements-optional.txt
 
+# Offline speech-to-text (Whisper)
+faster-whisper>=1.0.0
+
+# Whisper fine-tuning + dataset pipeline (optional).
+datasets>=2.19.0
+transformers>=4.39.0
+accelerate>=0.26.0
+soundfile>=0.12.1
+
 # Real-time mic/webcam streaming in Streamlit (optional).
 streamlit-webrtc>=0.47.0
 

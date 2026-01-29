@@ -27,7 +27,7 @@ class WhisperSTT:
     @classmethod
     def _get_model(cls):
         if cls._model is None:
-            size = os.getenv("STT_MODEL_SIZE", "small")
+            size = os.getenv("WHISPER_MODEL") or os.getenv("STT_MODEL_SIZE", "small")
             device = os.getenv("STT_DEVICE", "cpu")
             compute_type = os.getenv("STT_COMPUTE_TYPE", "int8")
             cls._model = cls._get_model_cls()(size, device=device, compute_type=compute_type)

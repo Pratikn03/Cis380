@@ -12,6 +12,7 @@ The production entrypoints live under `scripts/` and `src/`.
 ## Key training notebooks
 
 - `notebooks/overview/00_notebook_index.ipynb`: master index for all notebooks.
+- `notebooks/overview/01_full_project_training.ipynb`: end-to-end training orchestrator (all models).
 - `notebooks/training/81_face_emotion.ipynb`: 7-class face emotion training (vision).
 - `notebooks/training/82_brand_logo_yolo.ipynb`: Brand/logo YOLOv8 detector training.
 - `notebooks/training/83_voice_emotion.ipynb`: Voice emotion classifier training.

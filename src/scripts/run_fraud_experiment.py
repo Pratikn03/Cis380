@@ -12,7 +12,7 @@ Steps:
 
 from pathlib import Path
 import json
-import joblib
+import pickle
 
 import numpy as np
 import pandas as pd
@@ -133,7 +133,8 @@ def main():
     # Persist artifacts for dashboard/API/fusion
     paths = domain_paths("fraud")
     (paths["models"] / "supervised").mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, paths["models"] / "supervised" / "fraud_model.pkl")
+    with open(paths["models"] / "supervised" / "fraud_model.pkl", "wb") as f:
+        pickle.dump(model, f)
 
     metrics_out = {
         "val": val_metrics,

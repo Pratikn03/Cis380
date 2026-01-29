@@ -23,6 +23,8 @@ try:
     from .handlers.electronics import recommend_electronics
     from .handlers.cars import recommend_cars
     from .handlers.courses import recommend_courses
+    from .handlers.books import recommend_books
+    from .handlers.games import recommend_games
 except ImportError:
     from config import load_config
     from handlers.movies import recommend_movies, is_movie_similarity_query
@@ -32,6 +34,8 @@ except ImportError:
     from handlers.electronics import recommend_electronics
     from handlers.cars import recommend_cars
     from handlers.courses import recommend_courses
+    from handlers.books import recommend_books
+    from handlers.games import recommend_games
 
 
 def _detect_intent(text: str) -> Tuple[str, str]:
@@ -43,6 +47,12 @@ def _detect_intent(text: str) -> Tuple[str, str]:
         {"clothes", "outfit", "outfits", "clothing", "fashion", "wear", "apparel"}
     ):
         return "clothes", text
+
+    if tokens.intersection({"book", "books", "novel", "novels", "reading", "author"}):
+        return "books", text
+
+    if tokens.intersection({"game", "games", "gaming", "steam", "xbox", "playstation", "pc"}):
+        return "games", text
 
     phone_terms = {
         "phone",
@@ -81,12 +91,26 @@ def _detect_intent(text: str) -> Tuple[str, str]:
         "bose",
         "sony",
     }
+    camera_terms = {
+        "camera",
+        "cameras",
+        "dslr",
+        "mirrorless",
+        "lens",
+        "photography",
+        "canon",
+        "nikon",
+        "fujifilm",
+        "panasonic",
+    }
 
-    if tokens.intersection(phone_terms | laptop_terms | headphone_terms):
+    if tokens.intersection(phone_terms | laptop_terms | headphone_terms | camera_terms):
         if tokens.intersection(laptop_terms):
             return "laptops", text
         if tokens.intersection(phone_terms):
             return "phones", text
+        if tokens.intersection(camera_terms):
+            return "cameras", text
         return "headphones", text
 
     car_terms = {
@@ -215,6 +239,12 @@ def route_recommendation(text: str, preference: dict | None = None) -> Dict[str,
     if intent == "movies":
         items = recommend_movies(query=query, tmdb_api_key=cfg.tmdb_api_key)
         category = "Movies"
+    elif intent == "books":
+        items = recommend_books(query=query)
+        category = "Books"
+    elif intent == "games":
+        items = recommend_games(query=query)
+        category = "Games"
     elif intent == "places":
         items = recommend_places(query=query, city=city, places_api_key=cfg.places_api_key)
         category = "Places"
@@ -223,6 +253,11 @@ def route_recommendation(text: str, preference: dict | None = None) -> Dict[str,
             domain=intent, query=query, price_limit=price_pref, preferred_tags=tag_pref
         )
         category = intent.capitalize()
+    elif intent == "cameras":
+        items = recommend_electronics(
+            domain="cameras", query=query, price_limit=price_pref, preferred_tags=tag_pref
+        )
+        category = "Cameras"
     elif intent == "courses":
         items = recommend_courses(query=query)
         category = "Courses"

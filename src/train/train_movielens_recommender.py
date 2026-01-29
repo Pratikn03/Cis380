@@ -10,7 +10,7 @@ import argparse
 import json
 from pathlib import Path
 
-import joblib
+import pickle
 import pandas as pd
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import classification_report
@@ -104,8 +104,10 @@ def train(*, sample_size: int = 200_000):
     report = classification_report(y_test, y_pred, output_dict=True)
 
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, MODEL_PATH)
-    joblib.dump(meta, META_PATH)
+    with open(MODEL_PATH, "wb") as f:
+        pickle.dump(model, f)
+    with open(META_PATH, "wb") as f:
+        pickle.dump(meta, f)
 
     METRICS_PATH.parent.mkdir(parents=True, exist_ok=True)
     with METRICS_PATH.open("w") as f:

@@ -7,18 +7,14 @@ from celery import Celery
 from app.services.risk_engine import analyze_risk
 
 
-def _get_broker_url() -> str:
-    return os.getenv("CELERY_BROKER_URL") or os.getenv("REDIS_URL", "redis://localhost:6379/0")
-
-
-def _get_backend_url() -> str:
-    return os.getenv("CELERY_BACKEND_URL") or os.getenv("REDIS_URL", "redis://localhost:6379/0")
+def _get_conf(key: str, default: str = "redis://localhost:6379/0") -> str:
+    return os.getenv(key) or os.getenv("REDIS_URL", default)
 
 
 celery = Celery(
     "Sentifargo",
-    broker=_get_broker_url(),
-    backend=_get_backend_url(),
+    broker=_get_conf("CELERY_BROKER_URL"),
+    backend=_get_conf("CELERY_BACKEND_URL"),
 )
 
 

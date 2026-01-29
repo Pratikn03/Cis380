@@ -384,3 +384,15 @@ curl -X POST http://localhost:8000/fraud/predict \
 ---
 
 **Questions?** Check the `/docs` endpoint for interactive API documentation.
+
+### Operational & Headless Endpoints (API-Only)
+
+These endpoints are designed for MLOps, monitoring, and external integrations. They are not currently consumed by the React UI but are part of the platform contract.
+
+| Category | Endpoints | Purpose |
+|----------|-----------|---------|
+| Observability | /health, /health/detailed, /ready, /metrics | Kubernetes probes and Prometheus metrics scraping. |
+| MLOps | /api/monitor/drift, /api/monitor/log, /api/monitor/baseline/build | Drift detection and training baseline management. |
+| Training | /api/vision/train, /api/rag/ingest | Triggering model training or document ingestion via API. |
+| Advanced | /api/recommend/explain, /api/recommend/topn | Debugging recommendation logic. |
+| Streaming | /api/chat/stream | Server-Sent Events (SSE) for low-latency chat clients. |

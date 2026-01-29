@@ -160,6 +160,56 @@ ELECTRONICS_CATALOG: Dict[str, List[dict]] = {
             "tags": ["sony", "earbuds", "noise", "cancelling", "wireless"],
         },
     ],
+    "cameras": [
+        {
+            "itemId": "cam_canon_eos_r50",
+            "title": "Canon EOS R50",
+            "price": 679,
+            "rating": 4.6,
+            "popularity": 4200,
+            "tags": ["canon", "camera", "mirrorless", "vlog", "4k"],
+        },
+        {
+            "itemId": "cam_sony_alpha_a6400",
+            "title": "Sony Alpha a6400",
+            "price": 898,
+            "rating": 4.7,
+            "popularity": 5100,
+            "tags": ["sony", "camera", "mirrorless", "aps-c", "4k"],
+        },
+        {
+            "itemId": "cam_nikon_z30",
+            "title": "Nikon Z30",
+            "price": 749,
+            "rating": 4.5,
+            "popularity": 3300,
+            "tags": ["nikon", "camera", "mirrorless", "vlog", "compact"],
+        },
+        {
+            "itemId": "cam_fujifilm_xs10",
+            "title": "Fujifilm X-S10",
+            "price": 999,
+            "rating": 4.6,
+            "popularity": 2800,
+            "tags": ["fujifilm", "camera", "mirrorless", "stabilization", "aps-c"],
+        },
+        {
+            "itemId": "cam_panasonic_g7",
+            "title": "Panasonic Lumix G7",
+            "price": 597,
+            "rating": 4.4,
+            "popularity": 3900,
+            "tags": ["panasonic", "camera", "mirrorless", "mft", "4k"],
+        },
+        {
+            "itemId": "cam_canon_rebel_t7",
+            "title": "Canon EOS Rebel T7",
+            "price": 479,
+            "rating": 4.3,
+            "popularity": 4700,
+            "tags": ["canon", "camera", "dslr", "starter", "photo"],
+        },
+    ],
 }
 
 

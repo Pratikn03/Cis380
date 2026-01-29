@@ -1,0 +1,13 @@
+# YOLOv8 Dataset Configuration
+
+# Path to the dataset root directory (relative to where you run the training script)
+path: dataset
+
+# Subdirectories for training and validation images
+train: images/train
+val: images/val
+
+# Class Names (Modify these to match your specific use case)
+names:
+  0: anomaly
+  1: normal

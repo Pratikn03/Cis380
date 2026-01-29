@@ -27,13 +27,15 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def _run(args: list[str]) -> None:
+def _run(args: list[str], env_override: dict[str, str] | None = None) -> None:
     """Run a subprocess from repo root and raise on failure."""
     print("\n$", " ".join(args))
     env = os.environ.copy()
     # Ensure `import uais` works when executing files directly.
     src_dir = str(REPO_ROOT / "src")
     env["PYTHONPATH"] = src_dir + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
+    if env_override:
+        env.update(env_override)
     subprocess.run(args, cwd=str(REPO_ROOT), check=True, env=env)
 
 
@@ -75,6 +77,34 @@ def main() -> int:
         default=200,
         help="Max WAVs per class to use for voice training (0 uses all).",
     )
+    parser.add_argument(
+        "--with-stt",
+        action="store_true",
+        help="Run STT data bootstrap + manifest/splits + evaluation (offline).",
+    )
+    parser.add_argument(
+        "--stt-bootstrap-limit",
+        type=int,
+        default=200,
+        help="Max audio files for STT bootstrap (0 uses all).",
+    )
+    parser.add_argument(
+        "--stt-language",
+        type=str,
+        default="en",
+        help="Language code for STT bootstrap/eval.",
+    )
+    parser.add_argument(
+        "--stt-model-size",
+        type=str,
+        default="",
+        help="Override Whisper model size for STT (sets WHISPER_MODEL).",
+    )
+    parser.add_argument(
+        "--with-stt-train",
+        action="store_true",
+        help="Also fine-tune Whisper using manifest train/val CSVs.",
+    )
     args = parser.parse_args()
 
     # Core tabular domains
@@ -95,6 +125,84 @@ def main() -> int:
 
     # Recommender
     _run([sys.executable, "src/train/train_recommender.py"])
+
+    if args.with_stt:
+        env = {"WHISPER_MODEL": args.stt_model_size} if args.stt_model_size else None
+        stt_bootstrap = [
+            sys.executable,
+            "scripts/stt/bootstrap_transcripts.py",
+            "--audio-root",
+            str(REPO_ROOT / "data" / "raw" / "voice" / "AudioWAV"),
+            "--out",
+            str(REPO_ROOT / "data" / "raw" / "stt" / "transcripts.jsonl"),
+            "--language",
+            args.stt_language,
+            "--limit",
+            str(args.stt_bootstrap_limit),
+        ]
+        _run(stt_bootstrap, env_override=env)
+        _run(
+            [
+                sys.executable,
+                "scripts/stt/build_manifest.py",
+                "--transcripts",
+                str(REPO_ROOT / "data" / "raw" / "stt" / "transcripts.jsonl"),
+                "--out",
+                str(REPO_ROOT / "data" / "raw" / "stt" / "manifest.csv"),
+                "--normalize",
+                "--require-text",
+            ]
+        )
+        _run(
+            [
+                sys.executable,
+                "scripts/stt/split_manifest.py",
+                "--manifest",
+                str(REPO_ROOT / "data" / "raw" / "stt" / "manifest.csv"),
+                "--group-by",
+                "speaker_id",
+            ]
+        )
+        _run(
+            [
+                sys.executable,
+                "scripts/stt/validate_manifest.py",
+                "--manifest",
+                str(REPO_ROOT / "data" / "raw" / "stt" / "manifest.with_splits.csv"),
+            ]
+        )
+        _run(
+            [
+                sys.executable,
+                "scripts/stt/evaluate_stt.py",
+                "--manifest",
+                str(REPO_ROOT / "data" / "raw" / "stt" / "manifest.with_splits.csv"),
+                "--split",
+                "test",
+                "--limit",
+                str(min(100, args.stt_bootstrap_limit) if args.stt_bootstrap_limit else 100),
+                "--language",
+                args.stt_language,
+                "--normalize",
+            ],
+            env_override=env,
+        )
+
+        if args.with_stt_train:
+            _run(
+                [
+                    sys.executable,
+                    "scripts/stt/train_whisper.py",
+                    "--train-manifest",
+                    str(REPO_ROOT / "data" / "raw" / "stt" / "manifest.train.csv"),
+                    "--val-manifest",
+                    str(REPO_ROOT / "data" / "raw" / "stt" / "manifest.val.csv"),
+                    "--language",
+                    args.stt_language,
+                    "--normalize",
+                    "--augment",
+                ]
+            )
 
     # Vision is optional/heavy.
     if args.with_vision:
@@ -128,7 +236,7 @@ def main() -> int:
         os.environ.setdefault("BRAND_VAL", "false")
         os.environ.setdefault("BRAND_CACHE", "disk")
         _run([sys.executable, "scripts/prepare_brand_data.py"])
-        _run([sys.executable, "-m", "src.train.train_brand_logo_detector"])
+        _run([sys.executable, "app/agent/train_brand_logo_detector.py"])
 
     if args.with_video_temporal:
         # Trains a lightweight sklearn temporal model used by /api/vision/video/predict.

@@ -1,5 +1,11 @@
+import os
+# Fix for macOS libc++abi crash (mutex lock failed)
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from ultralytics import YOLO
 from transformers import pipeline
@@ -7,7 +13,6 @@ from openai import OpenAI
 from PIL import Image
 import io
 import uvicorn
-import os
 import tempfile
 import PyPDF2
 
@@ -31,14 +36,20 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-# Initialize the YOLO model.
-# Note: 'yolov8n.pt' is a standard pretrained model. It will download automatically if missing.
-# For specific anomaly detection, replace this with your custom trained model path (e.g., 'best.pt').
+# Initialize YOLO models
+models = {}
 try:
-    model = YOLO("yolov8n.pt")
+    models["general"] = YOLO("yolov8n.pt")
 except Exception as e:
-    print(f"Warning: Failed to load YOLO model: {e}")
-    model = None
+    print(f"Warning: Failed to load standard YOLO model: {e}")
+
+custom_model_path = os.getenv("YOLO_MODEL_PATH", "best.pt")
+if os.path.exists(custom_model_path):
+    try:
+        models["custom"] = YOLO(custom_model_path)
+        print(f"Loaded custom YOLO model: {custom_model_path}")
+    except Exception as e:
+        print(f"Warning: Failed to load custom YOLO model: {e}")
 
 # Initialize the Whisper model for audio if available
 whisper_model = None
@@ -78,13 +89,31 @@ except Exception as e:
     print(f"Warning: Failed to initialize OpenAI client: {e}")
     openai_client = None
 
+# Initialize Local Recommender (if trained)
+local_recommender = None
+local_model_path = "custom_recommender_model"
+if os.path.exists(local_model_path):
+    try:
+        local_recommender = pipeline("text-generation", model=local_model_path)
+        print(f"Loaded local recommender from {local_model_path}")
+    except Exception as e:
+        print(f"Warning: Failed to load local recommender: {e}")
+
 pdf_storage = {}
 
+@app.get("/")
+async def root():
+    """Redirects the root URL to the API documentation."""
+    return RedirectResponse(url="/docs")
+
 @app.post("/detect-anomalies")
-async def detect_anomalies(file: UploadFile = File(...)):
+async def detect_anomalies(file: UploadFile = File(...), model_type: str = "general"):
     """
     Accepts an image upload, runs YOLO inference, and returns detected objects/anomalies.
     """
+    # Select model based on request, fallback to general
+    model = models.get(model_type) or models.get("general")
+    
     if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
 
@@ -229,22 +258,37 @@ class RecommendationRequest(BaseModel):
 
 @app.post("/recommend")
 async def recommend(request: RecommendationRequest):
-    if not openai_client:
-        raise HTTPException(status_code=503, detail="OpenAI client not initialized. Please set OPENAI_API_KEY.")
-    
-    try:
-        response = openai_client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a versatile intelligent assistant. Provide 3 concise, relevant recommendations based on the input context. This could range from safety actions for anomalies, to styling tips for clothes, movie suggestions based on mood, or maintenance tips for vehicles. Format them as a numbered list."},
-                {"role": "user", "content": f"Context: {request.context}"}
-            ],
-            max_tokens=200
-        )
-        recommendation = response.choices[0].message.content.strip()
-        return {"recommendation": recommendation}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    # Priority 1: Use Local Model if available
+    if local_recommender:
+        try:
+            # Simple prompt for the local model
+            prompt = f"Context: {request.context}\nRecommendation:"
+            result = local_recommender(prompt, max_new_tokens=50, num_return_sequences=1)
+            generated_text = result[0]['generated_text']
+            # Clean up response
+            recommendation = generated_text.replace(prompt, "").strip()
+            return {"recommendation": recommendation}
+        except Exception as e:
+            print(f"Local inference failed: {e}")
+            # Fallback to OpenAI
+
+    # Priority 2: Use OpenAI
+    if openai_client:
+        try:
+            response = openai_client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a versatile intelligent assistant. Provide 3 concise, relevant recommendations based on the input context. Format them as a numbered list."},
+                    {"role": "user", "content": f"Context: {request.context}"}
+                ],
+                max_tokens=200
+            )
+            recommendation = response.choices[0].message.content.strip()
+            return {"recommendation": recommendation}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+            
+    raise HTTPException(status_code=503, detail="No recommendation model available (Local or OpenAI).")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)

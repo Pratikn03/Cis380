@@ -8,7 +8,7 @@ import os
 
 DEFAULT_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8001")
 
-def analyze_uploaded_file(uploaded_file, backend_url):
+def analyze_uploaded_file(uploaded_file, backend_url, model_type="general"):
     """Sends the uploaded file to the appropriate backend endpoint."""
     # Reset pointer to beginning of file
     uploaded_file.seek(0)
@@ -22,7 +22,7 @@ def analyze_uploaded_file(uploaded_file, backend_url):
     try:
         response = None
         if file_type == "image":
-            response = requests.post(f"{backend_url}/detect-anomalies", files=files)
+            response = requests.post(f"{backend_url}/detect-anomalies", files=files, params={"model_type": model_type})
         elif file_type == "audio":
             response = requests.post(f"{backend_url}/analyze-audio", files=files)
         elif file_type == "pdf":
@@ -65,51 +65,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for Gemini-like styling
-st.markdown("""
-<style>
-    /* Main background */
-    .stApp {
-        background-color: #FFFFFF;
-        color: #1F1F1F;
-    }
-    
-    /* Chat messages container */
-    .stChatMessage {
-        background-color: transparent;
-        border: none;
-    }
-    
-    /* User message bubble */
-    div[data-testid="stChatMessage"]:nth-child(odd) {
-        background-color: #F0F4F9;
-        border-radius: 20px;
-        padding: 15px;
-        margin-bottom: 10px;
-    }
-
-    /* Assistant message bubble */
-    div[data-testid="stChatMessage"]:nth-child(even) {
-        background-color: #FFFFFF;
-        padding: 15px;
-        margin-bottom: 10px;
-    }
-    
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background-color: #F0F4F9;
-    }
-    
-    /* Buttons */
-    .stButton > button {
-        border-radius: 20px;
-        background-color: #1a73e8;
-        color: white;
-        border: none;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # Initialize Backend URL in Session State
 if "backend_url" not in st.session_state:
     st.session_state.backend_url = DEFAULT_BACKEND_URL
@@ -122,6 +77,14 @@ with st.sidebar:
     
     st.markdown("**Core Skills**")
     st.caption("Python | React | ML/AI | FastAPI | Docker")
+    
+    st.markdown("---")
+    st.caption("Connect")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.link_button("GitHub", "https://github.com/Pratikn03")
+    with col2:
+        st.link_button("LinkedIn", "https://www.linkedin.com/")
     
     st.markdown("---")
     
@@ -148,11 +111,72 @@ with st.sidebar:
     st.markdown("---")
     rag_on = st.toggle("RAG On", value=True)
     dsa_mode = st.toggle("DSA Mode On", value=False)
+    dark_mode = st.toggle("Dark Mode", value=False)
     
     st.markdown("---")
     if st.button("Clear Chat"):
         st.session_state.messages = []
         st.rerun()
+
+# Custom CSS for Gemini-like styling
+bg_color = "#131314" if dark_mode else "#FFFFFF"
+text_color = "#E3E3E3" if dark_mode else "#000000"
+sidebar_bg = "#1E1F20" if dark_mode else "#F0F4F9"
+sidebar_border = "#444746" if dark_mode else "#E5E7EB"
+button_bg = "#8AB4F8" if dark_mode else "#1a73e8"
+button_text = "#000000" if dark_mode else "#FFFFFF"
+
+st.markdown(f"""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+    html, body, [class*="css"] {{
+        font-family: 'Inter', sans-serif;
+    }}
+
+    /* Main background */
+    .stApp {{
+        background-color: {bg_color};
+        color: {text_color};
+    }}
+    
+    /* Sidebar */
+    [data-testid="stSidebar"] {{
+        background-color: {sidebar_bg};
+        border-right: 1px solid {sidebar_border};
+        color: {text_color};
+    }}
+    
+    /* Captions */
+    [data-testid="stCaptionContainer"] {{
+        color: {text_color};
+        opacity: 0.8;
+    }}
+    
+    /* Remove top padding for cleaner look */
+    .block-container {{
+        padding-top: 2rem;
+    }}
+
+    h1 {{
+        font-weight: 600;
+    }}
+
+    /* Buttons */
+    .stButton > button {{
+        border-radius: 20px;
+        background-color: {button_bg};
+        color: {button_text};
+        border: none;
+    }}
+    
+    /* Adjust text inputs for dark mode */
+    .stTextInput > div > div > input {{
+        color: {text_color};
+        background-color: {bg_color};
+    }}
+</style>
+""", unsafe_allow_html=True)
 
 # Main Chat Interface
 st.title(active_tool)
@@ -270,7 +294,10 @@ if uploaded_file:
             message_placeholder = st.empty()
             message_placeholder.markdown("Thinking...")
             
-            data, error_msg, file_type = analyze_uploaded_file(uploaded_file, backend_url)
+            # Use custom model for Brand tool if available
+            model_type = "custom" if active_tool == "Brand (YOLO)" else "general"
+            
+            data, error_msg, file_type = analyze_uploaded_file(uploaded_file, backend_url, model_type=model_type)
             
             if data:
                 try:
@@ -420,11 +447,3 @@ if prompt := st.chat_input("Type your message..."):
             
         message_placeholder.markdown(response_text)
         st.session_state.messages.append({"role": "assistant", "content": response_text})
-
-# Footer
-st.markdown("---")
-st.markdown("""
-<div style="text-align: center; color: grey;">
-    © 2026 Pratik Niroula. All rights reserved.
-</div>
-""", unsafe_allow_html=True)

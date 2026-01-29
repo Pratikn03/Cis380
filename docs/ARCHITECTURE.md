@@ -87,6 +87,7 @@
 | Fraud API | `app/api/routes/fraud.py` | Fraud detection |
 | Cyber API | `app/api/cyber_timeline.py` | Cyber security timeline |
 | Vision API | `app/api/routes/vision.py` | Image/video analysis |
+| Object Detection API | `app/api/object_detection.py` | YOLOv3 object detection |
 | Voice API | `app/api/voice.py` | Audio processing |
 | RAG API | `app/api/routes/rag.py` | Document retrieval |
 | Brand API | `app/api/brand.py` | Brand recognition |
@@ -104,6 +105,8 @@ POST /api/chat          # Main conversational endpoint
 POST /api/fraud/predict # Fraud detection
 POST /api/cyber/analyze # Cyber threat analysis
 POST /api/vision/detect # Image analysis
+POST /api/vision/object/detect # YOLOv3 object detection
+POST /api/vision/object/visualize # YOLOv3 overlay visualization
 POST /api/voice/emotion # Voice emotion recognition
 POST /api/rag/query     # Document Q&A
 GET  /api/cyber/timeline # Security timeline

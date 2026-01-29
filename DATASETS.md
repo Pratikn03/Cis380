@@ -31,5 +31,14 @@
 - data/raw/brand/
 - data/raw/crema_d/ (audio/video source)
 - data/raw/voice/ (voice emotion classes)
+- data/raw/stt/ (speech-to-text transcripts + manifest)
 - data/raw/recommendation/
 - data/raw/dsa/
+
+## STT Dataset (Speech Recognition)
+- Task: speech-to-text (English)
+- Source: bootstrap from local audio (offline Whisper) or add labeled corpora
+- Raw audio: `data/raw/voice/AudioWAV` or `data/raw/stt/audio/`
+- Transcripts: `data/raw/stt/transcripts.jsonl`
+- Manifest: `data/raw/stt/manifest.csv`
+- Splits: `data/raw/stt/manifest.{train,val,test}.csv`

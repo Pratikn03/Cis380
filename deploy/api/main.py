@@ -4,6 +4,7 @@ from base64 import b64decode
 from io import BytesIO
 from pathlib import Path
 from typing import Dict, List
+import os
 
 import joblib
 import numpy as np
@@ -11,14 +12,22 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 
-app = FastAPI(title="Sentifargo API", version="1.3")
 
-project_root = Path(__file__).resolve().parents[2]
+def _find_project_root(start: Path) -> Path:
+    for p in [start, *start.parents]:
+        if (p / "models").exists() or (p / "pyproject.toml").exists() or (p / ".git").exists():
+            return p
+    return start
+
+
+project_root = Path(os.getenv("SENTIFARGO_ROOT", str(_find_project_root(Path(__file__).resolve()))))
 fraud_model_path = project_root / "models" / "fraud" / "supervised" / "fraud_model.pkl"
 cyber_model_path = project_root / "models" / "cyber" / "supervised" / "cyber_model.pkl"
 fusion_model_path = project_root / "experiments" / "fusion" / "models" / "fusion_meta_model.pkl"
 nlp_model_dir = project_root / "models" / "nlp" / "distilbert"
 vision_model_dir = project_root / "models" / "vision" / "resnet"
+
+MAX_IMAGE_BYTES = int(os.getenv("SENTIFARGO_MAX_IMAGE_BYTES", 5 * 1024 * 1024))
 
 fraud_model = None
 fraud_model_error: str | None = None
@@ -31,6 +40,7 @@ _nlp_artifacts_loaded = False
 _nlp_model = None
 _nlp_tokenizer = None
 _vision_model = None
+_vision_artifacts_loaded = False
 
 
 def _load_joblib_model(path: Path, *, name: str):
@@ -89,24 +99,28 @@ def _load_nlp():
 
 
 def _load_vision():
-    global _vision_model
-    if _vision_model is not None:
+    global _vision_model, _vision_artifacts_loaded
+    if _vision_artifacts_loaded:
         return _vision_model
     try:
-        import torch
+        import torch  # noqa: F401
         from uais_v.models.vision_resnet import VisionConfig, build_resnet_classifier
     except Exception:
-        _vision_model = False
+        _vision_artifacts_loaded = True
+        _vision_model = None
         return None
     state_path = vision_model_dir / "model.pt"
     if not state_path.exists():
-        _vision_model = False
+        _vision_artifacts_loaded = True
+        _vision_model = None
         return None
     cfg = VisionConfig(model_name="resnet18", num_classes=2, pretrained=False)
     model = build_resnet_classifier(cfg)
+    import torch
     model.load_state_dict(torch.load(state_path, map_location="cpu"))
     model.eval()
     _vision_model = model
+    _vision_artifacts_loaded = True
     return model
 
 
@@ -128,6 +142,9 @@ class NLPRequest(BaseModel):
 
 class VisionRequest(BaseModel):
     image_base64: str  # base64-encoded image (jpg/png)
+
+
+app = FastAPI(title="Sentifargo API", version="1.3")
 
 
 @app.get("/")
@@ -203,8 +220,12 @@ def predict_fusion(req: FusionRequest):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Fusion model not found."
         )
-    keys = sorted(req.scores)
-    X = np.array([[req.scores[k] for k in keys]])
+    expected_keys = list(getattr(fusion_model, "feature_names_in_", []))
+    if expected_keys:
+        keys = expected_keys
+    else:
+        keys = sorted(req.scores.keys())
+    X = np.array([[float(req.scores.get(k, 0.0)) for k in keys]])
     proba = fusion_model.predict_proba(X)[0, 1]
     return {"fusion_risk": float(proba), "domains": keys}
 
@@ -251,7 +272,14 @@ def predict_vision(req: VisionRequest):
 
     try:
         img_bytes = b64decode(req.image_base64)
+        if len(img_bytes) > MAX_IMAGE_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"Image too large (> {MAX_IMAGE_BYTES} bytes).",
+            )
         image = Image.open(BytesIO(img_bytes)).convert("RGB")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid image: {exc}")
 

@@ -40,9 +40,19 @@
   python -m src.train.train_video_temporal_lstm
   # LSTM drift monitor (writes reports/vision_temporal_lstm_drift.json)
   python scripts/monitor_video_temporal_drift.py
+- Speech-to-Text (STT) data + fine-tuning:
+  # Bootstrap transcripts (offline Whisper)
+  python scripts/stt/bootstrap_transcripts.py --audio-root data/raw/voice/AudioWAV --out data/raw/stt/transcripts.jsonl --language en
+  python scripts/stt/build_manifest.py --transcripts data/raw/stt/transcripts.jsonl --out data/raw/stt/manifest.csv --normalize --require-text
+  python scripts/stt/split_manifest.py --manifest data/raw/stt/manifest.csv --group-by speaker_id
+  # Evaluate WER/CER
+  python scripts/stt/evaluate_stt.py --manifest data/raw/stt/manifest.with_splits.csv --split test --normalize
+  # Fine-tune Whisper (optional)
+  python scripts/stt/train_whisper.py --train-manifest data/raw/stt/manifest.train.csv --val-manifest data/raw/stt/manifest.val.csv --model openai/whisper-small --normalize --augment
 
 ## Batch training shortcuts
 - python scripts/train_all.py
+- python scripts/train_all.py --with-stt --stt-bootstrap-limit 200
 - python scripts/train_all_vision.py
 - python scripts/train_all_vision_full.py
 - python scripts/train_production.py

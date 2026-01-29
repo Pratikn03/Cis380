@@ -94,6 +94,7 @@ _app_dsa_algo_router = None  # DSA algorithm API
 _app_brand_router = None  # Brand/logo detection
 _app_stt_router = None  # Speech-to-text
 _app_vision_temporal_router = None  # Video/temporal analysis
+_app_object_router = None  # Object detection (YOLOv3)
 _api_v1_router = None
 
 # ==============================================================================
@@ -160,6 +161,13 @@ try:  # pragma: no cover
 except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.api.brand router unavailable: %s", exc)
     _app_brand_router = None
+
+# Object Detection Router - YOLOv3 detections
+try:  # pragma: no cover
+    from app.api.object_detection import router as _app_object_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.object_detection router unavailable: %s", exc)
+    _app_object_router = None
 
 # STT Router - Speech-to-Text transcription
 try:  # pragma: no cover
@@ -295,6 +303,8 @@ if _app_dsa_algo_router is not None:
     app.include_router(_app_dsa_algo_router, dependencies=[Depends(require_auth)])
 if _app_brand_router is not None:
     app.include_router(_app_brand_router, dependencies=[Depends(require_auth)])
+if _app_object_router is not None:
+    app.include_router(_app_object_router, dependencies=[Depends(require_auth)])
 if _app_stt_router is not None:
     app.include_router(_app_stt_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_tts_router is not None:

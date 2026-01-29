@@ -6,7 +6,7 @@ import json
 import os
 from pathlib import Path
 
-import joblib
+import pickle
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -84,7 +84,8 @@ def main():
 
     paths = domain_paths("cyber")
     (paths["models"] / "supervised").mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, paths["models"] / "supervised" / "cyber_model.pkl")
+    with open(paths["models"] / "supervised" / "cyber_model.pkl", "wb") as f:
+        pickle.dump(model, f)
 
     metrics_dir = paths["experiments"] / "metrics"
     metrics_dir.mkdir(parents=True, exist_ok=True)

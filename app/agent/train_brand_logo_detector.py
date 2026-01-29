@@ -2,7 +2,7 @@
 Training script for Brand/Logo Detection using YOLOv8.
 
 Usage:
-    python -m src.train.train_brand_logo_detector
+    python app/agent/train_brand_logo_detector.py
 """
 
 import os

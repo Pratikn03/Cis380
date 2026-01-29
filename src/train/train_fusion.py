@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import joblib
+import pickle
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import GradientBoostingClassifier
@@ -86,7 +86,8 @@ def main():
     report = classification_report(y_test, y_pred, output_dict=True)
 
     OUT_MODEL.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, OUT_MODEL)
+    with open(OUT_MODEL, "wb") as f:
+        pickle.dump(model, f)
 
     OUT_METRICS.parent.mkdir(parents=True, exist_ok=True)
     with OUT_METRICS.open("w") as f:

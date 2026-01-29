@@ -1,23 +1,44 @@
-# Sentifargo Command Center Web UI
+# Universal Anomaly Intelligence Web Interface
 
-This folder contains the official web UI for the Sentifargo project.
-It is intentionally isolated from the backend and Streamlit UI.
+This directory contains the web interface for the Universal Anomaly Intelligence project. There are two frontend applications available:
 
-Structure:
-- ui-web/frontend: React + TypeScript + Tailwind frontend
-- ui-web/deploy: deployment notes and configs
+1.  **A React application built with Vite.**
+2.  **A Next.js application.**
 
-Local quickstart:
-1) cd ui-web/frontend
-2) npm install
-3) npm run dev
+## Frontend (Vite + React)
 
-Backend defaults to http://localhost:8000 via VITE_API_BASE.
-Set a different backend in ui-web/frontend/.env if needed.
+The `frontend` directory contains a React application built with Vite.
 
-GitHub Pages:
-- See ui-web/deploy/github-pages.md
-- Build with VITE_BASE_PATH=/REPO_NAME/
+### How to run
 
-Streamlit fallback (optional):
-streamlit run app/streamlit_chatbot/app.py
+1.  Navigate to the `ui-web/frontend` directory:
+    ```bash
+    cd ui-web/frontend
+    ```
+2.  Install the dependencies:
+    ```bash
+    npm install
+    ```
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```
+
+## Next.js
+
+The `next` directory contains a Next.js application.
+
+### How to run
+
+1.  Navigate to the `ui-web/next` directory:
+    ```bash
+    cd ui-web/next
+    ```
+2.  Install the dependencies:
+    ```bash
+    npm install
+    ```
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```

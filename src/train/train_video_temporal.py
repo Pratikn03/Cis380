@@ -17,8 +17,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-
-import joblib
+import pickle
 import numpy as np
 
 from uais_v.models.video_temporal import (
@@ -314,16 +313,17 @@ def main() -> int:
         print("[video-temporal] sample failures:", failures[:5])
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(
-        {
-            "model": clf,
-            "scaler": scaler,
-            "feature_names": list(TEMPORAL_FEATURE_NAMES),
-            "label_map": dict(LABEL_MAP),
-            "metrics": metrics,
-        },
-        args.out,
-    )
+    with open(args.out, "wb") as f:
+        pickle.dump(
+            {
+                "model": clf,
+                "scaler": scaler,
+                "feature_names": list(TEMPORAL_FEATURE_NAMES),
+                "label_map": dict(LABEL_MAP),
+                "metrics": metrics,
+            },
+            f,
+        )
     print(f"[video-temporal] saved: {args.out}")
 
     out_metrics = Path("experiments/vision/video_temporal/metrics.json")

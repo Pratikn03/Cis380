@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import List
 
-import joblib
+import pickle
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
@@ -158,14 +158,16 @@ def main():
     report = classification_report(y_test, y_pred, output_dict=True)
 
     OUT_MODEL.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, OUT_MODEL)
+    with open(OUT_MODEL, "wb") as f:
+        pickle.dump(model, f)
 
     meta = {
         "feature_names": features,
         "classes": list(getattr(model, "classes_", [])),
         "n_features": int(len(features)),
     }
-    joblib.dump(meta, OUT_META)
+    with open(OUT_META, "wb") as f:
+        pickle.dump(meta, f)
 
     OUT_METRICS.parent.mkdir(parents=True, exist_ok=True)
     with OUT_METRICS.open("w") as f:

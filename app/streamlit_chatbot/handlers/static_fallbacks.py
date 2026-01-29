@@ -391,10 +391,54 @@ def courses_fallback(query: str) -> List[Dict]:
     return [{"title": c["title"], "reason": c["reason"]} for c in selected]
 
 
+# ============================================================================
+# BOOKS FALLBACKS
+# ============================================================================
+BOOKS_POOL = [
+    {"title": "The Hobbit", "reason": "Classic fantasy adventure; J.R.R. Tolkien"},
+    {"title": "1984", "reason": "Dystopian masterpiece; George Orwell"},
+    {"title": "To Kill a Mockingbird", "reason": "Timeless courtroom drama; Harper Lee"},
+    {"title": "The Name of the Wind", "reason": "Epic fantasy; Patrick Rothfuss"},
+    {"title": "Pride and Prejudice", "reason": "Beloved romance; Jane Austen"},
+    {"title": "The Martian", "reason": "Smart sci-fi survival; Andy Weir"},
+    {"title": "Sapiens", "reason": "Big-picture history; Yuval Noah Harari"},
+    {"title": "The Alchemist", "reason": "Inspirational journey; Paulo Coelho"},
+]
+
+
+def books_fallback(query: str) -> List[Dict]:
+    """Return random book recommendations."""
+    selected = random.sample(BOOKS_POOL, min(5, len(BOOKS_POOL)))
+    return [{"title": b["title"], "reason": b["reason"]} for b in selected]
+
+
+# ============================================================================
+# GAMES FALLBACKS
+# ============================================================================
+GAMES_POOL = [
+    {"title": "Hades", "reason": "Fast-paced roguelike; critically acclaimed"},
+    {"title": "Stardew Valley", "reason": "Relaxing farming sim; cozy vibes"},
+    {"title": "Hollow Knight", "reason": "Challenging metroidvania; great art"},
+    {"title": "The Witcher 3: Wild Hunt", "reason": "Epic RPG; deep story"},
+    {"title": "Celeste", "reason": "Tight platformer; inspiring narrative"},
+    {"title": "Portal 2", "reason": "Puzzle classic; witty writing"},
+    {"title": "Factorio", "reason": "Automation addicting loop; strategy"},
+    {"title": "Slay the Spire", "reason": "Deck-builder roguelike; highly replayable"},
+]
+
+
+def games_fallback(query: str) -> List[Dict]:
+    """Return random game recommendations."""
+    selected = random.sample(GAMES_POOL, min(5, len(GAMES_POOL)))
+    return [{"title": g["title"], "reason": g["reason"]} for g in selected]
+
+
 __all__ = [
     "movies_fallback",
     "places_fallback",
     "news_fallback",
     "cars_fallback",
     "courses_fallback",
+    "books_fallback",
+    "games_fallback",
 ]
