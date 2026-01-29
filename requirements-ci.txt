@@ -19,5 +19,6 @@ passlib[bcrypt]>=1.7.4
 celery>=5.3.0
 pytest>=7.0.0
 pytest-asyncio>=0.23.0
+pytest-timeout>=2.2.0
 httpx>=0.26.0
 ruff>=0.0.300
