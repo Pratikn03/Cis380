@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import os
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -151,7 +152,16 @@ def create_role(payload: RoleCreate, db: Session = Depends(get_db)) -> dict[str,
 
 
 @admin_router.post("/bootstrap")
-def bootstrap(payload: UserCreate, db: Session = Depends(get_db)) -> dict[str, Any]:
+def bootstrap(
+    payload: UserCreate,
+    db: Session = Depends(get_db),
+    bootstrap_token: str | None = Header(default=None, alias="X-Bootstrap-Token"),
+) -> dict[str, Any]:
+    expected_token = os.getenv("BOOTSTRAP_TOKEN")
+    if not expected_token:
+        raise HTTPException(status_code=403, detail="Bootstrap disabled")
+    if bootstrap_token != expected_token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid bootstrap token")
     if db.query(User).count() > 0:
         raise HTTPException(status_code=400, detail="Bootstrap already completed")
     admin = bootstrap_admin(db, payload.username, payload.password)

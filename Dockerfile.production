@@ -3,6 +3,19 @@
 # Multi-stage build for optimized image size
 # ============================================
 
+# Stage 0: Frontend Builder
+FROM node:20-alpine as frontend-builder
+
+WORKDIR /app/ui-web/frontend
+
+# Install frontend deps
+COPY ui-web/frontend/package*.json ./
+RUN npm ci
+
+# Build React UI
+COPY ui-web/frontend/ ./
+RUN npm run build
+
 # Stage 1: Builder
 FROM python:3.11-slim as builder
 
@@ -50,6 +63,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application code
 COPY --chown=Sentifargo:Sentifargo . .
+
+# Copy built frontend assets
+COPY --from=frontend-builder /app/ui-web/frontend/dist /app/ui-web/frontend/dist
 
 # Create necessary directories with proper permissions
 RUN mkdir -p /app/logs /app/data/monitoring /app/artifacts \

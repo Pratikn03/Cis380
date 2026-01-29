@@ -8,7 +8,9 @@
 
 ## Environment controls
 
-- `AUTH_TOKEN` (legacy bearer token)
+- `AUTH_TOKEN` (optional legacy bearer token)
+- `BOOTSTRAP_TOKEN` (protects `/api/v1/admin/bootstrap`)
+- `AUTH_BYPASS` (non-production only; disable in production)
 - `SECRET_KEY`, `ACCESS_TOKEN_EXPIRE_MINUTES`, `REFRESH_TOKEN_EXPIRE_DAYS`
 - `CORS_ORIGINS` to control frontend access
 

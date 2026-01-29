@@ -21,12 +21,18 @@ services:
     environment:
       - APP_ENV=production
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SECRET_KEY=${SECRET_KEY:-}
       - AUTH_TOKEN=${AUTH_TOKEN:-}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      - BOOTSTRAP_TOKEN=${BOOTSTRAP_TOKEN:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - REDIS_URL=redis://redis:6379/0
-      - DATABASE_URL=${DATABASE_URL:-sqlite:///./data/Sentifargo.db}
+      - DATABASE_URL=${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-sentifargo}:${POSTGRES_PASSWORD:-sentifargo}@postgres:5432/${POSTGRES_DB:-sentifargo}}
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
       - MAX_REQUEST_SIZE=${MAX_REQUEST_SIZE:-50MB}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-}
+      - FORCE_HTTPS=${FORCE_HTTPS:-false}
     volumes:
       - ./data:/app/data:rw
       - ./logs:/app/logs:rw
@@ -34,6 +40,8 @@ services:
       - ./artifacts:/app/artifacts:ro
     depends_on:
       redis:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -58,44 +66,6 @@ services:
         max-file: "5"
 
   # ==========================================
-  # Streamlit UI Service
-  # ==========================================
-  Sentifargo-ui:
-    build:
-      context: .
-      dockerfile: Dockerfile.production
-      target: production
-    container_name: Sentifargo-ui
-    restart: unless-stopped
-    ports:
-      - "${UI_PORT:-8501}:8501"
-    environment:
-      - Sentifargo_BACKEND=http://Sentifargo-api:8000
-      - AUTH_TOKEN=${AUTH_TOKEN:-}
-    volumes:
-      - ./models:/app/models:ro
-      - ./artifacts:/app/artifacts:ro
-      - ./experiments:/app/experiments:ro
-    command: >
-      streamlit run app/streamlit_chatbot/app.py
-      --server.port=8501
-      --server.address=0.0.0.0
-      --server.headless=true
-      --browser.gatherUsageStats=false
-      --theme.base=dark
-      --theme.primaryColor=#3b82f6
-    depends_on:
-      Sentifargo-api:
-        condition: service_healthy
-    networks:
-      - Sentifargo-network
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 4G
-
-  # ==========================================
   # Redis Cache
   # ==========================================
   redis:
@@ -117,6 +87,52 @@ services:
         limits:
           cpus: '1'
           memory: 1G
+
+  # ==========================================
+  # Postgres Database
+  # ==========================================
+  postgres:
+    image: postgres:16
+    container_name: Sentifargo-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-sentifargo}
+      - POSTGRES_USER=${POSTGRES_USER:-sentifargo}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-sentifargo}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sentifargo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - Sentifargo-network
+
+  # ==========================================
+  # Celery Worker
+  # ==========================================
+  Sentifargo-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      target: production
+    container_name: Sentifargo-worker
+    restart: unless-stopped
+    command: celery -A app.workers.celery_app.celery worker -l info
+    environment:
+      - APP_ENV=production
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SECRET_KEY=${SECRET_KEY:-}
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-sentifargo}:${POSTGRES_PASSWORD:-sentifargo}@postgres:5432/${POSTGRES_DB:-sentifargo}}
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - Sentifargo-network
 
   # ==========================================
   # Prometheus Metrics
@@ -180,7 +196,6 @@ services:
       - ./deploy/nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - Sentifargo-api
-      - Sentifargo-ui
     networks:
       - Sentifargo-network
     profiles:
@@ -200,6 +215,8 @@ networks:
 volumes:
   redis-data:
     name: Sentifargo-redis-data
+  postgres-data:
+    name: Sentifargo-postgres-data
   prometheus-data:
     name: Sentifargo-prometheus-data
   grafana-data:

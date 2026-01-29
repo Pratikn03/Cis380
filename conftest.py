@@ -19,6 +19,8 @@ def pytest_configure() -> None:
     # CI runs that attempt to download large HuggingFace/Whisper weights.
     os.environ.setdefault("HF_HUB_OFFLINE", "1")
     os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+    os.environ.setdefault("APP_ENV", "test")
+    os.environ.setdefault("AUTH_BYPASS", "true")
 
     repo_root = Path(__file__).resolve().parent
     src_dir = repo_root / "src"

@@ -1,8 +1,48 @@
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import clsx from "clsx";
 import { navigation } from "../data/navigation";
+import { api } from "../services/api";
 
 export default function Sidebar() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+
+  useEffect(() => {
+    setIsAuthed(Boolean(localStorage.getItem("AUTH_TOKEN")));
+  }, []);
+
+  const handleLogin = async () => {
+    setIsLoading(true);
+    setStatus(null);
+    try {
+      const { data } = await api.post("/api/v1/auth/login", { username, password });
+      if (!data?.access_token) {
+        setStatus("Login failed: missing token");
+        return;
+      }
+      localStorage.setItem("AUTH_TOKEN", data.access_token);
+      setIsAuthed(true);
+      setPassword("");
+      setStatus("Authenticated");
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.detail || err?.message || "Login failed. Check credentials.";
+      setStatus(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("AUTH_TOKEN");
+    setIsAuthed(false);
+    setStatus("Signed out");
+  };
+
   return (
     <aside className="w-full bg-slate-900 border-b border-slate-700 px-6 py-6 md:w-64 md:border-b-0 md:border-r md:min-h-screen">
       {/* Logo */}
@@ -36,6 +76,45 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Access */}
+      <div className="mt-10">
+        <p className="text-xs uppercase tracking-wider text-slate-500 font-medium mb-4">Access</p>
+        <div className="space-y-2">
+          <input
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username"
+            className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500"
+          />
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            placeholder="Password"
+            className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500"
+          />
+          <button
+            onClick={handleLogin}
+            disabled={isLoading || !username || !password}
+            className="w-full rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-3 py-2 text-sm font-medium disabled:opacity-50"
+          >
+            {isLoading ? "Signing in..." : isAuthed ? "Re-authenticate" : "Sign in"}
+          </button>
+          {isAuthed && (
+            <button
+              onClick={handleLogout}
+              className="w-full rounded-lg bg-slate-800 text-slate-300 border border-slate-700 px-3 py-2 text-sm font-medium"
+            >
+              Sign out
+            </button>
+          )}
+          {status && <p className="text-xs text-slate-400">{status}</p>}
+          <p className="text-[11px] text-slate-500">
+            Use admin credentials from your environment configuration.
+          </p>
+        </div>
+      </div>
 
       {/* Skills */}
       <div className="mt-10">

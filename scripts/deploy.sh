@@ -135,7 +135,15 @@ deploy() {
     # Pull latest images
     log_info "Pulling latest images..."
     docker compose -f "$COMPOSE_FILE" $profile_args pull
-    
+
+    # Start core dependencies first
+    log_info "Starting database + cache..."
+    docker compose -f "$COMPOSE_FILE" $profile_args up -d postgres redis
+
+    # Run migrations before starting the API
+    log_info "Running database migrations..."
+    docker compose -f "$COMPOSE_FILE" $profile_args run --rm Sentifargo-api alembic upgrade head
+
     # Start services
     log_info "Starting services..."
     docker compose -f "$COMPOSE_FILE" $profile_args up -d
