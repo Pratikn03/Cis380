@@ -26,6 +26,7 @@ venv.bak/
 .env.local
 .env.*.local
 .env.backup.*
+.env.save
 !.env.example
 !.env.production.example
 

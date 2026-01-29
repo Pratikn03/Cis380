@@ -123,7 +123,18 @@ def main() -> None:
     processor = WhisperProcessor.from_pretrained(
         args.model, language=args.language, task="transcribe"
     )
-    model = WhisperForConditionalGeneration.from_pretrained(args.model)
+
+    # Match model dtype to device capabilities to avoid float/half mismatches.
+    model_dtype = torch.float32
+    if torch.cuda.is_available() and args.fp16:
+        model_dtype = torch.float16
+    try:
+        model = WhisperForConditionalGeneration.from_pretrained(
+            args.model, torch_dtype=model_dtype
+        )
+    except TypeError:
+        model = WhisperForConditionalGeneration.from_pretrained(args.model)
+        model = model.to(model_dtype)
 
     rng = np.random.default_rng(args.augment_seed)
 
@@ -161,6 +172,7 @@ def main() -> None:
     def prepare_batch(batch):
         audio_path = batch["audio"]
         audio_array, sr = load_audio(audio_path)
+        audio_array = np.asarray(audio_array, dtype=np.float32)
         if args.augment and rng.random() < args.noise_prob:
             snr = rng.uniform(args.noise_min_snr, args.noise_max_snr)
             audio_array = add_noise(audio_array, snr)
@@ -220,33 +232,51 @@ def main() -> None:
     )
     print(f"[stt_train] device={device_label}")
 
-    training_args = Seq2SeqTrainingArguments(
-        output_dir=str(args.output_dir),
-        per_device_train_batch_size=args.batch_size,
-        per_device_eval_batch_size=args.batch_size,
-        gradient_accumulation_steps=max(1, int(args.grad_accum)),
-        learning_rate=args.learning_rate,
-        num_train_epochs=args.epochs,
-        max_steps=args.max_steps if args.max_steps > 0 else None,
-        fp16=args.fp16 and torch.cuda.is_available(),
-        evaluation_strategy="steps",
-        save_steps=args.save_steps,
-        eval_steps=args.eval_steps,
-        logging_steps=50,
-        save_total_limit=2,
-        predict_with_generate=True,
-        generation_max_length=128,
-        report_to="none",
-    )
+    training_kwargs = {
+        "output_dir": str(args.output_dir),
+        "per_device_train_batch_size": args.batch_size,
+        "per_device_eval_batch_size": args.batch_size,
+        "gradient_accumulation_steps": max(1, int(args.grad_accum)),
+        "learning_rate": args.learning_rate,
+        "num_train_epochs": args.epochs,
+        "max_steps": args.max_steps if args.max_steps > 0 else 0,
+        "fp16": args.fp16 and torch.cuda.is_available(),
+        "save_steps": args.save_steps,
+        "eval_steps": args.eval_steps,
+        "logging_steps": 50,
+        "save_total_limit": 2,
+        "predict_with_generate": True,
+        "generation_max_length": 128,
+        "report_to": "none",
+    }
 
-    trainer = Seq2SeqTrainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=val_dataset,
-        data_collator=data_collator,
-        tokenizer=processor.feature_extractor,
-    )
+    import inspect
+
+    training_sig = inspect.signature(Seq2SeqTrainingArguments.__init__)
+    if "evaluation_strategy" in training_sig.parameters:
+        training_kwargs["evaluation_strategy"] = "steps"
+    elif "eval_strategy" in training_sig.parameters:
+        training_kwargs["eval_strategy"] = "steps"
+
+    filtered_kwargs = {
+        key: value for key, value in training_kwargs.items() if key in training_sig.parameters
+    }
+    training_args = Seq2SeqTrainingArguments(**filtered_kwargs)
+
+    trainer_kwargs = {
+        "model": model,
+        "args": training_args,
+        "train_dataset": train_dataset,
+        "eval_dataset": val_dataset,
+        "data_collator": data_collator,
+    }
+    trainer_sig = inspect.signature(Seq2SeqTrainer.__init__)
+    if "tokenizer" in trainer_sig.parameters:
+        trainer_kwargs["tokenizer"] = processor.feature_extractor
+    elif "processing_class" in trainer_sig.parameters:
+        trainer_kwargs["processing_class"] = processor
+
+    trainer = Seq2SeqTrainer(**trainer_kwargs)
 
     trainer.train()
     trainer.save_model(str(args.output_dir))
