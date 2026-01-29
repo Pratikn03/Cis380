@@ -115,7 +115,9 @@ class Settings(BaseModel):
     # Application
     app_name: str = Field(default="Sentifargo")
     app_version: str = Field(default="1.0.0")
-    app_env: Literal["development", "staging", "production"] = Field(default="development")
+    app_env: Literal["development", "staging", "production", "test"] = Field(
+        default="development"
+    )
     debug: bool = Field(default=False)
 
     # Server
