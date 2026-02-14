@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import os
+
 from fastapi import APIRouter, UploadFile, File, HTTPException
 
 from app.models.voice.emotion_predict import predict_emotion
+from app.models.voice.emotion_ssl_predict import predict_emotion_ssl, ssl_available
 from app.utils.uploads import (
     AUDIO_EXTENSIONS,
     AUDIO_MIME_TYPES,
@@ -34,8 +37,13 @@ def voice_emotion(file: UploadFile = File(...)) -> dict[str, object]:
             status_code=413,
             detail=f"Audio exceeds upload limit ({MAX_AUDIO_BYTES} bytes).",
         )
+
+    backend = os.getenv("VOICE_EMOTION_BACKEND", "mfcc").lower()
     try:
-        payload = predict_emotion(audio_bytes=audio_bytes, filename=file.filename)
+        if backend in {"ssl", "wav2vec2", "hubert", "wavlm"} and ssl_available():
+            payload = predict_emotion_ssl(audio_bytes=audio_bytes, filename=file.filename)
+        else:
+            payload = predict_emotion(audio_bytes=audio_bytes, filename=file.filename)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
     payload["filename"] = file.filename

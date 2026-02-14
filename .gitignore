@@ -104,6 +104,7 @@ ui-web/**/dist/
 ui-web/**/.next/
 ui-web/**/.turbo/
 ui-web/**/.cache/
+services/gateway-kotlin/.gradle-local/
 
 # ============================================
 # ML/AI Specific

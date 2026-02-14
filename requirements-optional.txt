@@ -17,7 +17,7 @@ streamlit-webrtc>=0.47.0
 torchaudio>=2.1.0
 
 # Optional recommender alternative.
-lightfm>=1.17
+lightfm>=1.17; python_version < "3.13"
 
 # Prefer full OpenCV instead of headless wheels (optional).
 opencv-python>=4.8.0

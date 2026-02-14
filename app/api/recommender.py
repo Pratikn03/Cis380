@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 
 from app.models.recommender.explain import explain_recommendation
@@ -13,6 +14,7 @@ from app.utils.uploads import (
     MAX_IMAGE_BYTES,
     read_image_payload,
 )
+from app.services.vision.yolov3 import detect_objects_yolov3
 
 router = APIRouter()
 
@@ -48,6 +50,7 @@ async def recommend_multimodal(
     image_base64: str | None = Form(default=None),
     use_brand: bool = Form(default=False),
     brand_kind: str = Form(default="logo"),
+    use_objects: bool = Form(default=True),
 ) -> dict[str, object]:
     """Multimodal recommendations via CLIP similarity search.
 
@@ -74,6 +77,24 @@ async def recommend_multimodal(
         brand_model = None
 
         text_value = text
+
+        # 1. Generic Object Detection (YOLO)
+        # Identifies the "what" (e.g., "shoe", "bag", "car")
+        if use_objects and image_bytes is not None:
+            try:
+                yolo_out = await run_in_threadpool(
+                    detect_objects_yolov3, image_bytes, conf=0.3, top_k=5
+                )
+                detections = yolo_out.get("detections", [])
+                labels = {d["label"] for d in detections if d.get("label")}
+                if labels:
+                    labels_str = " ".join(sorted(labels))
+                    text_value = f"{text_value} {labels_str}" if text_value else labels_str
+            except Exception:
+                pass  # Continue if object detection fails
+
+        # 2. Brand Recognition
+        # Identifies the "who" (e.g., "Nike", "Gucci")
         if use_brand and image_bytes is not None:
             try:
                 from src.vision.brand.recognizer import model_path, predict_image_bytes
