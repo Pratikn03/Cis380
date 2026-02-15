@@ -1,4 +1,5 @@
-import argparse, sys
+import argparse
+import sys
 from pathlib import Path
 
 IMG_EXT = {".jpg", ".jpeg", ".png", ".webp"}

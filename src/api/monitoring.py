@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from fastapi.responses import Response
-import time
 
 router = APIRouter()
 

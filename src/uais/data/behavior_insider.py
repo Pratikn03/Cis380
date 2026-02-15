@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable
+from typing import Dict
 
 import numpy as np
 import pandas as pd
@@ -73,7 +73,6 @@ def augment_insider_patterns(
         series = base[col]
         mult = _column_multiplier(col)
         high = _safe_quantile(series, 0.95)
-        low = _safe_quantile(series, 0.05)
         std = float(np.std(series.astype(float))) if np.isfinite(series).any() else 0.0
         noise = rng.normal(0.0, std if std > 0 else 1.0, size=n_new)
 

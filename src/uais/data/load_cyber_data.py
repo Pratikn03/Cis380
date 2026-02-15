@@ -63,7 +63,32 @@ def _find_cyber_csvs(raw_dir: Path) -> List[Path]:
     csv_files = sorted(raw_dir.rglob("*.csv"))
     if not csv_files:
         raise FileNotFoundError(f"No CSV files found in {raw_dir}")
-    return csv_files
+
+    # Prefer canonical labeled UNSW files first for stable smoke training.
+    preferred_names = (
+        "UNSW_NB15_training-set.csv",
+        "UNSW_NB15_testing-set.csv",
+    )
+    preferred: List[Path] = []
+    remaining: List[Path] = []
+    preferred_set = set(preferred_names)
+    for path in csv_files:
+        if path.name in preferred_set:
+            preferred.append(path)
+        else:
+            remaining.append(path)
+    return preferred + remaining
+
+
+def _read_cyber_csv(path: Path, read_kwargs: dict) -> pd.DataFrame:
+    """Read a cyber CSV with encoding fallbacks.
+
+    Raises on parser/IO timeout errors so caller can decide to skip.
+    """
+    try:
+        return pd.read_csv(path, **read_kwargs)
+    except UnicodeDecodeError:
+        return pd.read_csv(path, encoding="latin1", **read_kwargs)
 
 
 def load_cyber_data(
@@ -117,16 +142,24 @@ def load_cyber_data(
                 if remaining is not None:
                     read_kwargs["nrows"] = remaining
                 try:
-                    df = pd.read_csv(f, **read_kwargs)
-                except UnicodeDecodeError:
-                    df = pd.read_csv(f, encoding="latin1", **read_kwargs)
+                    df = _read_cyber_csv(f, read_kwargs)
+                except (TimeoutError, OSError, pd.errors.ParserError, pd.errors.EmptyDataError) as exc:
+                    print(f"[warn] Skipping {f.name} (read failed: {exc})")
+                    continue
                 if not _has_label_columns(df):
                     print(f"[warn] Skipping {f.name} (no label columns)")
                     continue
                 dfs.append(df)
                 if remaining is not None:
                     remaining -= len(df)
-            df_all = pd.concat(dfs, ignore_index=True)
+            if not dfs:
+                if allow_synthetic and raw_dir == project_root / "data" / "raw" / "cyber":
+                    print("[warn] No readable labeled cyber CSVs found. Falling back to synthetic cyber data.")
+                    df_all = _synthetic_cyber(n_rows or 500)
+                else:
+                    raise ValueError(f"No readable labeled cyber CSVs found under {raw_dir}")
+            else:
+                df_all = pd.concat(dfs, ignore_index=True)
             print("Full cyber raw shape:", df_all.shape)
 
     df_all.columns = [c.strip() for c in df_all.columns]

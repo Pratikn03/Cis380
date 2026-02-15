@@ -12,6 +12,7 @@ Steps:
 
 from pathlib import Path
 import json
+import os
 import pickle
 
 import numpy as np
@@ -23,7 +24,6 @@ from uais.data.load_fraud_data import load_fraud_data
 from uais.features.fraud_features import build_fraud_feature_table
 from uais.supervised.train_fraud_supervised import FraudModelConfig, train_fraud_model
 from uais.utils.metrics import compute_classification_metrics
-from uais.utils.plotting import plot_roc_curve, plot_pr_curve
 from uais.anomaly.train_isolation_forest import train_isolation_forest, compute_anomaly_score
 from uais.ensembles.blending import blend_supervised_and_anomaly
 from uais.utils.paths import domain_paths, ensure_directories
@@ -34,9 +34,23 @@ def main():
     project_root = Path(__file__).resolve().parents[2]
     print(f"Project root: {project_root}")
 
+    sample_env = os.getenv("Sentifargo_FRAUD_SAMPLE_SIZE")
+    sample_size = int(sample_env) if sample_env else None
+    if sample_size is not None and sample_size <= 0:
+        sample_size = None
+
+    max_iter_env = os.getenv("Sentifargo_FRAUD_MAX_ITER")
+    max_iter = int(max_iter_env) if max_iter_env else 200
+    skip_plots = os.getenv("Sentifargo_FRAUD_SKIP_PLOTS", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
     # 1. Load raw data
     cfg = load_config("fraud")
-    df_raw = load_fraud_data(cfg)
+    df_raw = load_fraud_data(cfg, n_rows=sample_size)
     print(f"Loaded raw fraud data with shape: {df_raw.shape}")
 
     # 2. Build features
@@ -63,7 +77,7 @@ def main():
     print(f"Train shape: {X_train.shape}, Val shape: {X_val.shape}, Test shape: {X_test.shape}")
 
     # 4. Train supervised model
-    config = FraudModelConfig(model_type="hist_gb", max_depth=4, learning_rate=0.1, max_iter=200)
+    config = FraudModelConfig(model_type="hist_gb", max_depth=4, learning_rate=0.1, max_iter=max_iter)
     model, val_metrics = train_fraud_model(X_train, y_train, X_val, y_val, config)
     print("Validation metrics (supervised model):")
     for k, v in val_metrics.items():
@@ -81,25 +95,28 @@ def main():
     for k, v in test_metrics.items():
         print(f"  {k}: {v:.4f}")
 
-    # Plot ROC and PR curves for test set
     experiments_dir = project_root / "experiments" / "fraud"
     plots_dir = experiments_dir / "plots"
     plots_dir.mkdir(parents=True, exist_ok=True)
+    if not skip_plots:
+        from uais.utils.plotting import plot_pr_curve, plot_roc_curve
 
-    plot_roc_curve(
-        y_test.values,
-        y_test_prob,
-        title="Fraud ROC (Supervised)",
-        show=False,
-        save_path=str(plots_dir / "roc_supervised.png"),
-    )
-    plot_pr_curve(
-        y_test.values,
-        y_test_prob,
-        title="Fraud PR (Supervised)",
-        show=False,
-        save_path=str(plots_dir / "pr_supervised.png"),
-    )
+        plot_roc_curve(
+            y_test.values,
+            y_test_prob,
+            title="Fraud ROC (Supervised)",
+            show=False,
+            save_path=str(plots_dir / "roc_supervised.png"),
+        )
+        plot_pr_curve(
+            y_test.values,
+            y_test_prob,
+            title="Fraud PR (Supervised)",
+            show=False,
+            save_path=str(plots_dir / "pr_supervised.png"),
+        )
+    else:
+        print("Skipping fraud plotting for smoke run (Sentifargo_FRAUD_SKIP_PLOTS=true).")
 
     # 5. Train Isolation Forest on training data for anomaly scores (v1: use same features)
     iso_model, scaler = train_isolation_forest(X_train, contamination=0.01)
@@ -115,20 +132,23 @@ def main():
     for k, v in hybrid_metrics.items():
         print(f"  {k}: {v:.4f}")
 
-    plot_roc_curve(
-        y_test.values,
-        hybrid_scores,
-        title="Fraud ROC (Hybrid)",
-        show=False,
-        save_path=str(plots_dir / "roc_hybrid.png"),
-    )
-    plot_pr_curve(
-        y_test.values,
-        hybrid_scores,
-        title="Fraud PR (Hybrid)",
-        show=False,
-        save_path=str(plots_dir / "pr_hybrid.png"),
-    )
+    if not skip_plots:
+        from uais.utils.plotting import plot_pr_curve, plot_roc_curve
+
+        plot_roc_curve(
+            y_test.values,
+            hybrid_scores,
+            title="Fraud ROC (Hybrid)",
+            show=False,
+            save_path=str(plots_dir / "roc_hybrid.png"),
+        )
+        plot_pr_curve(
+            y_test.values,
+            hybrid_scores,
+            title="Fraud PR (Hybrid)",
+            show=False,
+            save_path=str(plots_dir / "pr_hybrid.png"),
+        )
 
     # Persist artifacts for dashboard/API/fusion
     paths = domain_paths("fraud")

@@ -4,8 +4,9 @@ project_name: "Sentifargo - Cyber"
 data:
   # UNSW-NB15 binary label column
   target: label
-  # Prefer the raw directory so we can load all UNSW-NB15 CSV splits present.
-  path: data/raw/cyber
+  # Use the canonical labeled training split for stable local smoke runs.
+  # This avoids scanning unrelated CSV files that may be huge/corrupt/unlabeled.
+  path: data/raw/cyber/UNSW_NB15_training-set.csv
   # Avoid leakage: attack_cat is highly correlated with label
   drop_columns: [id, attack_cat]
 

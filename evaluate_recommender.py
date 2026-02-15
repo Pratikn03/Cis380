@@ -6,7 +6,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 def evaluate_model():
     model_path = "custom_recommender_model"
     # Ideally, use a separate validation file. For now, we check how well it learned the training data.
-    data_file = "combined_training_data.txt" 
+    data_file = "validation_data.txt"
 
     if not os.path.exists(model_path):
         print(f"❌ Model not found at {model_path}. Please run train_recommender.py first.")

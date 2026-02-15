@@ -165,7 +165,7 @@ def main() -> int:
         print(f"{cls}: {stats.per_class[cls]}")
 
     print("\nNext:")
-    print(f"- Run training: python app/models/voice/emotion_train.py --limit-per-class 0")
+    print("- Run training: python app/models/voice/emotion_train.py --limit-per-class 0")
     return 0
 
 

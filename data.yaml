@@ -1,13 +1,8 @@
-# YOLOv8 Dataset Configuration
-
-# Path to the dataset root directory (relative to where you run the training script)
-path: dataset
-
-# Subdirectories for training and validation images
+path: /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/dataset # dataset root dir
 train: images/train
 val: images/val
 
-# Class Names (Modify these to match your specific use case)
 names:
-  0: anomaly
-  1: normal
+  0: crack
+  1: dent
+  2: scratch
