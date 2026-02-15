@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Unbounded } from "next/font/google";
 import AppShell from "@/components/AppShell";
+import GraphQLProvider from "@/components/GraphQLProvider";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -26,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${spaceGrotesk.variable} ${unbounded.variable}`}>
-        <AppShell>{children}</AppShell>
+        <GraphQLProvider>
+          <AppShell>{children}</AppShell>
+        </GraphQLProvider>
       </body>
     </html>
   );
