@@ -1,0 +1,73 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R /F2 6 0 R /F3 7 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 2992 >>
+stream
+BT /F2 16 Tf 54.0 738.0 Td (Sentifargo App Summary) Tj ET
+BT /F2 12.5 Tf 54.0 714.0 Td (What it is) Tj ET
+BT /F1 10.5 Tf 54.0 698.0 Td (Sentifargo is a production-grade multimodal AI platform for enterprise anomaly detection) Tj ET
+BT /F1 10.5 Tf 54.0 685.0 Td (across fraud detection, cybersecurity monitoring, and behavioral analytics. It routes) Tj ET
+BT /F1 10.5 Tf 54.0 672.0 Td (each request to the right subsystem \(RAG, risk scoring, recommendations, vision, voice\)) Tj ET
+BT /F1 10.5 Tf 54.0 659.0 Td (and returns a single structured response.) Tj ET
+BT /F2 12.5 Tf 54.0 640.0 Td (Who it is for) Tj ET
+BT /F1 10.5 Tf 54.0 624.0 Td (Teams building enterprise fraud, cybersecurity, and behavioral risk analytics.) Tj ET
+BT /F2 12.5 Tf 54.0 605.0 Td (What it does) Tj ET
+BT /F1 10.5 Tf 54.0 589.0 Td (- FastAPI gateway exposing chat, RAG, fraud, cyber, vision, voice, and monitoring) Tj ET
+BT /F1 10.5 Tf 66.0 576.0 Td (  endpoints.) Tj ET
+BT /F1 10.5 Tf 54.0 563.0 Td (- Streamlit command-center UI with chat, multimodal uploads, and dashboards.) Tj ET
+BT /F1 10.5 Tf 54.0 550.0 Td (- Multimodal routing across fraud, cyber, behavior, vision, audio, NLP, and RAG model) Tj ET
+BT /F1 10.5 Tf 66.0 537.0 Td (  services.) Tj ET
+BT /F1 10.5 Tf 54.0 524.0 Td (- Fraud detection with transaction scoring, velocity analysis, and synthetic fraud) Tj ET
+BT /F1 10.5 Tf 66.0 511.0 Td (  generation.) Tj ET
+BT /F1 10.5 Tf 54.0 498.0 Td (- Cybersecurity analytics with network intrusion detection and attack timeline) Tj ET
+BT /F1 10.5 Tf 66.0 485.0 Td (  visualization.) Tj ET
+BT /F1 10.5 Tf 54.0 472.0 Td (- Monitoring and explainability with metrics, drift summaries, and SHAP.) Tj ET
+BT /F2 12.5 Tf 54.0 453.0 Td (How it works) Tj ET
+BT /F1 10.5 Tf 54.0 437.0 Td (- React/Streamlit UI sends REST/JSON requests to the FastAPI API.) Tj ET
+BT /F1 10.5 Tf 54.0 424.0 Td (- API calls an agent/orchestrator for intent routing and memory.) Tj ET
+BT /F1 10.5 Tf 54.0 411.0 Td (- Orchestrator dispatches to model services \(fraud, cyber, behavior, vision, audio,) Tj ET
+BT /F1 10.5 Tf 66.0 398.0 Td (  NLP, RAG\).) Tj ET
+BT /F1 10.5 Tf 54.0 385.0 Td (- Outputs are fused by a multimodal fusion + rule engine to produce risk scores and) Tj ET
+BT /F1 10.5 Tf 66.0 372.0 Td (  decisions.) Tj ET
+BT /F1 10.5 Tf 54.0 359.0 Td (- Monitoring + MLOps stack \(Prometheus, MLflow, DVC\) tracks metrics, drift, and) Tj ET
+BT /F1 10.5 Tf 66.0 346.0 Td (  registry; infra uses Docker, Nginx, Grafana, Redis.) Tj ET
+BT /F2 12.5 Tf 54.0 327.0 Td (How to run) Tj ET
+BT /F1 10.5 Tf 54.0 311.0 Td (- Prereq: Python 3.11+ \(Node.js 18+ only for React UI\).) Tj ET
+BT /F3 10 Tf 54.0 298.0 Td (- python3 -m venv .venv && source .venv/bin/activate) Tj ET
+BT /F3 10 Tf 54.0 285.0 Td (- pip install -r requirements.txt) Tj ET
+BT /F3 10 Tf 54.0 272.0 Td (- uvicorn app.main:app --reload --port 8000) Tj ET
+BT /F3 10 Tf 54.0 259.0 Td (- Sentifargo_BACKEND=http://localhost:8000 streamlit run app/streamlit_chatbot/app.py) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000261 00000 n 
+0000003305 00000 n 
+0000003375 00000 n 
+0000003450 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+3518
+%%EOF
