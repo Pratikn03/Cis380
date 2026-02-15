@@ -42,6 +42,7 @@ import os
 import platform
 import sys
 import time
+from datetime import datetime, timedelta, timezone
 
 # FastAPI - Modern web framework for building APIs
 from fastapi import Depends, FastAPI, Request
@@ -96,6 +97,7 @@ _app_stt_router = None  # Speech-to-text
 _app_vision_temporal_router = None  # Video/temporal analysis
 _app_object_router = None  # Object detection (YOLOv3)
 _api_v1_router = None
+_app_internal_router = None
 
 # ==============================================================================
 # OPTIONAL ROUTER IMPORTS
@@ -136,6 +138,12 @@ try:  # pragma: no cover
 except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.api.v1 router unavailable: %s", exc)
     _api_v1_router = None
+
+try:  # pragma: no cover
+    from app.api.internal import router as _app_internal_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.internal router unavailable: %s", exc)
+    _app_internal_router = None
 
 # DSA RAG Router - Offline-first DSA document Q&A
 try:  # pragma: no cover
@@ -318,6 +326,9 @@ if _app_vision_temporal_router is not None:
 if _api_v1_router is not None:
     app.include_router(_api_v1_router)
 
+if _app_internal_router is not None:
+    app.include_router(_app_internal_router, dependencies=[Depends(require_auth)])
+
 # ==============================================================================
 # STARTUP TASKS - Best-effort index build for DSA RAG
 # ==============================================================================
@@ -383,6 +394,42 @@ async def log_requests(request: Request, call_next):
             response.status_code,  # 200, 404, etc.
             duration,  # Time in seconds
         )
+    return response
+
+
+_LEGACY_PREFIXES = (
+    "/chat",
+    "/rag",
+    "/recommend",
+    "/behavior",
+    "/fraud",
+    "/cyber",
+    "/vision",
+    "/api/monitor",
+    "/api/risk",
+    "/api/voice",
+    "/api/rag",
+    "/api/dsa-rag",
+    "/api/dsa-algorithms",
+    "/api/vision",
+    "/api/recommend",
+    "/api/fraud",
+    "/api/cyber",
+    "/api/behavior",
+)
+_SUNSET_AT = (datetime.now(timezone.utc) + timedelta(days=90)).strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+
+@app.middleware("http")
+async def legacy_deprecation_headers(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path.startswith("/api/v1") or path.startswith("/internal"):
+        return response
+    if any(path.startswith(prefix) for prefix in _LEGACY_PREFIXES):
+        response.headers["Deprecation"] = "true"
+        response.headers["Sunset"] = _SUNSET_AT
+        response.headers["Link"] = '</graphql>; rel="successor-version"'
     return response
 
 

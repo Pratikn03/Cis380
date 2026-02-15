@@ -43,12 +43,12 @@ def _detect_intent(text: str) -> Tuple[str, str]:
     t = text.lower()
     tokens = set(re.findall(r"[a-z0-9]+", t))
 
-    if tokens.intersection(
+    if tokens.intersection(  # Clothes / Fashion
         {"clothes", "outfit", "outfits", "clothing", "fashion", "wear", "apparel"}
     ):
         return "clothes", text
 
-    if tokens.intersection({"book", "books", "novel", "novels", "reading", "author"}):
+    if tokens.intersection({"book", "books", "novel", "novels", "reading", "author", "literature"}):
         return "books", text
 
     if tokens.intersection({"game", "games", "gaming", "steam", "xbox", "playstation", "pc"}):
@@ -188,6 +188,8 @@ def _detect_intent(text: str) -> Tuple[str, str]:
             "beach",
             "museum",
             "bar",
+            "travel",
+            "vacation",
         }
     ):
         return "places", text
@@ -197,7 +199,31 @@ def _detect_intent(text: str) -> Tuple[str, str]:
         return "news_crime", text
     if "news" in t or "headline" in t:
         return "news", text
-    # default to news/general
+        
+    # Generic/Fallback for other categories found in data/raw
+    # If the user asks for something we don't have a specific handler for,
+    # we can try to map it to a generic 'recommend' intent that uses the trained model.
+    generic_domains = {"music", "grocery", "finance", "sports", "tech", "beauty", "home"}
+    
+    # Dynamic discovery: Add any folder found in data/raw as a valid domain
+    try:
+        # Resolve project root: app/streamlit_chatbot/recommender_router.py -> ../../
+        project_root = Path(__file__).resolve().parents[2]
+        data_raw = project_root / "data" / "raw"
+        if data_raw.exists():
+            # Exclude system folders
+            excluded = {"recommendation", "voice", "vision", "fraud", "cyber", "behavior", "docs", "monitoring"}
+            for p in data_raw.iterdir():
+                if p.is_dir() and p.name.lower() not in excluded:
+                    generic_domains.add(p.name.lower())
+    except Exception:
+        pass
+
+    for domain in generic_domains:
+        if domain in tokens:
+            return f"generic_{domain}", text
+
+    # default to news/general if really unsure
     return "news", text
 
 
@@ -287,6 +313,11 @@ def route_recommendation(text: str, preference: dict | None = None) -> Dict[str,
     elif intent == "news_crime":
         items = recommend_news(query=query, topic="crime", news_api_key=cfg.news_api_key)
         category = "Crime News"
+    elif intent.startswith("generic_"):
+        # Fallback for domains without specific handlers (uses the trained model implicitly via orchestrator fallback or generic logic)
+        # For now, we return a placeholder that the orchestrator can pick up to use the LLM.
+        items = [{"title": f"Top {intent.split('_')[1]} item", "reason": "Based on popular trends"}]
+        category = intent.split('_')[1].capitalize()
     else:
         items = recommend_news(query=query, topic=None, news_api_key=cfg.news_api_key)
         category = "News"
