@@ -1,0 +1,253 @@
+name: Quality Gates
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gates-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "20"
+  JAVA_VERSION: "21"
+
+jobs:
+  waiver-check:
+    name: Waiver Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install waiver dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install PyYAML
+      - name: Validate waivers
+        run: python scripts/quality/quality_thresholds.py check --waivers quality/waivers.yml
+
+  lint-static:
+    name: Lint + Static Checks
+    runs-on: ubuntu-latest
+    needs: waiver-check
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-ci.txt
+          pip install black mypy
+      - name: Python lint
+        run: |
+          ruff check app src scripts tests
+          black --check app src scripts tests
+          mypy app --ignore-missing-imports || true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui-web/next/package-lock.json
+      - name: Next lint
+        run: |
+          cd ui-web/next
+          npm install --no-audit --no-fund
+          npm run lint
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui-web/frontend/package-lock.json
+      - name: Legacy frontend build check
+        run: |
+          cd ui-web/frontend
+          npm install --no-audit --no-fund
+          npm run build
+
+  unit-fast:
+    name: Unit + Smoke Tests
+    runs-on: ubuntu-latest
+    needs: lint-static
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Python smoke tests
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-ci.txt
+          pytest -q tests/test_data_quality_scripts.py tests/test_auth_password.py tests/test_health.py
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - name: Gateway tests
+        run: |
+          cd services/gateway-kotlin
+          chmod +x ./gradlew
+          ./gradlew clean test
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui-web/next/package-lock.json
+      - name: Next tests
+        run: |
+          cd ui-web/next
+          npm install --no-audit --no-fund
+          npm run test:ci
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui-web/frontend/package-lock.json
+      - name: Legacy frontend tests
+        run: |
+          cd ui-web/frontend
+          npm install --no-audit --no-fund
+          cd ../..
+          python scripts/quality/run_with_timeout.py --timeout 180 --name legacy-frontend-tests -- bash -lc "cd ui-web/frontend && npm run test:ci:stable"
+
+  data-quality:
+    name: Data Quality Gate
+    runs-on: ubuntu-latest
+    needs: waiver-check
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Run data quality gates
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-ci.txt
+          python scripts/data/run_quality_gates.py --strict-data-presence
+      - name: Upload data quality artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-quality-reports
+          path: |
+            reports/data_quality_gate.json
+            reports/data_quality_gate.md
+            reports/TRAINING_DATA.md
+            reports/TRAINING_DATA.json
+
+  docs-quality:
+    name: Docs Quality Gate
+    runs-on: ubuntu-latest
+    needs: waiver-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install docs checker dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install PyYAML
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Run docs schema and score checks
+        run: |
+          python scripts/quality/docs_quality_check.py --mode fast --threshold 85 --manifest docs/docs-manifest.yml
+          python scripts/quality/docs_quality_check.py --mode full --threshold 95 --manifest docs/docs-manifest.yml
+      - name: Run markdown lint
+        run: |
+          npx --yes markdownlint-cli@0.40.0 README.md docs/**/*.md ui-web/**/*.md services/**/*.md scripts/**/*.md data/**/*.md benchmarks/**/*.md infra/terraform/**/*.md --config .markdownlint.yml
+      - name: Run prose lint (Vale)
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/work" -w /work jdkato/vale:latest --config=.vale.ini README.md docs ui-web services scripts data benchmarks infra/terraform
+      - name: Upload docs scorecard
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-scorecard
+          path: |
+            reports/docs_scorecard.json
+            reports/DOCS_SCORECARD.md
+
+  coverage-enforce:
+    name: Coverage Enforcement
+    runs-on: ubuntu-latest
+    needs: [unit-fast, data-quality, docs-quality]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Python coverage gates
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-ci.txt
+          python scripts/quality/quality_thresholds.py check --waivers quality/waivers.yml
+          PY_API_THRESHOLD=$(python scripts/quality/quality_thresholds.py threshold --module python_api --waivers quality/waivers.yml)
+          PY_SCRIPTS_THRESHOLD=$(python scripts/quality/quality_thresholds.py threshold --module python_quality_scripts --waivers quality/waivers.yml)
+          RAG_EMBED_BACKEND=hashing HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 pytest -q tests --cov=app/api/v1 --cov-report=xml:reports/coverage_python_api.xml --cov-report=term-missing --cov-fail-under=$PY_API_THRESHOLD
+          pytest -q tests/test_data_quality_scripts.py --cov=scripts.data --cov=scripts.training_data_audit --cov-report=xml:reports/coverage_python_quality_scripts.xml --cov-report=term-missing --cov-fail-under=$PY_SCRIPTS_THRESHOLD
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - name: Gateway coverage gate
+        run: |
+          GATEWAY_THRESHOLD=$(python scripts/quality/quality_thresholds.py threshold --module gateway_kotlin --waivers quality/waivers.yml)
+          cd services/gateway-kotlin
+          chmod +x ./gradlew
+          ./gradlew clean test jacocoTestReport jacocoTestCoverageVerification -PcoverageMinimum=$GATEWAY_THRESHOLD
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui-web/next/package-lock.json
+      - name: Next coverage gate
+        run: |
+          NEXT_THRESHOLD=$(python scripts/quality/quality_thresholds.py threshold --module next_frontend --waivers quality/waivers.yml)
+          cd ui-web/next
+          npm install --no-audit --no-fund
+          NEXT_THRESHOLD=$NEXT_THRESHOLD npm run test:coverage
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui-web/frontend/package-lock.json
+      - name: Legacy frontend coverage gate
+        run: |
+          LEGACY_THRESHOLD=$(python scripts/quality/quality_thresholds.py threshold --module legacy_frontend --waivers quality/waivers.yml)
+          cd ui-web/frontend
+          npm install --no-audit --no-fund
+          cd ../..
+          python scripts/quality/run_with_timeout.py --timeout 300 --name legacy-frontend-coverage -- bash -lc "cd ui-web/frontend && LEGACY_THRESHOLD=$LEGACY_THRESHOLD npm run test:coverage:stable"
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            reports/coverage_python_api.xml
+            reports/coverage_python_quality_scripts.xml
+            reports/coverage
+            services/gateway-kotlin/build/reports/jacoco/test/html
+            services/gateway-kotlin/build/reports/jacoco/test/jacocoTestReport.xml

@@ -34,6 +34,7 @@ alembic>=1.13.0
 psycopg2-binary>=2.9.0
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
+bcrypt>=4.0.1,<5
 librosa>=0.10.0
 plotly>=5.23.0
 pillow>=10.0.0

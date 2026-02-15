@@ -1,14 +1,7 @@
 [run]
-# Measure all source directories
 source = 
     app/
     src/
-    agent/
-    api/
-    backend/
-    dashboard/
-    rag/
-    recommender/
 branch = true
 omit =
     */tests/*
@@ -19,9 +12,16 @@ omit =
     */venv/*
     */.venv/*
     */site-packages/*
+    */node_modules/*
+    */build/*
+    */dist/*
+    */.next/*
+    */data/*
+    */models/*
+    */artifacts/*
+    */reports/*
 
-# Fail if coverage drops below threshold (enable in CI)
-# fail_under = 60
+# Per-module thresholds are enforced via scripts/quality/quality_thresholds.py in CI.
 
 [report]
 exclude_lines =

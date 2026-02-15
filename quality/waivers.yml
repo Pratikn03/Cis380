@@ -1,0 +1,28 @@
+default_threshold: 95
+max_waiver_days: 28
+waivers:
+  - module: python_api
+    owner: pratik_n
+    reason: "Large legacy FastAPI surface; module-by-module hardening in progress."
+    expires_on: 2026-03-10
+    temporary_threshold: 60
+  - module: python_quality_scripts
+    owner: pratik_n
+    reason: "Data quality scripts recently added; tests still being expanded."
+    expires_on: 2026-03-10
+    temporary_threshold: 70
+  - module: gateway_kotlin
+    owner: pratik_n
+    reason: "Gateway recently scaffolded; resolver and integration tests are still growing."
+    expires_on: 2026-03-10
+    temporary_threshold: 34
+  - module: next_frontend
+    owner: pratik_n
+    reason: "Next migration in progress; UI integration tests still being added."
+    expires_on: 2026-03-10
+    temporary_threshold: 57
+  - module: legacy_frontend
+    owner: pratik_n
+    reason: "Legacy Vite frontend is stabilization-only and pending retirement."
+    expires_on: 2026-03-10
+    temporary_threshold: 60

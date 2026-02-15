@@ -92,7 +92,7 @@ jobs:
       - name: Install deps
         run: |
           cd ui-web/next
-          npm ci
+          npm install --no-audit --no-fund
       - name: Audit (non-blocking)
         run: |
           cd ui-web/next
@@ -105,6 +105,24 @@ jobs:
         run: |
           cd ui-web/next
           npm run build
+
+  gateway-tests:
+    name: Gateway Tests (Kotlin)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+      - name: Run gateway tests
+        run: |
+          cd services/gateway-kotlin
+          chmod +x ./gradlew
+          ./gradlew clean test
 
   docker-build:
     name: Docker Build
@@ -268,7 +286,7 @@ jobs:
   docker:
     name: Build + Push Docker Image
     runs-on: ubuntu-latest
-    needs: [unit-tests, contract-gate, artifact-gate, e2e, scorecard, security]
+    needs: [unit-tests, frontend, gateway-tests, contract-gate, artifact-gate, e2e, scorecard, security]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: read
