@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: sentifargo-gateway
+  graphql:
+    graphiql:
+      enabled: true
+    websocket:
+      path: /graphql
+
+server:
+  port: ${PORT:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+sentifargo:
+  fastapi:
+    base-url: ${SENTIFARGO_FASTAPI_BASE_URL:http://host.docker.internal:8000}
+    timeout-seconds: ${SENTIFARGO_FASTAPI_TIMEOUT_SECONDS:30}
+  uploads:
+    bucket: ${SENTIFARGO_UPLOAD_BUCKET:sentifargo-uploads}
+    region: ${SENTIFARGO_UPLOAD_REGION:us-east-1}
+    signed-url-minutes: ${SENTIFARGO_UPLOAD_SIGNED_URL_MINUTES:15}
+    max-bytes: ${SENTIFARGO_UPLOAD_MAX_BYTES:104857600}
