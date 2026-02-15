@@ -29,7 +29,6 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     try:
-        import torch
         from transformers import AutoFeatureExtractor, AutoModelForAudioClassification, Trainer, TrainingArguments
     except ImportError as exc:
         raise SystemExit("Missing dependencies. Install transformers + datasets + torchaudio + soundfile.") from exc
