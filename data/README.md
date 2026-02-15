@@ -1,16 +1,38 @@
-# Data Layout
+# Data Workspace
 
-Large datasets and generated artifacts are intentionally kept under `data/` and are typically ignored by git.
+## Purpose
+Define data directory conventions for raw inputs, processed artifacts, splits, and retrieval stores.
 
-## Directory Structure
-- `data/raw/` — raw datasets (domain-specific subfolders).
-- `data/interim/` — intermediate cleaned outputs created during preprocessing.
-- `data/processed/` — processed datasets and derived artifacts.
-- `data/docs/` — local RAG knowledge base (markdown/txt files).
-- `data/embeddings/` — local embedding/vector artifacts (RAG + recommender indexes).
-- `data/monitoring/` — monitoring logs (JSONL) and baselines.
+## Scope
+- Dataset storage layout
+- RAG knowledge sources
+- Embedding and monitoring outputs
 
-## Notes
-- If some raw datasets are missing, parts of the system fall back to synthetic data to keep the demo runnable.
-- Brand/logo YOLO preparation writes a YOLO-style dataset under `data/processed/brand_yolo/`.
+## Run locally
+```bash
+python3 scripts/data/validate_catalog.py --strict
+python3 scripts/data/validate_dataset.py --task <task> --dataset <dataset> --path <path>
+python3 scripts/data/make_splits.py --task <task> --dataset <dataset> --path <path>
+```
 
+## Test and quality commands
+```bash
+python3 scripts/data/run_quality_gates.py
+python3 scripts/training_data_audit.py
+```
+
+## Ownership and canonical links
+- Owner: Sentifargo Data Team
+- Last verified: 2026-02-11
+- Canonical dataset registry: `../DATASETS.md`
+- Canonical docs index: `../docs/README.md`
+
+## Layout
+- `data/raw/`
+- `data/interim/`
+- `data/processed/`
+- `data/splits/`
+- `data/docs/`
+- `data/dsa_docs/`
+- `data/embeddings/`
+- `data/monitoring/`

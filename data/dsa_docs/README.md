@@ -1,27 +1,28 @@
-# DSA Docs Index
+# DSA Docs Corpus
 
-This folder powers the offline-first DSA RAG.
+## Purpose
+Define the document corpus used by the DSA RAG pipeline.
+
+## Scope
+- Topic content for DSA retrieval
+- Index build and refresh process
+
+## Run locally
+```bash
+python3 -m app.rag_dsa.build_index
+```
+
+## Test and quality commands
+```bash
+python3 scripts/rag/evaluate_dsa.py
+python3 scripts/quality/docs_quality_check.py --mode fast --threshold 85
+```
+
+## Ownership and canonical links
+- Owner: Sentifargo RAG Team
+- Last verified: 2026-02-11
+- Canonical docs index: `../../docs/README.md`
+- DSA RAG entrypoint: `../../app/rag_dsa/build_index.py`
 
 ## Topics
-- arrays
-- searching_sorting
-- linked_lists
-- stack_queue
-- trees (BST, traversals, LCA, segment tree, lazy propagation, trie compression)
-- graphs (BFS/DFS, MST, SCC, max flow, shortest paths)
-- heaps
-- dp (basics, knapsack, LIS, DP on trees, optimizations)
-- hashing
-- recursion_backtracking
-- greedy
-- bit_manipulation
-- strings
-
-## Build/refresh index
-```
-python -m app.rag_dsa.build_index
-```
-
-## Assets
-- `_assets/dsa_snippets.py` contains runnable code samples.
-- `_assets/dsa_docs.css` provides basic styling if you render markdown in a UI.
+- arrays, searching/sorting, linked lists, stack/queue, trees, graphs, heaps, DP, hashing, recursion/backtracking, greedy, bit manipulation, strings

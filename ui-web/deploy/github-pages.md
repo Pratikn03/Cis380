@@ -1,25 +1,29 @@
-# GitHub Pages Deployment (Sentifargo Command Center)
+# GitHub Pages Deployment (Next.js Command Center)
 
-## Prerequisites
-- Backend hosted separately (FastAPI is not deployable on GitHub Pages).
-- `VITE_API_BASE` points to your backend URL.
+Production deployment uses a single GitHub Actions workflow:
+- `.github/workflows/deploy-production.yml`
 
-## Build Steps
-1) Install dependencies:
-```
-cd ui-web/frontend
+## Runtime Prerequisites
+- Backend hosted separately and publicly reachable.
+- GitHub repository has Pages enabled for `GitHub Actions`.
+
+## Required GitHub Repository Variables
+- `NEXT_PUBLIC_GRAPHQL_HTTP` (for example `https://api.example.com/graphql`)
+- `NEXT_PUBLIC_GRAPHQL_WS` (for example `wss://api.example.com/graphql`)
+
+## Local Production Build Check
+```bash
+cd ui-web/next
 npm install
+STATIC_EXPORT=true NEXT_PUBLIC_BASE_PATH=/Cis380 npm run build
 ```
 
-2) Build with a base path (replace REPO_NAME with your GitHub repo name):
-```
-VITE_BASE_PATH=/REPO_NAME/ npm run build
-```
+This generates static output in `ui-web/next/out`.
 
-3) Deploy `dist/` to GitHub Pages:
-- Option A: Push `dist/` to a `gh-pages` branch.
-- Option B: Configure a GitHub Actions workflow to publish `dist/`.
+## Deployment Trigger
+- Push to `main` with changes under `ui-web/next/**`, or
+- manually run the `Deploy Production Frontend (Next.js)` workflow from the Actions tab.
 
 ## Notes
-- If you use a custom domain, set `VITE_BASE_PATH=/`.
-- The backend must be reachable from the browser (public URL, not localhost).
+- `NEXT_PUBLIC_BASE_PATH` must match your repository Pages path (`/Cis380` in this repository).
+- Legacy Vite frontend deploy scripts and workflow are intentionally removed.

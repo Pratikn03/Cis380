@@ -1,44 +1,37 @@
-# Universal Anomaly Intelligence Web Interface
+# UI Web Workspace
 
-This directory contains the web interface for the Universal Anomaly Intelligence project. There are two frontend applications available:
+## Purpose
+Define frontend application boundaries and identify the canonical production UI target.
 
-1.  **A React application built with Vite.**
-2.  **A Next.js application.**
+## Scope
+- Canonical production frontend: `ui-web/next`
+- Legacy frontend (non-production): `ui-web/frontend`
 
-## Frontend (Vite + React)
+## Run locally
+### Next (canonical)
+```bash
+cd ui-web/next
+npm install
+npm run dev
+```
 
-The `frontend` directory contains a React application built with Vite.
+### Legacy frontend (optional)
+```bash
+cd ui-web/frontend
+npm install
+npm run dev
+```
 
-### How to run
+## Test and quality commands
+Run from repository root:
+```bash
+make quality-fast
+make quality-test
+make quality-docs-fast
+```
 
-1.  Navigate to the `ui-web/frontend` directory:
-    ```bash
-    cd ui-web/frontend
-    ```
-2.  Install the dependencies:
-    ```bash
-    npm install
-    ```
-3.  Start the development server:
-    ```bash
-    npm run dev
-    ```
-
-## Next.js
-
-The `next` directory contains a Next.js application.
-
-### How to run
-
-1.  Navigate to the `ui-web/next` directory:
-    ```bash
-    cd ui-web/next
-    ```
-2.  Install the dependencies:
-    ```bash
-    npm install
-    ```
-3.  Start the development server:
-    ```bash
-    npm run dev
-    ```
+## Ownership and canonical links
+- Owner: Sentifargo Web Platform
+- Last verified: 2026-02-11
+- Canonical frontend README: `next/README.md`
+- Canonical repository docs: `../docs/README.md`

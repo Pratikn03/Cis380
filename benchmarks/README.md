@@ -1,87 +1,29 @@
-# Sentifargo Benchmarks
+# Benchmarks
 
-End-to-end evaluation suite for the Sentifargo platform.
+## Purpose
+Run repeatable end-to-end benchmark suites for routing quality, model behavior, and latency.
 
-## Quick Start
+## Scope
+- Intent detection
+- Fraud scoring metrics
+- RAG retrieval metrics
+- System latency metrics
+- Multimodal fusion consistency
 
+## Run locally
 ```bash
-# Run all benchmarks
-python -m benchmarks.benchmark_suite
-
-# Run with verbose output and save results
-python -m benchmarks.benchmark_suite --verbose --save
+python3 -m benchmarks.benchmark_suite
+python3 -m benchmarks.benchmark_suite --verbose --save
 ```
 
-## Benchmarks Included
-
-| Benchmark | Description | Thresholds |
-|-----------|-------------|------------|
-| `intent_detection` | Orchestrator routing accuracy | accuracy ≥ 85%, confidence ≥ 70% |
-| `fraud_detection` | Fraud model AUC/precision/recall | AUC ≥ 80%, P/R ≥ 70% |
-| `rag_retrieval` | RAG retrieval quality (MRR, Recall@K) | MRR ≥ 60%, Recall@5 ≥ 70% |
-| `latency` | System response latency | P50 ≤ 200ms, P95 ≤ 500ms |
-| `multimodal_fusion` | Fusion model consistency | consistency ≥ 80% |
-
-## Directory Structure
-
-```
-benchmarks/
-├── benchmark_suite.py    # Main benchmark runner
-├── datasets/             # Held-out test datasets
-│   ├── intent_test.json
-│   ├── fraud_test.csv
-│   └── rag_test.json
-├── results/              # Benchmark results (auto-generated)
-│   └── Sentifargo_e2e_YYYYMMDD_HHMMSS.json
-└── README.md
+## Test and quality commands
+```bash
+python3 -m benchmarks.benchmark_suite --save
+python3 scripts/quality/docs_quality_check.py --mode fast --threshold 85
 ```
 
-## Adding Custom Benchmarks
-
-```python
-from benchmarks.benchmark_suite import BaseBenchmark, BenchmarkResult
-
-class MyBenchmark(BaseBenchmark):
-    name = "my_benchmark"
-    thresholds = {"accuracy": 0.90}
-    
-    def run(self) -> BenchmarkResult:
-        # Your benchmark logic
-        metrics = {"accuracy": 0.95}
-        return BenchmarkResult(
-            benchmark_name=self.name,
-            timestamp=datetime.now().isoformat(),
-            metrics=metrics,
-            latency_ms=100.0,
-            num_samples=100,
-            passed=self._check_thresholds(metrics),
-        )
-```
-
-## CI Integration
-
-Add to `.github/workflows/ci.yml`:
-
-```yaml
-- name: Run Benchmarks
-  run: |
-    python -m benchmarks.benchmark_suite --save
-```
-
-## Results Format
-
-```json
-{
-  "suite_name": "Sentifargo_e2e",
-  "timestamp": "2026-01-08T12:00:00",
-  "pass_rate": 1.0,
-  "results": [
-    {
-      "benchmark_name": "intent_detection",
-      "metrics": {"accuracy": 0.875, "avg_confidence": 0.82},
-      "latency_ms": 150.5,
-      "passed": true
-    }
-  ]
-}
-```
+## Ownership and canonical links
+- Owner: Sentifargo Evaluation Team
+- Last verified: 2026-02-11
+- Canonical docs index: `../docs/README.md`
+- Quality pipeline: `../.github/workflows/quality-gates.yml`

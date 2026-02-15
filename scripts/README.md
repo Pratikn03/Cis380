@@ -1,22 +1,31 @@
-## Scripts
+# Scripts Workspace
 
-This repository has a **single canonical UI + training entrypoints**.
+## Purpose
+Provide canonical script entrypoints for training, validation, production checks, and utility workflows.
 
-### Canonical entrypoints
+## Scope
+- Training orchestration scripts
+- Data quality scripts
+- Production readiness scripts
+- Specialized script groups (`stt`, `voice`, `experimental`)
 
-- **Run demo (backend + UI):** `bash scripts/run_demo.sh`
-- **Train core models:** `python scripts/train_all.py`
-- **Train vision stack:** `python scripts/train_all_vision.py`
-- **Train face emotion (image):** `python -m src.train.train_face_emotion --data-dir data/raw/vision/face_emotion`
-- **Prepare brand/logo dataset:** `python scripts/prepare_brand_data.py`
-- **Train brand/logo YOLO:** `python -m src.train.train_brand_logo_detector`
-- **Build recommender vector index:** `python scripts/build_recommender_index.py`
-- **Production readiness check:** `python scripts/check_production.py`
-- **Training data audit:** `python scripts/training_data_audit.py`
+## Run locally
+```bash
+python3 scripts/train_all.py
+python3 scripts/train_all_vision.py
+python3 scripts/check_production.py
+python3 scripts/training_data_audit.py
+```
 
-### Experimental scripts
+## Test and quality commands
+```bash
+python3 scripts/data/run_quality_gates.py
+python3 scripts/quality/docs_quality_check.py --mode fast --threshold 85
+```
 
-Experimental / research scripts live under `scripts/experimental/`.
-
-- They may require large local datasets, GPU acceleration, or extra Python deps.
-- They are **not** used by the production Docker images by default.
+## Ownership and canonical links
+- Owner: Sentifargo Platform Engineering
+- Last verified: 2026-02-11
+- Canonical repository docs: `../docs/README.md`
+- Training operations: `../TRAINING.md`
+- Data registry: `../DATASETS.md`

@@ -10,8 +10,8 @@
 ```
 ┌────────────────────────────┐
 │        Frontend UI         │
-│  React (Web) / Streamlit   │
-│  ChatGPT-style Interface   │
+│   Next.js (Canonical)      │
+│   Legacy Vite / Streamlit  │
 └─────────────┬──────────────┘
               │ REST / JSON
 ┌─────────────▼──────────────┐
@@ -63,11 +63,12 @@
 
 | Component | Technology | Location |
 |-----------|------------|----------|
-| Web Interface | React + TypeScript + Tailwind | `ui-web/frontend/` |
+| Web Interface (Production) | Next.js + React + TypeScript | `ui-web/next/` |
+| Legacy Web Interface (Non-Prod) | Vite + React + TypeScript | `ui-web/frontend/` |
 | Dashboard | Streamlit | `dashboard/app_streamlit.py` |
-| Chat Interface | React Chat Component | `ui-web/frontend/src/pages/Chat.tsx` |
-| Result Cards | React Component | `ui-web/frontend/src/components/ResultCard.tsx` |
-| File Upload | React Component | `ui-web/frontend/src/components/UnifiedUploadBox.tsx` |
+| Chat Interface (Prod) | Next App Router page | `ui-web/next/src/app/page.tsx` |
+| Route Shell | Next component | `ui-web/next/src/components/AppShell.tsx` |
+| GraphQL Client | Apollo Client | `ui-web/next/src/lib/gateway-graphql.ts` |
 
 **Features:**
 - ChatGPT-style conversational interface
