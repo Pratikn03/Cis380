@@ -41,7 +41,7 @@ datasets:
 
   - name: vision_video_deepfake
     domain: vision
-    path: data/Video-2
+    path: data/raw/vision/video
     format: video
     source: DFDC subset
     license: unknown
@@ -49,7 +49,7 @@ datasets:
 
   - name: voice_ravdess
     domain: voice
-    path: data/raw/voice/_ravdess
+    path: data/raw/voice
     format: audio
     source: RAVDESS
     license: unknown
@@ -57,7 +57,7 @@ datasets:
 
   - name: voice_tess
     domain: voice
-    path: data/raw/voice/_tess
+    path: data/raw/voice
     format: audio
     source: TESS
     license: unknown

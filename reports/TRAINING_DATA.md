@@ -1,6 +1,6 @@
 # Training Data Audit
 
-- Generated: 2026-01-24 06:15:34 UTC
+- Generated: 2026-02-14 20:19:34 UTC
 
 ## Required (production training)
 
@@ -24,7 +24,7 @@
   - sad: 1270 wav, probe=ok
   - angry: 2542 wav, probe=ok
   - neutral: 1087 wav, probe=ok
-- **Brand (LogoDet-3K raw)** — `['/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/brand/LogoDet-3K']` — **ok**
+- **Brand (LogoDet-3K raw)** — `['/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/brand/LogoDet-3K', '/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/brand/logodet3k']` — **ok**
 - **Brand (prepared YOLO dataset)** — `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/brand_yolo/brands.yaml` — **ok**
   - note: prepared dataset present
   - train_images: 5000 (capped)
