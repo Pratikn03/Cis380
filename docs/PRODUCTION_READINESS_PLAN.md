@@ -6,7 +6,7 @@
 Prepare the system for global production publishing with a clear, minimal-risk checklist and optional improvements.
 
 ## Decisions (Confirmed)
-- **Production UI:** React (`ui-web/frontend`)
+- **Production UI:** Next (`ui-web/next`)
 - **Auth model:** JWT-first (legacy token optional for backward compatibility)
 - **Production stack:** Postgres + Celery worker included
 
@@ -46,8 +46,8 @@ Prepare the system for global production publishing with a clear, minimal-risk c
   - Files: `requirements.txt`, `pyproject.toml`
 
 ### 2.3 Auth/UI Alignment
-- React UI expects `localStorage.token`, Next UI expects JWT from `/api/v1/auth/login`. Align on **one** UI and **one** auth flow.
-  - Files: `ui-web/frontend/src/services/api.ts`, `ui-web/next/src/app/login/page.tsx`, `app/main.py`
+- Keep production auth flow aligned to the canonical Next app and gateway GraphQL contract.
+  - Files: `ui-web/next/src/app/login/page.tsx`, `ui-web/next/src/lib/auth.ts`, `app/main.py`
 
 ---
 
@@ -114,4 +114,4 @@ You requested **no dataset deletions**. To publish globally while keeping datase
 ---
 
 ## Current Focus
-Apply the decisions above without deleting any datasets and ensure the React UI can authenticate and run end-to-end.
+Apply the decisions above without deleting any datasets and ensure the Next UI can authenticate and run end-to-end.

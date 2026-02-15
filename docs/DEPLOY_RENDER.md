@@ -1,6 +1,7 @@
-# Render Backend + GitHub Pages Frontend
+# Render Backend + GitHub Pages Frontend (Next.js)
 
-This project hosts the FastAPI backend separately from the static UI. GitHub Pages only serves frontend assets, so the API must run elsewhere (Render, Fly, Railway, VPS).
+This project hosts the backend separately from the static UI.  
+GitHub Pages serves the canonical Next frontend (`ui-web/next`) and the API runs elsewhere (Render, Fly, Railway, VPS, or ECS).
 
 ## 1) Deploy the FastAPI backend on Render
 
@@ -21,33 +22,49 @@ This project hosts the FastAPI backend separately from the static UI. GitHub Pag
    - `OPENAI_API_KEY` (optional, only if you want online fallback)
 5. Deploy and copy your Render service URL, e.g. `https://sentifargo.onrender.com`.
 
-## 2) Build + deploy the React UI to GitHub Pages
+## 2) Build + deploy the Next UI to GitHub Pages
 
-From repo root:
+Production deploy is handled by GitHub Actions:
+
+- Workflow: `.github/workflows/deploy-production.yml`
+- App path: `ui-web/next`
+- Artifact path: `ui-web/next/out`
+
+Required repository variables:
+
+- `NEXT_PUBLIC_GRAPHQL_HTTP` (for example `https://api.example.com/graphql`)
+- `NEXT_PUBLIC_GRAPHQL_WS` (for example `wss://api.example.com/graphql`)
+
+Local production build check:
 
 ```bash
-cd ui-web/frontend
-VITE_API_BASE=https://sentifargo.onrender.com \
-VITE_BASE_PATH=/Cis380/ \
-npm run build
+cd ui-web/next
+npm install
+STATIC_EXPORT=true NEXT_PUBLIC_BASE_PATH=/Cis380 npm run build
 ```
 
-Deploy `ui-web/frontend/dist/` to the `gh-pages` branch.
-
 Notes:
-- If you use a **custom domain** for GitHub Pages, set `VITE_BASE_PATH=./`.
-- Keep `VITE_API_BASE` pointed at the backend URL (Render/Fly/Railway).
+- `NEXT_PUBLIC_BASE_PATH` must match the repo Pages path (for this repo: `/Cis380`).
+- Legacy Vite frontend (`ui-web/frontend`) is non-production and not part of release deploys.
 
 ## 3) Local dev (optional)
 
 ```bash
-uvicorn app.main:app --reload
-cd ui-web/frontend
-VITE_API_BASE=http://localhost:8000 npm run dev
+uvicorn app.main:app --reload --port 8000
+
+cd services/gateway-kotlin
+export SENTIFARGO_FASTAPI_BASE_URL=http://localhost:8000
+./gradlew bootRun
+
+cd ui-web/next
+NEXT_PUBLIC_GRAPHQL_HTTP=http://localhost:8081/graphql \
+NEXT_PUBLIC_GRAPHQL_WS=ws://localhost:8081/graphql \
+npm run dev
 ```
 
 ## Common issue checklist
 
-- CORS: make sure `CORS_ORIGINS` includes your GitHub Pages domain.
-- API down: GitHub Pages is static; backend must be live.
-- Base path: for `github.io/<repo>`, set `VITE_BASE_PATH=/repo/` at build time.
+- CORS: ensure backend CORS allows your GitHub Pages domain.
+- API down: GitHub Pages is static; backend/gateway must be live.
+- Base path: for `github.io/<repo>`, ensure `NEXT_PUBLIC_BASE_PATH=/repo`.
+- GraphQL vars: make sure `NEXT_PUBLIC_GRAPHQL_HTTP` and `NEXT_PUBLIC_GRAPHQL_WS` are set in repo variables.

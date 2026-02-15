@@ -1,44 +1,52 @@
-# DATASETS REGISTRY
+# Dataset Registry
 
-## Standard Layout
-- data/raw/<task>/<dataset>/
-- data/processed/<task>/<dataset>/
-- data/splits/<task>/<dataset>/splits.json
-- data/docs/ (general RAG source)
-- data/dsa_docs/ (DSA RAG source)
+## Purpose
+Define canonical dataset layout, validation expectations, and active dataset roots.
 
-## Required per dataset
-- manifest.json (counts, checksums optional)
-- validation report (reports/data_quality/<task>/<dataset>/report.json)
+## Scope
+- Raw/interim/processed data structure
+- Required validation artifacts
+- Active dataset locations for training and inference
 
-## Template
-### <dataset_name>
-- Task: tabular|vision|audio|docs
-- Source:
-- License:
-- Raw path:
-- Expected structure:
-- Labels:
-- Split strategy:
-- Validation:
-  python scripts/data/validate_dataset.py --task <task> --dataset <dataset_name> --path <path>
+## Run locally
+### Standard validation
+```bash
+python3 scripts/data/validate_catalog.py --strict
+python3 scripts/data/validate_dataset.py --task <task> --dataset <dataset> --path <path>
+```
 
-## Detected dataset roots (current repo)
-- data/raw/fraud/creditcard.csv (configs/data_fraud.yaml)
-- data/raw/cyber/ (configs/data_cyber.yaml)
-- data/raw/behavior/ (configs/data_behavior.yaml)
-- data/raw/vision/
-- data/raw/brand/
-- data/raw/crema_d/ (audio/video source)
-- data/raw/voice/ (voice emotion classes)
-- data/raw/stt/ (speech-to-text transcripts + manifest)
-- data/raw/recommendation/
-- data/raw/dsa/
+### Split generation
+```bash
+python3 scripts/data/make_splits.py --task <task> --dataset <dataset> --path <path>
+```
 
-## STT Dataset (Speech Recognition)
-- Task: speech-to-text (English)
-- Source: bootstrap from local audio (offline Whisper) or add labeled corpora
-- Raw audio: `data/raw/voice/AudioWAV` or `data/raw/stt/audio/`
-- Transcripts: `data/raw/stt/transcripts.jsonl`
-- Manifest: `data/raw/stt/manifest.csv`
-- Splits: `data/raw/stt/manifest.{train,val,test}.csv`
+## Test and quality commands
+```bash
+python3 scripts/data/run_quality_gates.py
+python3 scripts/training_data_audit.py
+```
+
+## Ownership and canonical links
+- Owner: Sentifargo Data Team
+- Last verified: 2026-02-11
+- Canonical docs index: `docs/README.md`
+- Canonical style policy: `docs/STYLE_GUIDE.md`
+
+## Standard layout
+- `data/raw/<task>/<dataset>/`
+- `data/interim/<task>/<dataset>/`
+- `data/processed/<task>/<dataset>/`
+- `data/splits/<task>/<dataset>/splits.json`
+- `data/docs/` (general RAG sources)
+- `data/dsa_docs/` (DSA RAG sources)
+
+## Active dataset roots
+- `data/raw/fraud/creditcard.csv`
+- `data/raw/cyber/`
+- `data/raw/behavior/`
+- `data/raw/vision/`
+- `data/raw/brand/`
+- `data/raw/voice/`
+- `data/raw/stt/`
+- `data/raw/recommendation/`
+- `data/raw/dsa/`

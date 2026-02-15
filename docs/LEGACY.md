@@ -187,5 +187,5 @@ DISABLE_LEGACY_ROUTES=true uvicorn app.main:app
 ## Related Documentation
 
 - [Architecture](ARCHITECTURE.md) - Current system architecture
-- [API Reference](api_streamlit_notes.md) - Current API documentation
+- [API Reference](../README.md) - Current API and service overview
 - [MLOps Roadmap](MLOPS_ROADMAP.md) - Future improvements
