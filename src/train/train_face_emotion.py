@@ -350,16 +350,32 @@ def main() -> int:
     )
 
     raw_classes: list[str]
+    use_auto_split = split.val_root is None
     if split.val_root is not None:
-        train_ds = datasets.ImageFolder(split.train_root, transform=train_tfms)
-        val_ds = datasets.ImageFolder(split.val_root, transform=val_tfms)
-        if train_ds.classes != val_ds.classes:
-            raise RuntimeError(
-                f"Train/val class mismatch. train={train_ds.classes} val={val_ds.classes}. "
-                "Ensure both splits contain the same folders."
-            )
-        raw_classes = list(train_ds.classes)
-    else:
+        try:
+            train_ds = datasets.ImageFolder(split.train_root, transform=train_tfms)
+            val_ds = datasets.ImageFolder(split.val_root, transform=val_tfms)
+            if train_ds.classes != val_ds.classes:
+                if rank == 0:
+                    print(
+                        "[face-emotion] Warning: train/val class mismatch detected; "
+                        "falling back to random split from train/."
+                    )
+                    print(f"  train={train_ds.classes}")
+                    print(f"  val={val_ds.classes}")
+                use_auto_split = True
+            else:
+                raw_classes = list(train_ds.classes)
+        except Exception as exc:
+            if rank == 0:
+                print(
+                    "[face-emotion] Warning: could not load explicit val split; "
+                    "falling back to random split from train/."
+                )
+                print(f"  reason: {exc}")
+            use_auto_split = True
+
+    if use_auto_split:
         root_train = datasets.ImageFolder(split.train_root, transform=train_tfms)
         root_val = datasets.ImageFolder(split.train_root, transform=val_tfms)
         raw_classes = list(root_train.classes)
