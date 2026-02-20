@@ -22,9 +22,10 @@ class FraudLogEvent(BaseModel):
 
 
 class RiskSummary(BaseModel):
-    window: str
-    risk_score: float
-    details: Dict[str, Any]
+    window_n: int
+    total_events: int
+    decision_counts: Dict[str, int]
+    avg_risks: Dict[str, float]
 
 
 class RiskLogEvent(BaseModel):

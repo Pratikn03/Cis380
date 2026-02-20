@@ -54,7 +54,12 @@ def get_risk_summary(window_n: int = 1000) -> Dict[str, object]:
             if isinstance(value, (int, float)):
                 risk_acc[key].append(float(value))
     avg_risks = {k: (mean(v) if v else 0.0) for k, v in risk_acc.items()}
-    return {"total_events": len(events), "decision_counts": decision_counts, "avg_risks": avg_risks}
+    return {
+        "window_n": int(window_n),
+        "total_events": len(events),
+        "decision_counts": decision_counts,
+        "avg_risks": avg_risks,
+    }
 
 
 def get_drift_report(window_n: int = 1000) -> Dict[str, object]:
