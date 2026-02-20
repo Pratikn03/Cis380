@@ -12,7 +12,7 @@ from pydantic import BaseModel
 router = APIRouter(prefix="/training", tags=["training"])
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CORE_DOMAINS = ("fraud", "cyber", "behavior", "vision", "fusion")
+CORE_DOMAINS = ("fraud", "cyber", "behavior", "vision", "voice", "recommender", "fusion")
 
 MODEL_PATHS: dict[str, tuple[Path, ...]] = {
     "fraud": (Path("models/fraud/supervised/fraud_model.pkl"),),
@@ -24,8 +24,17 @@ MODEL_PATHS: dict[str, tuple[Path, ...]] = {
     "vision": (
         Path("models/vision/resnet/model.pt"),
         Path("models/vision/face_emotion/model.pt"),
-        Path("models/voice_emotion.pkl"),
         Path("artifacts/brand/yolo_logo_det.pt"),
+    ),
+    "voice": (
+        Path("models/voice_emotion.pkl"),
+        Path("models/voice_emotion_ssl"),
+    ),
+    "recommender": (
+        Path("models/recommender/recommender_model.pkl"),
+        Path("models/recommender/recommender_meta.joblib"),
+        Path("models/recommender/movielens_model.pkl"),
+        Path("models/recommender/movielens_meta.joblib"),
     ),
     "fusion": (Path("models/fusion/fusion_meta_model.pkl"),),
 }
@@ -187,6 +196,10 @@ def _domain_entry_status(domain: str, audit: dict[str, Any] | None) -> bool:
         "fraud": ("Fraud (creditcard.csv)",),
         "cyber": ("Cyber (UNSW_NB15_training-set.csv)",),
         "behavior": ("Behavior (online_shoppers_intention.csv)",),
+        "voice": ("Voice emotion (wav folders)",),
+    }
+    optional_names = {
+        "recommender": ("MovieLens recommender",),
     }
 
     def _is_ok(items: list[dict[str, Any]], names: tuple[str, ...]) -> bool:
@@ -206,6 +219,9 @@ def _domain_entry_status(domain: str, audit: dict[str, Any] | None) -> bool:
                 return True
         return False
 
+    if domain in optional_names:
+        return _is_ok(optional, optional_names[domain])
+
     if domain == "fusion":
         return all(_domain_entry_status(dep, audit) for dep in ("fraud", "cyber", "behavior"))
 
@@ -216,8 +232,16 @@ def _model_ready(root: Path, domain: str) -> bool:
     paths = MODEL_PATHS.get(domain, ())
     if not paths:
         return False
-    if domain in {"behavior", "vision"}:
+    if domain in {"behavior", "vision", "voice"}:
         return any((root / p).exists() for p in paths)
+    if domain == "recommender":
+        primary = (
+            root / "models/recommender/recommender_model.pkl"
+        ).exists() and (root / "models/recommender/recommender_meta.joblib").exists()
+        movielens = (
+            root / "models/recommender/movielens_model.pkl"
+        ).exists() and (root / "models/recommender/movielens_meta.joblib").exists()
+        return primary or movielens
     return all((root / p).exists() for p in paths)
 
 
@@ -236,6 +260,20 @@ def _metrics_sources(
             [
                 root / "experiments" / "vision" / "video_temporal" / "metrics.json",
                 root / "experiments" / "vision" / "temporal_lstm" / "metrics.json",
+            ]
+        )
+    elif domain == "recommender":
+        json_candidates.extend(
+            [
+                root / "experiments" / "recommender" / "metrics" / "recommender_metrics.json",
+                root / "experiments" / "recommender" / "metrics" / "movielens_metrics.json",
+            ]
+        )
+    elif domain == "voice":
+        json_candidates.extend(
+            [
+                root / "reports" / "execution_voice_pipeline_summary.json",
+                root / "reports" / "evaluation_voice_metrics_summary.json",
             ]
         )
 
