@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 import wave
 from datetime import datetime, timezone
 from pathlib import Path
@@ -152,6 +153,42 @@ def _probe_wav(folder: Path) -> Dict[str, Any]:
     return {"ok": False, "note": "no wav files"}
 
 
+def _speaker_id_from_name(stem: str) -> str | None:
+    lower = stem.lower()
+    explicit = re.search(r"(?:speaker|spk|user|actor)[-_]?(\d{1,4})", lower)
+    if explicit:
+        return f"spk_{int(explicit.group(1)):03d}"
+
+    parts = [part for part in re.split(r"[-_]", lower) if part]
+    for part in reversed(parts):
+        if part.isdigit():
+            return f"spk_{int(part):03d}"
+    return None
+
+
+def _voice_speaker_coverage(root: Path, emotions: list[str]) -> Dict[str, Any]:
+    speaker_counts: Dict[str, int] = {}
+    unresolved = 0
+    for emotion in emotions:
+        folder = root / emotion
+        if not folder.exists():
+            continue
+        for wav_path in folder.rglob("*.wav"):
+            speaker_id = _speaker_id_from_name(wav_path.stem)
+            if speaker_id is None:
+                unresolved += 1
+                continue
+            speaker_counts[speaker_id] = speaker_counts.get(speaker_id, 0) + 1
+
+    sorted_speakers = sorted(speaker_counts.items(), key=lambda item: (-item[1], item[0]))
+    return {
+        "speaker_count": len(speaker_counts),
+        "resolved_samples": sum(speaker_counts.values()),
+        "unresolved_samples": unresolved,
+        "top_speakers": [{"speaker_id": sid, "samples": count} for sid, count in sorted_speakers[:20]],
+    }
+
+
 def _resolve_yaml_path(yaml_path: Path, raw: str | None) -> Path | None:
     if not raw:
         return None
@@ -248,14 +285,16 @@ def main() -> int:
     )
 
     voice_root = ROOT / "data" / "raw" / "voice"
-    voice_emotions = ["happy", "sad", "angry", "neutral"]
+    voice_emotions = ["happy", "sad", "angry", "neutral", "fearful"]
     voice_detail = []
     voice_total = 0
+    class_counts: Dict[str, int] = {}
     for emotion in voice_emotions:
         folder = voice_root / emotion
         count, capped = _count_files(folder, "*.wav", limit=5000)
         probe = _probe_wav(folder)
         voice_total += count
+        class_counts[emotion] = count
         voice_detail.append(
             {
                 "emotion": emotion,
@@ -266,6 +305,12 @@ def main() -> int:
                 "probe": probe,
             }
         )
+    missing_classes = [emotion for emotion, count in class_counts.items() if count == 0]
+    nonzero_counts = [count for count in class_counts.values() if count > 0]
+    imbalance_ratio = (
+        round(max(nonzero_counts) / min(nonzero_counts), 3) if len(nonzero_counts) >= 2 else None
+    )
+    speaker_coverage = _voice_speaker_coverage(voice_root, voice_emotions)
     required.append(
         {
             "name": "Voice emotion (wav folders)",
@@ -273,6 +318,12 @@ def main() -> int:
             "status": "ok" if voice_total > 0 else "missing",
             "total_wav": voice_total,
             "details": voice_detail,
+            "class_balance": {
+                "per_class": class_counts,
+                "missing_classes": missing_classes,
+                "imbalance_ratio_max_to_min_nonzero": imbalance_ratio,
+            },
+            "speaker_coverage": speaker_coverage,
         }
     )
 
@@ -449,6 +500,32 @@ def main() -> int:
                 lines.append(
                     f"  - {detail['emotion']}: {detail['wav_count']} wav{suffix}{probe_line}"
                 )
+        if item.get("class_balance"):
+            balance = item["class_balance"]
+            per_class = balance.get("per_class", {})
+            if per_class:
+                lines.append(
+                    "  - class_balance: "
+                    + ", ".join(f"{name}={count}" for name, count in sorted(per_class.items()))
+                )
+            if balance.get("missing_classes"):
+                lines.append(
+                    "  - missing_classes: "
+                    + ", ".join(str(name) for name in balance["missing_classes"])
+                )
+            if balance.get("imbalance_ratio_max_to_min_nonzero") is not None:
+                lines.append(
+                    "  - imbalance_ratio(max/min nonzero): "
+                    f"{balance['imbalance_ratio_max_to_min_nonzero']}"
+                )
+        if item.get("speaker_coverage"):
+            speaker = item["speaker_coverage"]
+            lines.append(f"  - speakers_detected: {speaker.get('speaker_count', 0)}")
+            lines.append(
+                "  - speaker_samples: "
+                f"resolved={speaker.get('resolved_samples', 0)}, "
+                f"unresolved={speaker.get('unresolved_samples', 0)}"
+            )
 
     lines.append("\n## Optional (extended training)\n")
     for item in optional:
