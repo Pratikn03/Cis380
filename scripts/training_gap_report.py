@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 TRAINING_DATA = ROOT / "reports" / "TRAINING_DATA.json"
 OUT_MD = ROOT / "reports" / "TRAINING_GAPS.md"
 OUT_JSON = ROOT / "reports" / "TRAINING_GAPS.json"
+STALE_HOURS = int(os.getenv("REPORT_STALE_HOURS", "48"))
 
 
 def _path_ready(path: Path) -> bool:
@@ -22,8 +24,8 @@ def _path_ready(path: Path) -> bool:
     return True
 
 
-def _artifact_status(items: List[tuple[str, str]]) -> List[Dict[str, Any]]:
-    results: List[Dict[str, Any]] = []
+def _artifact_status(items: list[tuple[str, str]]) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
     for name, rel_path in items:
         path = ROOT / rel_path
         results.append(
@@ -56,6 +58,123 @@ def _summarize_dsa_docs(root: Path) -> dict[str, Any]:
         {p.relative_to(docs_dir).parts[0] for p in doc_paths if p.relative_to(docs_dir).parts}
     )
     return {"docs_dir": "data/dsa_docs", "doc_count": len(doc_paths), "topics": topics}
+
+
+def _report_freshness(paths: list[Path]) -> list[dict[str, Any]]:
+    now = datetime.now(timezone.utc)
+    rows: list[dict[str, Any]] = []
+    for path in paths:
+        if not path.exists():
+            rows.append(
+                {
+                    "path": str(path.relative_to(ROOT)),
+                    "status": "missing",
+                    "updated_at": None,
+                    "age_hours": None,
+                }
+            )
+            continue
+        mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
+        age_hours = round((now - mtime).total_seconds() / 3600, 2)
+        rows.append(
+            {
+                "path": str(path.relative_to(ROOT)),
+                "status": "stale" if age_hours > STALE_HOURS else "fresh",
+                "updated_at": mtime.strftime("%Y-%m-%d %H:%M:%S UTC"),
+                "age_hours": age_hours,
+            }
+        )
+    return rows
+
+
+def _has_text(path: Path, needle: str) -> bool:
+    try:
+        return needle in path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+
+def _voice_pipeline_contract() -> dict[str, Any]:
+    train_script = ROOT / "app" / "models" / "voice" / "emotion_train.py"
+    verify_script = ROOT / "scripts" / "verify_voice_pipeline.py"
+    predict_script = ROOT / "app" / "models" / "voice" / "emotion_predict.py"
+
+    checks = [
+        {
+            "name": "trainer_supports_out_model_arg",
+            "status": "ok" if _has_text(train_script, '"--out-model"') else "missing",
+            "path": str(train_script.relative_to(ROOT)),
+        },
+        {
+            "name": "verify_script_uses_out_model_arg",
+            "status": "ok" if _has_text(verify_script, '"--out-model"') else "missing",
+            "path": str(verify_script.relative_to(ROOT)),
+        },
+        {
+            "name": "verify_script_uses_keyword_audio_bytes",
+            "status": "ok" if _has_text(verify_script, "predict_emotion(audio_bytes=") else "missing",
+            "path": str(verify_script.relative_to(ROOT)),
+        },
+        {
+            "name": "predict_api_keyword_only_audio_bytes",
+            "status": "ok" if _has_text(predict_script, "def predict_emotion(*, audio_bytes: bytes") else "missing",
+            "path": str(predict_script.relative_to(ROOT)),
+        },
+    ]
+    missing = [check for check in checks if check["status"] != "ok"]
+    return {
+        "status": "ok" if not missing else "mismatch",
+        "checks": checks,
+        "missing": missing,
+    }
+
+
+def _build_recommendations(
+    *,
+    missing_artifacts: list[dict[str, Any]],
+    required_items: list[dict[str, Any]],
+    freshness: list[dict[str, Any]],
+    voice_contract: dict[str, Any],
+    dsa_topics: list[str],
+) -> list[str]:
+    recommendations: list[str] = []
+
+    if missing_artifacts:
+        missing_paths = ", ".join(sorted({artifact["path"] for artifact in missing_artifacts[:6]}))
+        recommendations.append(f"Train/build missing model artifacts: {missing_paths}.")
+
+    required_not_ready = [item for item in required_items if str(item.get("status", "")).lower() != "ok"]
+    if required_not_ready:
+        names = ", ".join(item.get("name", "unknown") for item in required_not_ready)
+        recommendations.append(f"Resolve required dataset readiness gaps: {names}.")
+
+    stale_reports = [row for row in freshness if row.get("status") == "stale"]
+    missing_reports = [row for row in freshness if row.get("status") == "missing"]
+    if stale_reports:
+        stale_paths = ", ".join(row["path"] for row in stale_reports)
+        recommendations.append(f"Refresh stale audit artifacts: {stale_paths}.")
+    if missing_reports:
+        missing_paths = ", ".join(row["path"] for row in missing_reports)
+        recommendations.append(f"Regenerate missing audit artifacts: {missing_paths}.")
+
+    if voice_contract.get("status") != "ok":
+        recommendations.append(
+            "Fix voice pipeline CLI/API contract mismatches before running verify_voice_pipeline."
+        )
+
+    if len(dsa_topics) <= 4:
+        recommendations.append(
+            "Expand DSA RAG docs beyond arrays/search/linked-lists/stack-queue for broader coverage."
+        )
+    else:
+        recommendations.append(
+            "Keep extending advanced DSA topics (tries, segment trees, suffix arrays)."
+        )
+
+    if not recommendations:
+        recommendations.append("No blocking gaps detected. Continue periodic retraining readiness checks.")
+
+    return recommendations
 
 
 def main() -> int:
@@ -96,11 +215,34 @@ def main() -> int:
     dvc_yaml = ROOT / "dvc.yaml"
     dvc_lock = ROOT / "dvc.lock"
 
+    report_freshness = _report_freshness(
+        [
+            ROOT / "reports" / "TRAINING_DATA.json",
+            ROOT / "reports" / "TRAINING_DATA.md",
+            ROOT / "reports" / "TRAINING_GAPS.json",
+            ROOT / "reports" / "TRAINING_GAPS.md",
+            ROOT / "reports" / "PROJECT_AUDIT.json",
+            ROOT / "reports" / "PROJECT_AUDIT.md",
+        ]
+    )
+    voice_contract = _voice_pipeline_contract()
+    recommendations = _build_recommendations(
+        missing_artifacts=missing_artifacts,
+        required_items=required,
+        freshness=report_freshness,
+        voice_contract=voice_contract,
+        dsa_topics=dsa_docs["topics"],
+    )
+
     payload = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
         "training_data": training_data,
         "artifacts": artifacts,
         "missing_artifacts": missing_artifacts,
+        "pipeline_contracts": {
+            "voice_pipeline": voice_contract,
+        },
+        "report_freshness": report_freshness,
         "dvc": {
             "dvc_yaml": str(dvc_yaml),
             "dvc_yaml_exists": dvc_yaml.exists(),
@@ -114,6 +256,7 @@ def main() -> int:
             "doc_count": dsa_docs["doc_count"],
             "topics": dsa_docs["topics"],
         },
+        "recommendations": recommendations,
     }
 
     OUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -142,6 +285,19 @@ def main() -> int:
         lines.append("- None")
     lines.append("")
 
+    lines.append("## Pipeline contract checks\n")
+    lines.append(f"- Voice pipeline contract: **{voice_contract['status']}**")
+    for check in voice_contract["checks"]:
+        lines.append(f"- `{check['name']}` (`{check['path']}`): **{check['status']}**")
+    lines.append("")
+
+    lines.append(f"## Report freshness (stale threshold: {STALE_HOURS}h)\n")
+    for row in report_freshness:
+        updated_at = row["updated_at"] or "missing"
+        age = row["age_hours"] if row["age_hours"] is not None else "n/a"
+        lines.append(f"- `{row['path']}` — **{row['status']}** (updated: {updated_at}, age_h: {age})")
+    lines.append("")
+
     lines.append("## DSA RAG index\n")
     lines.append(
         f"- `{payload['dsa_rag']['embed_dir']}` ready: **{payload['dsa_rag']['embed_dir_ready']}**"
@@ -157,24 +313,9 @@ def main() -> int:
     lines.append(f"- `dvc.lock` present: **{payload['dvc']['dvc_lock_exists']}**")
     lines.append("")
 
-    lines.append("## Accuracy + training recommendations\n")
-    lines.append("- Video temporal: retrain if new real/fake videos are added; monitor LSTM drift.")
-    lines.append(
-        "- Behavior model: add more insider-style patterns if false positives remain high."
-    )
-    lines.append("- Voice emotion: augment with noise if `tests/test_voice_noise.py` fails.")
-    lines.append(
-        "- Brand YOLO: multi-class (car/fashion) requires its own dataset + retrain."
-        " Use BRAND_DATA_YAML + BRAND_OUT_PATH, then set BRAND_MODEL_CAR_PATH/BRAND_MODEL_FASHION_PATH."
-    )
-    if len(payload["dsa_rag"]["topics"]) <= 4:
-        lines.append(
-            "- DSA RAG: expand docs beyond arrays/search/linked-lists/stack-queue as coverage grows."
-        )
-    else:
-        lines.append(
-            "- DSA RAG: continue adding advanced topics (tries, segment trees, suffix arrays)."
-        )
+    lines.append("## Recommendations (current state)\n")
+    for item in recommendations:
+        lines.append(f"- {item}")
     lines.append("")
 
     OUT_MD.write_text("\n".join(lines), encoding="utf-8")
