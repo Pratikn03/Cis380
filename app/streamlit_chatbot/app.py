@@ -77,37 +77,70 @@ def main():
 
     def _auth_headers() -> dict[str, str]:
         headers: dict[str, str] = {}
-        if os.getenv("AUTH_TOKEN"):
-            headers["Authorization"] = f"Bearer {os.environ['AUTH_TOKEN']}"
+        token = (
+            str(st.session_state.get("auth_token", "")).strip()
+            or str(os.getenv("AUTH_TOKEN", "")).strip()
+        )
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
         return headers
 
-    def call_model(path: str, payload: dict) -> dict:
+    def _error_message(response: requests.Response) -> str:
+        detail = ""
         try:
-            resp = requests.post(
+            payload = response.json()
+            if isinstance(payload, dict):
+                raw_detail = payload.get("detail")
+                if isinstance(raw_detail, str):
+                    detail = raw_detail
+        except Exception:
+            detail = ""
+
+        if response.status_code == 401:
+            return (
+                "Unauthorized (401). Sign in from the sidebar Login panel or paste a valid bearer token."
+            )
+        if response.status_code == 403:
+            return "Forbidden (403). Your token is valid but lacks required permissions."
+        if response.status_code == 404:
+            return "Endpoint not found (404). Check backend URL/version."
+        if response.status_code >= 500:
+            return f"Backend error ({response.status_code}). Check server logs."
+        if detail:
+            return f"HTTP {response.status_code}: {detail}"
+        return f"HTTP {response.status_code}: request failed"
+
+    def _request_json(request_fn) -> dict:
+        try:
+            resp = request_fn()
+            if resp.status_code >= 400:
+                return {"error": _error_message(resp)}
+            payload = resp.json()
+            return payload if isinstance(payload, dict) else {"data": payload}
+        except Exception as exc:
+            return {"error": f"{exc}"}
+
+    def call_model(path: str, payload: dict) -> dict:
+        return _request_json(
+            lambda: requests.post(
                 f"{backend_url}{path}",
                 json=payload,
                 headers=_auth_headers(),
                 timeout=15.0,
             )
-            resp.raise_for_status()
-            return resp.json()
-        except Exception as exc:
-            return {"error": f"{exc}"}
+        )
 
     def call_get(
         path: str, *, params: dict[str, str | int | float] | None = None, timeout: float = 15.0
     ) -> dict:
-        try:
-            resp = requests.get(
+        return _request_json(
+            lambda: requests.get(
                 f"{backend_url}{path}",
                 params=params,
                 headers=_auth_headers(),
                 timeout=timeout,
             )
-            resp.raise_for_status()
-            return resp.json()
-        except Exception as exc:
-            return {"error": f"{exc}"}
+        )
 
     def call_multipart(
         path: str,
@@ -116,18 +149,15 @@ def main():
         files: dict[str, tuple[str, bytes, str]] | None,
         timeout: float = 90.0,
     ) -> dict:
-        try:
-            resp = requests.post(
+        return _request_json(
+            lambda: requests.post(
                 f"{backend_url}{path}",
                 data=data,
                 files=files,
                 headers=_auth_headers(),
                 timeout=timeout,
             )
-            resp.raise_for_status()
-            return resp.json()
-        except Exception as exc:
-            return {"error": f"{exc}"}
+        )
 
     def call_upload(path: str, *, filename: str, content: bytes, content_type: str) -> dict:
         files = {"file": (filename, content, content_type)}
