@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-15 23:49:01 UTC",
+  "generated_at": "2026-02-20 17:46:43 UTC",
   "required": [
     {
       "name": "Fraud (creditcard.csv)",
@@ -73,7 +73,7 @@
       "name": "Voice emotion (wav folders)",
       "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice",
       "status": "ok",
-      "total_wav": 6170,
+      "total_wav": 7441,
       "details": [
         {
           "emotion": "happy",
@@ -126,8 +126,119 @@
             "channels": 1,
             "sample_rate": 16000
           }
+        },
+        {
+          "emotion": "fearful",
+          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/fearful",
+          "wav_count": 1271,
+          "count_capped": false,
+          "status": "ok",
+          "probe": {
+            "ok": true,
+            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/fearful/1029_TAI_FEA_XX.wav",
+            "channels": 1,
+            "sample_rate": 16000
+          }
         }
-      ]
+      ],
+      "class_balance": {
+        "per_class": {
+          "happy": 1271,
+          "sad": 1270,
+          "angry": 2542,
+          "neutral": 1087,
+          "fearful": 1271
+        },
+        "missing_classes": [],
+        "imbalance_ratio_max_to_min_nonzero": 2.339
+      },
+      "speaker_coverage": {
+        "speaker_count": 91,
+        "resolved_samples": 7441,
+        "unresolved_samples": 0,
+        "top_speakers": [
+          {
+            "speaker_id": "spk_1001",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1003",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1004",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1005",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1006",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1007",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1010",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1011",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1012",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1013",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1014",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1015",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1016",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1017",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1018",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1020",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1021",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1022",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1023",
+            "samples": 82
+          },
+          {
+            "speaker_id": "spk_1024",
+            "samples": 82
+          }
+        ]
+      }
     },
     {
       "name": "Brand (LogoDet-3K raw)",
