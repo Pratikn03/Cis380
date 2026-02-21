@@ -237,15 +237,58 @@ def sidebar_panel(*, backend_url: str) -> str:
     ).strip()
     backend_url = backend_url.rstrip("/")
 
-    st.sidebar.caption(f"AUTH_TOKEN: {'set' if os.getenv('AUTH_TOKEN') else 'not set'}")
+    if "sidebar_auth_token" not in st.session_state:
+        st.session_state["sidebar_auth_token"] = os.getenv("AUTH_TOKEN", "")
+    token_input = st.sidebar.text_input(
+        "Session bearer token",
+        type="password",
+        key="sidebar_auth_token",
+        help="Used for this Streamlit session. Overrides AUTH_TOKEN env if provided.",
+    )
+    st.session_state["auth_token"] = token_input.strip()
+    st.sidebar.caption(f"AUTH_TOKEN: {'set' if st.session_state.get('auth_token') else 'not set'}")
+
+    with st.sidebar.expander("Login (get token)", expanded=False):
+        username = st.text_input("Username", key="sidebar_login_username")
+        password = st.text_input("Password", type="password", key="sidebar_login_password")
+        if st.button("Login", key="sidebar_login_button", type="secondary"):
+            if not username or not password:
+                st.warning("Enter username and password.")
+            else:
+                try:
+                    login_response = requests.post(
+                        f"{backend_url}/api/v1/auth/login",
+                        json={"username": username, "password": password},
+                        timeout=8.0,
+                    )
+                    payload = login_response.json() if login_response.content else {}
+                    if login_response.status_code == 200 and isinstance(payload, dict):
+                        token = str(payload.get("access_token", "")).strip()
+                        if token:
+                            st.session_state["sidebar_auth_token"] = token
+                            st.session_state["auth_token"] = token
+                            st.success("Login successful. Session token updated.")
+                        else:
+                            st.error("Login response missing access_token.")
+                    else:
+                        detail = payload.get("detail") if isinstance(payload, dict) else None
+                        message = detail if isinstance(detail, str) else f"HTTP {login_response.status_code}"
+                        st.error(f"Login failed: {message}")
+                except Exception as exc:
+                    st.error(f"Login failed: {exc}")
+        if st.button("Clear token", key="sidebar_clear_token_button"):
+            st.session_state["sidebar_auth_token"] = ""
+            st.session_state["auth_token"] = ""
+            st.info("Session token cleared.")
 
     # ---- Backend health + optional features ----
     # Keep this lightweight and non-fatal: if the backend is down or auth blocks
     # the health endpoint, we just show an offline banner.
     try:
         headers: dict[str, str] = {}
-        if os.getenv("AUTH_TOKEN"):
-            headers["Authorization"] = f"Bearer {os.environ['AUTH_TOKEN']}"
+        token = st.session_state.get("auth_token") or os.getenv("AUTH_TOKEN")
+        if token:
+            headers["Authorization"] = f"Bearer {str(token).strip()}"
 
         r = requests.get(f"{backend_url}/api/health", headers=headers, timeout=3.5)
         if r.status_code == 200:
