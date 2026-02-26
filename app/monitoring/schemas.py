@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from pydantic import BaseModel
 
 
@@ -35,3 +35,31 @@ class RiskLogEvent(BaseModel):
     payload: Dict[str, Any]
     risk_scores: Dict[str, float]
     decision: str
+
+
+class LogStatusResponse(BaseModel):
+    status: str
+
+
+class MonitorPaths(BaseModel):
+    fraud_log: str
+    risk_log: str
+
+
+class MonitorSummaryResponse(BaseModel):
+    count: int
+    avg_latency: float
+    avg_score: float
+    label_dist: Dict[str, int]
+    risk: RiskSummary
+    paths: MonitorPaths
+
+
+class MonitorEventsResponse(BaseModel):
+    kind: str
+    path: str
+    events: List[Dict[str, Any]]
+
+
+class BaselineBuildResponse(BaseModel):
+    status: str

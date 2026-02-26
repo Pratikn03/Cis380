@@ -3,7 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
+from app.api.monitor import router as monitor_router
 from app.monitoring.logger import append_jsonl
 from app.monitoring.schemas import FraudLogEvent, RiskSummary
 from app.monitoring import service
@@ -97,3 +100,29 @@ def test_risk_summary_populated_contract(tmp_path: Path, monkeypatch: pytest.Mon
     assert payload["avg_risks"]["behavior_risk"] == pytest.approx(0.4)
     assert payload["avg_risks"]["fraud_risk"] == pytest.approx(0.6)
     assert payload["avg_risks"]["fusion_risk"] == pytest.approx(0.65)
+
+
+def test_monitor_router_response_models(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _configure_monitor_paths(monkeypatch, tmp_path)
+
+    app = FastAPI()
+    app.include_router(monitor_router, prefix="/api")
+    client = TestClient(app)
+
+    summary_resp = client.get("/api/monitor/summary", params={"window_n": 25})
+    assert summary_resp.status_code == 200
+    summary = summary_resp.json()
+    assert summary["count"] == 0
+    assert summary["risk"]["window_n"] == 25
+    assert "fraud_log" in summary["paths"]
+    assert "risk_log" in summary["paths"]
+
+    events_resp = client.get("/api/monitor/events", params={"kind": "risk", "window_n": 5})
+    assert events_resp.status_code == 200
+    events = events_resp.json()
+    assert events["kind"] == "risk"
+    assert isinstance(events["events"], list)
+
+    baseline_resp = client.post("/api/monitor/baseline/build", json={"events_n": 10, "samples": []})
+    assert baseline_resp.status_code == 200
+    assert baseline_resp.json() == {"status": "baseline ready"}

@@ -29,6 +29,7 @@ from app.models.voice.features import (
 
 MODEL_PATH = Path("models/voice_emotion.pkl")
 RAW_DIR = Path("data/raw/voice")
+BALANCED_DIR = Path("data/processed/voice_balanced")
 SUPPORTED = ["happy", "sad", "angry", "neutral", "fearful"]
 # 26 MFCC + 5 additional features (zcr, rms_mean, rms_std, pitch_mean, spectral_contrast)
 FEATURE_COUNT = 31
@@ -72,10 +73,15 @@ def _extract_enhanced_features(audio: np.ndarray, sr: int) -> np.ndarray:
     return np.concatenate([mfcc_feat, extra_features])
 
 
-def gather_features(*, limit_per_class: int | None = None, min_per_class: int = 25) -> List[Dict[str, float]]:
+def gather_features(
+    *,
+    data_root: Path = RAW_DIR,
+    limit_per_class: int | None = None,
+    min_per_class: int = 25,
+) -> List[Dict[str, float]]:
     data = []
     for label in SUPPORTED:
-        folder = RAW_DIR / label
+        folder = data_root / label
         kept = 0
         if not folder.exists():
             data.extend(_synthetic_rows(label, min_per_class))
@@ -116,7 +122,14 @@ def synthetic_data() -> List[Dict[str, float]]:
     return data
 
 
-def train_model(data: List[Dict[str, float]], *, out_model: Path = MODEL_PATH) -> None:
+def train_model(
+    data: List[Dict[str, float]],
+    *,
+    out_model: Path = MODEL_PATH,
+    seed: int = 42,
+    n_estimators: int = 200,
+    max_depth: int = 25,
+) -> None:
     features = []
     labels = []
     for entry in data:
@@ -136,14 +149,22 @@ def train_model(data: List[Dict[str, float]], *, out_model: Path = MODEL_PATH) -
     print(f"📊 Features per sample: {FEATURE_COUNT} (26 MFCC + 5 audio features)")
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
+        X, y, test_size=0.2, random_state=int(seed), stratify=y
     )
 
     # Use Pipeline with StandardScaler + RandomForest for robustness
     clf = Pipeline(
         [
             ("scaler", StandardScaler()),
-            ("rf", RandomForestClassifier(n_estimators=200, max_depth=25, random_state=42, n_jobs=-1)),
+            (
+                "rf",
+                RandomForestClassifier(
+                    n_estimators=max(10, int(n_estimators)),
+                    max_depth=max(2, int(max_depth)),
+                    random_state=int(seed),
+                    n_jobs=-1,
+                ),
+            ),
         ]
     )
     clf.fit(X_train, y_train)
@@ -174,13 +195,49 @@ def main() -> None:
         default=MODEL_PATH,
         help="Output model artifact path.",
     )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed for deterministic splits/model fit.",
+    )
+    parser.add_argument(
+        "--n-estimators",
+        type=int,
+        default=200,
+        help="RandomForest trees (voice model is non-epoch based).",
+    )
+    parser.add_argument(
+        "--max-depth",
+        type=int,
+        default=25,
+        help="RandomForest max depth.",
+    )
+    parser.add_argument(
+        "--data-root",
+        type=Path,
+        default=None,
+        help="Voice dataset root. Defaults to data/processed/voice_balanced when available, otherwise data/raw/voice.",
+    )
     args = parser.parse_args()
 
     limit = (
         None if (args.limit_per_class is None or args.limit_per_class <= 0) else int(args.limit_per_class)
     )
-    data = gather_features(limit_per_class=limit, min_per_class=max(1, int(args.min_per_class)))
-    train_model(data, out_model=args.out_model)
+    data_root = args.data_root or (BALANCED_DIR if BALANCED_DIR.exists() else RAW_DIR)
+    print(f"🎙️ Using voice data root: {data_root}")
+    data = gather_features(
+        data_root=data_root,
+        limit_per_class=limit,
+        min_per_class=max(1, int(args.min_per_class)),
+    )
+    train_model(
+        data,
+        out_model=args.out_model,
+        seed=int(args.seed),
+        n_estimators=int(args.n_estimators),
+        max_depth=int(args.max_depth),
+    )
 
 
 if __name__ == "__main__":
