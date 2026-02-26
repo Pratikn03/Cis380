@@ -14,6 +14,36 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, field_validator
 
 
+def _load_dotenv_defaults(env_path: Path) -> None:
+    """Load `.env` key/values only when not already present in the process env."""
+    if not env_path.exists():
+        return
+    try:
+        raw = env_path.read_text(encoding="utf-8")
+    except OSError:
+        return
+
+    for raw_line in raw.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[len("export ") :].strip()
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if not key or key in os.environ:
+            continue
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+            value = value[1:-1]
+        os.environ[key] = value
+
+
+_load_dotenv_defaults(Path(__file__).resolve().parents[2] / ".env")
+
+
 class DatabaseSettings(BaseModel):
     """Database configuration."""
 

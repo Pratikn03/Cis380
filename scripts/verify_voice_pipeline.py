@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 
 def create_dummy_data():
     data_dir = ROOT / "data/raw/voice"
-    emotions = ["happy", "sad", "angry", "neutral"]
+    emotions = ["happy", "sad", "angry", "neutral", "fearful"]
 
     print(f"Creating dummy audio data in {data_dir}...")
 
@@ -40,6 +40,7 @@ def run_training():
     # Ensure ROOT is in PYTHONPATH so the subprocess can import 'app'
     env = os.environ.copy()
     env["PYTHONPATH"] = str(ROOT) + os.pathsep + env.get("PYTHONPATH", "")
+    model_path = ROOT / "models/voice_emotion.pkl"
 
     cmd = [
         sys.executable,
@@ -47,9 +48,12 @@ def run_training():
         "--limit-per-class",
         "5",
         "--out-model",
-        "models/voice_emotion.pkl",
+        str(model_path),
     ]
+    print("Training command:", " ".join(cmd))
     subprocess.run(cmd, cwd=str(ROOT), check=True, env=env)
+    if not model_path.exists():
+        raise RuntimeError(f"Training did not produce expected model: {model_path}")
 
 
 def verify_inference():
@@ -65,7 +69,7 @@ def verify_inference():
     sf.write(buf, y, sr, format="WAV")
     audio_bytes = buf.getvalue()
 
-    result = predict_emotion(audio_bytes)
+    result = predict_emotion(audio_bytes=audio_bytes, filename="verify.wav")
     print("Prediction result:", result)
     if "error" in result:
         raise RuntimeError(f"Inference failed: {result['error']}")

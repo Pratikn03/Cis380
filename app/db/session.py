@@ -21,6 +21,14 @@ engine = create_engine(settings.database.url, **_engine_kwargs())
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+def ensure_schema() -> None:
+    """Create missing DB tables for local/dev environments."""
+    from app.db.base import Base
+    import app.db.models  # noqa: F401  # ensure models are registered on Base metadata
+
+    Base.metadata.create_all(bind=engine)
+
+
 def get_db():
     db = SessionLocal()
     try:

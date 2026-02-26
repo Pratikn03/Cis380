@@ -4,6 +4,39 @@ import clsx from "clsx";
 import { navigation } from "../data/navigation";
 import { api } from "../services/api";
 
+export function formatLoginError(err: unknown): string {
+  const payload = err as {
+    code?: string;
+    message?: string;
+    response?: { status?: number; data?: { detail?: string } };
+  };
+  const status = payload?.response?.status;
+  const detail = payload?.response?.data?.detail;
+
+  if (status === 401) {
+    return (
+      "Unauthorized: check credentials. For a fresh local setup, run backend startup once to " +
+      "auto-bootstrap dev admin (default admin/admin123 unless overridden)."
+    );
+  }
+  if (status === 404) {
+    return "Login endpoint not found. Verify API base URL and backend startup.";
+  }
+  if (status && status >= 500) {
+    return `Backend error (${status}). Check server logs and DB bootstrap state.`;
+  }
+  if (payload?.code === "ECONNABORTED" || payload?.message?.includes("timeout")) {
+    return "Login timed out. Confirm backend is reachable.";
+  }
+  if (detail && typeof detail === "string") {
+    return detail;
+  }
+  if (payload?.message) {
+    return payload.message;
+  }
+  return "Login failed. Check backend availability and credentials.";
+}
+
 export default function Sidebar() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -28,10 +61,8 @@ export default function Sidebar() {
       setIsAuthed(true);
       setPassword("");
       setStatus("Authenticated");
-    } catch (err: any) {
-      const message =
-        err?.response?.data?.detail || err?.message || "Login failed. Check credentials.";
-      setStatus(message);
+    } catch (err: unknown) {
+      setStatus(formatLoginError(err));
     } finally {
       setIsLoading(false);
     }
@@ -110,9 +141,7 @@ export default function Sidebar() {
             </button>
           )}
           {status && <p className="text-xs text-slate-400">{status}</p>}
-          <p className="text-[11px] text-slate-500">
-            Use admin credentials from your environment configuration.
-          </p>
+          <p className="text-[11px] text-slate-500">Default local dev bootstrap: admin/admin123.</p>
         </div>
       </div>
 

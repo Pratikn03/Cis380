@@ -2,43 +2,48 @@
 
 - Root: `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2`
 - Full scan: **False**
-- Scan exclusions: `.cache, .git, .idea, .mypy_cache, .next, .pytest_cache, .venv, .vscode, __pycache__, artifacts, build, data, dist, experiments, logs, models, node_modules, notebooks, reports, runs, ui-web, venv`
-- Analysis exclusions: `.cache, .git, .idea, .mypy_cache, .next, .pytest_cache, .venv, .vscode, __pycache__, artifacts, build, data, dist, experiments, logs, models, node_modules, notebooks, reports, runs, ui-web, venv`
-- Scan started: `2026-01-15T14:13:32`
-- Scan duration (s): **0.82**
-- Files scanned: **553**
-- Python files (total): **352**
-- Python files (analyzed): **352**
-- Total size (bytes): **80336172**
+- UI sources included: **True**
+- Duplicate hashing skipped: **True**
+- Scan exclusions: `.cache, .git, .idea, .mypy_cache, .next, .pytest_cache, .venv, .vscode, __pycache__, artifacts, build, data, dist, experiments, logs, models, node_modules, notebooks, reports, runs, venv`
+- Analysis exclusions: `.cache, .git, .idea, .mypy_cache, .next, .pytest_cache, .venv, .vscode, __pycache__, artifacts, build, data, dist, experiments, logs, models, node_modules, notebooks, reports, runs, venv`
+- Scan started: `2026-02-20T12:17:18`
+- Scan duration (s): **9.69**
+- Files scanned: **6444**
+- Python files (total): **456**
+- Python files (analyzed): **456**
+- Total size (bytes): **1298016666**
 
 ## Infra Files Found
 
 - Requirements/pyproject files: 2
   - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/requirements.txt`
   - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/pyproject.toml`
-- Docker files: 3
+- Docker files: 4
   - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/Dockerfile`
   - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/Dockerfile.production`
   - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/docker-compose.yml`
-- CI files: 3
+  - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/services/gateway-kotlin/Dockerfile`
+- CI files: 5
   - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.github/workflows/ci-cd.yml`
-  - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.github/workflows/ci.yml`
-  - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.github/workflows/deploy-pages.yml`
+  - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.github/workflows/deploy-production.yml`
+  - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.github/workflows/quality-gates.yml`
+  - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.github/workflows/scorecard.yml`
+  - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.github/workflows/test.yml`
 
 ## Data / Artifacts Summary (file counts)
 
 - `data/raw`: **5000** files
 - `data/processed`: **5000** files
-- `artifacts`: **5** files
-- `runs`: **3727** files
-- `models`: **92** files
+- `artifacts`: **8** files
+- `runs`: **1486** files
+- `models`: **115** files
 - `configs`: **25** files
-- `reports`: **43** files
+- `reports`: **315** files
 
 ## FastAPI Wiring
 
-- include_router() found: **21**
-- endpoints found: **65**
+- include_router() found: **33**
+- endpoints found: **107**
 
 ### include_router snippets (first 50)
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(chat.router)`
@@ -54,16 +59,34 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(_app_voice_router, prefix="/api", dependencies=[Depends(require_auth)`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(_app_rag_router, prefix="/api", dependencies=[Depends(require_auth)`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(_app_dsa_rag_router, prefix="/api", dependencies=[Depends(require_auth)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(_app_dsa_algo_router, dependencies=[Depends(require_auth)`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(_app_brand_router, dependencies=[Depends(require_auth)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(_app_object_router, dependencies=[Depends(require_auth)`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(_app_stt_router, prefix="/api", dependencies=[Depends(require_auth)`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(_app_tts_router, prefix="/api", dependencies=[Depends(require_auth)`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(_app_vision_temporal_router, prefix="/api", dependencies=[Depends(require_auth)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(_api_v1_router)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `include_router(_app_internal_router, dependencies=[Depends(require_auth)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/router.py` → `include_router(auth.router)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/router.py` → `include_router(auth.admin_router)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/router.py` → `include_router(auth.users_router)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/router.py` → `include_router(jobs.router)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/router.py` → `include_router(rag.router)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/router.py` → `include_router(models.router)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/router.py` → `include_router(datasets.router)`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/router.py` → `include_router(training.router)`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/full_project_audit.py` → `include_router()`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/full_project_audit.py` → `include_router({r.expr})`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/main.py` → `include_router(health_router)`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/main.py` → `include_router(monitoring_router)`
 
 ### endpoints (first 100)
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/main.py` → `app.GET` `/`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/main.py` → `app.POST` `/detect-anomalies`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/main.py` → `app.POST` `/analyze-audio`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/main.py` → `app.POST` `/analyze-text`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/main.py` → `app.POST` `/ask-pdf`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/main.py` → `app.POST` `/recommend`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `app.GET` `/api/health`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py` → `app.GET` `/`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/core/health.py` → `router.GET` `/health`
@@ -84,6 +107,9 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/api/routes/chat.py` → `router.POST` `/multimodal`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/api/routes/chat.py` → `router.GET` `/stream`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/api/routes/rag.py` → `router.POST` `/query`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/internal.py` → `router.GET` `/health`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/internal.py` → `router.POST` `/risk/analyze`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/internal.py` → `router.POST` `/rag/query`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/cyber_timeline.py` → `router.GET` `/events`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/cyber_timeline.py` → `router.GET` `/patterns`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/cyber_timeline.py` → `router.GET` `/sources`
@@ -97,6 +123,21 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/health.py` → `router.GET` `/health`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/vision_temporal.py` → `router.POST` `/predict`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/tts.py` → `router.POST` `/speak`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/lca`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/segment-tree`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/min-cost-max-flow`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/segment-tree-min`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/bfs`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/dfs`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/shortest-paths`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/shortest-paths/bellman-ford`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/shortest-paths/floyd-warshall`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/shortest-paths/zero-one-bfs`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/mst`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/scc`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/topological-sort`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/trie`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_algorithms.py` → `router.POST` `/algorithms/dp`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/fraud.py` → `router.POST` `/fraud`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_rag.py` → `router.POST` `/ask`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/dsa_rag.py` → `router.POST` `/ingest`
@@ -104,31 +145,42 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/voice.py` → `router.POST` `/emotion`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/chat.py` → `router.POST` `/chat`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/rag.py` → `router.POST` `/ingest`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/rag.py` → `router.POST` `/index`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/rag.py` → `router.POST` `/upload`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/rag.py` → `router.POST` `/ask`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/rag.py` → `router.POST` `/query`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/rag.py` → `router.GET` `/status`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/rag.py` → `router.DELETE` `/docs/{doc_id}`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/fusion.py` → `router.POST` `/analyze`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/risk.py` → `router.POST` `/risk/analyze`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/object_detection.py` → `router.POST` `/detect`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/object_detection.py` → `router.POST` `/visualize`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/brand.py` → `router.POST` `/predict`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/recommender.py` → `router.POST` `/recommend`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/recommender.py` → `router.POST` `/recommend/explain`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/recommender.py` → `router.POST` `/recommend/multimodal`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/stt.py` → `router.POST` `/transcribe`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/deploy/api/main.py` → `app.GET` `/`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/deploy/api/main.py` → `app.GET` `/health`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/deploy/api/main.py` → `app.POST` `/predict_fraud`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/deploy/api/main.py` → `app.POST` `/predict_cyber`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/deploy/api/main.py` → `app.POST` `/predict_fusion`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/deploy/api/main.py` → `app.POST` `/predict_nlp`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/deploy/api/main.py` → `app.POST` `/predict_vision`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/auth.py` → `router.POST` `/login`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/auth.py` → `router.POST` `/refresh`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/auth.py` → `users_router.GET` `/me`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/auth.py` → `admin_router.GET` `/users`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/auth.py` → `admin_router.POST` `/users`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/auth.py` → `admin_router.GET` `/roles`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/auth.py` → `admin_router.POST` `/roles`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/auth.py` → `admin_router.POST` `/bootstrap`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/jobs.py` → `router.POST` `/start`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/jobs.py` → `router.GET` `/{job_id}`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/jobs.py` → `router.POST` `/{job_id}/cancel`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/jobs.py` → `router.GET` `/{job_id}/logs`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/rag.py` → `router.POST` `/upload`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/rag.py` → `router.POST` `/index`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/rag.py` → `router.POST` `/eval`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/rag.py` → `router.POST` `/query`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/training.py` → `router.GET` `/overview`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/training.py` → `router.GET` `/domain/{domain}`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/truth_table_audit.py` → `router.GET` `/x`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/truth_table_audit.py` → `app.POST` `/y`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/health.py` → `router.GET` `/health`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/health.py` → `router.GET` `/ready`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/monitoring.py` → `router.GET` `/metrics`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/fraud.py` → `router.POST` `/score`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/logo.py` → `router.POST` `/predict`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/reco.py` → `router.POST` `/recommend`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/rag.py` → `router.POST` `/query`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/api/audio.py` → `router.POST` `/emotion`
 
 ## RAG-related Candidates (heuristic)
 
@@ -140,14 +192,20 @@
 
 ## Training/Modeling Candidates (heuristic)
 
-- Files flagged: **35**
+- Files flagged: **53**
 
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/agent/train_brand_logo_detector.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/v1/training.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/core/config.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/agent/chat_responses.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/api/routes/vision.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/services/vision/yolov3.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/pages/metrics.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/dashboard/components/shap_viz.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/download_kaggle_data.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/main.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/predict_yolo.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/experimental/train_behavior_v2.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/experimental/train_real_fake.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/experimental/train_voice_emotion_v2.py`
@@ -155,12 +213,21 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/import_celeb_v2_vision.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/prepare_brand_data.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/prepare_intel_scene_vision.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/show_model_metrics.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/stt/train_whisper.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/train_all.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/train_all_vision.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/train_all_vision_full.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/train_brand_multiclass.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/train_production.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/training_data_audit.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/training_gap_report.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/vision/download_yolov3.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/vision/run_yolov3.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/voice/eval_emotion_ssl.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/voice/ssl_utils.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/scripts/voice/train_emotion_ssl.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/setup_dummy_data.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_brand_logo_detector.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_face_emotion.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/train/train_video_temporal.py`
@@ -177,73 +244,13 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais_v/training/train_vision.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/vision/brand/data_utils.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/vision/brand/recognizer.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/tests/test_data_quality_scripts.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/train_recommender.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/train_yolo.py`
 
-## Duplicate Files (identical hash; <=2MB)
+## Duplicate Files (identical hash; text/source files only, <= 524288 bytes)
 
-- Groups: **10** (showing top 30)
-
-### sha256 `19454d5445271ec7a06a084f2b708072ebc8749c38a792598765672286f9ad5c` (6 files)
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/accuracy`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/f1`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/pr_auc`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/precision`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/recall`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/metrics/roc_auc`
-
-### sha256 `af9554b330e69850bbf0dd095a2f575e8d59911b8cd2298b2faef6553c5b53b4` (6 files)
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais_v/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais_v/cli/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais_v/evaluation/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais_v/features/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais_v/training/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais_v/utils/__init__.py`
-
-### sha256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` (6 files)
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.dvc/tmp/btime`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/dashboards/.gitkeep`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/generative/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/nlp/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/vision/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/tests/contract/.gitkeep`
-
-### sha256 `192f0012c3ba0a005d643fd0e6bd4e1d8db7cca0af5b32e1830b98cecf5469b2` (5 files)
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/2e8138b35e464c8aa2ddc0e74506b031/tags/mlflow.user`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/2fbf0cfe6386488dae65ac945f546ac5/tags/mlflow.user`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/77c133a832264a8a9c681c41a3e96d07/tags/mlflow.user`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/tags/mlflow.user`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/ae201b6ab42042d9a4b41024e0923e0d/tags/mlflow.user`
-
-### sha256 `646c19373ac9e27e972c8e3bdf6554c4c10d23006c1abec3407cbff80c4ab71f` (5 files)
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/2e8138b35e464c8aa2ddc0e74506b031/tags/mlflow.source.type`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/2fbf0cfe6386488dae65ac945f546ac5/tags/mlflow.source.type`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/77c133a832264a8a9c681c41a3e96d07/tags/mlflow.source.type`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/tags/mlflow.source.type`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/ae201b6ab42042d9a4b41024e0923e0d/tags/mlflow.source.type`
-
-### sha256 `eea8d43a676a6a702f4a711d1a671b74015e45d65907d8ec497e7b99a1614990` (5 files)
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/2e8138b35e464c8aa2ddc0e74506b031/tags/mlflow.source.git.commit`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/2fbf0cfe6386488dae65ac945f546ac5/tags/mlflow.source.git.commit`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/77c133a832264a8a9c681c41a3e96d07/tags/mlflow.source.git.commit`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/8baaac1d4fe6470da9fddcabcff2703c/tags/mlflow.source.git.commit`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/ae201b6ab42042d9a4b41024e0923e0d/tags/mlflow.source.git.commit`
-
-### sha256 `831f5698f107d1f36449596d3603e9667ee7ed59d9ff8ff45b2be965b580e0d8` (3 files)
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/2fbf0cfe6386488dae65ac945f546ac5/tags/mlflow.runName`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/77c133a832264a8a9c681c41a3e96d07/tags/mlflow.runName`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/ae201b6ab42042d9a4b41024e0923e0d/tags/mlflow.runName`
-
-### sha256 `cc113b45459ea17bee7ed876a9f5332f93524119cf58aab8ef4d36c9e2ff5d99` (3 files)
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/2fbf0cfe6386488dae65ac945f546ac5/tags/mlflow.source.name`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/77c133a832264a8a9c681c41a3e96d07/tags/mlflow.source.name`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/mlruns/497119083612192240/ae201b6ab42042d9a4b41024e0923e0d/tags/mlflow.source.name`
-
-### sha256 `01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b` (2 files)
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/rag/vector_store/.gitkeep`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/universal_anomaly_intelligence.egg-info/dependency_links.txt`
-
-### sha256 `b9a670c75c36fb5a96e87b51dbfc7b3462ec1bcce249e42df33c4d3bb159b48b` (2 files)
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.dvc/tmp/lock`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/.dvc/tmp/rwlock.lock`
+- Groups: **0** (showing top 30)
 
 
 ## Python Compile Errors
@@ -253,18 +260,20 @@
 
 ## Unreferenced Internal Modules (heuristic)
 
-- Unreferenced: **189** (showing up to 100)
+- Unreferenced: **191** (showing up to 100)
 
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/agent/orchestrator.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/agent/train_brand_logo_detector.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/api/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/chatbot/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/chatbot/context_manager.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/chatbot/recommend_handler.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/core/logging.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/db/__init__.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/dsa_algorithms/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/fusion/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/agent/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/agent/chat_responses.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/agent/orchestrator.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/agent/policy.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/agent/utils/__init__.py`
@@ -276,23 +285,20 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/rag/retriever.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/legacy/rag/service.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/mlops/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/monitoring/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/monitoring/alerts.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/monitoring/latency.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/rag/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/rag/ocr.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/rag_dsa/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/rag_dsa/build_index.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/services/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/services/alert_service.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/services/async_worker.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/services/vision/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/classic_chat.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/config.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/courses.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/electronics.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/electronics_catalog.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/news.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/books.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/games.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/handlers/static_fallbacks.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/pages/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/pages/brand.py`
@@ -309,8 +315,11 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/unified_chat.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/streamlit_chatbot/utils.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/vision_local/__init__.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/vision_local/detector.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/vision_local/index.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/workers/tasks.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/__init__.py`
+- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/cli.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/orchestration/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/orchestration/behavior_flow.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/orchestration/cyber_flow.py`
@@ -353,13 +362,10 @@
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/ensembles/stacking.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/evaluation/__init__.py`
 - `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/evaluation/evaluate_all.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/explainability/__init__.py`
-- `/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/src/uais/explainability/explainer_utils.py`
 
 ## Notes
 
-- Duplicate files found with identical content hash (safe to consolidate later).
 - Unreferenced internal modules found (may indicate duplicates/dead code).
 - Data summary capped at 5000 files for: data/raw, data/processed
 
-_Generated in 0.82s._
+_Generated in 9.69s._

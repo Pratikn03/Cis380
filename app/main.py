@@ -69,18 +69,22 @@ if str(SRC_DIR) not in sys.path:
 # ==============================================================================
 # On macOS, importing XGBoost before PyTorch can cause the app to hang.
 # By importing torch/torchvision first, we avoid this known issue.
-try:  # pragma: no cover
-    import torch  # noqa: F401
-    import torchvision  # noqa: F401
-except Exception:
-    pass  # It's okay if PyTorch is not installed
+if os.getenv("SKIP_TORCH_PREIMPORT", "false").lower() not in {"1", "true", "yes"}:
+    try:  # pragma: no cover
+        import torch  # noqa: F401
+        import torchvision  # noqa: F401
+    except Exception:
+        pass  # It's okay if PyTorch is not installed
 
 # ==============================================================================
 # IMPORT API ROUTES - Each route handles a specific ML service
 # ==============================================================================
 from app.core import settings, setup_production_middleware  # noqa: E402
 from app.core.auth import bootstrap_admin, bootstrap_roles  # noqa: E402
-from app.db.session import SessionLocal  # noqa: E402
+from app.core.startup import bootstrap_admin_user as run_bootstrap_admin_user  # noqa: E402
+from app.core.startup import bootstrap_credentials as resolve_bootstrap_credentials  # noqa: E402
+from app.core.startup import initialize_dev_database as run_initialize_dev_database  # noqa: E402
+from app.db.session import SessionLocal, ensure_schema  # noqa: E402
 from app.legacy.api.deps import require_auth  # noqa: E402
 from app.legacy.api.routes import behavior, chat, cyber, fraud, rag, recommend, vision  # noqa: E402
 
@@ -344,18 +348,28 @@ if _dsa_rag_ensure_index is not None:
             logger.warning("DSA RAG auto-ingest skipped: %s", exc)
 
 
+def _initialize_dev_database() -> None:
+    run_initialize_dev_database(
+        app_env=settings.app_env,
+        ensure_schema_fn=ensure_schema,
+        logger=logger,
+    )
+
+
+def _bootstrap_credentials() -> tuple[str | None, str | None]:
+    return resolve_bootstrap_credentials(app_env=settings.app_env, logger=logger)
+
+
 @app.on_event("startup")
 def _bootstrap_admin_user() -> None:
-    admin_username = os.getenv("ADMIN_USERNAME")
-    admin_password = os.getenv("ADMIN_PASSWORD")
-    if not admin_username or not admin_password:
-        return
-    try:
-        with SessionLocal() as db:
-            bootstrap_roles(db)
-            bootstrap_admin(db, admin_username, admin_password)
-    except Exception as exc:  # pragma: no cover
-        logger.warning("Admin bootstrap skipped: %s", exc)
+    run_bootstrap_admin_user(
+        app_env=settings.app_env,
+        ensure_schema_fn=ensure_schema,
+        session_factory=SessionLocal,
+        bootstrap_roles_fn=bootstrap_roles,
+        bootstrap_admin_fn=bootstrap_admin,
+        logger=logger,
+    )
 
 
 # ==============================================================================

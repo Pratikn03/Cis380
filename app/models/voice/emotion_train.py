@@ -18,7 +18,14 @@ if __package__ in {None, ""}:
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
 
-from app.models.voice.features import extract_mfcc, load_audio, compute_zero_crossing_rate, compute_rms, compute_pitch, compute_spectral_contrast
+from app.models.voice.features import (
+    compute_pitch,
+    compute_rms,
+    compute_spectral_contrast,
+    compute_zero_crossing_rate,
+    extract_mfcc,
+    load_audio,
+)
 
 MODEL_PATH = Path("models/voice_emotion.pkl")
 RAW_DIR = Path("data/raw/voice")
@@ -43,22 +50,25 @@ def _extract_enhanced_features(audio: np.ndarray, sr: int) -> np.ndarray:
     """Extract MFCC + additional audio features for better emotion recognition."""
     # MFCC features (26 values)
     mfcc_feat = extract_mfcc(audio, sr)
-    
+
     # Additional features
     zcr = compute_zero_crossing_rate(audio)
     rms_mean, rms_std = compute_rms(audio)
-    pitch_mean, pitch_std = compute_pitch(audio, sr)
+    pitch_mean, _ = compute_pitch(audio, sr)
     spectral = compute_spectral_contrast(audio, sr)
-    
+
     # Convert None to 0.0
-    extra_features = np.array([
-        zcr,
-        rms_mean,
-        rms_std,
-        pitch_mean if pitch_mean is not None else 0.0,
-        spectral if spectral is not None else 0.0
-    ], dtype=np.float64)
-    
+    extra_features = np.array(
+        [
+            zcr,
+            rms_mean,
+            rms_std,
+            pitch_mean if pitch_mean is not None else 0.0,
+            spectral if spectral is not None else 0.0,
+        ],
+        dtype=np.float64,
+    )
+
     return np.concatenate([mfcc_feat, extra_features])
 
 
@@ -97,45 +107,51 @@ def synthetic_data() -> List[Dict[str, float]]:
     data = []
     for label in SUPPORTED:
         for _ in range(10):
-            values = np.random.normal(loc=0.0 if label == "neutral" else 1.0, scale=0.5, size=26)
+            values = np.random.normal(
+                loc=0.0 if label == "neutral" else 1.0, scale=0.5, size=FEATURE_COUNT
+            )
             summary = {f"f{i}": float(values[i]) for i in range(len(values))}
             summary["label"] = label
             data.append(summary)
     return data
 
 
-def train_model(data: List[Dict[str, float]]) -> None:
+def train_model(data: List[Dict[str, float]], *, out_model: Path = MODEL_PATH) -> None:
     features = []
     labels = []
     for entry in data:
         lbl = entry.pop("label")
         labels.append(lbl)
         features.append([entry[f"f{i}"] for i in range(FEATURE_COUNT)])
-    
+
     # Convert to numpy and handle NaN/Inf values
     X = np.array(features, dtype=np.float64)
     y = np.array(labels)
-    
+
     # Filter out rows with NaN or Inf values
     valid_mask = np.all(np.isfinite(X), axis=1)
     X = X[valid_mask]
     y = y[valid_mask]
     print(f"📊 Using {len(X)} valid samples (filtered {(~valid_mask).sum()} bad samples)")
     print(f"📊 Features per sample: {FEATURE_COUNT} (26 MFCC + 5 audio features)")
-    
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-    
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
     # Use Pipeline with StandardScaler + RandomForest for robustness
-    clf = Pipeline([
-        ('scaler', StandardScaler()),
-        ('rf', RandomForestClassifier(n_estimators=200, max_depth=25, random_state=42, n_jobs=-1))
-    ])
+    clf = Pipeline(
+        [
+            ("scaler", StandardScaler()),
+            ("rf", RandomForestClassifier(n_estimators=200, max_depth=25, random_state=42, n_jobs=-1)),
+        ]
+    )
     clf.fit(X_train, y_train)
     acc = clf.score(X_test, y_test)
     print(f"✅ Trained voice emotion model (accuracy={acc:.2%})")
-    MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(clf, MODEL_PATH)
-    print(f"📁 Saved to {MODEL_PATH}")
+    out_model.parent.mkdir(parents=True, exist_ok=True)
+    joblib.dump(clf, out_model)
+    print(f"📁 Saved to {out_model}")
 
 
 def main() -> None:
@@ -152,11 +168,19 @@ def main() -> None:
         default=25,
         help="Minimum samples per class (pads missing classes with synthetic rows to guarantee label support).",
     )
+    parser.add_argument(
+        "--out-model",
+        type=Path,
+        default=MODEL_PATH,
+        help="Output model artifact path.",
+    )
     args = parser.parse_args()
 
-    limit = None if (args.limit_per_class is None or args.limit_per_class <= 0) else int(args.limit_per_class)
+    limit = (
+        None if (args.limit_per_class is None or args.limit_per_class <= 0) else int(args.limit_per_class)
+    )
     data = gather_features(limit_per_class=limit, min_per_class=max(1, int(args.min_per_class)))
-    train_model(data)
+    train_model(data, out_model=args.out_model)
 
 
 if __name__ == "__main__":

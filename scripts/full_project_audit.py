@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import re
+import signal
 import time
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -61,7 +62,22 @@ ANALYSIS_EXCLUDE_DIRS = {
 }
 
 FULL_SCAN = os.getenv("FULL_PROJECT_SCAN", "false").lower() == "true"
-EXCLUDE_DIRS = {".git"} if FULL_SCAN else DEFAULT_EXCLUDE_DIRS
+INCLUDE_UI_SOURCES = (
+    os.getenv("AUDIT_INCLUDE_UI_SOURCES", "").lower() in {"1", "true", "yes"}
+    or os.getenv("AUDIT_INCLUDE_UI_SOURCE", "").lower() in {"1", "true", "yes"}
+)
+
+
+def _resolved_exclusions() -> tuple[set[str], set[str]]:
+    scan_exclusions = {".git"} if FULL_SCAN else set(DEFAULT_EXCLUDE_DIRS)
+    analysis_exclusions = set(ANALYSIS_EXCLUDE_DIRS)
+    if INCLUDE_UI_SOURCES:
+        scan_exclusions.discard("ui-web")
+        analysis_exclusions.discard("ui-web")
+    return scan_exclusions, analysis_exclusions
+
+
+EXCLUDE_DIRS, ANALYSIS_EXCLUDE_DIRS = _resolved_exclusions()
 
 FASTAPI_DECORATORS = ("get", "post", "put", "delete", "patch", "options", "head")
 TRAIN_HINTS = [
@@ -106,6 +122,32 @@ RAG_HINTS = [
     "rewrite",
 ]
 
+DUPLICATE_HASH_EXTS = {
+    ".py",
+    ".pyi",
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
+    ".json",
+    ".md",
+    ".txt",
+    ".yaml",
+    ".yml",
+    ".toml",
+    ".ini",
+    ".cfg",
+    ".css",
+    ".scss",
+    ".html",
+    ".sh",
+    ".sql",
+}
+
+DUPLICATE_HASH_MAX_BYTES = int(os.getenv("AUDIT_DUPLICATE_HASH_MAX_BYTES", str(512 * 1024)))
+AUDIT_SKIP_DUPLICATES = os.getenv("AUDIT_SKIP_DUPLICATES", "false").lower() in {"1", "true", "yes"}
+READ_TIMEOUT_SEC = float(os.getenv("AUDIT_READ_TIMEOUT_SEC", "0"))
+
 
 @dataclass
 class Endpoint:
@@ -131,6 +173,7 @@ class DupGroup:
 class Audit:
     root: str
     full_scan: bool
+    include_ui_sources: bool
     scan_exclusions: List[str]
     analysis_exclusions: List[str]
     scan_started_at: str
@@ -173,15 +216,35 @@ def walk(root: Path) -> List[Path]:
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if not is_excluded_dir(d)]
         for fn in filenames:
-            out.append(Path(dirpath) / fn)
+            path = Path(dirpath) / fn
+            if path.is_symlink():
+                continue
+            out.append(path)
     return out
 
 
 def read_text(p: Path, limit: Optional[int] = 400_000) -> str:
+    def _read_chunk() -> bytes:
+        with p.open("rb") as f:
+            if limit is None:
+                return f.read()
+            return f.read(limit)
+
     try:
-        b = p.read_bytes()
-        if limit is not None and len(b) > limit:
-            b = b[:limit]
+        if READ_TIMEOUT_SEC > 0:
+            def _timeout_handler(signum, frame):  # type: ignore[unused-argument]
+                raise TimeoutError(f"read timed out after {READ_TIMEOUT_SEC}s: {p}")
+
+            previous_handler = signal.getsignal(signal.SIGALRM)
+            signal.signal(signal.SIGALRM, _timeout_handler)
+            signal.setitimer(signal.ITIMER_REAL, READ_TIMEOUT_SEC)
+            try:
+                b = _read_chunk()
+            finally:
+                signal.setitimer(signal.ITIMER_REAL, 0)
+                signal.signal(signal.SIGALRM, previous_handler)
+        else:
+            b = _read_chunk()
         return b.decode("utf-8", errors="ignore")
     except Exception:
         return ""
@@ -198,6 +261,11 @@ def sha256_file(p: Path, max_bytes: int = 2 * 1024 * 1024) -> Optional[str]:
         return h.hexdigest()
     except Exception:
         return None
+
+
+def _eligible_for_duplicate_hash(path: Path) -> bool:
+    suffix = path.suffix.lower()
+    return suffix in DUPLICATE_HASH_EXTS
 
 
 def detect_fastapi(p: Path) -> Tuple[List[RouterInclude], List[Endpoint]]:
@@ -233,6 +301,11 @@ def looks_like_rag(p: Path) -> bool:
 def compile_check(py_files: List[Path]) -> List[str]:
     errs = []
     for p in py_files:
+        try:
+            if p.stat().st_size > 1_500_000:
+                continue
+        except OSError:
+            continue
         try:
             src = read_text(p, limit=None)
             compile(src, str(p), "exec")
@@ -360,14 +433,18 @@ def main():
     total_bytes = sum(p.stat().st_size for p in files)
 
     # duplicates
-    hash_map: Dict[str, List[str]] = {}
-    for p in files:
-        h = sha256_file(p, max_bytes=2 * 1024 * 1024)
-        if not h:
-            continue
-        hash_map.setdefault(h, []).append(str(p))
-    dups = [DupGroup(sha256=h, files=sorted(v)) for h, v in hash_map.items() if len(v) >= 2]
-    dups.sort(key=lambda g: (-len(g.files), g.sha256))
+    dups: List[DupGroup] = []
+    if not AUDIT_SKIP_DUPLICATES:
+        hash_map: Dict[str, List[str]] = {}
+        for p in analysis_files:
+            if not _eligible_for_duplicate_hash(p):
+                continue
+            h = sha256_file(p, max_bytes=DUPLICATE_HASH_MAX_BYTES)
+            if not h:
+                continue
+            hash_map.setdefault(h, []).append(str(p))
+        dups = [DupGroup(sha256=h, files=sorted(v)) for h, v in hash_map.items() if len(v) >= 2]
+        dups.sort(key=lambda g: (-len(g.files), g.sha256))
 
     # fastapi
     includes: List[RouterInclude] = []
@@ -436,6 +513,7 @@ def main():
     audit = Audit(
         root=str(root),
         full_scan=FULL_SCAN,
+        include_ui_sources=INCLUDE_UI_SOURCES,
         scan_exclusions=sorted(EXCLUDE_DIRS),
         analysis_exclusions=sorted(ANALYSIS_EXCLUDE_DIRS),
         scan_started_at=scan_started_at,
@@ -469,6 +547,8 @@ def main():
     md.append("# Full Project Audit Report\n")
     md.append(f"- Root: `{audit.root}`")
     md.append(f"- Full scan: **{audit.full_scan}**")
+    md.append(f"- UI sources included: **{audit.include_ui_sources}**")
+    md.append(f"- Duplicate hashing skipped: **{AUDIT_SKIP_DUPLICATES}**")
     md.append(
         f"- Scan exclusions: `{', '.join(audit.scan_exclusions) if audit.scan_exclusions else 'none'}`"
     )
@@ -530,7 +610,10 @@ def main():
         md.append(f"- `{p}`")
     md.append("")
 
-    md.append("## Duplicate Files (identical hash; <=2MB)\n")
+    md.append(
+        "## Duplicate Files (identical hash; text/source files only,"
+        f" <= {DUPLICATE_HASH_MAX_BYTES} bytes)\n"
+    )
     md.append(f"- Groups: **{len(dups)}** (showing top 30)\n")
     for g in dups[:30]:
         md.append(f"### sha256 `{g.sha256}` ({len(g.files)} files)")
@@ -566,6 +649,8 @@ def main():
     # terminal summary for copy/paste back to chat
     print("\n================ FULL PROJECT AUDIT SUMMARY ================")
     print(f"Root: {audit.root}")
+    print(f"Full scan: {audit.full_scan} | UI sources included: {audit.include_ui_sources}")
+    print(f"Duplicate hashing skipped: {AUDIT_SKIP_DUPLICATES}")
     print(
         "Files scanned: "
         f"{audit.files_scanned} | Python (total): {audit.py_files_total} | "
@@ -573,7 +658,10 @@ def main():
     )
     print(f"FastAPI include_router: {len(includes)} | endpoints: {len(endpoints)}")
     print(f"RAG candidates: {len(rag)} | Training candidates: {len(training)}")
-    print(f"Duplicate groups: {len(dups)} (<=2MB hashed)")
+    print(
+        f"Duplicate groups: {len(dups)} "
+        f"(text/source files <= {DUPLICATE_HASH_MAX_BYTES} bytes)"
+    )
     print(f"Python compile errors: {len(compile_errors)}")
     print(f"Unreferenced internal modules: {len(unref)} (heuristic)")
     if audit.data_dirs:
