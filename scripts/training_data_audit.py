@@ -284,7 +284,10 @@ def main() -> int:
         }
     )
 
-    voice_root = ROOT / "data" / "raw" / "voice"
+    voice_raw_root = ROOT / "data" / "raw" / "voice"
+    voice_balanced_root = ROOT / "data" / "processed" / "voice_balanced"
+    voice_root = voice_balanced_root if voice_balanced_root.exists() else voice_raw_root
+    voice_source = "processed_balanced" if voice_root == voice_balanced_root else "raw"
     voice_emotions = ["happy", "sad", "angry", "neutral", "fearful"]
     voice_detail = []
     voice_total = 0
@@ -315,6 +318,9 @@ def main() -> int:
         {
             "name": "Voice emotion (wav folders)",
             "path": str(voice_root),
+            "source_root_raw": str(voice_raw_root),
+            "source_root_balanced": str(voice_balanced_root),
+            "voice_source": voice_source,
             "status": "ok" if voice_total > 0 else "missing",
             "total_wav": voice_total,
             "details": voice_detail,
@@ -489,6 +495,8 @@ def main() -> int:
                 f"names={y.get('names_count', 0)}"
             )
         if item.get("details"):
+            if item.get("voice_source"):
+                lines.append(f"  - source: {item['voice_source']}")
             for detail in item["details"]:
                 suffix = " (capped)" if detail["count_capped"] else ""
                 probe = detail.get("probe") or {}

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-20 17:46:43 UTC",
+  "generated_at": "2026-02-21 08:20:05 UTC",
   "required": [
     {
       "name": "Fraud (creditcard.csv)",
@@ -71,71 +71,74 @@
     },
     {
       "name": "Voice emotion (wav folders)",
-      "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice",
+      "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced",
+      "source_root_raw": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice",
+      "source_root_balanced": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced",
+      "voice_source": "processed_balanced",
       "status": "ok",
-      "total_wav": 7441,
+      "total_wav": 12735,
       "details": [
         {
           "emotion": "happy",
-          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/happy",
-          "wav_count": 1271,
+          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced/happy",
+          "wav_count": 2547,
           "count_capped": false,
           "status": "ok",
           "probe": {
             "ok": true,
-            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/happy/1008_TAI_HAP_XX.wav",
+            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced/happy/1008_TAI_HAP_XX.wav",
             "channels": 1,
             "sample_rate": 16000
           }
         },
         {
           "emotion": "sad",
-          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/sad",
-          "wav_count": 1270,
+          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced/sad",
+          "wav_count": 2547,
           "count_capped": false,
           "status": "ok",
           "probe": {
             "ok": true,
-            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/sad/1078_IWL_SAD_XX.wav",
+            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced/sad/1078_IWL_SAD_XX.wav",
             "channels": 1,
             "sample_rate": 16000
           }
         },
         {
           "emotion": "angry",
-          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/angry",
-          "wav_count": 2542,
+          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced/angry",
+          "wav_count": 2547,
           "count_capped": false,
           "status": "ok",
           "probe": {
             "ok": true,
-            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/angry/1022_ITS_ANG_XX.wav",
+            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced/angry/1022_ITS_ANG_XX.wav",
             "channels": 1,
             "sample_rate": 16000
           }
         },
         {
           "emotion": "neutral",
-          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/neutral",
-          "wav_count": 1087,
+          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced/neutral",
+          "wav_count": 2547,
           "count_capped": false,
           "status": "ok",
           "probe": {
             "ok": true,
-            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/neutral/1060_ITS_NEU_XX.wav",
+            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced/neutral/1059_TSI_NEU_XX__aug_1097_gain_down.wav",
             "channels": 1,
             "sample_rate": 16000
           }
         },
         {
           "emotion": "fearful",
-          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/fearful",
-          "wav_count": 1271,
+          "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced/fearful",
+          "wav_count": 2547,
           "count_capped": false,
           "status": "ok",
           "probe": {
             "ok": true,
-            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/raw/voice/fearful/1029_TAI_FEA_XX.wav",
+            "path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/data/processed/voice_balanced/fearful/1044_ITH_FEA_XX__aug_1193_gain_down.wav",
             "channels": 1,
             "sample_rate": 16000
           }
@@ -143,99 +146,99 @@
       ],
       "class_balance": {
         "per_class": {
-          "happy": 1271,
-          "sad": 1270,
-          "angry": 2542,
-          "neutral": 1087,
-          "fearful": 1271
+          "happy": 2547,
+          "sad": 2547,
+          "angry": 2547,
+          "neutral": 2547,
+          "fearful": 2547
         },
         "missing_classes": [],
-        "imbalance_ratio_max_to_min_nonzero": 2.339
+        "imbalance_ratio_max_to_min_nonzero": 1.0
       },
       "speaker_coverage": {
-        "speaker_count": 91,
-        "resolved_samples": 7441,
+        "speaker_count": 1455,
+        "resolved_samples": 12735,
         "unresolved_samples": 0,
         "top_speakers": [
           {
             "speaker_id": "spk_1001",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1003",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1004",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1005",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1006",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1007",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1010",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1011",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1012",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1013",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1014",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1015",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1016",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1017",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1018",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1020",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1021",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1022",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1023",
-            "samples": 82
+            "samples": 86
           },
           {
             "speaker_id": "spk_1024",
-            "samples": 82
+            "samples": 86
           }
         ]
       }
