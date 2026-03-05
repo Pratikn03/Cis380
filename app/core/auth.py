@@ -10,10 +10,9 @@ from typing import TYPE_CHECKING, Callable
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from app.core import settings
+from app.core.config import settings
 
 if TYPE_CHECKING:
     from app.db.models import Role, User
@@ -78,6 +77,8 @@ def _get_db():
 
 
 def _create_token(data: dict, expires_delta: timedelta) -> str:
+    from jose import jwt
+
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
@@ -99,6 +100,8 @@ def create_refresh_token(user_id: str) -> str:
 
 
 def _decode_token(token: str) -> dict:
+    from jose import jwt
+
     return jwt.decode(token, settings.security.secret_key, algorithms=[ALGORITHM])
 
 
@@ -107,6 +110,7 @@ def get_current_user(
     db: Session = Depends(_get_db),
 ) -> "User":
     from app.db.models import User
+    from jose import JWTError
 
     token = creds.credentials
     try:
