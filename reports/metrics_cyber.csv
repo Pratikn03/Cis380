@@ -1,5 +1,0 @@
-Metric,mean,std
-anomaly_f1,0.0316205533596837,
-anomaly_roc_auc,0.3410189758524379,
-test_f1,0.9785536159600996,
-test_roc_auc,0.9974359199830688,

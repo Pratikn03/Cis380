@@ -1,8 +1,0 @@
-data:
-  raw_root: data/raw
-  processed_root: data/processed
-  splits_root: data/splits
-  samples_root: data/samples
-
-validation:
-  fail_on_warning: false

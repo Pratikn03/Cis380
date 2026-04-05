@@ -1,1 +1,0 @@
-{"detail":"Not authenticated","success":false,"error":{"code":"FORBIDDEN","message":"Not authenticated","details":{},"path":"/api/v1/rag/query","request_id":"87eafb21-d2a4-43da-9fc3-e6b54659297d","timestamp":"2026-01-21T13:51:26.607376Z"}}

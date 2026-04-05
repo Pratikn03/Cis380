@@ -1,9 +1,0 @@
-{
-  "drift_report": {
-    "window": "last_1000",
-    "drift_score": 0.0,
-    "per_feature": {},
-    "status": "ok"
-  },
-  "script_exit_code": 0
-}

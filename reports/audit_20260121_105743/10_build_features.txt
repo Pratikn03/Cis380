@@ -1,3 +1,0 @@
-Loading lake parquet: data/lake/fraud/creditcard_20260121.parquet
-Saved features to data/processed/fraud/features_v1.parquet with shape (284807, 36)
-Wrote feature metadata to data/processed/fraud/features_v1.json

@@ -1,9 +1,0 @@
-task: logo
-model:
-  type: yolo
-  seed: 42
-inference:
-  conf_thres: 0.25
-  iou_thres: 0.45
-eval:
-  metrics: [map50, map50_95]

@@ -21,8 +21,3 @@ waivers:
     reason: "Next migration in progress; UI integration tests still being added."
     expires_on: 2026-03-10
     temporary_threshold: 57
-  - module: legacy_frontend
-    owner: pratik_n
-    reason: "Legacy Vite frontend is stabilization-only and pending retirement."
-    expires_on: 2026-03-10
-    temporary_threshold: 60

@@ -1,1 +1,0 @@
-"""Sentifargo-V package."""

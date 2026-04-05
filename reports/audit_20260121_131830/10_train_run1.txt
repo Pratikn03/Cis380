@@ -1,2 +1,0 @@
-Saved metrics to experiments/fraud/metrics/fraud_metrics.json
-Saved plots to experiments/fraud/plots

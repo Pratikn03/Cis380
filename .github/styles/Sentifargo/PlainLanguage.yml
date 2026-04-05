@@ -1,9 +1,0 @@
-extends: existence
-message: "Avoid filler word '%s' in technical docs."
-level: warning
-ignorecase: true
-tokens:
-  - \bjust\b
-  - \bsimply\b
-  - \bbasically\b
-  - \bvery\b

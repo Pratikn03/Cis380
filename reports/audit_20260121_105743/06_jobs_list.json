@@ -1,1 +1,0 @@
-{"detail":"Not authenticated","success":false,"error":{"code":"FORBIDDEN","message":"Not authenticated","details":{},"path":"/api/v1/jobs","request_id":"065802dd-f663-4f14-8bb2-9b22a6af47f2","timestamp":"2026-01-21T16:58:00.777142Z"}}

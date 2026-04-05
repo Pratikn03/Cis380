@@ -1,1 +1,0 @@
-{"status":"ok","service":"Sentifargo","version":"0.2","python":{"version":"3.13.5","implementation":"CPython"},"platform":{"system":"Darwin","release":"25.1.0","machine":"arm64"},"optional_features":{"webrtc":false,"stt":false,"clip":false,"faiss":false}}

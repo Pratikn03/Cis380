@@ -1,8 +1,0 @@
-project:
-  name: "Sentifargo"
-  description: "Sentifargo with 30-sequence module"
-paths:
-  raw_dir: "data/raw"
-  lake_dir: "data/lake"
-  processed_dir: "data/processed"
-  sequences_dir: "data/sequences"

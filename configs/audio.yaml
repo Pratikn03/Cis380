@@ -1,6 +1,0 @@
-task: audio
-model:
-  type: emotion_classifier
-  seed: 42
-eval:
-  metrics: [f1_macro, accuracy]
