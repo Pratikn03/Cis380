@@ -1,0 +1,8 @@
+extends: existence
+message: "Remove placeholder marker '%s' before merge."
+level: error
+ignorecase: true
+tokens:
+  - \bTODO\b
+  - \bTBD\b
+  - \bFIXME\b

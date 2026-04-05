@@ -1,0 +1,4 @@
+data:
+  domain: "cyber"
+  raw: "data/raw/cyber"
+  processed: "data/processed/cyber/unsw_nb15_features.parquet"

@@ -1,0 +1,282 @@
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ============================================
+# Virtual Environments (KEEP ALL)
+# ============================================
+.venv/
+.venv_integration/
+.venv-*/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ============================================
+# Environment Variables
+# ============================================
+.env
+.env.local
+.env.*.local
+.env.backup.*
+.env.save
+!.env.example
+!.env.production.example
+
+# ============================================
+# IDEs and Editors
+# ============================================
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+Untitled*.ipynb
+*-checkpoint.ipynb
+notebooks/_executed/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*~
+
+# Local tooling artifacts
+.virtual_documents/
+anaconda_projects/
+
+# ============================================
+# Operating System
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Testing
+# ============================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+coverage.xml
+*.cover
+.cache
+nosetests.xml
+
+# ============================================
+# Build & Distribution
+# ============================================
+build/
+dist/
+*.egg-info/
+*.egg
+wheels/
+*.whl
+
+# ============================================
+# Node / Frontend
+# ============================================
+node_modules/
+ui-web/**/dist/
+ui-web/**/.next/
+ui-web/**/.turbo/
+ui-web/**/.cache/
+services/gateway-kotlin/.gradle-local/
+
+# ============================================
+# ML/AI Specific
+# ============================================
+# Models
+*.pt
+*.pth
+*.onnx
+*.ckpt
+*.pb
+*.h5
+*.hdf5
+*.pkl
+*.joblib
+*.pickle
+
+# Weights
+*.safetensors
+*.bin
+
+# Indexes
+*.index
+*.faiss
+
+# Arrays
+*.npy
+*.npz
+
+# Allow curated release artifacts (tracked via Git LFS)
+!artifacts/**/*.pt
+!artifacts/**/*.pth
+!artifacts/**/*.pkl
+!artifacts/**/*.pickle
+!artifacts/**/*.onnx
+!artifacts/**/*.h5
+!artifacts/**/*.hdf5
+!artifacts/**/*.pb
+!artifacts/**/*.npy
+!artifacts/**/*.npz
+
+# ============================================
+# Data
+# ============================================
+data/**
+!data/README.md
+!data/**/.gitkeep
+!data/**/*.dvc
+data/raw/
+data/processed/
+data/interim/
+data/samples/
+data/embeddings/
+data/dsa_embeddings/
+data/monitoring/
+data/lake/
+data/Celeb_V2/
+data/Video-2/
+data/video-2/
+data/*.db
+
+# Metrics outputs (keep rag_eval.json for evidence)
+metrics/
+!metrics/rag_eval.json
+
+# Allow DVC tracking for docs + rag outputs
+!data/raw/*.dvc
+!data/processed/*.dvc
+
+# Large image datasets
+data/raw/clothing_images/
+data/raw/brand/logodet3k/
+data/processed/brand_yolo/
+
+# ============================================
+# Artifacts & Outputs
+# ============================================
+artifacts/
+models/
+!models/whisper_large/
+!models/whisper_large/**
+runs/
+logs/
+mlruns/
+mlartifacts/
+experiments/
+
+# ============================================
+# Reports
+# ============================================
+reports/**
+!reports/.gitkeep
+!reports/whisper_large/
+!reports/whisper_large/**
+reports/benchmarks.md
+reports/duplicates_*.csv
+reports/duplicates_*.json
+reports/duplicates_move_*.sh
+reports/*.pdf
+reports/*.html
+reports/INTEGRATION_UNUSED_CODE.txt
+reports/deps.dot
+reports/deps.txt
+reports/importtime_app_main.txt
+reports/ruff_unused.txt
+reports/vulture.txt
+ENGINEERING.md
+
+# ============================================
+# Media Files
+# ============================================
+
+# ============================================
+# Archives
+# ============================================
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tgz
+*.rar
+*.7z
+
+# ============================================
+# Temporary Files
+# ============================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# ============================================
+# Logs and Misc
+backend.log
+
+# ============================================
+# MLflow
+# ============================================
+mlruns/
+mlartifacts/
+
+# ============================================
+# Monitoring
+# ============================================
+.prometheus/
+grafana/data/
+
+# ============================================
+# Docker
+# ============================================
+docker-compose.override.yml
+
+# ============================================
+# Cache
+# ============================================
+.ruff_cache/
+.mypy_cache/
+.pytype/
+.dmypy.json
+dmypy.json
+
+# ============================================
+# Legacy paths (from original gitignore)
+# ============================================
+src/models/
+src/experiments/
+datasets/
+
+# ============================================
+# Keep These
+# ============================================
+!.gitkeep
+!.github/

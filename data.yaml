@@ -1,0 +1,8 @@
+path: /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/dataset # dataset root dir
+train: images/train
+val: images/val
+
+names:
+  0: crack
+  1: dent
+  2: scratch

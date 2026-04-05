@@ -1,0 +1,1 @@
+"""Sentifargo package."""

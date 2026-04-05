@@ -1,0 +1,4 @@
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment_name: Sentifargo_Experiments
+  model_registry: true

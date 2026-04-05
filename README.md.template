@@ -1,0 +1,23 @@
+# SentinelForge (OmniChatX / UAIS-V2)
+
+Offline-first multimodal AI platform: Data Engineering + ML Engineering + AI Engineering.
+
+## Quickstart (local)
+- Create venv, install deps
+- Start API (FastAPI)
+- Optionally start UI (Streamlit)
+
+## Architecture
+- src/api: routers
+- src/services: business logic
+- src/data_eng: ingestion/validation/splits/features
+- src/ml: trainers/eval/registry/serving
+- src/ai: agent router + RAG
+- src/ops: metrics/health/readiness
+
+## Proof Pack
+- DATASETS.md
+- TRAINING.md
+- docs/model_cards/
+- reports/ + runs/
+- tests/ + CI

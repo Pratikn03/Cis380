@@ -1,0 +1,244 @@
+scalar JSON
+
+type Query {
+  viewer: Viewer
+  systemHealth: SystemHealth!
+  jobs(limit: Int = 50): [JobRecord!]!
+  job(id: ID!): JobRecord
+  models: [ModelRecord!]!
+  datasets: [DatasetRecord!]!
+  ragStatus: RagStatus!
+  dashboardSummary: DashboardSummary!
+  trainingOverview: TrainingOverview!
+  trainingDomain(domain: String!): TrainingDomain!
+}
+
+type Mutation {
+  login(username: String!, password: String!): AuthPayload!
+  refreshToken(token: String!): AuthPayload!
+  startJob(input: StartJobInput!): JobRecord!
+  queryRag(query: String!, topK: Int = 6, returnChunks: Boolean = false): RagAnswer!
+  runRisk(input: RiskInput!): RiskResult!
+  scoreFraud(features: [Float!]!): ScoreResult!
+  scoreCyber(features: [Float!]!): ScoreResult!
+  scoreBehavior(features: [Float!]!): ScoreResult!
+  createUploadSession(input: UploadSessionInput!): UploadSessionResult!
+  finalizeUpload(input: FinalizeUploadInput!): FinalizeUploadResult!
+
+  missionChat(prompt: String!, useRag: Boolean = true): JSON!
+  recommendMovies(prompt: String!, topK: Int = 5): RecommendationResult!
+  recommendClothes(prompt: String!, topK: Int = 5): RecommendationResult!
+  analyzeVoiceEmotion(input: MediaAnalyzeInput!): JSON!
+  analyzeVideoEmotion(input: MediaAnalyzeInput!): JSON!
+  detectDeepfake(input: MediaAnalyzeInput!): JSON!
+  detectBrandLogos(input: MediaAnalyzeInput!): JSON!
+}
+
+type Subscription {
+  jobProgress(jobId: ID!): JobProgressEvent!
+  inferenceTrace(correlationId: String!): InferenceTraceEvent!
+  systemAlerts: SystemAlert!
+}
+
+type Viewer {
+  id: ID!
+  username: String!
+  email: String
+  roles: [String!]!
+  isActive: Boolean!
+}
+
+type SystemHealth {
+  status: String!
+  service: String!
+  version: String!
+  uptimeSeconds: Float
+}
+
+type JobRecord {
+  jobId: ID!
+  taskId: String
+  type: String!
+  status: String!
+  progress: Float!
+  message: String!
+  createdAt: String
+}
+
+type ModelRecord {
+  id: ID!
+  modelName: String!
+  version: String!
+  status: String!
+  createdAt: String
+}
+
+type DatasetRecord {
+  id: ID!
+  name: String!
+  location: String!
+  license: String!
+  sizeBytes: Float!
+  createdAt: String
+}
+
+type RagStatus {
+  status: String!
+  docsCount: Int
+  chunksCount: Int
+}
+
+type RagAnswer {
+  status: String!
+  answer: String!
+  citations: [String!]!
+  retrieval: String
+}
+
+type RiskResult {
+  cyberRisk: Float!
+  behaviorRisk: Float!
+  fraudRisk: Float!
+  fusionRisk: Float!
+  decision: String!
+  reasonCode: String!
+  explanation: String
+}
+
+type ScoreResult {
+  score: Float!
+  inputFeatures: Int!
+  expectedFeatures: Int
+}
+
+type AuthPayload {
+  accessToken: String!
+  refreshToken: String!
+  tokenType: String!
+}
+
+type UploadSessionResult {
+  uploadUrl: String!
+  objectKey: String!
+  expiresAt: String!
+  maxBytes: Int!
+  contentTypes: [String!]!
+}
+
+type FinalizeUploadResult {
+  status: String!
+  objectKey: String!
+  correlationId: String!
+  jobId: String
+}
+
+type JobProgressEvent {
+  jobId: ID!
+  status: String!
+  progress: Float!
+  message: String!
+  timestamp: String!
+}
+
+type InferenceTraceEvent {
+  correlationId: String!
+  step: String!
+  status: String!
+  message: String!
+  timestamp: String!
+  latencyMs: Float
+}
+
+type SystemAlert {
+  level: String!
+  message: String!
+  component: String!
+  timestamp: String!
+}
+
+type DashboardAlert {
+  level: String!
+  message: String!
+  component: String!
+  timestamp: String!
+}
+
+type DashboardSummary {
+  fraudAlerts: Int!
+  docsIndexed: Int!
+  activeJobs: Int!
+  riskScore: Int!
+  alerts: [DashboardAlert!]!
+}
+
+type RecommendationItem {
+  id: String!
+  title: String!
+  score: Float!
+  reason: String
+}
+
+type RecommendationResult {
+  mode: String!
+  items: [RecommendationItem!]!
+  raw: JSON
+}
+
+type TrainingMetrics {
+  accuracy: Float
+  f1: Float
+  auc: Float
+  precision: Float
+  recall: Float
+}
+
+type TrainingDomain {
+  domain: String!
+  status: String!
+  datasetReady: Boolean!
+  modelReady: Boolean!
+  metrics: TrainingMetrics
+  sourcePath: String!
+  updatedAt: String
+  blockers: [String!]!
+}
+
+type TrainingOverview {
+  generatedAt: String
+  domains: [TrainingDomain!]!
+  readyCount: Int!
+  totalCount: Int!
+}
+
+input StartJobInput {
+  type: String!
+  rebuild: Boolean
+  script: String
+  args: [String!]
+}
+
+input RiskInput {
+  loginCountry: String = "US"
+  deviceKnown: Boolean = true
+  loginTime: Float = 12.0
+  clicksPerMinute: Float = 10.0
+  filesAccessed: Int = 0
+  transactionAmount: Float = 0.0
+}
+
+input UploadSessionInput {
+  fileName: String!
+  contentType: String!
+  maxBytes: Int
+}
+
+input FinalizeUploadInput {
+  objectKey: String!
+  tool: String!
+  correlationId: String!
+}
+
+input MediaAnalyzeInput {
+  fileName: String
+  mediaUrl: String
+}

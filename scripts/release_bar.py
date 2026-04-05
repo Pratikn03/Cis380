@@ -179,20 +179,29 @@ def _load_auth_sources() -> tuple[list[str], list[str]]:
     auth_provider = ROOT / "ui-web" / "next" / "src" / "components" / "auth" / "AuthProvider.tsx"
     app_main = ROOT / "app" / "main.py"
     paths = [runtime, login, auth_provider, app_main]
-    text = "\n".join(path.read_text(encoding="utf-8", errors="ignore") for path in paths if path.exists())
+    runtime_text = runtime.read_text(encoding="utf-8", errors="ignore") if runtime.exists() else ""
+    login_text = login.read_text(encoding="utf-8", errors="ignore") if login.exists() else ""
+    auth_provider_text = (
+        auth_provider.read_text(encoding="utf-8", errors="ignore") if auth_provider.exists() else ""
+    )
+    app_main_text = app_main.read_text(encoding="utf-8", errors="ignore") if app_main.exists() else ""
+    text = "\n".join((runtime_text, login_text, auth_provider_text, app_main_text))
 
     signals: list[str] = []
-    if re.search(r'return\s+raw\s*===\s*"jwt"\s*\?\s*"jwt"\s*:\s*"disabled"', text):
+    if re.search(r'return\s+raw\s*===\s*"jwt"\s*\?\s*"jwt"\s*:\s*"disabled"', runtime_text):
         signals.append("NEXT_PUBLIC_AUTH_MODE defaults to disabled")
-    if re.search(r"Authentication Disabled|No Login Required", text):
+    if re.search(r"Authentication Disabled|No Login Required", login_text):
         signals.append("login page advertises disabled auth")
-    if re.search(r'authenticated:\s*authMode\s*===\s*"disabled"\s*\?\s*true\s*:\s*Boolean\(token\)', text):
+    if re.search(
+        r'authenticated:\s*authMode\s*===\s*"disabled"\s*\?\s*true\s*:\s*Boolean\(token\)',
+        auth_provider_text,
+    ):
         signals.append("disabled auth mode treats visitors as authenticated")
-    if 'app.mount("/ui"' in text:
+    if 'app.mount("/ui"' in app_main_text and 'ENABLE_LEGACY_RUNTIME", "false"' not in app_main_text:
         signals.append("backend still mounts legacy /ui frontend by default")
-    if "Legacy routers (no authentication required for demo)" in text:
+    if "Legacy routers (no authentication required for demo)" in app_main_text:
         signals.append("legacy demo routers remain in app.main")
-    if 'from app.legacy.api.deps import require_auth' in text:
+    if 'from app.legacy.api.deps import require_auth' in app_main_text:
         signals.append("canonical app still depends on legacy auth deps")
 
     return [str(path) for path in paths if path.exists()], signals
@@ -400,27 +409,27 @@ def _production_blockers(now: dt.datetime) -> Pillar:
     plan = ROOT / "docs" / "PRODUCTION_READINESS_PLAN.md"
     compose = ROOT / "docker-compose.production.yml"
     app_main = ROOT / "app" / "main.py"
-    text = "\n".join(
-        path.read_text(encoding="utf-8", errors="ignore") for path in [plan, compose, app_main] if path.exists()
-    )
+    plan_text = plan.read_text(encoding="utf-8", errors="ignore") if plan.exists() else ""
+    compose_text = compose.read_text(encoding="utf-8", errors="ignore") if compose.exists() else ""
+    app_main_text = app_main.read_text(encoding="utf-8", errors="ignore") if app_main.exists() else ""
     _, freshness_hours, generated_at = _freshness_payload(plan, now)
-    signals = [
-        signal
-        for signal in [
-            "Rotate exposed secrets",
-            "Enforce auth globally",
-            "Bootstrap safety",
-            "CORS must be explicit",
-            "Allowed hosts & HTTPS",
-            "legacy routes allow unauthenticated access",
-            'CORS_ORIGINS=${CORS_ORIGINS:-*}',
-            'ALLOWED_HOSTS=${ALLOWED_HOSTS:-}',
-            'FORCE_HTTPS=${FORCE_HTTPS:-false}',
-            'app.mount("/ui"',
-            "Legacy routers (no authentication required for demo)",
-        ]
-        if signal in text
-    ]
+    signals: list[str] = []
+    if "Rotate exposed secrets" in plan_text:
+        signals.append("Rotate exposed secrets")
+    if "Enforce auth globally" in plan_text:
+        signals.append("Enforce auth globally")
+    if "Bootstrap safety" in plan_text:
+        signals.append("Bootstrap safety")
+    if 'CORS_ORIGINS=${CORS_ORIGINS:-*}' in compose_text:
+        signals.append("CORS must be explicit")
+    if 'ALLOWED_HOSTS=${ALLOWED_HOSTS:-}' in compose_text or 'FORCE_HTTPS=${FORCE_HTTPS:-false}' in compose_text:
+        signals.append("Allowed hosts & HTTPS")
+    if "legacy routes allow unauthenticated access" in plan_text:
+        signals.append("legacy routes allow unauthenticated access")
+    if 'app.mount("/ui"' in app_main_text and 'ENABLE_LEGACY_RUNTIME", "false"' not in app_main_text:
+        signals.append('app.mount("/ui"')
+    if "Legacy routers (no authentication required for demo)" in app_main_text:
+        signals.append("Legacy routers (no authentication required for demo)")
     blocking = bool(signals)
     status = "blocking" if blocking else "pass"
     return Pillar(

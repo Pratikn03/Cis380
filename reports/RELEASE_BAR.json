@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-04-05T19:23:40.734332+00:00",
+  "generated_at": "2026-04-05T19:42:23.051197+00:00",
   "pillars": {
     "artifact_readiness": {
       "blocking": false,
       "evidence_path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/reports/ARTIFACT_GATE.json",
-      "freshness_hours": 1716.8,
+      "freshness_hours": 1717.1,
       "generated_at": "2026-01-24T06:35:09.717357+00:00",
       "missing_optional_count": 4,
       "missing_required_count": 0,
@@ -13,36 +13,34 @@
       "strict": true
     },
     "auth_contract": {
-      "blocking": true,
+      "blocking": false,
       "evidence_path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/ui-web/next/src/lib/runtime.ts, /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/ui-web/next/src/app/login/page.tsx, /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/ui-web/next/src/components/auth/AuthProvider.tsx, /Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/app/main.py",
-      "freshness_hours": 0.0,
+      "freshness_hours": 0.3,
       "generated_at": "2026-04-05T19:21:39.051823+00:00",
-      "signals": [
-        "backend still mounts legacy /ui frontend by default"
-      ],
-      "status": "blocking"
+      "signals": [],
+      "status": "pass"
     },
     "code_quality": {
-      "active_modules": [],
-      "blocking": true,
-      "default_threshold": 95,
-      "evidence_path": "quality/waivers.yml",
-      "expired_modules": [
+      "active_modules": [
         "gateway_kotlin",
         "next_frontend",
         "python_api",
         "python_quality_scripts"
       ],
+      "blocking": false,
+      "default_threshold": 95,
+      "evidence_path": "quality/waivers.yml",
+      "expired_modules": [],
       "freshness_hours": 0.0,
-      "generated_at": "2026-04-05T19:22:08.978169+00:00",
+      "generated_at": "2026-04-05T19:41:41.867110+00:00",
       "max_waiver_days": 28,
-      "status": "blocking",
+      "status": "pass",
       "validation_errors": []
     },
     "docs_quality": {
       "blocking": false,
       "evidence_path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/reports/docs_scorecard.json",
-      "freshness_hours": 1219.4,
+      "freshness_hours": 1219.7,
       "generated_at": "2026-02-14T00:00:00+00:00",
       "score": 100.0,
       "stale": true,
@@ -54,21 +52,18 @@
       "blocking": true,
       "compose_path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/docker-compose.production.yml",
       "evidence_path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/docs/PRODUCTION_READINESS_PLAN.md",
-      "freshness_hours": 0.0,
+      "freshness_hours": 0.3,
       "generated_at": "2026-04-05T19:23:01.022328+00:00",
       "signals": [
         "Rotate exposed secrets",
-        "Bootstrap safety",
-        "CORS must be explicit",
-        "Allowed hosts & HTTPS",
-        "app.mount(\"/ui\""
+        "Bootstrap safety"
       ],
       "status": "blocking"
     },
     "runtime_smoke": {
       "blocking": true,
       "evidence_path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/reports/LIVE_STACK_SMOKE_2026-03-05.md",
-      "freshness_hours": 763.4,
+      "freshness_hours": 763.7,
       "generated_at": "2026-03-05T00:00:00+00:00",
       "signals": [
         "INTERNAL_ERROR",
@@ -82,41 +77,42 @@
     "training_data_readiness": {
       "blocking": false,
       "evidence_path": "/Users/pratik_n/Desktop/MyComputer/universal-anomaly-intelligence-v2/reports/TRAINING_DATA.json",
-      "freshness_hours": 1043.1,
-      "generated_at": "2026-02-21T08:20:05+00:00",
+      "freshness_hours": 0.3,
+      "generated_at": "2026-04-05T19:25:13+00:00",
       "required_count": 6,
       "required_ok": true,
-      "status": "warning",
+      "status": "pass",
       "voice_source": "processed_balanced"
     }
   },
   "release_ready": false,
   "summary": {
     "blocking_pillars": [
-      "auth_contract",
-      "code_quality",
       "runtime_smoke",
       "production_blockers"
     ],
-    "pass_pillars": [],
+    "pass_pillars": [
+      "auth_contract",
+      "code_quality",
+      "training_data_readiness"
+    ],
     "waivers": {
-      "active_modules": [],
-      "default_threshold": 95,
-      "errors": [],
-      "expired_modules": [
+      "active_modules": [
         "gateway_kotlin",
         "next_frontend",
         "python_api",
         "python_quality_scripts"
       ],
+      "default_threshold": 95,
+      "errors": [],
+      "expired_modules": [],
       "freshness_hours": 0.0,
-      "generated_at": "2026-04-05T19:22:08.978169+00:00",
+      "generated_at": "2026-04-05T19:41:41.867110+00:00",
       "max_waiver_days": 28,
       "path": "quality/waivers.yml"
     },
     "warning_pillars": [
       "artifact_readiness",
-      "training_data_readiness",
       "docs_quality"
     ]
   }

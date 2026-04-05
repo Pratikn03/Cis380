@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+pyyaml
+numpy
+pandas
+scikit-learn
+python-multipart
+prometheus-client
+pytest
