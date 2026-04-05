@@ -21,6 +21,8 @@ class UploadService(
     private val presigner: S3Presigner,
     private val s3Client: S3Client,
 ) {
+    private val finalizeHeadAttempts = 4
+    private val finalizeHeadBackoffMillis = 250L
     private val allowedTools = setOf("vision", "voice", "video", "brand", "rag")
     private val allowedContentTypePrefixes = listOf("image/", "audio/", "video/")
     private val allowedExactContentTypes = setOf(
@@ -75,11 +77,7 @@ class UploadService(
             .bucket(props.uploads.bucket)
             .key(input.objectKey)
             .build()
-        try {
-            s3Client.headObject(headRequest)
-        } catch (_: Exception) {
-            throw IllegalArgumentException("Uploaded object not found or inaccessible for key '${input.objectKey}'.")
-        }
+        assertUploadedObjectAccessible(headRequest, input.objectKey)
 
         return FinalizeUploadResult(
             status = "accepted",
@@ -94,6 +92,25 @@ class UploadService(
         val cleaned = base.replace(Regex("[^A-Za-z0-9._-]"), "_").take(120)
         require(cleaned.isNotBlank()) { "fileName is invalid." }
         return cleaned
+    }
+
+    private fun assertUploadedObjectAccessible(headRequest: HeadObjectRequest, objectKey: String) {
+        var lastError: Exception? = null
+        repeat(finalizeHeadAttempts) { attempt ->
+            try {
+                s3Client.headObject(headRequest)
+                return
+            } catch (ex: Exception) {
+                lastError = ex
+                if (attempt < finalizeHeadAttempts - 1) {
+                    Thread.sleep(finalizeHeadBackoffMillis)
+                }
+            }
+        }
+        throw IllegalArgumentException(
+            "Uploaded object not found or inaccessible for key '$objectKey'.",
+            lastError,
+        )
     }
 
     private fun isAllowedContentType(contentType: String): Boolean {

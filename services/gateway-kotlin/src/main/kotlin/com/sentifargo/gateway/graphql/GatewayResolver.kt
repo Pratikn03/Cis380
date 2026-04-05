@@ -35,6 +35,7 @@ import org.springframework.graphql.data.method.annotation.ContextValue
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SubscriptionMapping
+import org.springframework.graphql.execution.ErrorType
 import org.springframework.stereotype.Controller
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -52,7 +53,10 @@ class GatewayResolver(
     }
 
     private fun badRequest(message: String): GraphqlErrorException {
-        return GraphqlErrorException.newErrorException().message(message).build()
+        return GraphqlErrorException.newErrorException()
+            .message(message)
+            .errorClassification(ErrorType.BAD_REQUEST)
+            .build()
     }
 
     @QueryMapping
