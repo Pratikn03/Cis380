@@ -41,6 +41,29 @@ type CachedTrainingOverview = {
   payload: TrainingOverview;
 };
 
+const READY_ALIASES = new Set(["ok", "ready", "green", "pass", "passed", "fresh"]);
+const DEGRADED_ALIASES = new Set([
+  "warn",
+  "warning",
+  "yellow",
+  "degraded",
+  "needs_preprocess",
+  "stale",
+  "soft",
+  "soft_gate",
+]);
+const BLOCKED_ALIASES = new Set([
+  "missing",
+  "error",
+  "critical",
+  "red",
+  "fail",
+  "failed",
+  "mismatch",
+  "blocked",
+]);
+const ADVISORY_ALIASES = new Set(["advisory", "historical", "manual"]);
+
 function parseIsoDate(value: string | null | undefined): Date | null {
   if (!value) return null;
   const parsed = new Date(value);
@@ -79,7 +102,25 @@ function writeCachedOverview(payload: TrainingOverview): void {
 }
 
 function countReady(domains: TrainingDomain[]): number {
-  return domains.filter((domain) => domain.status === "ready").length;
+  return domains.filter((domain) => isTrainingReadyStatus(domain.status)).length;
+}
+
+export function normalizeTrainingStatus(status: string | null | undefined): string {
+  const normalized = (status ?? "").trim().toLowerCase().replace(/-/g, "_");
+  if (!normalized) return "blocked";
+  if (READY_ALIASES.has(normalized)) return "ready";
+  if (DEGRADED_ALIASES.has(normalized)) return "degraded";
+  if (BLOCKED_ALIASES.has(normalized)) return "blocked";
+  if (ADVISORY_ALIASES.has(normalized)) return "advisory";
+  return normalized;
+}
+
+export function isTrainingReadyStatus(status: string | null | undefined): boolean {
+  return normalizeTrainingStatus(status) === "ready";
+}
+
+export function isTrainingBlockingStatus(status: string | null | undefined): boolean {
+  return normalizeTrainingStatus(status) === "blocked";
 }
 
 export function metricToPercent(value: number | null | undefined): number | null {
@@ -133,7 +174,15 @@ export function useTrainingReadiness() {
       : "unavailable";
 
   const effectiveOverview = source === "live" ? liveOverview : cached?.payload;
-  const domains = effectiveOverview?.domains ?? [];
+  const domains = useMemo(
+    () =>
+      (effectiveOverview?.domains ?? []).map((domain) => ({
+        ...domain,
+        status: normalizeTrainingStatus(domain.status),
+        blockers: Array.isArray(domain.blockers) ? domain.blockers : [],
+      })),
+    [effectiveOverview?.domains],
+  );
 
   const domainsByKey = useMemo(() => {
     const map: Record<string, TrainingDomain> = {};
@@ -148,7 +197,9 @@ export function useTrainingReadiness() {
   const totalCount =
     effectiveOverview?.totalCount ?? domains.length;
 
-  const hasBlockers = domains.some((domain) => domain.blockers.length > 0);
+  const hasBlockers = domains.some(
+    (domain) => domain.blockers.length > 0 || isTrainingBlockingStatus(domain.status),
+  );
   const staleAgeMinutes =
     source === "live"
       ? getStaleAgeMinutes(effectiveOverview?.generatedAt)
@@ -158,7 +209,7 @@ export function useTrainingReadiness() {
     if (source === "unavailable" && query.loading) return "loading";
     if (source === "unavailable" && query.error) return "offline";
     if (!domains.length) return "empty";
-    if (domains.every((domain) => domain.status === "ready")) return "ready";
+    if (domains.every((domain) => isTrainingReadyStatus(domain.status))) return "ready";
     return "error";
   })();
 
