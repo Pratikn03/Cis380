@@ -1,16 +1,28 @@
 """
 Sentifargo Core Module
-Configuration, middleware, and health checks for production deployment.
+Configuration, middleware, and health checks for production deployment
 """
 
-from __future__ import annotations
-
-from typing import Any
+from app.core.config import Settings, get_settings, settings
+from app.core.middleware import (
+    SentifargoException,
+    ValidationError,
+    AuthenticationError,
+    AuthorizationError,
+    RateLimitError,
+    ModelError,
+    NotFoundError,
+    setup_production_middleware,
+)
+from app.core.auth import check_token_query, require_auth
+from app.core.health import router as health_router
 
 __all__ = [
+    # Config
     "Settings",
     "get_settings",
     "settings",
+    # Exceptions
     "SentifargoException",
     "ValidationError",
     "AuthenticationError",
@@ -18,31 +30,11 @@ __all__ = [
     "RateLimitError",
     "ModelError",
     "NotFoundError",
+    # Middleware
     "setup_production_middleware",
+    # Auth
+    "require_auth",
+    "check_token_query",
+    # Health
     "health_router",
 ]
-
-
-def __getattr__(name: str) -> Any:
-    if name in {"Settings", "get_settings", "settings"}:
-        from app.core.config import Settings, get_settings, settings
-
-        return {"Settings": Settings, "get_settings": get_settings, "settings": settings}[name]
-    if name in {
-        "SentifargoException",
-        "ValidationError",
-        "AuthenticationError",
-        "AuthorizationError",
-        "RateLimitError",
-        "ModelError",
-        "NotFoundError",
-        "setup_production_middleware",
-    }:
-        from app.core import middleware as _middleware
-
-        return getattr(_middleware, name)
-    if name == "health_router":
-        from app.core.health import router as health_router
-
-        return health_router
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

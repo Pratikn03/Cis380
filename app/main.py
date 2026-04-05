@@ -11,19 +11,17 @@ This is the main entry point for the FastAPI backend server. It:
 1. Creates the FastAPI web application
 2. Sets up API routes for different ML services (fraud, cyber, vision, etc.)
 3. Configures CORS (Cross-Origin Resource Sharing) for web access
-4. Serves the React frontend as static files
-5. Provides health check endpoints for monitoring
+4. Provides health check endpoints for monitoring
 
 HOW TO RUN:
 -----------
     uvicorn app.main:app --reload --port 8000
 
-Then visit: http://localhost:8000/ui for the web interface
-            http://localhost:8000/docs for API documentation
+Then visit: http://localhost:8000/docs for API documentation
 
 ARCHITECTURE:
 -------------
-    [Frontend React App] <---> [This FastAPI Server] <---> [ML Models/Services]
+    [Next.js Frontend] <---> [This FastAPI Server] <---> [ML Models/Services]
                                       |
                                       v
                               [Database/Storage]
@@ -46,7 +44,6 @@ from datetime import datetime, timedelta, timezone
 
 # FastAPI - Modern web framework for building APIs
 from fastapi import Depends, FastAPI, Request
-from fastapi.staticfiles import StaticFiles  # Serves React frontend files
 from prometheus_client import Counter, Histogram  # Metrics for monitoring
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
@@ -80,13 +77,13 @@ if os.getenv("SKIP_TORCH_PREIMPORT", "false").lower() not in {"1", "true", "yes"
 # IMPORT API ROUTES - Each route handles a specific ML service
 # ==============================================================================
 from app.core import settings, setup_production_middleware  # noqa: E402
-from app.core.auth import bootstrap_admin, bootstrap_roles  # noqa: E402
+from app.core.auth import bootstrap_admin, bootstrap_roles, require_auth  # noqa: E402
 from app.core.startup import bootstrap_admin_user as run_bootstrap_admin_user  # noqa: E402
 from app.core.startup import bootstrap_credentials as resolve_bootstrap_credentials  # noqa: E402
 from app.core.startup import initialize_dev_database as run_initialize_dev_database  # noqa: E402
 from app.db.session import SessionLocal, ensure_schema  # noqa: E402
-from app.legacy.api.deps import require_auth  # noqa: E402
-from app.legacy.api.routes import behavior, chat, cyber, fraud, rag, recommend, vision  # noqa: E402
+
+_legacy_runtime_enabled = os.getenv("ENABLE_LEGACY_RUNTIME", "false").lower() in {"1", "true", "yes"}
 
 # Initialize optional router variables (set to None if module not available)
 _app_risk_router = None  # Unified risk scoring
@@ -102,6 +99,13 @@ _app_vision_temporal_router = None  # Video/temporal analysis
 _app_object_router = None  # Object detection (YOLOv3)
 _api_v1_router = None
 _app_internal_router = None
+_legacy_chat_router = None
+_legacy_rag_router = None
+_legacy_recommend_router = None
+_legacy_behavior_router = None
+_legacy_fraud_router = None
+_legacy_cyber_router = None
+_legacy_vision_router = None
 
 # ==============================================================================
 # OPTIONAL ROUTER IMPORTS
@@ -136,6 +140,19 @@ try:  # pragma: no cover
 except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.api.rag router unavailable: %s", exc)
     _app_rag_router = None
+
+if _legacy_runtime_enabled:
+    try:  # pragma: no cover
+        from app.legacy.api.routes import behavior as _legacy_behavior_router
+        from app.legacy.api.routes import chat as _legacy_chat_router
+        from app.legacy.api.routes import cyber as _legacy_cyber_router
+        from app.legacy.api.routes import fraud as _legacy_fraud_router
+        from app.legacy.api.routes import rag as _legacy_rag_router
+        from app.legacy.api.routes import recommend as _legacy_recommend_router
+        from app.legacy.api.routes import vision as _legacy_vision_router
+    except Exception as exc:  # pragma: no cover
+        logging.getLogger("omnichatx").warning("legacy routers unavailable: %s", exc)
+        _legacy_runtime_enabled = False
 
 try:  # pragma: no cover
     from app.api.v1.router import api_v1 as _api_v1_router
@@ -275,25 +292,25 @@ if os.getenv("FORCE_HTTPS", "false").lower() == "true":
     app.add_middleware(HTTPSRedirectMiddleware)
 
 # ==============================================================================
-# STATIC FILES - Serve the React frontend
+# LEGACY UI - Optional rollback surface, disabled by default
 # ==============================================================================
-# The React app is built to ui-web/frontend/dist/
-# This makes it available at http://localhost:8000/ui/
 ui_dir = Path(__file__).resolve().parents[1] / "ui-web" / "frontend" / "dist"
-if ui_dir.exists():
+if _legacy_runtime_enabled and ui_dir.exists():
+    from fastapi.staticfiles import StaticFiles  # Serves legacy frontend files
+
     app.mount("/ui", StaticFiles(directory=ui_dir, html=True), name="ui")
 
 # ==============================================================================
 # REGISTER API ROUTERS - Each router handles specific endpoints
 # ==============================================================================
-# Legacy routers (no authentication required for demo)
-app.include_router(chat.router)  # /chat - Chatbot conversations
-app.include_router(rag.router)  # /rag - Document Q&A
-app.include_router(recommend.router)  # /recommend - Recommendations
-app.include_router(behavior.router)  # /behavior - User behavior analysis
-app.include_router(fraud.router)  # /fraud - Fraud detection
-app.include_router(cyber.router)  # /cyber - Cybersecurity threats
-app.include_router(vision.router)  # /vision - Image analysis
+if _legacy_runtime_enabled:
+    app.include_router(_legacy_chat_router)  # /chat - Chatbot conversations
+    app.include_router(_legacy_rag_router)  # /rag - Document Q&A
+    app.include_router(_legacy_recommend_router)  # /recommend - Recommendations
+    app.include_router(_legacy_behavior_router)  # /behavior - User behavior analysis
+    app.include_router(_legacy_fraud_router)  # /fraud - Fraud detection
+    app.include_router(_legacy_cyber_router)  # /cyber - Cybersecurity threats
+    app.include_router(_legacy_vision_router)  # /vision - Image analysis
 
 # Health check router (production monitoring)
 if _health_router is not None:
@@ -301,37 +318,36 @@ if _health_router is not None:
     app.include_router(_health_router)
 
 # New routers with authentication (protected endpoints)
+_auth_dependency = [Depends(require_auth)]
 if _app_risk_router is not None:
-    app.include_router(_app_risk_router, prefix="/api", dependencies=[Depends(require_auth)])
+    app.include_router(_app_risk_router, prefix="/api", dependencies=_auth_dependency)
 if _app_monitor_router is not None:
-    app.include_router(_app_monitor_router, prefix="/api", dependencies=[Depends(require_auth)])
+    app.include_router(_app_monitor_router, prefix="/api", dependencies=_auth_dependency)
 if _app_voice_router is not None:
-    app.include_router(_app_voice_router, prefix="/api", dependencies=[Depends(require_auth)])
+    app.include_router(_app_voice_router, prefix="/api", dependencies=_auth_dependency)
 if _app_rag_router is not None:
-    app.include_router(_app_rag_router, prefix="/api", dependencies=[Depends(require_auth)])
+    app.include_router(_app_rag_router, prefix="/api", dependencies=_auth_dependency)
 if _app_dsa_rag_router is not None:
-    app.include_router(_app_dsa_rag_router, prefix="/api", dependencies=[Depends(require_auth)])
+    app.include_router(_app_dsa_rag_router, prefix="/api", dependencies=_auth_dependency)
 if _app_dsa_algo_router is not None:
-    app.include_router(_app_dsa_algo_router, dependencies=[Depends(require_auth)])
+    app.include_router(_app_dsa_algo_router, dependencies=_auth_dependency)
 if _app_brand_router is not None:
-    app.include_router(_app_brand_router, dependencies=[Depends(require_auth)])
+    app.include_router(_app_brand_router, dependencies=_auth_dependency)
 if _app_object_router is not None:
-    app.include_router(_app_object_router, dependencies=[Depends(require_auth)])
+    app.include_router(_app_object_router, dependencies=_auth_dependency)
 if _app_stt_router is not None:
-    app.include_router(_app_stt_router, prefix="/api", dependencies=[Depends(require_auth)])
+    app.include_router(_app_stt_router, prefix="/api", dependencies=_auth_dependency)
 if _app_tts_router is not None:
-    app.include_router(_app_tts_router, prefix="/api", dependencies=[Depends(require_auth)])
+    app.include_router(_app_tts_router, prefix="/api", dependencies=_auth_dependency)
 if _app_vision_temporal_router is not None:
-    app.include_router(
-        _app_vision_temporal_router, prefix="/api", dependencies=[Depends(require_auth)]
-    )
+    app.include_router(_app_vision_temporal_router, prefix="/api", dependencies=_auth_dependency)
 
 # Versioned API (Tier-6 contract)
 if _api_v1_router is not None:
     app.include_router(_api_v1_router)
 
 if _app_internal_router is not None:
-    app.include_router(_app_internal_router, dependencies=[Depends(require_auth)])
+    app.include_router(_app_internal_router, dependencies=_auth_dependency)
 
 # ==============================================================================
 # STARTUP TASKS - Best-effort index build for DSA RAG
@@ -411,40 +427,42 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-_LEGACY_PREFIXES = (
-    "/chat",
-    "/rag",
-    "/recommend",
-    "/behavior",
-    "/fraud",
-    "/cyber",
-    "/vision",
-    "/api/monitor",
-    "/api/risk",
-    "/api/voice",
-    "/api/rag",
-    "/api/dsa-rag",
-    "/api/dsa-algorithms",
-    "/api/vision",
-    "/api/recommend",
-    "/api/fraud",
-    "/api/cyber",
-    "/api/behavior",
-)
-_SUNSET_AT = (datetime.now(timezone.utc) + timedelta(days=90)).strftime("%a, %d %b %Y %H:%M:%S GMT")
+if _legacy_runtime_enabled:
+    _LEGACY_PREFIXES = (
+        "/chat",
+        "/rag",
+        "/recommend",
+        "/behavior",
+        "/fraud",
+        "/cyber",
+        "/vision",
+        "/api/monitor",
+        "/api/risk",
+        "/api/voice",
+        "/api/rag",
+        "/api/dsa-rag",
+        "/api/dsa-algorithms",
+        "/api/vision",
+        "/api/recommend",
+        "/api/fraud",
+        "/api/cyber",
+        "/api/behavior",
+    )
+    _SUNSET_AT = (
+        datetime.now(timezone.utc) + timedelta(days=90)
+    ).strftime("%a, %d %b %Y %H:%M:%S GMT")
 
-
-@app.middleware("http")
-async def legacy_deprecation_headers(request: Request, call_next):
-    response = await call_next(request)
-    path = request.url.path
-    if path.startswith("/api/v1") or path.startswith("/internal"):
+    @app.middleware("http")
+    async def legacy_deprecation_headers(request: Request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+        if path.startswith("/api/v1") or path.startswith("/internal"):
+            return response
+        if any(path.startswith(prefix) for prefix in _LEGACY_PREFIXES):
+            response.headers["Deprecation"] = "true"
+            response.headers["Sunset"] = _SUNSET_AT
+            response.headers["Link"] = '</graphql>; rel="successor-version"'
         return response
-    if any(path.startswith(prefix) for prefix in _LEGACY_PREFIXES):
-        response.headers["Deprecation"] = "true"
-        response.headers["Sunset"] = _SUNSET_AT
-        response.headers["Link"] = '</graphql>; rel="successor-version"'
-    return response
 
 
 # ==============================================================================
@@ -543,15 +561,17 @@ def api_health():
 @app.get("/")
 def root_redirect():
     """
-    Root endpoint - Redirects to the UI or returns API info.
-
-    Behavior:
-    - If UI is built: Redirects to /ui/ (React frontend)
-    - If UI not built: Returns a simple JSON message
+    Root endpoint - returns API info and canonical entrypoints.
     """
-    if ui_dir.exists():
+    if _legacy_runtime_enabled and ui_dir.exists():
         return RedirectResponse(url="/ui/")
-    return {"message": "OmniChatX API. UI not found; ensure ui/ directory exists."}
+    return {
+        "message": "Sentifargo FastAPI backend",
+        "canonical_frontend": "Next.js app",
+        "graphql": "/graphql",
+        "docs": "/docs",
+        "legacy_runtime_enabled": _legacy_runtime_enabled,
+    }
 
 
 # ==============================================================================

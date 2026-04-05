@@ -8,11 +8,13 @@ import hmac
 import os
 from typing import TYPE_CHECKING, Callable
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.db.session import SessionLocal
 
 if TYPE_CHECKING:
     from app.db.models import Role, User
@@ -76,9 +78,19 @@ def _get_db():
     yield from _get_db_dependency()
 
 
-def _create_token(data: dict, expires_delta: timedelta) -> str:
-    from jose import jwt
+def _auth_token() -> str | None:
+    return settings.security.auth_token or os.getenv("AUTH_TOKEN") or None
 
+
+def _extract_bearer(authorization: str | None) -> str | None:
+    if not authorization:
+        return None
+    if not authorization.lower().startswith("bearer "):
+        return None
+    return authorization.split(" ", 1)[1].strip()
+
+
+def _create_token(data: dict, expires_delta: timedelta) -> str:
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
@@ -100,9 +112,63 @@ def create_refresh_token(user_id: str) -> str:
 
 
 def _decode_token(token: str) -> dict:
-    from jose import jwt
-
     return jwt.decode(token, settings.security.secret_key, algorithms=[ALGORITHM])
+
+
+def _verify_jwt(token: str, db: Session) -> None:
+    try:
+        payload = _decode_token(token)
+        if payload.get("type") != "access":
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    except JWTError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        ) from exc
+
+    from app.db.models import User
+
+    user = db.get(User, user_id)
+    if not user or not user.is_active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User inactive")
+
+
+async def require_auth(
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(_get_db),
+) -> None:
+    if os.getenv("AUTH_BYPASS", "false").lower() == "true" and settings.app_env != "production":
+        return
+
+    token = _extract_bearer(authorization)
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing bearer token",
+        )
+
+    auth_token = _auth_token()
+    if auth_token and token == auth_token:
+        return
+
+    _verify_jwt(token, db)
+
+
+def check_token_query(token: str | None) -> None:
+    if os.getenv("AUTH_BYPASS", "false").lower() == "true" and settings.app_env != "production":
+        return
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing bearer token",
+        )
+    auth_token = _auth_token()
+    if auth_token and token == auth_token:
+        return
+    with SessionLocal() as db:
+        _verify_jwt(token, db)
 
 
 def get_current_user(
@@ -110,7 +176,6 @@ def get_current_user(
     db: Session = Depends(_get_db),
 ) -> "User":
     from app.db.models import User
-    from jose import JWTError
 
     token = creds.credentials
     try:
