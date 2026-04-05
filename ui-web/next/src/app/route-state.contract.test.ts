@@ -16,6 +16,10 @@ describe("route state contracts", () => {
     expect(source).toContain("training.source === \"cache\"");
     expect(source).toContain("training.source === \"unavailable\"");
     expect(source).toContain("TrainingReadinessStrip");
+    expect(source).toContain("onRefresh={() => runRefresh(\"training\")}");
+    expect(source).toContain("Refresh Dashboard");
+    expect(source).toContain("Inspect Active Jobs");
+    expect(source).toContain("Open Model Registry");
     expect(source).toContain("formatMetric");
   });
 

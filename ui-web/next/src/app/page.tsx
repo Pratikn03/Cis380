@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { AlertFeed } from "@/components/dashboard/AlertFeed";
 import { KpiCard } from "@/components/dashboard/KpiCard";
@@ -42,8 +43,34 @@ export default function DashboardPage() {
     gatewayOffline,
     source: dashboardSource,
     staleAgeMinutes: dashboardStaleAgeMinutes,
+    refetch: refreshDashboard,
   } = useDashboardSummary();
   const training = useTrainingReadiness();
+  const [refreshTarget, setRefreshTarget] = useState<"dashboard" | "training" | "all" | null>(null);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [lastManualRefresh, setLastManualRefresh] = useState<string | null>(null);
+
+  const refreshDashboardOnly = refreshTarget === "dashboard" || refreshTarget === "all";
+  const refreshTrainingOnly = refreshTarget === "training" || refreshTarget === "all";
+
+  const runRefresh = async (target: "dashboard" | "training" | "all") => {
+    setRefreshTarget(target);
+    setRefreshError(null);
+    try {
+      if (target === "dashboard") {
+        await refreshDashboard();
+      } else if (target === "training") {
+        await training.refetch();
+      } else {
+        await Promise.all([refreshDashboard(), training.refetch()]);
+      }
+      setLastManualRefresh(new Date().toLocaleTimeString());
+    } catch (error: unknown) {
+      setRefreshError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setRefreshTarget(null);
+    }
+  };
 
   const mediaCards: MediaInsight[] = [
     {
@@ -114,6 +141,8 @@ export default function DashboardPage() {
         source={training.source}
         staleAgeMinutes={training.staleAgeMinutes}
         hasBlockers={training.hasBlockers}
+        onRefresh={() => runRefresh("training")}
+        refreshing={refreshTrainingOnly}
       />
 
       <section className="dash-main-grid">
@@ -145,12 +174,24 @@ export default function DashboardPage() {
         </article>
 
         <aside className="card dash-actions-panel">
-          <div className="dash-panel-title">Quick Actions</div>
+          <div className="dash-panel-headline">
+            <div className="dash-panel-title">Quick Actions</div>
+            <button className="pill-btn" type="button" onClick={() => void runRefresh("dashboard")} disabled={refreshDashboardOnly}>
+              {refreshDashboardOnly ? "Refreshing dashboard..." : "Refresh Dashboard"}
+            </button>
+          </div>
+          <p className="dash-control-copy">
+            {refreshError
+              ? `Refresh failed: ${refreshError}`
+              : lastManualRefresh
+                ? `Last manual refresh at ${lastManualRefresh}.`
+                : "Pull the latest gateway metrics and readiness signals without leaving the home view."}
+          </p>
           <QuickActionGrid
             actions={[
               { href: "/risk", label: "Run Risk Analysis", tone: "amber" },
-              { href: "/live-media", label: "Upload Media for Analysis", tone: "cyan" },
-              { href: "/models", label: "Recommend Products", tone: "pink" },
+              { href: "/jobs", label: "Inspect Active Jobs", tone: "cyan" },
+              { href: "/models", label: "Review Model Health", tone: "pink" },
               { href: "/rag", label: "Run RAG Query", tone: "blue" },
             ]}
           />
@@ -168,10 +209,10 @@ export default function DashboardPage() {
             Start Chat Analysis
           </Link>
           <Link href="/models" className="dash-strip-btn strip-orange">
-            Movie Recommender
+            Open Model Registry
           </Link>
           <Link href="/datasets" className="dash-strip-btn strip-gold">
-            Clothes Recommender
+            Open Dataset Catalog
           </Link>
           <Link href="/live-media" className="dash-strip-btn strip-blue">
             Analyze Video

@@ -9,6 +9,8 @@ type Props = {
   source: "live" | "cache" | "unavailable";
   staleAgeMinutes: number | null;
   hasBlockers: boolean;
+  onRefresh?: () => Promise<unknown> | void;
+  refreshing?: boolean;
 };
 
 export function TrainingReadinessStrip({
@@ -19,6 +21,8 @@ export function TrainingReadinessStrip({
   source,
   staleAgeMinutes,
   hasBlockers,
+  onRefresh,
+  refreshing = false,
 }: Props) {
   return (
     <section className="sf-training-strip">
@@ -38,6 +42,11 @@ export function TrainingReadinessStrip({
             <span className="sf-training-generated">stale: {staleAgeMinutes ?? 0}m</span>
           )}
           {hasBlockers && <span className="sf-blocker-pill">blockers present</span>}
+          {onRefresh && (
+            <button className="pill-btn" type="button" onClick={() => void onRefresh()} disabled={refreshing}>
+              {refreshing ? "Refreshing readiness..." : "Refresh Training Readiness"}
+            </button>
+          )}
         </div>
       </header>
 

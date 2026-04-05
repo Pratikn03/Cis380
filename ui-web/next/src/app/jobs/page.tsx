@@ -18,6 +18,7 @@ type JobRecord = {
 export default function JobsPage() {
   const [error, setError] = useState("");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [pendingJob, setPendingJob] = useState<JobRecord | null>(null);
 
   const { data, loading, error: queryError, refetch } = useQuery(JOBS, {
     variables: { limit: 50 },
@@ -26,7 +27,12 @@ export default function JobsPage() {
 
   const [startJob, { loading: starting }] = useMutation(START_JOB);
 
-  const jobs: JobRecord[] = useMemo(() => data?.jobs ?? [], [data]);
+  const jobs: JobRecord[] = useMemo(() => {
+    const liveJobs: JobRecord[] = data?.jobs ?? [];
+    if (!pendingJob) return liveJobs;
+    if (liveJobs.some((job) => job.jobId === pendingJob.jobId)) return liveJobs;
+    return [pendingJob, ...liveJobs];
+  }, [data, pendingJob]);
   const activeJobId = selectedJobId ?? jobs[0]?.jobId ?? null;
 
   const { data: progressData } = useSubscription(JOB_PROGRESS, {
@@ -47,10 +53,27 @@ export default function JobsPage() {
           },
         },
       });
-      const id = out.data?.startJob?.jobId;
+      const startedJob = out.data?.startJob;
+      const id = startedJob?.jobId;
+      if (startedJob && id) {
+        setPendingJob({
+          jobId: id,
+          taskId: startedJob.taskId ?? null,
+          type: startedJob.type ?? "rag_index",
+          status: startedJob.status ?? "queued",
+          progress: typeof startedJob.progress === "number" ? startedJob.progress : 0,
+          message: startedJob.message ?? "queued",
+          createdAt: startedJob.createdAt ?? new Date().toISOString(),
+        });
+      }
       if (id) setSelectedJobId(id);
-      await refetch();
+      const refreshed = await refetch();
+      const refreshedJobs: JobRecord[] = refreshed.data?.jobs ?? [];
+      if (id && refreshedJobs.some((job) => job.jobId === id)) {
+        setPendingJob(null);
+      }
     } catch (err: unknown) {
+      setPendingJob(null);
       setError(err instanceof Error ? err.message : String(err));
     }
   };
