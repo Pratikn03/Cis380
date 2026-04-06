@@ -59,7 +59,7 @@ class GatewayResolverTests {
     }
 
     @Test
-    fun `viewer query allows open access when auth header is absent`() {
+    fun `viewer query blocks missing auth header`() {
         server.enqueue(
             MockResponse()
                 .setResponseCode(200)
@@ -67,11 +67,10 @@ class GatewayResolverTests {
                 .setBody("""{"id":"u1","username":"demo","roles":["viewer"],"is_active":true}"""),
         )
 
-        val out = resolver.viewer(null).block()
-        assertEquals("demo", out?.username)
-
-        val request = server.takeRequest()
-        assertEquals("/api/v1/users/me", request.path)
+        val ex = assertThrows(GraphqlErrorException::class.java) {
+            resolver.viewer(null)
+        }
+        assertEquals("Missing authorization token", ex.message)
     }
 
     @Test
@@ -132,5 +131,35 @@ class GatewayResolverTests {
 
         val request = server.takeRequest()
         assertTrue((request.path ?: "").contains("/api/v1/training/domain/fraud"))
+    }
+
+    @Test
+    fun `createUploadSession blocks missing auth header`() {
+        val ex = assertThrows(GraphqlErrorException::class.java) {
+            resolver.createUploadSession(
+                UploadSessionInput(
+                    fileName = "sample.bin",
+                    contentType = "application/pdf",
+                    maxBytes = 10,
+                ),
+                null,
+            )
+        }
+        assertEquals("Missing authorization token", ex.message)
+    }
+
+    @Test
+    fun `finalizeUpload blocks missing auth header`() {
+        val ex = assertThrows(GraphqlErrorException::class.java) {
+            resolver.finalizeUpload(
+                FinalizeUploadInput(
+                    correlationId = "corr",
+                    objectKey = "uploads/example.bin",
+                    tool = "vision",
+                ),
+                null,
+            )
+        }
+        assertEquals("Missing authorization token", ex.message)
     }
 }

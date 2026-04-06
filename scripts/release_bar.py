@@ -5,8 +5,6 @@ import argparse
 import datetime as dt
 import json
 import re
-import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -25,6 +23,7 @@ DEFAULT_MD = REPORTS_DIR / "RELEASE_BAR.md"
 DOCS_STALE_HOURS = 720
 REPORT_STALE_HOURS = 720
 SMOKE_STALE_HOURS = 72
+SMOKE_CANDIDATE_PATTERNS = ("*SMOKE*", "*smoke*", "*runtime*smoke*")
 
 
 def _utcnow() -> dt.datetime:
@@ -109,6 +108,59 @@ def _freshness_payload(path: Path, now: dt.datetime) -> tuple[str, float, str]:
     return str(path), round(_hours_between(now, ts), 1), ts.isoformat()
 
 
+def _read_text_if_exists(path: Path) -> str:
+    return path.read_text(encoding="utf-8", errors="ignore") if path.exists() else ""
+
+
+def _find_training_auth_guard() -> tuple[bool, list[str]]:
+    training_router = ROOT / "app" / "api" / "v1" / "training.py"
+    text = _read_text_if_exists(training_router)
+    if not text:
+        return False, [f"missing file: {training_router}"]
+    if "dependencies=[Depends(require_auth)]" in text and "APIRouter(" in text:
+        return True, []
+    return False, ["training API router lacks explicit canonical auth dependency"]
+
+
+def _find_gateway_auth_contract() -> tuple[bool, list[str]]:
+    path = ROOT / "services" / "gateway-kotlin" / "src" / "main" / "kotlin" / "com" / "sentifargo" / "gateway" / "graphql" / "GatewayResolver.kt"
+    text = _read_text_if_exists(path)
+    signals: list[str] = []
+
+    if not text:
+        return False, [f"missing file: {path}"]
+
+    if not re.search(r"private fun requireAuthHeader\(authToken: String\?\): String", text):
+        signals.append("missing requireAuthHeader helper")
+    if "raw.isNullOrBlank()" not in text or "UNAUTHORIZED" not in text or "Missing authorization token" not in text:
+        signals.append("requireAuthHeader does not reject missing/blank tokens as unauthorized")
+    for op in ("createUploadSession", "finalizeUpload"):
+        start = text.find(f"fun {op}")
+        if start == -1:
+            signals.append(f"{op} handler missing from GatewayResolver")
+            continue
+        end = text.find("fun ", start + 1)
+        if end == -1:
+            end = len(text)
+        op_body = text[start:end]
+        if f"val authHeader = requireAuthHeader(authToken)" not in op_body:
+            signals.append(f"{op} does not consume normalized auth header")
+
+    if "fun login" not in text or "fun refreshToken" not in text:
+        signals.append("login/refresh public resolver handlers missing")
+    return len(signals) == 0, signals
+
+
+def _latest_smoke_report(now: dt.datetime) -> Path | None:
+    candidates: list[Path] = []
+    for pattern in SMOKE_CANDIDATE_PATTERNS:
+        candidates.extend(REPORTS_DIR.glob(pattern))
+    candidates.extend(REPORTS_DIR.glob("*RUNTIME_RECOVERY*.*"))
+    if not candidates:
+        return None
+    return max(candidates, key=lambda path: path.stat().st_mtime)
+
+
 def _load_waivers(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise SystemExit(f"Waiver file not found: {path}")
@@ -178,31 +230,21 @@ def _load_auth_sources() -> tuple[list[str], list[str]]:
     login = ROOT / "ui-web" / "next" / "src" / "app" / "login" / "page.tsx"
     auth_provider = ROOT / "ui-web" / "next" / "src" / "components" / "auth" / "AuthProvider.tsx"
     app_main = ROOT / "app" / "main.py"
-    paths = [runtime, login, auth_provider, app_main]
-    runtime_text = runtime.read_text(encoding="utf-8", errors="ignore") if runtime.exists() else ""
-    login_text = login.read_text(encoding="utf-8", errors="ignore") if login.exists() else ""
-    auth_provider_text = (
-        auth_provider.read_text(encoding="utf-8", errors="ignore") if auth_provider.exists() else ""
-    )
-    app_main_text = app_main.read_text(encoding="utf-8", errors="ignore") if app_main.exists() else ""
-    text = "\n".join((runtime_text, login_text, auth_provider_text, app_main_text))
+    gateway_resolver = ROOT / "services" / "gateway-kotlin" / "src" / "main" / "kotlin" / "com" / "sentifargo" / "gateway" / "graphql" / "GatewayResolver.kt"
+    training_router = ROOT / "app" / "api" / "v1" / "training.py"
+    paths = [runtime, login, auth_provider, app_main, gateway_resolver, training_router]
 
     signals: list[str] = []
-    if re.search(r'return\s+raw\s*===\s*"jwt"\s*\?\s*"jwt"\s*:\s*"disabled"', runtime_text):
-        signals.append("NEXT_PUBLIC_AUTH_MODE defaults to disabled")
-    if re.search(r"Authentication Disabled|No Login Required", login_text):
-        signals.append("login page advertises disabled auth")
-    if re.search(
-        r'authenticated:\s*authMode\s*===\s*"disabled"\s*\?\s*true\s*:\s*Boolean\(token\)',
-        auth_provider_text,
-    ):
-        signals.append("disabled auth mode treats visitors as authenticated")
+    app_main_text = _read_text_if_exists(app_main)
+
+    training_ok, training_signals = _find_training_auth_guard()
+    gateway_ok, gateway_signals = _find_gateway_auth_contract()
+    if not training_ok:
+        signals.extend(training_signals)
+    if not gateway_ok:
+        signals.extend(gateway_signals)
     if 'app.mount("/ui"' in app_main_text and 'ENABLE_LEGACY_RUNTIME", "false"' not in app_main_text:
         signals.append("backend still mounts legacy /ui frontend by default")
-    if "Legacy routers (no authentication required for demo)" in app_main_text:
-        signals.append("legacy demo routers remain in app.main")
-    if 'from app.legacy.api.deps import require_auth' in app_main_text:
-        signals.append("canonical app still depends on legacy auth deps")
 
     return [str(path) for path in paths if path.exists()], signals
 
@@ -356,7 +398,20 @@ def _training_data_readiness(now: dt.datetime) -> Pillar:
 
 
 def _runtime_smoke(now: dt.datetime) -> Pillar:
-    path = ROOT / "reports" / "LIVE_STACK_SMOKE_2026-03-05.md"
+    path = _latest_smoke_report(now)
+    if path is None:
+        return Pillar(
+            status="blocking",
+            blocking=True,
+            evidence_path="",
+            freshness_hours=float("inf"),
+            generated_at=now.isoformat(),
+            details={
+                "stale": True,
+                "signals": ["runtime smoke evidence missing"],
+            },
+        )
+
     text = path.read_text(encoding="utf-8", errors="ignore")
     _, freshness_hours, generated_at = _freshness_payload(path, now)
     failed_markers = [

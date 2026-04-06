@@ -45,6 +45,15 @@ class FastApiClient(
         return fieldNode.asText()
     }
 
+    private fun sanitizeSourcePath(rawSourcePath: String): String {
+        val sourcePath = rawSourcePath.trim()
+        if (sourcePath.isBlank()) return ""
+        if (sourcePath.contains("..") || sourcePath.contains("\\") || sourcePath.startsWith("/") || sourcePath.startsWith("~")) {
+            return ""
+        }
+        return sourcePath
+    }
+
     @Suppress("UNCHECKED_CAST")
     private fun jsonToMap(node: JsonNode): Map<String, Any?> {
         return objectMapper.convertValue(node, Map::class.java) as? Map<String, Any?> ?: emptyMap()
@@ -484,7 +493,7 @@ class FastApiClient(
             datasetReady = node.path("datasetReady").asBoolean(false),
             modelReady = node.path("modelReady").asBoolean(false),
             metrics = metrics,
-            sourcePath = node.path("sourcePath").asText(""),
+            sourcePath = sanitizeSourcePath(node.path("sourcePath").asText("")),
             updatedAt = textOrNull(node, "updatedAt"),
             blockers = node.path("blockers").map { it.asText() },
         )

@@ -132,6 +132,41 @@ class FastApiClientTests {
     }
 
     @Test
+    fun `trainingOverview sanitizes sensitive sourcePath values from backend`() {
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(
+                    """
+                    {
+                      "generatedAt":"2026-02-14T00:00:00Z",
+                      "readyCount":1,
+                      "totalCount":1,
+                      "domains":[
+                        {
+                          "domain":"fraud",
+                          "status":"ready",
+                          "datasetReady":true,
+                          "modelReady":true,
+                          "metrics":{"accuracy":0.99,"f1":0.62,"auc":0.91,"precision":0.55,"recall":0.71},
+                          "sourcePath":"/tmp/secrets/metric.log",
+                          "updatedAt":"2026-02-14T00:00:00Z",
+                          "blockers":[]
+                        }
+                      ]
+                    }
+                    """.trimIndent(),
+                ),
+        )
+
+        val out = client.trainingOverview("Bearer token").block()
+        val domain = out?.domains?.first()
+
+        assertEquals("", domain?.sourcePath)
+    }
+
+    @Test
     fun `dashboardSummary does not fabricate fallback values on backend failure`() {
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {

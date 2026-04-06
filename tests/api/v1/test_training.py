@@ -95,6 +95,7 @@ def test_training_overview_full_fixture_ready(tmp_path: Path) -> None:
     assert overview.readyCount == 7
     assert all(domain.status == "ready" for domain in overview.domains)
     assert overview.generatedAt == "2026-02-14 00:00:00 UTC"
+    assert all(domain.sourcePath == "" for domain in overview.domains)
 
 
 def test_training_overview_partial_fixture_reports_warning(tmp_path: Path) -> None:
@@ -214,3 +215,5 @@ def test_training_domain_route_supports_voice_and_recommender(
     recommender = training_api.training_domain("recommender")
     assert voice.domain == "voice"
     assert recommender.domain == "recommender"
+    assert voice.sourcePath == ""
+    assert recommender.sourcePath == ""

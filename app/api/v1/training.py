@@ -6,12 +6,18 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.monitoring.status import BLOCKED, DEGRADED, READY
 
-router = APIRouter(prefix="/training", tags=["training"])
+from app.core.auth import require_auth
+
+router = APIRouter(
+    prefix="/training",
+    tags=["training"],
+    dependencies=[Depends(require_auth)],
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CORE_DOMAINS = ("fraud", "cyber", "behavior", "vision", "voice", "recommender", "fusion")
@@ -331,7 +337,7 @@ def _build_domain(root: Path, domain: str, audit: dict[str, Any] | None) -> Trai
         datasetReady=dataset_ready,
         modelReady=model_ready,
         metrics=metrics,
-        sourcePath=str(source_path) if source_path else "",
+        sourcePath="",
         updatedAt=updated_at,
         blockers=blockers,
     )

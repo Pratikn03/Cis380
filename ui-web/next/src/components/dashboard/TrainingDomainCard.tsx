@@ -33,7 +33,7 @@ export function TrainingDomainCard({ domain }: Props) {
       <div className="sf-training-score">{score === null ? "n/a" : `${score}%`}</div>
       <div className="sf-training-meta">
         <span>{domain.updatedAt ? new Date(domain.updatedAt).toLocaleString() : "no timestamp"}</span>
-        <span>{domain.sourcePath ? "metrics linked" : "metrics missing"}</span>
+        <span>{domain.metrics ? "metrics linked" : "metrics missing"}</span>
         <span>{blockerCount > 0 ? `${blockerCount} blocker(s)` : "no blockers"}</span>
       </div>
       {domain.blockers.length > 0 && (

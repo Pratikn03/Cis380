@@ -48,7 +48,12 @@ class GatewayResolver(
 ) {
     private fun requireAuthHeader(authToken: String?): String {
         val raw = authToken?.trim()
-        if (raw.isNullOrBlank()) return ""
+        if (raw.isNullOrBlank()) {
+            throw GraphqlErrorException.newErrorException()
+                .message("Missing authorization token")
+                .errorClassification(ErrorType.UNAUTHORIZED)
+                .build()
+        }
         return if (raw.startsWith("Bearer ", ignoreCase = true)) raw else "Bearer $raw"
     }
 
@@ -222,9 +227,9 @@ class GatewayResolver(
         @Argument input: UploadSessionInput,
         @ContextValue("authToken") authToken: String?,
     ): UploadSessionResult {
-        requireAuthHeader(authToken)
+        val authHeader = requireAuthHeader(authToken)
         return try {
-            uploadService.createUploadSession(input)
+            uploadService.createUploadSession(input, authHeader)
         } catch (ex: IllegalArgumentException) {
             throw badRequest(ex.message ?: "Invalid upload session request.")
         }
@@ -235,9 +240,9 @@ class GatewayResolver(
         @Argument input: FinalizeUploadInput,
         @ContextValue("authToken") authToken: String?,
     ): FinalizeUploadResult {
-        requireAuthHeader(authToken)
+        val authHeader = requireAuthHeader(authToken)
         val result = try {
-            uploadService.finalizeUpload(input)
+            uploadService.finalizeUpload(input, authHeader)
         } catch (ex: IllegalArgumentException) {
             throw badRequest(ex.message ?: "Invalid finalize upload request.")
         }

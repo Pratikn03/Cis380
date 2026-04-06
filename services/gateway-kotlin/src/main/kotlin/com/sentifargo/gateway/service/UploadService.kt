@@ -32,7 +32,7 @@ class UploadService(
         "application/octet-stream",
     )
 
-    fun createUploadSession(input: UploadSessionInput): UploadSessionResult {
+    fun createUploadSession(input: UploadSessionInput, @Suppress("UNUSED_PARAMETER") authHeader: String? = null): UploadSessionResult {
         require(input.fileName.isNotBlank()) { "fileName is required." }
         require(isAllowedContentType(input.contentType)) { "Unsupported contentType '${input.contentType}'." }
         val now = Instant.now()
@@ -67,7 +67,7 @@ class UploadService(
         )
     }
 
-    fun finalizeUpload(input: FinalizeUploadInput): FinalizeUploadResult {
+    fun finalizeUpload(input: FinalizeUploadInput, @Suppress("UNUSED_PARAMETER") authHeader: String? = null): FinalizeUploadResult {
         val normalizedTool = input.tool.trim().lowercase()
         require(normalizedTool in allowedTools) { "Unsupported tool '${input.tool}'." }
         require(input.objectKey.startsWith("uploads/")) { "objectKey must be inside uploads/ namespace." }
