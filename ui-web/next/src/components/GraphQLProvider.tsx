@@ -16,7 +16,11 @@ import { getAuthToken } from "@/lib/auth";
 
 function buildClient() {
   const base = process.env.NEXT_PUBLIC_GRAPHQL_HTTP ?? "http://localhost:8081/graphql";
-  const wsBase = process.env.NEXT_PUBLIC_GRAPHQL_WS ?? "ws://localhost:8081/graphql";
+  const rawWsBase = process.env.NEXT_PUBLIC_GRAPHQL_WS ?? "ws://localhost:8081/graphql";
+  const wsBase =
+    typeof window !== "undefined" && rawWsBase.startsWith("/")
+      ? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}${rawWsBase}`
+      : rawWsBase;
 
   const httpLink = new HttpLink({
     uri: base,

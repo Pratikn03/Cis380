@@ -38,6 +38,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("software.amazon.awssdk:s3:2.30.15")
     implementation("software.amazon.awssdk:regions:2.30.15")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.graphql:spring-graphql-test")
@@ -55,6 +56,41 @@ tasks.withType<KotlinCompile>().configureEach {
         jvmTarget.set(JvmTarget.JVM_21)
         freeCompilerArgs.add("-Xjsr305=strict")
     }
+}
+
+fun deleteAppleDoubleFiles() {
+    val buildDir = layout.buildDirectory.get().asFile
+    if (buildDir.exists()) {
+        exec {
+            isIgnoreExitValue = true
+            commandLine("find", buildDir.absolutePath, "-name", "._*", "-type", "f", "-delete")
+        }
+    }
+    val srcDir = layout.projectDirectory.dir("src").asFile
+    if (srcDir.exists()) {
+        exec {
+            isIgnoreExitValue = true
+            commandLine("find", srcDir.absolutePath, "-name", "._*", "-type", "f", "-delete")
+        }
+    }
+}
+
+tasks.named("clean") {
+    doFirst { deleteAppleDoubleFiles() }
+}
+
+val sanitizeAppleDoubleFiles by tasks.registering {
+    dependsOn(tasks.named("compileKotlin"), tasks.named("processResources"))
+    doLast { deleteAppleDoubleFiles() }
+}
+
+tasks.named("compileTestKotlin") {
+    dependsOn(sanitizeAppleDoubleFiles)
+    doFirst { deleteAppleDoubleFiles() }
+}
+
+tasks.named("test") {
+    doFirst { deleteAppleDoubleFiles() }
 }
 
 jacoco {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.sentifargo.gateway.config.FastApiProperties
 import com.sentifargo.gateway.config.GatewayProperties
 import com.sentifargo.gateway.config.UploadProperties
+import com.sentifargo.gateway.model.FinalizeUploadInput
 import com.sentifargo.gateway.model.UploadSessionInput
 import com.sentifargo.gateway.service.EventStreamService
 import com.sentifargo.gateway.service.FastApiClient

@@ -161,6 +161,10 @@ data class TrainingDomain(
     val sourcePath: String,
     val updatedAt: String?,
     val blockers: List<String>,
+    val qualityStatus: String,
+    val thresholds: Any?,
+    val metricFailures: List<String>,
+    val artifactSha256: String?,
 )
 
 data class TrainingOverview(

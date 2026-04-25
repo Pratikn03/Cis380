@@ -241,6 +241,10 @@ export const TRAINING_OVERVIEW = gql`
         sourcePath
         updatedAt
         blockers
+        qualityStatus
+        thresholds
+        metricFailures
+        artifactSha256
         metrics {
           accuracy
           f1
@@ -263,6 +267,10 @@ export const TRAINING_DOMAIN = gql`
       sourcePath
       updatedAt
       blockers
+      qualityStatus
+      thresholds
+      metricFailures
+      artifactSha256
       metrics {
         accuracy
         f1

@@ -18,6 +18,9 @@ import com.sentifargo.gateway.model.RiskResult
 import com.sentifargo.gateway.model.ScoreResult
 import com.sentifargo.gateway.model.StartJobInput
 import com.sentifargo.gateway.model.SystemHealth
+import com.sentifargo.gateway.model.TrainingDomain
+import com.sentifargo.gateway.model.TrainingMetrics
+import com.sentifargo.gateway.model.TrainingOverview
 import com.sentifargo.gateway.model.Viewer
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
@@ -40,6 +43,15 @@ class FastApiClient(
         val fieldNode = node.path(field)
         if (fieldNode.isMissingNode || fieldNode.isNull) return null
         return fieldNode.asText()
+    }
+
+    private fun sanitizeSourcePath(rawSourcePath: String): String {
+        val sourcePath = rawSourcePath.trim()
+        if (sourcePath.isBlank()) return ""
+        if (sourcePath.contains("..") || sourcePath.contains("\\") || sourcePath.startsWith("/") || sourcePath.startsWith("~")) {
+            return ""
+        }
+        return sourcePath
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -308,22 +320,20 @@ class FastApiClient(
                     ),
                 )
             }
-            .onErrorReturn(
-                DashboardSummary(
-                    fraudAlerts = 12,
-                    docsIndexed = 238,
-                    activeJobs = 5,
-                    riskScore = 58,
-                    alerts = listOf(
-                        DashboardAlert(
-                            level = "warning",
-                            message = "Fallback summary active",
-                            component = "gateway",
-                            timestamp = java.time.Instant.now().toString(),
-                        ),
-                    ),
-                ),
-            )
+    }
+
+    fun trainingOverview(authToken: String?): Mono<TrainingOverview> {
+        val request = webClient.get().uri("/api/v1/training/overview")
+        authHeaders(authToken)?.let { (k, v) -> request.header(k, v) }
+        return request.retrieve().bodyToMono(JsonNode::class.java)
+            .map { node -> mapTrainingOverview(node) }
+    }
+
+    fun trainingDomain(domain: String, authToken: String?): Mono<TrainingDomain> {
+        val request = webClient.get().uri("/api/v1/training/domain/$domain")
+        authHeaders(authToken)?.let { (k, v) -> request.header(k, v) }
+        return request.retrieve().bodyToMono(JsonNode::class.java)
+            .map { node -> mapTrainingDomain(node) }
     }
 
     fun missionChat(prompt: String, useRag: Boolean, authToken: String?): Mono<Map<String, Any?>> {
@@ -351,16 +361,6 @@ class FastApiClient(
             .retrieve()
             .bodyToMono(JsonNode::class.java)
             .map { toRecommendationResult(it, "movies") }
-            .onErrorReturn(
-                RecommendationResult(
-                    mode = "movies",
-                    items = listOf(
-                        RecommendationItem("mv-1", "Interstellar", 0.82, "fallback"),
-                        RecommendationItem("mv-2", "Blade Runner 2049", 0.78, "fallback"),
-                    ),
-                    raw = mapOf("status" to "fallback"),
-                ),
-            )
     }
 
     fun recommendClothes(prompt: String, topK: Int, authToken: String?): Mono<RecommendationResult> {
@@ -376,16 +376,6 @@ class FastApiClient(
             .retrieve()
             .bodyToMono(JsonNode::class.java)
             .map { toRecommendationResult(it, "clothes") }
-            .onErrorReturn(
-                RecommendationResult(
-                    mode = "clothes",
-                    items = listOf(
-                        RecommendationItem("cl-1", "Streetwear Layered Set", 0.76, "fallback"),
-                        RecommendationItem("cl-2", "Minimal Tech Runner", 0.71, "fallback"),
-                    ),
-                    raw = mapOf("status" to "fallback"),
-                ),
-            )
     }
 
     fun analyzeVoiceEmotion(input: MediaAnalyzeInput, authToken: String?): Mono<Map<String, Any?>> {
@@ -450,6 +440,46 @@ class FastApiClient(
             mode = node.path("mode").asText(mode),
             items = items,
             raw = jsonToMap(node),
+        )
+    }
+
+    private fun mapTrainingOverview(node: JsonNode): TrainingOverview {
+        val domains = node.path("domains").map { mapTrainingDomain(it) }
+        return TrainingOverview(
+            generatedAt = textOrNull(node, "generatedAt"),
+            domains = domains,
+            readyCount = node.path("readyCount").asInt(domains.count { it.status == "ready" }),
+            totalCount = node.path("totalCount").asInt(domains.size),
+        )
+    }
+
+    private fun mapTrainingDomain(node: JsonNode): TrainingDomain {
+        val metricsNode = node.path("metrics")
+        val metrics = if (metricsNode.isMissingNode || metricsNode.isNull) {
+            null
+        } else {
+            TrainingMetrics(
+                accuracy = metricsNode.path("accuracy").takeIf { !it.isMissingNode && !it.isNull }?.asDouble(),
+                f1 = metricsNode.path("f1").takeIf { !it.isMissingNode && !it.isNull }?.asDouble(),
+                auc = metricsNode.path("auc").takeIf { !it.isMissingNode && !it.isNull }?.asDouble(),
+                precision = metricsNode.path("precision").takeIf { !it.isMissingNode && !it.isNull }?.asDouble(),
+                recall = metricsNode.path("recall").takeIf { !it.isMissingNode && !it.isNull }?.asDouble(),
+            )
+        }
+
+        return TrainingDomain(
+            domain = node.path("domain").asText(),
+            status = node.path("status").asText("missing"),
+            datasetReady = node.path("datasetReady").asBoolean(false),
+            modelReady = node.path("modelReady").asBoolean(false),
+            metrics = metrics,
+            sourcePath = sanitizeSourcePath(node.path("sourcePath").asText("")),
+            updatedAt = textOrNull(node, "updatedAt"),
+            blockers = node.path("blockers").map { it.asText() },
+            qualityStatus = node.path("qualityStatus").asText("unknown"),
+            thresholds = objectMapper.convertValue(node.path("thresholds"), Any::class.java),
+            metricFailures = node.path("metricFailures").map { it.asText() },
+            artifactSha256 = textOrNull(node, "artifactSha256"),
         )
     }
 

@@ -23,6 +23,10 @@ export type TrainingDomain = {
   sourcePath: string;
   updatedAt?: string | null;
   blockers: string[];
+  qualityStatus: string;
+  thresholds?: unknown;
+  metricFailures: string[];
+  artifactSha256?: string | null;
 };
 
 type TrainingOverview = {
@@ -180,6 +184,7 @@ export function useTrainingReadiness() {
         ...domain,
         status: normalizeTrainingStatus(domain.status),
         blockers: Array.isArray(domain.blockers) ? domain.blockers : [],
+        metricFailures: Array.isArray(domain.metricFailures) ? domain.metricFailures : [],
       })),
     [effectiveOverview?.domains],
   );

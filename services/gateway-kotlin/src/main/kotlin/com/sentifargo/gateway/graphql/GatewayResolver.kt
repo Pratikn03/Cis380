@@ -19,6 +19,8 @@ import com.sentifargo.gateway.model.ScoreResult
 import com.sentifargo.gateway.model.StartJobInput
 import com.sentifargo.gateway.model.SystemAlert
 import com.sentifargo.gateway.model.SystemHealth
+import com.sentifargo.gateway.model.TrainingDomain
+import com.sentifargo.gateway.model.TrainingOverview
 import com.sentifargo.gateway.model.UploadSessionInput
 import com.sentifargo.gateway.model.UploadSessionResult
 import com.sentifargo.gateway.model.Viewer
@@ -33,6 +35,7 @@ import org.springframework.graphql.data.method.annotation.ContextValue
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SubscriptionMapping
+import org.springframework.graphql.execution.ErrorType
 import org.springframework.stereotype.Controller
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -45,12 +48,20 @@ class GatewayResolver(
 ) {
     private fun requireAuthHeader(authToken: String?): String {
         val raw = authToken?.trim()
-        if (raw.isNullOrBlank()) return ""
+        if (raw.isNullOrBlank()) {
+            throw GraphqlErrorException.newErrorException()
+                .message("Missing authorization token")
+                .errorClassification(ErrorType.UNAUTHORIZED)
+                .build()
+        }
         return if (raw.startsWith("Bearer ", ignoreCase = true)) raw else "Bearer $raw"
     }
 
     private fun badRequest(message: String): GraphqlErrorException {
-        return GraphqlErrorException.newErrorException().message(message).build()
+        return GraphqlErrorException.newErrorException()
+            .message(message)
+            .errorClassification(ErrorType.BAD_REQUEST)
+            .build()
     }
 
     @QueryMapping
@@ -102,6 +113,21 @@ class GatewayResolver(
     fun dashboardSummary(@ContextValue("authToken") authToken: String?): Mono<DashboardSummary> {
         val authHeader = requireAuthHeader(authToken)
         return fastApiClient.dashboardSummary(authHeader)
+    }
+
+    @QueryMapping
+    fun trainingOverview(@ContextValue("authToken") authToken: String?): Mono<TrainingOverview> {
+        val authHeader = requireAuthHeader(authToken)
+        return fastApiClient.trainingOverview(authHeader)
+    }
+
+    @QueryMapping
+    fun trainingDomain(
+        @Argument domain: String,
+        @ContextValue("authToken") authToken: String?,
+    ): Mono<TrainingDomain> {
+        val authHeader = requireAuthHeader(authToken)
+        return fastApiClient.trainingDomain(domain, authHeader)
     }
 
     @MutationMapping
@@ -201,9 +227,9 @@ class GatewayResolver(
         @Argument input: UploadSessionInput,
         @ContextValue("authToken") authToken: String?,
     ): UploadSessionResult {
-        requireAuthHeader(authToken)
+        val authHeader = requireAuthHeader(authToken)
         return try {
-            uploadService.createUploadSession(input)
+            uploadService.createUploadSession(input, authHeader)
         } catch (ex: IllegalArgumentException) {
             throw badRequest(ex.message ?: "Invalid upload session request.")
         }
@@ -214,9 +240,9 @@ class GatewayResolver(
         @Argument input: FinalizeUploadInput,
         @ContextValue("authToken") authToken: String?,
     ): FinalizeUploadResult {
-        requireAuthHeader(authToken)
+        val authHeader = requireAuthHeader(authToken)
         val result = try {
-            uploadService.finalizeUpload(input)
+            uploadService.finalizeUpload(input, authHeader)
         } catch (ex: IllegalArgumentException) {
             throw badRequest(ex.message ?: "Invalid finalize upload request.")
         }

@@ -3,7 +3,7 @@ spring:
     name: sentifargo-gateway
   graphql:
     graphiql:
-      enabled: true
+      enabled: ${SENTIFARGO_GRAPHIQL_ENABLED:false}
     websocket:
       path: /graphql
 

@@ -201,6 +201,10 @@ type TrainingDomain {
   sourcePath: String!
   updatedAt: String
   blockers: [String!]!
+  qualityStatus: String!
+  thresholds: JSON
+  metricFailures: [String!]!
+  artifactSha256: String
 }
 
 type TrainingOverview {
