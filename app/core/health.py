@@ -16,7 +16,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Depends, Response
 from fastapi.responses import JSONResponse
 from prometheus_client import (
     Counter,
@@ -27,6 +27,8 @@ from prometheus_client import (
     CONTENT_TYPE_LATEST,
     REGISTRY,
 )
+from app.core.auth import require_auth
+from app.core.config import settings
 
 logger = logging.getLogger("Sentifargo.health")
 
@@ -207,18 +209,20 @@ async def check_database() -> ComponentHealth:
     """Check database connectivity."""
     start = time.time()
     try:
-        # Simple check - verify data directory exists
-        data_dir = Path("./data")
-        if not data_dir.exists():
-            data_dir.mkdir(parents=True, exist_ok=True)
+        from sqlalchemy import text
+
+        from app.db.session import engine
+
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
 
         latency = (time.time() - start) * 1000
         return ComponentHealth(
             name="database",
             status=HealthStatus.HEALTHY,
             latency_ms=latency,
-            message="Database accessible",
-            details={"type": "sqlite", "path": str(data_dir)},
+            message="Database connected",
+            details={"url_scheme": settings.database.url.split(":", 1)[0]},
         )
     except Exception as e:
         latency = (time.time() - start) * 1000
@@ -234,21 +238,25 @@ async def check_redis() -> ComponentHealth:
     """Check Redis connectivity."""
     start = time.time()
     try:
-        redis_url = os.getenv("REDIS_URL", "")
+        redis_url = settings.redis.url.strip()
         if not redis_url:
             return ComponentHealth(
                 name="redis",
-                status=HealthStatus.HEALTHY,
+                status=HealthStatus.UNHEALTHY if settings.is_production else HealthStatus.DEGRADED,
                 latency_ms=0,
-                message="Redis not configured (optional)",
-                details={"configured": False},
+                message="Redis URL not configured",
+                details={"configured": False, "required": settings.is_production},
             )
 
-        # Try to import and ping Redis
         try:
             import redis
 
-            client = redis.from_url(redis_url, socket_timeout=2)
+            client = redis.from_url(
+                redis_url,
+                socket_timeout=2,
+                socket_connect_timeout=2,
+                health_check_interval=30,
+            )
             client.ping()
             latency = (time.time() - start) * 1000
             return ComponentHealth(
@@ -256,15 +264,19 @@ async def check_redis() -> ComponentHealth:
                 status=HealthStatus.HEALTHY,
                 latency_ms=latency,
                 message="Redis connected",
-                details={"configured": True},
+                details={"configured": True, "required": settings.is_production},
             )
         except ImportError:
             return ComponentHealth(
                 name="redis",
-                status=HealthStatus.DEGRADED,
+                status=HealthStatus.UNHEALTHY if settings.is_production else HealthStatus.DEGRADED,
                 latency_ms=0,
                 message="Redis client not installed",
-                details={"configured": True, "available": False},
+                details={
+                    "configured": True,
+                    "available": False,
+                    "required": settings.is_production,
+                },
             )
     except Exception as e:
         latency = (time.time() - start) * 1000
@@ -276,11 +288,48 @@ async def check_redis() -> ComponentHealth:
         )
 
 
+async def check_worker() -> ComponentHealth:
+    """Check Celery worker connectivity."""
+    start = time.time()
+    try:
+        from app.workers.celery_app import celery
+
+        inspector = celery.control.inspect(timeout=2)
+        responses = inspector.ping() if inspector is not None else None
+        latency = (time.time() - start) * 1000
+
+        if responses:
+            return ComponentHealth(
+                name="worker",
+                status=HealthStatus.HEALTHY,
+                latency_ms=latency,
+                message="Celery worker responded",
+                details={"workers": sorted(responses.keys()), "required": settings.is_production},
+            )
+
+        return ComponentHealth(
+            name="worker",
+            status=HealthStatus.UNHEALTHY if settings.is_production else HealthStatus.DEGRADED,
+            latency_ms=latency,
+            message="Celery worker did not respond",
+            details={"workers": [], "required": settings.is_production},
+        )
+    except Exception as e:
+        latency = (time.time() - start) * 1000
+        return ComponentHealth(
+            name="worker",
+            status=HealthStatus.UNHEALTHY if settings.is_production else HealthStatus.DEGRADED,
+            latency_ms=latency,
+            message=f"Worker check error: {str(e)}",
+            details={"required": settings.is_production},
+        )
+
+
 async def check_models() -> ComponentHealth:
     """Check ML models availability."""
     start = time.time()
     try:
-        models_dir = Path("./models")
+        models_dir = settings.ml.models_dir
         available_models = []
         missing_models = []
 
@@ -326,6 +375,89 @@ async def check_models() -> ComponentHealth:
             status=HealthStatus.UNHEALTHY,
             latency_ms=latency,
             message=f"Model check error: {str(e)}",
+        )
+
+
+REQUIRED_MODEL_DOMAINS = {
+    "fraud",
+    "cyber",
+    "behavior",
+    "vision_deepfake",
+    "vision_face_emotion",
+    "vision_temporal",
+    "brand",
+    "voice",
+    "recommender",
+    "fusion",
+    "rag",
+}
+
+
+async def check_model_manifest() -> ComponentHealth:
+    """Validate the promoted release model manifest without hashing large artifacts."""
+    start = time.time()
+    manifest_path = Path(os.getenv("MODEL_MANIFEST_PATH", "artifacts/release/model-manifest.json"))
+    try:
+        import json
+
+        if not manifest_path.exists():
+            return ComponentHealth(
+                name="model_manifest",
+                status=HealthStatus.UNHEALTHY if settings.is_production else HealthStatus.DEGRADED,
+                latency_ms=(time.time() - start) * 1000,
+                message="Release model manifest missing",
+                details={"path": str(manifest_path), "required": settings.is_production},
+            )
+
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        models = payload.get("models", [])
+        if not isinstance(models, list):
+            raise ValueError("manifest field 'models' must be a list")
+
+        domains = {str(item.get("domain", "")).strip() for item in models if isinstance(item, dict)}
+        missing_domains = sorted(REQUIRED_MODEL_DOMAINS - domains)
+        missing_paths: list[str] = []
+        failing_domains: list[str] = []
+
+        for item in models:
+            if not isinstance(item, dict):
+                continue
+            rel_path = str(item.get("path", "")).strip()
+            if rel_path and not Path(rel_path).exists():
+                missing_paths.append(rel_path)
+            threshold_result = str(item.get("thresholdResult", "")).lower()
+            if threshold_result and threshold_result not in {"pass", "passed"}:
+                failing_domains.append(str(item.get("domain", "unknown")))
+
+        latency = (time.time() - start) * 1000
+        if missing_domains or missing_paths or failing_domains:
+            return ComponentHealth(
+                name="model_manifest",
+                status=HealthStatus.UNHEALTHY,
+                latency_ms=latency,
+                message="Release model manifest is not production-ready",
+                details={
+                    "path": str(manifest_path),
+                    "missing_domains": missing_domains,
+                    "missing_paths": missing_paths[:20],
+                    "failing_domains": sorted(set(failing_domains)),
+                },
+            )
+
+        return ComponentHealth(
+            name="model_manifest",
+            status=HealthStatus.HEALTHY,
+            latency_ms=latency,
+            message="Release model manifest is ready",
+            details={"path": str(manifest_path), "domains": sorted(domains)},
+        )
+    except Exception as e:
+        return ComponentHealth(
+            name="model_manifest",
+            status=HealthStatus.UNHEALTHY,
+            latency_ms=(time.time() - start) * 1000,
+            message=f"Model manifest error: {str(e)}",
+            details={"path": str(manifest_path)},
         )
 
 
@@ -456,8 +588,11 @@ async def readiness_check() -> JSONResponse:
     # Run health checks concurrently
     checks = await asyncio.gather(
         check_database(),
-        check_models(),
+        check_redis(),
+        check_worker(),
+        check_model_manifest(),
         check_disk_space(),
+        check_memory(),
         return_exceptions=True,
     )
 
@@ -495,13 +630,15 @@ async def readiness_check() -> JSONResponse:
     return JSONResponse(content=health.to_dict(), status_code=http_status)
 
 
-@router.get("/health/detailed")
+@router.get("/health/detailed", dependencies=[Depends(require_auth)])
 async def detailed_health_check() -> JSONResponse:
     """Detailed health check with all components."""
     # Run all health checks concurrently
     checks = await asyncio.gather(
         check_database(),
         check_redis(),
+        check_worker(),
+        check_model_manifest(),
         check_models(),
         check_disk_space(),
         check_memory(),

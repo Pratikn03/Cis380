@@ -46,10 +46,10 @@ from datetime import datetime, timedelta, timezone
 
 # FastAPI - Modern web framework for building APIs
 from fastapi import Depends, FastAPI, Request
-from fastapi.staticfiles import StaticFiles  # Serves React frontend files
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from prometheus_client import Counter, Histogram  # Metrics for monitoring
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 # ==============================================================================
 # PATH SETUP - Ensure Python can find our project modules
@@ -69,24 +69,37 @@ if str(SRC_DIR) not in sys.path:
 # ==============================================================================
 # On macOS, importing XGBoost before PyTorch can cause the app to hang.
 # By importing torch/torchvision first, we avoid this known issue.
-try:  # pragma: no cover
-    import torch  # noqa: F401
-    import torchvision  # noqa: F401
-except Exception:
-    pass  # It's okay if PyTorch is not installed
+if os.getenv("SKIP_TORCH_PREIMPORT", "false").lower() not in {"1", "true", "yes"}:
+    try:  # pragma: no cover
+        import torch  # noqa: F401
+        import torchvision  # noqa: F401
+    except Exception:
+        pass  # It's okay if PyTorch is not installed
 
 # ==============================================================================
 # IMPORT API ROUTES - Each route handles a specific ML service
 # ==============================================================================
 from app.core import settings, setup_production_middleware  # noqa: E402
-from app.core.auth import bootstrap_admin, bootstrap_roles  # noqa: E402
-from app.db.session import SessionLocal  # noqa: E402
-from app.legacy.api.deps import require_auth  # noqa: E402
-from app.legacy.api.routes import behavior, chat, cyber, fraud, rag, recommend, vision  # noqa: E402
+from app.core.auth import bootstrap_admin, bootstrap_roles, require_auth  # noqa: E402
+from app.core.startup import bootstrap_admin_user as run_bootstrap_admin_user  # noqa: E402
+from app.db.session import SessionLocal, ensure_schema  # noqa: E402
+
+_legacy_runtime_enabled = os.getenv("ENABLE_LEGACY_RUNTIME", "false").lower() in {
+    "1",
+    "true",
+    "yes",
+}
+_serve_legacy_ui = os.getenv("SERVE_LEGACY_UI", "false").lower() in {"1", "true", "yes"}
 
 # Initialize optional router variables (set to None if module not available)
 _app_risk_router = None  # Unified risk scoring
 _app_monitor_router = None  # System monitoring
+_app_chat_router = None  # Canonical chat/orchestrator
+_app_recommender_router = None  # Canonical recommendations
+_app_fraud_router = None  # Fraud scoring
+_app_cyber_router = None  # Cyber scoring
+_app_behavior_router = None  # Behavior scoring
+_app_fusion_router = None  # Cross-domain fusion scoring
 _app_voice_router = None  # Voice/audio analysis
 _app_tts_router = None  # Text-to-speech
 _app_rag_router = None  # Document Q&A (Retrieval Augmented Generation)
@@ -98,6 +111,13 @@ _app_vision_temporal_router = None  # Video/temporal analysis
 _app_object_router = None  # Object detection (YOLOv3)
 _api_v1_router = None
 _app_internal_router = None
+_legacy_chat_router = None
+_legacy_rag_router = None
+_legacy_recommend_router = None
+_legacy_behavior_router = None
+_legacy_fraud_router = None
+_legacy_cyber_router = None
+_legacy_vision_router = None
 
 # ==============================================================================
 # OPTIONAL ROUTER IMPORTS
@@ -119,6 +139,43 @@ except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.api.monitor router unavailable: %s", exc)
     _app_monitor_router = None
 
+# Canonical product routers used by the GraphQL gateway.
+try:  # pragma: no cover
+    from app.api.chat import router as _app_chat_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.chat router unavailable: %s", exc)
+    _app_chat_router = None
+
+try:  # pragma: no cover
+    from app.api.recommender import router as _app_recommender_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.recommender router unavailable: %s", exc)
+    _app_recommender_router = None
+
+try:  # pragma: no cover
+    from app.api.fraud import router as _app_fraud_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.fraud router unavailable: %s", exc)
+    _app_fraud_router = None
+
+try:  # pragma: no cover
+    from app.api.cyber import router as _app_cyber_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.cyber router unavailable: %s", exc)
+    _app_cyber_router = None
+
+try:  # pragma: no cover
+    from app.api.behavior import router as _app_behavior_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.behavior router unavailable: %s", exc)
+    _app_behavior_router = None
+
+try:  # pragma: no cover
+    from app.api.fusion import router as _app_fusion_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.fusion router unavailable: %s", exc)
+    _app_fusion_router = None
+
 # Voice Router - Voice emotion detection and audio analysis
 try:  # pragma: no cover
     from app.api.voice import router as _app_voice_router
@@ -132,6 +189,18 @@ try:  # pragma: no cover
 except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.api.rag router unavailable: %s", exc)
     _app_rag_router = None
+
+if _legacy_runtime_enabled:
+    try:  # pragma: no cover
+        from app.legacy.api.routes import behavior as _legacy_behavior_router
+        from app.legacy.api.routes import chat as _legacy_chat_router
+        from app.legacy.api.routes import cyber as _legacy_cyber_router
+        from app.legacy.api.routes import fraud as _legacy_fraud_router
+        from app.legacy.api.routes import rag as _legacy_rag_router
+        from app.legacy.api.routes import recommend as _legacy_recommend_router
+        from app.legacy.api.routes import vision as _legacy_vision_router
+    except Exception as exc:  # pragma: no cover
+        logging.getLogger("omnichatx").warning("legacy routers unavailable: %s", exc)
 
 try:  # pragma: no cover
     from app.api.v1.router import api_v1 as _api_v1_router
@@ -205,8 +274,6 @@ except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.core.health router unavailable: %s", exc)
     _health_router = None
 
-from fastapi.responses import RedirectResponse  # noqa: E402
-
 # ==============================================================================
 # LOGGING SETUP
 # ==============================================================================
@@ -267,29 +334,43 @@ setup_production_middleware(
 _allowed_hosts = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "*").split(",") if h.strip()]
 if _allowed_hosts != ["*"]:
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=_allowed_hosts)
-if os.getenv("FORCE_HTTPS", "false").lower() == "true":
-    app.add_middleware(HTTPSRedirectMiddleware)
+
+
+@app.middleware("http")
+async def enforce_proxy_https(request: Request, call_next):
+    """Redirect only proxy-marked HTTP traffic; keep internal Docker calls plain HTTP."""
+    forwarded_proto = request.headers.get("x-forwarded-proto", "").lower()
+    if settings.security.force_https and forwarded_proto == "http":
+        url = request.url.replace(scheme="https")
+        return RedirectResponse(str(url), status_code=301)
+    return await call_next(request)
+
 
 # ==============================================================================
-# STATIC FILES - Serve the React frontend
+# STATIC FILES - Legacy compatibility UI (disabled by default)
 # ==============================================================================
-# The React app is built to ui-web/frontend/dist/
-# This makes it available at http://localhost:8000/ui/
 ui_dir = Path(__file__).resolve().parents[1] / "ui-web" / "frontend" / "dist"
-if ui_dir.exists():
+if _serve_legacy_ui and ui_dir.exists():
     app.mount("/ui", StaticFiles(directory=ui_dir, html=True), name="ui")
 
 # ==============================================================================
 # REGISTER API ROUTERS - Each router handles specific endpoints
 # ==============================================================================
-# Legacy routers (no authentication required for demo)
-app.include_router(chat.router)  # /chat - Chatbot conversations
-app.include_router(rag.router)  # /rag - Document Q&A
-app.include_router(recommend.router)  # /recommend - Recommendations
-app.include_router(behavior.router)  # /behavior - User behavior analysis
-app.include_router(fraud.router)  # /fraud - Fraud detection
-app.include_router(cyber.router)  # /cyber - Cybersecurity threats
-app.include_router(vision.router)  # /vision - Image analysis
+if _legacy_runtime_enabled:
+    if _legacy_chat_router is not None:
+        app.include_router(_legacy_chat_router.router)
+    if _legacy_rag_router is not None:
+        app.include_router(_legacy_rag_router.router)
+    if _legacy_recommend_router is not None:
+        app.include_router(_legacy_recommend_router.router)
+    if _legacy_behavior_router is not None:
+        app.include_router(_legacy_behavior_router.router)
+    if _legacy_fraud_router is not None:
+        app.include_router(_legacy_fraud_router.router)
+    if _legacy_cyber_router is not None:
+        app.include_router(_legacy_cyber_router.router)
+    if _legacy_vision_router is not None:
+        app.include_router(_legacy_vision_router.router)
 
 # Health check router (production monitoring)
 if _health_router is not None:
@@ -301,6 +382,18 @@ if _app_risk_router is not None:
     app.include_router(_app_risk_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_monitor_router is not None:
     app.include_router(_app_monitor_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_chat_router is not None:
+    app.include_router(_app_chat_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_recommender_router is not None:
+    app.include_router(_app_recommender_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_fraud_router is not None:
+    app.include_router(_app_fraud_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_cyber_router is not None:
+    app.include_router(_app_cyber_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_behavior_router is not None:
+    app.include_router(_app_behavior_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_fusion_router is not None:
+    app.include_router(_app_fusion_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_voice_router is not None:
     app.include_router(_app_voice_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_rag_router is not None:
@@ -346,16 +439,14 @@ if _dsa_rag_ensure_index is not None:
 
 @app.on_event("startup")
 def _bootstrap_admin_user() -> None:
-    admin_username = os.getenv("ADMIN_USERNAME")
-    admin_password = os.getenv("ADMIN_PASSWORD")
-    if not admin_username or not admin_password:
-        return
-    try:
-        with SessionLocal() as db:
-            bootstrap_roles(db)
-            bootstrap_admin(db, admin_username, admin_password)
-    except Exception as exc:  # pragma: no cover
-        logger.warning("Admin bootstrap skipped: %s", exc)
+    run_bootstrap_admin_user(
+        app_env=settings.app_env,
+        ensure_schema_fn=ensure_schema,
+        session_factory=SessionLocal,
+        bootstrap_roles_fn=bootstrap_roles,
+        bootstrap_admin_fn=bootstrap_admin,
+        logger=logger,
+    )
 
 
 # ==============================================================================
@@ -535,9 +626,9 @@ def root_redirect():
     - If UI is built: Redirects to /ui/ (React frontend)
     - If UI not built: Returns a simple JSON message
     """
-    if ui_dir.exists():
+    if _serve_legacy_ui:
         return RedirectResponse(url="/ui/")
-    return {"message": "OmniChatX API. UI not found; ensure ui/ directory exists."}
+    return {"message": "Sentifargo API. Production UI is served by the Next.js web service."}
 
 
 # ==============================================================================

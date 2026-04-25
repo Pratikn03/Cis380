@@ -6,6 +6,7 @@ Rate limiting, security headers, logging, and error handling
 from __future__ import annotations
 
 import logging
+import os
 import time
 import uuid
 from collections import defaultdict
@@ -236,6 +237,20 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.window_seconds = window_seconds
         self.enabled = enabled
         self.request_counts: dict[str, list[float]] = defaultdict(list)
+        self.redis_client = None
+        redis_url = os.getenv("REDIS_URL", "").strip()
+        if redis_url:
+            try:
+                import redis
+
+                self.redis_client = redis.from_url(
+                    redis_url,
+                    socket_timeout=1,
+                    socket_connect_timeout=1,
+                    decode_responses=True,
+                )
+            except Exception:
+                logger.warning("Redis rate limit backend unavailable; using in-memory fallback.")
 
     def _get_client_ip(self, request: Request) -> str:
         """Get client IP from request."""
@@ -246,6 +261,18 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     def _is_rate_limited(self, client_ip: str) -> bool:
         """Check if client is rate limited."""
+        if self.redis_client is not None:
+            try:
+                now = int(time.time())
+                bucket = now // self.window_seconds
+                key = f"sentifargo:rate:{client_ip}:{bucket}"
+                count = int(self.redis_client.incr(key))
+                if count == 1:
+                    self.redis_client.expire(key, self.window_seconds + 2)
+                return count > self.requests_per_minute
+            except Exception:
+                logger.warning("Redis rate limit check failed; using in-memory fallback.")
+
         now = time.time()
         window_start = now - self.window_seconds
 

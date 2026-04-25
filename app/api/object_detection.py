@@ -7,7 +7,6 @@ from typing import Any
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 
-from app.services.vision.yolov3 import detect_objects_yolov3, render_detections_yolov3
 from app.utils.uploads import (
     IMAGE_EXTENSIONS,
     IMAGE_MIME_TYPES,
@@ -92,6 +91,8 @@ async def detect_objects(
         )
         allowed_labels = _parse_label_param(labels)
         allowed_ids = _parse_id_param(class_ids)
+        from app.services.vision.yolov3 import detect_objects_yolov3
+
         payload = detect_objects_yolov3(
             image_bytes,
             conf=conf,
@@ -134,6 +135,8 @@ async def visualize_objects(
         )
         allowed_labels = _parse_label_param(labels)
         allowed_ids = _parse_id_param(class_ids)
+        from app.services.vision.yolov3 import detect_objects_yolov3, render_detections_yolov3
+
         payload = detect_objects_yolov3(
             image_bytes,
             conf=conf,

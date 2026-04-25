@@ -181,7 +181,9 @@ data/processed/brand_yolo/
 # ============================================
 # Artifacts & Outputs
 # ============================================
-artifacts/
+artifacts/*
+!artifacts/release/
+!artifacts/release/model-manifest.json
 models/
 !models/whisper_large/
 !models/whisper_large/**

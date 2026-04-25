@@ -4,8 +4,6 @@ Brand recognition API endpoints.
 
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 
-from src.vision.brand.recognizer import predict_image_bytes
-
 router = APIRouter(prefix="/api/vision/brand", tags=["brand"])
 
 
@@ -19,6 +17,8 @@ async def predict_brand(
     Detect brands/logos in an uploaded image.
     """
     try:
+        from src.vision.brand.recognizer import predict_image_bytes
+
         image_bytes = await file.read()
         detections = predict_image_bytes(image_bytes, conf=conf, kind=kind)
         return {

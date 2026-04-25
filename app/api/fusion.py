@@ -3,8 +3,6 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from app.fusion.engine import predict_fusion
-
 router = APIRouter(prefix="/fusion", tags=["fusion"])
 
 
@@ -20,6 +18,8 @@ class FusionSignals(BaseModel):
 @router.post("/analyze")
 async def analyze_fusion(payload: FusionSignals) -> dict:
     try:
+        from app.fusion.engine import predict_fusion
+
         signals = payload.model_dump(exclude={"threshold"})
         return predict_fusion(signals, threshold=payload.threshold)
     except FileNotFoundError as exc:

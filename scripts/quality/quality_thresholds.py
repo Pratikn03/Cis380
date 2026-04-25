@@ -164,11 +164,18 @@ def _threshold_for_module(payload: dict[str, Any], module: str, now: dt.date) ->
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate and resolve quality gate thresholds.")
     sub = parser.add_subparsers(dest="command", required=True)
-    check_parser = sub.add_parser("check", help="Validate waiver file and print resolved thresholds.")
+    check_parser = sub.add_parser(
+        "check", help="Validate waiver file and print resolved thresholds."
+    )
     check_parser.add_argument(
         "--waivers",
         default="quality/waivers.yml",
         help="Path to waiver file.",
+    )
+    check_parser.add_argument(
+        "--no-active",
+        action="store_true",
+        help="Fail if any active waiver is present.",
     )
 
     threshold_parser = sub.add_parser("threshold", help="Get threshold for a module.")
@@ -192,6 +199,9 @@ def main() -> int:
 
     if args.command == "check":
         default_threshold, max_waiver_days, thresholds = _validate(payload, now)
+        if args.no_active and thresholds:
+            modules = ", ".join(sorted(thresholds))
+            raise SystemExit(f"Active quality waivers are not allowed: {modules}")
         print(
             json.dumps(
                 {

@@ -24,6 +24,9 @@ def initialize_dev_database(
 
 
 def bootstrap_credentials(*, app_env: str, logger: Logger) -> tuple[str | None, str | None]:
+    if app_env == "production":
+        return None, None
+
     username = os.getenv("ADMIN_USERNAME")
     password = os.getenv("ADMIN_PASSWORD")
     if username and password:

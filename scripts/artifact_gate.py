@@ -43,8 +43,10 @@ def main() -> int:
     strict = os.getenv("ARTIFACT_GATE_STRICT", "true").lower() in {"1", "true", "yes"}
 
     required_items = [
+        ("Release model manifest", "artifacts/release/model-manifest.json"),
         ("Fraud model", "models/fraud/supervised/fraud_model.pkl"),
         ("Cyber model", "models/cyber/supervised/cyber_model.pkl"),
+        ("Behavior autoencoder", "models/behavior/behavior_autoencoder.pkl"),
         ("Behavior model", "models/behavior/behavior_supervised.pkl"),
         ("Behavior LOF", "models/behavior/behavior_lof.pkl"),
         ("Voice emotion", "models/voice_emotion.pkl"),
@@ -60,11 +62,11 @@ def main() -> int:
         ("Temporal LSTM", "artifacts/vision_temporal/temporal_lstm.pt"),
         ("Brand YOLO", "artifacts/brand/yolo_logo_det.pt"),
         ("Fusion model", "models/fusion/fusion_meta_model.pkl"),
+        ("DSA RAG FAISS index", "data/dsa_embeddings/faiss.index"),
         ("DVC lock", "dvc.lock"),
     ]
 
     optional_items = [
-        ("DSA embeddings", "data/dsa_embeddings"),
         ("DSA Chroma index", "chroma/dsa"),
         ("RAG embeddings", "data/embeddings"),
         ("Brand YOLO (car)", "artifacts/brand/yolo_car_brand.pt"),

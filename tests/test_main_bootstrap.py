@@ -48,6 +48,15 @@ def test_bootstrap_credentials_uses_dev_defaults(monkeypatch) -> None:
     assert password == "admin123"
 
 
+def test_bootstrap_credentials_ignores_production_admin_env(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_USERNAME", "admin")
+    monkeypatch.setenv("ADMIN_PASSWORD", "secret")
+
+    username, password = startup.bootstrap_credentials(app_env="production", logger=_logger())
+    assert username is None
+    assert password is None
+
+
 def test_bootstrap_admin_user_skips_production_without_explicit_env(monkeypatch) -> None:
     monkeypatch.delenv("ADMIN_USERNAME", raising=False)
     monkeypatch.delenv("ADMIN_PASSWORD", raising=False)

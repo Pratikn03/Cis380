@@ -4,6 +4,7 @@ Sentifargo Production Readiness Check
 Verifies all production configuration files are in place
 """
 
+import json
 import os
 import sys
 from pathlib import Path
@@ -55,8 +56,11 @@ def check_files() -> Tuple[int, int, int]:
     # Required files for production
     required_files = [
         ("Dockerfile.production", True),
+        ("ui-web/next/Dockerfile", True),
+        ("services/gateway-kotlin/Dockerfile", True),
         ("docker-compose.production.yml", True),
         (".env.production.example", True),
+        ("artifacts/release/model-manifest.json", True),
         ("app/core/config.py", True),
         ("app/core/middleware.py", True),
         ("app/core/health.py", True),
@@ -65,7 +69,9 @@ def check_files() -> Tuple[int, int, int]:
         ("deploy/prometheus/prometheus.yml", True),
         ("deploy/grafana/provisioning/datasources/datasource.yml", True),
         ("scripts/deploy.sh", True),
+        ("scripts/model_quality_gate.py", True),
         (".github/workflows/ci-cd.yml", True),
+        (".github/workflows/deploy-production.yml", True),
         ("tests/test_production.py", True),
         ("pytest.ini", True),
         (".coveragerc", True),
@@ -110,16 +116,25 @@ def check_compose_configuration() -> Tuple[int, int, int]:
 
     raw = compose_path.read_text(encoding="utf-8")
     checks = [
-        ("API service present", "Sentifargo-api:"),
-        ("Worker service present", "Sentifargo-worker:"),
+        ("API service present", "\n  api:\n"),
+        ("Worker service present", "\n  worker:\n"),
+        ("Migration service present", "\n  migrate:\n"),
+        ("Kotlin gateway service present", "\n  gateway:\n"),
+        ("Next web service present", "\n  web:\n"),
         ("Postgres service present", "\n  postgres:\n"),
         ("Redis service present", "\n  redis:\n"),
-        ("API requires SECRET_KEY", "SECRET_KEY=${SECRET_KEY:?"),
-        ("API requires CORS_ORIGINS", "CORS_ORIGINS=${CORS_ORIGINS:?"),
-        ("API requires ALLOWED_HOSTS", "ALLOWED_HOSTS=${ALLOWED_HOSTS:?"),
-        ("API forces HTTPS", "FORCE_HTTPS=true"),
+        ("Redis exporter service present", "\n  redis-exporter:\n"),
+        ("Prometheus service present", "\n  prometheus:\n"),
+        ("Grafana service present", "\n  grafana:\n"),
+        ("API requires SECRET_KEY", "SECRET_KEY: ${SECRET_KEY:?"),
+        ("API requires DATABASE_URL", "DATABASE_URL: ${DATABASE_URL:?"),
+        ("API requires CORS_ORIGINS", "CORS_ORIGINS: ${CORS_ORIGINS:?"),
+        ("API requires ALLOWED_HOSTS", "ALLOWED_HOSTS: ${ALLOWED_HOSTS:?"),
+        ("API forces HTTPS", 'FORCE_HTTPS: "true"'),
+        ("Legacy runtime disabled", 'ENABLE_LEGACY_RUNTIME: "false"'),
+        ("Model manifest configured", "MODEL_MANIFEST_PATH: artifacts/release/model-manifest.json"),
         ("API healthcheck uses readiness", "http://localhost:8000/health/ready"),
-        ("API waits for worker health", "Sentifargo-worker:\n        condition: service_healthy"),
+        ("API waits for worker health", "worker:\n        condition: service_healthy"),
         ("Worker checks Celery ping", "celery.control.inspect(timeout=2)"),
     ]
 
@@ -147,7 +162,9 @@ def check_environment_variables():
         ("CORS_ORIGINS", False, _is_explicit_list),
         ("ALLOWED_HOSTS", False, _is_explicit_list),
         ("FORCE_HTTPS", False, lambda v: v.lower() == "true"),
-        ("AUTH_TOKEN", True, lambda v: True),
+        ("MODEL_MANIFEST_PATH", False, lambda v: bool(v.strip())),
+        ("GRAFANA_PASSWORD", True, lambda v: bool(v.strip())),
+        ("BOOTSTRAP_TOKEN", True, lambda v: True),
         ("OPENAI_API_KEY", True, lambda v: True),
     ]
 
@@ -164,12 +181,95 @@ def check_environment_variables():
                 print(f"  {RED}{CROSS}{RESET} {var} = {display} (invalid)")
                 failed += 1
         else:
-            if var in {"APP_ENV", "SECRET_KEY", "DATABASE_URL", "REDIS_URL", "CORS_ORIGINS", "ALLOWED_HOSTS", "FORCE_HTTPS"}:
+            if var in {
+                "APP_ENV",
+                "SECRET_KEY",
+                "DATABASE_URL",
+                "REDIS_URL",
+                "CORS_ORIGINS",
+                "ALLOWED_HOSTS",
+                "FORCE_HTTPS",
+                "MODEL_MANIFEST_PATH",
+                "GRAFANA_PASSWORD",
+            }:
                 print(f"  {RED}{CROSS}{RESET} {var} (not set)")
                 failed += 1
             else:
                 print(f"  {YELLOW}{WARN}{RESET} {var} (not set)")
                 warnings += 1
+
+    return passed, failed, warnings
+
+
+def check_model_manifest() -> Tuple[int, int, int]:
+    """Check release model manifest readiness without hashing large files."""
+    base = Path(__file__).parent.parent
+    manifest_path = base / "artifacts" / "release" / "model-manifest.json"
+    print_header("Model Manifest Check")
+
+    if not manifest_path.exists():
+        print_result("artifacts/release/model-manifest.json", False)
+        return 0, 1, 0
+
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    models = payload.get("models", [])
+    if not isinstance(models, list):
+        print_result("manifest models list", False)
+        return 0, 1, 0
+
+    required_domains = {
+        "fraud",
+        "cyber",
+        "behavior",
+        "vision_deepfake",
+        "vision_face_emotion",
+        "vision_temporal",
+        "brand",
+        "voice",
+        "recommender",
+        "fusion",
+        "rag",
+    }
+    domains = {str(item.get("domain", "")) for item in models if isinstance(item, dict)}
+    missing_domains = sorted(required_domains - domains)
+    failing_domains = sorted(
+        {
+            str(item.get("domain", "unknown"))
+            for item in models
+            if isinstance(item, dict)
+            and str(item.get("thresholdResult", "")).lower() not in {"pass", "passed"}
+        }
+    )
+    pending_smoke = sorted(
+        {
+            str(item.get("domain", "unknown"))
+            for item in models
+            if isinstance(item, dict)
+            and str(item.get("smokeInference", "")).lower() not in {"pass", "passed"}
+        }
+    )
+
+    passed = failed = warnings = 0
+    print_result("all required domains present", not missing_domains)
+    if missing_domains:
+        print(f"    missing: {', '.join(missing_domains)}")
+        failed += 1
+    else:
+        passed += 1
+
+    print_result("all threshold results pass", not failing_domains)
+    if failing_domains:
+        print(f"    failing: {', '.join(failing_domains)}")
+        failed += 1
+    else:
+        passed += 1
+
+    print_result("all smoke inference checks pass", not pending_smoke)
+    if pending_smoke:
+        print(f"    pending/failing: {', '.join(pending_smoke)}")
+        failed += 1
+    else:
+        passed += 1
 
     return passed, failed, warnings
 
@@ -271,7 +371,7 @@ def generate_summary(passed: int, failed: int, warnings: int):
         print("  Your project is ready for production deployment.")
     else:
         print(f"\n  {RED}❌ Production readiness check FAILED!{RESET}")
-        print(f"  Please address the {failed} missing required file(s).")
+        print(f"  Please address the {failed} failed production check(s).")
 
     print(f"\n  {BLUE}Next Steps:{RESET}")
     print("  1. Configure .env with your values (copy from .env.production.example)")
@@ -291,9 +391,10 @@ def main():
     passed, failed, warnings = check_files()
     config_passed, config_failed, config_warnings = check_compose_configuration()
     env_passed, env_failed, env_warnings = check_environment_variables()
-    passed += config_passed + env_passed
-    failed += config_failed + env_failed
-    warnings += config_warnings + env_warnings
+    manifest_passed, manifest_failed, manifest_warnings = check_model_manifest()
+    passed += config_passed + env_passed + manifest_passed
+    failed += config_failed + env_failed + manifest_failed
+    warnings += config_warnings + env_warnings + manifest_warnings
     check_directories()
     check_docker()
     check_python_deps()

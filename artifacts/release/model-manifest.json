@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "releaseName": "sentifargo-docker-vm-production",
+  "sourceCommit": "00136d1",
+  "trainingDataVersion": "local-2026-04-25",
+  "generatedAt": "2026-04-25T00:00:00Z",
+  "models": [
+    {
+      "domain": "fraud",
+      "modelName": "fraud-supervised",
+      "version": "0.1.0",
+      "path": "models/fraud/supervised/fraud_model.pkl",
+      "artifactSha256": "441812838f0cc67e9b4d8c133aeb917233667360c6ef4b9385123213e1908654",
+      "metricsFile": "experiments/fraud/metrics/metrics.json",
+      "smokeInference": "pending",
+      "thresholdResult": "fail"
+    },
+    {
+      "domain": "cyber",
+      "modelName": "cyber-supervised",
+      "version": "0.1.0",
+      "path": "models/cyber/supervised/cyber_model.pkl",
+      "artifactSha256": "1e6c2eeea347ad38362e63a016e8c9a7e026a3edeb1918565b626c212b882f35",
+      "metricsFile": "experiments/cyber/metrics/metrics.json",
+      "smokeInference": "pending",
+      "thresholdResult": "fail"
+    },
+    {
+      "domain": "behavior",
+      "modelName": "behavior-supervised",
+      "version": "0.1.0",
+      "path": "models/behavior/behavior_supervised.pkl",
+      "artifactSha256": "32fd0392d5ced598f529d0ec873bf5d501b86cfa9ac09fb7d4aad5e820cee31c",
+      "metricsFile": "experiments/behavior/metrics/metrics.json",
+      "smokeInference": "pending",
+      "thresholdResult": "fail"
+    },
+    {
+      "domain": "vision_deepfake",
+      "modelName": "vision-resnet-real-fake",
+      "version": "0.1.0",
+      "path": "models/vision/resnet/model.pt",
+      "artifactSha256": "b18af24ae6c443dc8acaa6239b40b8239af22ae9a8b398d38a2c8b92e6c78277",
+      "metricsFile": "experiments/vision/metrics/metrics.csv",
+      "smokeInference": "pending",
+      "thresholdResult": "fail"
+    },
+    {
+      "domain": "vision_face_emotion",
+      "modelName": "vision-face-emotion",
+      "version": "0.1.0",
+      "path": "models/vision/face_emotion/model.pt",
+      "artifactSha256": "b54415808feb3d2ace51aea61071bf49606aa2d6e524e29418aeb7f9ce12356b",
+      "metricsFile": "models/vision/face_emotion/metrics.json",
+      "smokeInference": "pending",
+      "thresholdResult": "fail"
+    },
+    {
+      "domain": "vision_temporal",
+      "modelName": "vision-temporal",
+      "version": "0.1.0",
+      "path": "models/vision/video_temporal_model.pkl",
+      "artifactSha256": "83f5ff0c40234e77521bcb823c1e22e6c6f870c7c3a33c1f6cf5baf740445313",
+      "metricsFile": "experiments/vision/temporal_lstm/metrics.json",
+      "smokeInference": "pending",
+      "thresholdResult": "fail"
+    },
+    {
+      "domain": "brand",
+      "modelName": "brand-yolo-logo",
+      "version": "0.1.0",
+      "path": "artifacts/brand/yolo_logo_det.pt",
+      "artifactSha256": "eb8511de30230387087373c2c0dc4cc2892232138819cb3aee0017368c4bcf09",
+      "metricsFile": "models/brand/full/results.csv",
+      "smokeInference": "pending",
+      "thresholdResult": "fail"
+    },
+    {
+      "domain": "voice",
+      "modelName": "voice-emotion",
+      "version": "0.1.0",
+      "path": "models/voice_emotion.pkl",
+      "artifactSha256": "d576cd2df7891344ca0f8f193ba1d37bc43b54c0f10f9ce04f0662d5acf5a6cf",
+      "metricsFile": "reports/evaluation_voice_metrics_summary.json",
+      "smokeInference": "pending",
+      "thresholdResult": "fail"
+    },
+    {
+      "domain": "recommender",
+      "modelName": "recommender-primary",
+      "version": "0.1.0",
+      "path": "models/recommender/recommender_model.pkl",
+      "artifactSha256": "048bd42a0440cc649745a80611411ecee53234a09b5e86e1dc8afed676d4b1c0",
+      "metricsFile": "experiments/recommender/metrics/recommender_metrics.json",
+      "smokeInference": "pending",
+      "thresholdResult": "fail"
+    },
+    {
+      "domain": "fusion",
+      "modelName": "fusion-meta-model",
+      "version": "0.1.0",
+      "path": "models/fusion/fusion_meta_model.pkl",
+      "artifactSha256": "808e2b2cdbbd2e70addd6336ee7416579256df56127374374207d9c1fd916c90",
+      "metricsFile": "experiments/fusion/metrics/metrics.json",
+      "smokeInference": "pending",
+      "thresholdResult": "fail"
+    },
+    {
+      "domain": "rag",
+      "modelName": "dsa-rag-index",
+      "version": "0.1.0",
+      "path": "data/dsa_embeddings/faiss.index",
+      "artifactSha256": "22b02a8d748c271e8fdf3b7c7dfc9fa7ab3c7fe1749f5aae729235304fb264e9",
+      "metricsFile": "metrics/rag_eval.json",
+      "smokeInference": "pending",
+      "thresholdResult": "fail"
+    }
+  ]
+}

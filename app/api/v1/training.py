@@ -7,11 +7,11 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
-
-from app.monitoring.status import BLOCKED, DEGRADED, READY
+from pydantic import BaseModel, Field
 
 from app.core.auth import require_auth
+from app.monitoring.status import BLOCKED, DEGRADED, READY
+from scripts.model_quality_gate import THRESHOLDS
 
 router = APIRouter(
     prefix="/training",
@@ -20,8 +20,19 @@ router = APIRouter(
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-CORE_DOMAINS = ("fraud", "cyber", "behavior", "vision", "voice", "recommender", "fusion")
-
+CORE_DOMAINS = (
+    "fraud",
+    "cyber",
+    "behavior",
+    "vision_deepfake",
+    "vision_face_emotion",
+    "vision_temporal",
+    "brand",
+    "voice",
+    "recommender",
+    "fusion",
+    "rag",
+)
 MODEL_PATHS: dict[str, tuple[Path, ...]] = {
     "fraud": (Path("models/fraud/supervised/fraud_model.pkl"),),
     "cyber": (Path("models/cyber/supervised/cyber_model.pkl"),),
@@ -29,11 +40,13 @@ MODEL_PATHS: dict[str, tuple[Path, ...]] = {
         Path("models/behavior/behavior_autoencoder.pkl"),
         Path("models/behavior/behavior_lof.pkl"),
     ),
-    "vision": (
-        Path("models/vision/resnet/model.pt"),
-        Path("models/vision/face_emotion/model.pt"),
-        Path("artifacts/brand/yolo_logo_det.pt"),
+    "vision_deepfake": (Path("models/vision/resnet/model.pt"),),
+    "vision_face_emotion": (Path("models/vision/face_emotion/model.pt"),),
+    "vision_temporal": (
+        Path("models/vision/video_temporal_model.pkl"),
+        Path("artifacts/vision_temporal/temporal_lstm.pt"),
     ),
+    "brand": (Path("artifacts/brand/yolo_logo_det.pt"),),
     "voice": (
         Path("models/voice_emotion.pkl"),
         Path("models/voice_emotion_ssl"),
@@ -45,6 +58,7 @@ MODEL_PATHS: dict[str, tuple[Path, ...]] = {
         Path("models/recommender/movielens_meta.joblib"),
     ),
     "fusion": (Path("models/fusion/fusion_meta_model.pkl"),),
+    "rag": (Path("data/dsa_embeddings/faiss.index"),),
 }
 
 
@@ -65,6 +79,10 @@ class TrainingDomain(BaseModel):
     sourcePath: str
     updatedAt: str | None = None
     blockers: list[str]
+    qualityStatus: str = "unknown"
+    thresholds: list[dict[str, Any]] = Field(default_factory=list)
+    metricFailures: list[str] = Field(default_factory=list)
+    artifactSha256: str | None = None
 
 
 class TrainingOverview(BaseModel):
@@ -165,7 +183,9 @@ def _pick_metric(values: dict[str, float], aliases: tuple[str, ...]) -> float | 
     return max(hits) if hits else None
 
 
-def _extract_metrics(metrics_json: dict[str, Any] | None, metrics_csv: dict[str, float] | None) -> TrainingMetrics | None:
+def _extract_metrics(
+    metrics_json: dict[str, Any] | None, metrics_csv: dict[str, float] | None
+) -> TrainingMetrics | None:
     values: dict[str, float] = {}
     if metrics_json:
         preferred = None
@@ -185,13 +205,70 @@ def _extract_metrics(metrics_json: dict[str, Any] | None, metrics_csv: dict[str,
         precision=_pick_metric(values, ("precision",)),
         recall=_pick_metric(values, ("recall",)),
     )
-    if all(getattr(metrics, field) is None for field in ("accuracy", "f1", "auc", "precision", "recall")):
+    if all(
+        getattr(metrics, field) is None
+        for field in ("accuracy", "f1", "auc", "precision", "recall")
+    ):
         return None
     return metrics
 
 
 def _training_audit(root: Path) -> dict[str, Any] | None:
     return _read_json(root / "reports" / "TRAINING_DATA.json")
+
+
+def _model_manifest(root: Path) -> dict[str, Any]:
+    return _read_json(root / "artifacts" / "release" / "model-manifest.json") or {}
+
+
+def _manifest_entry(root: Path, domain: str) -> dict[str, Any]:
+    manifest = _model_manifest(root)
+    models = manifest.get("models", [])
+    if not isinstance(models, list):
+        return {}
+    for item in models:
+        if isinstance(item, dict) and item.get("domain") == domain:
+            return item
+    return {}
+
+
+def _quality_report_entry(root: Path, domain: str) -> dict[str, Any]:
+    report = _read_json(root / "reports" / "MODEL_QUALITY_GATE.json") or {}
+    results = report.get("results", [])
+    if not isinstance(results, list):
+        return {}
+    for item in results:
+        if isinstance(item, dict) and item.get("domain") == domain:
+            return item
+    return {}
+
+
+def _quality_fields(
+    root: Path, domain: str
+) -> tuple[str, list[dict[str, Any]], list[str], str | None]:
+    report_entry = _quality_report_entry(root, domain)
+    manifest_entry = _manifest_entry(root, domain)
+    failures = report_entry.get("metricFailures", [])
+    normalized_failures = [
+        json.dumps(failure, sort_keys=True) if isinstance(failure, dict) else str(failure)
+        for failure in failures
+    ]
+    quality_status = str(
+        report_entry.get("qualityStatus") or manifest_entry.get("thresholdResult") or "unknown"
+    )
+    if quality_status in {"pass", "passed"}:
+        quality_status = "pass"
+    elif quality_status not in {"unknown", ""}:
+        quality_status = "fail"
+    if quality_status == "unknown" and manifest_entry:
+        normalized_failures.append("model_quality_gate_not_run")
+    artifact_sha = manifest_entry.get("artifactSha256")
+    return (
+        quality_status or "unknown",
+        THRESHOLDS.get(domain, []),
+        normalized_failures,
+        str(artifact_sha) if artifact_sha else None,
+    )
 
 
 def _domain_entry_status(domain: str, audit: dict[str, Any] | None) -> bool:
@@ -219,19 +296,37 @@ def _domain_entry_status(domain: str, audit: dict[str, Any] | None) -> bool:
     if domain in required_names:
         return _is_ok(required, required_names[domain])
 
-    if domain == "vision":
+    if domain in {"vision_deepfake", "vision_face_emotion", "vision_temporal"}:
         vision_tokens = ("vision", "face emotion", "video temporal")
         for item in optional:
             name = str(item.get("name", "")).lower()
-            if any(token in name for token in vision_tokens) and str(item.get("status", "")).lower() == "ok":
+            if (
+                any(token in name for token in vision_tokens)
+                and str(item.get("status", "")).lower() == "ok"
+            ):
                 return True
         return False
+
+    if domain == "brand":
+        raw_ok = False
+        prepared_ok = False
+        for item in required:
+            name = str(item.get("name", "")).lower()
+            status = str(item.get("status", "")).lower()
+            if "brand" in name and "raw" in name and status == "ok":
+                raw_ok = True
+            if "brand" in name and "prepared" in name and status == "ok":
+                prepared_ok = True
+        return raw_ok and prepared_ok
 
     if domain in optional_names:
         return _is_ok(optional, optional_names[domain])
 
     if domain == "fusion":
         return all(_domain_entry_status(dep, audit) for dep in ("fraud", "cyber", "behavior"))
+
+    if domain == "rag":
+        return (REPO_ROOT / "data" / "dsa_embeddings").exists()
 
     return False
 
@@ -240,15 +335,17 @@ def _model_ready(root: Path, domain: str) -> bool:
     paths = MODEL_PATHS.get(domain, ())
     if not paths:
         return False
-    if domain in {"behavior", "vision", "voice"}:
+    if domain in {"behavior", "vision_deepfake", "vision_face_emotion", "brand", "voice"}:
+        return any((root / p).exists() for p in paths)
+    if domain == "vision_temporal":
         return any((root / p).exists() for p in paths)
     if domain == "recommender":
-        primary = (
-            root / "models/recommender/recommender_model.pkl"
-        ).exists() and (root / "models/recommender/recommender_meta.joblib").exists()
-        movielens = (
-            root / "models/recommender/movielens_model.pkl"
-        ).exists() and (root / "models/recommender/movielens_meta.joblib").exists()
+        primary = (root / "models/recommender/recommender_model.pkl").exists() and (
+            root / "models/recommender/recommender_meta.joblib"
+        ).exists()
+        movielens = (root / "models/recommender/movielens_model.pkl").exists() and (
+            root / "models/recommender/movielens_meta.joblib"
+        ).exists()
         return primary or movielens
     return all((root / p).exists() for p in paths)
 
@@ -263,11 +360,19 @@ def _metrics_sources(
     csv_candidates = [
         root / "experiments" / domain / "metrics" / "metrics.csv",
     ]
-    if domain == "vision":
+    if domain in {"vision_deepfake", "vision_face_emotion", "vision_temporal", "brand"}:
         json_candidates.extend(
             [
                 root / "experiments" / "vision" / "video_temporal" / "metrics.json",
                 root / "experiments" / "vision" / "temporal_lstm" / "metrics.json",
+                root / "models" / "vision" / "face_emotion" / "metrics.json",
+            ]
+        )
+        csv_candidates.extend(
+            [
+                root / "experiments" / "vision" / "metrics" / "metrics.csv",
+                root / "models" / "brand" / "full" / "results.csv",
+                root / "models" / "brand" / "fast_run_1epoch" / "results.csv",
             ]
         )
     elif domain == "recommender":
@@ -307,6 +412,7 @@ def _build_domain(root: Path, domain: str, audit: dict[str, Any] | None) -> Trai
     model_ready = _model_ready(root, domain)
     source_path, metrics_json, metrics_csv, metrics_parse_error = _metrics_sources(root, domain)
     metrics = _extract_metrics(metrics_json, metrics_csv)
+    quality_status, thresholds, metric_failures, artifact_sha = _quality_fields(root, domain)
 
     blockers: list[str] = []
     if audit is None:
@@ -319,8 +425,10 @@ def _build_domain(root: Path, domain: str, audit: dict[str, Any] | None) -> Trai
         blockers.append("metrics_parse_error" if metrics_parse_error else "metrics_missing")
     elif metrics_parse_error:
         blockers.append("metrics_parse_error")
+    if quality_status != "pass":
+        blockers.append("quality_gate_failed")
 
-    if dataset_ready and model_ready and metrics is not None:
+    if dataset_ready and model_ready and metrics is not None and quality_status == "pass":
         status = READY
     elif dataset_ready or model_ready or metrics is not None:
         status = DEGRADED
@@ -328,8 +436,17 @@ def _build_domain(root: Path, domain: str, audit: dict[str, Any] | None) -> Trai
         status = BLOCKED
 
     updated_at: str | None = None
+    source_path_value = ""
     if source_path and source_path.exists():
-        updated_at = datetime.fromtimestamp(source_path.stat().st_mtime, UTC).replace(microsecond=0).isoformat()
+        updated_at = (
+            datetime.fromtimestamp(source_path.stat().st_mtime, UTC)
+            .replace(microsecond=0)
+            .isoformat()
+        )
+        try:
+            source_path_value = str(source_path.relative_to(root))
+        except ValueError:
+            source_path_value = ""
 
     return TrainingDomain(
         domain=domain,
@@ -337,9 +454,13 @@ def _build_domain(root: Path, domain: str, audit: dict[str, Any] | None) -> Trai
         datasetReady=dataset_ready,
         modelReady=model_ready,
         metrics=metrics,
-        sourcePath="",
+        sourcePath=source_path_value,
         updatedAt=updated_at,
         blockers=blockers,
+        qualityStatus=quality_status,
+        thresholds=thresholds,
+        metricFailures=metric_failures,
+        artifactSha256=artifact_sha,
     )
 
 
