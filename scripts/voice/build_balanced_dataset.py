@@ -169,14 +169,6 @@ def build_balanced_dataset(
     return {
         "generated_from": str(src_root),
         "generated_to": str(dst_root),
-        "source_root_raw": str(src_root),
-        "source_root_balanced": str(dst_root),
-        "voice_source_resolution": "processed_balanced",
-        "readiness_status": "ready",
-        "status_vocabulary": {
-            "canonical": ["ready", "degraded", "blocked", "advisory"],
-            "legacy": ["ok", "warn", "missing"],
-        },
         "seed": seed,
         "target_per_class": target,
         "summary": [asdict(row) for row in summaries],

@@ -3,17 +3,12 @@ from __future__ import annotations
 import csv
 import json
 import re
-import sys
 import wave
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, Tuple
 
 ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-from app.monitoring.status import BLOCKED, normalize_readiness_status
-
 REPORT_MD = ROOT / "reports" / "TRAINING_DATA.md"
 REPORT_JSON = ROOT / "reports" / "TRAINING_DATA.json"
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
@@ -58,14 +53,6 @@ def _file_size_mb(path: Path) -> float:
 
 def _status(exists: bool) -> str:
     return "ok" if exists else "missing"
-
-
-def _readiness_status(raw_status: str | None) -> str:
-    return normalize_readiness_status(raw_status)
-
-
-def _is_blocking(raw_status: str | None) -> bool:
-    return _readiness_status(raw_status) == BLOCKED
 
 
 def _brand_status(raw_ok: bool, prepared_ok: bool) -> Tuple[str, str]:
@@ -260,8 +247,6 @@ def main() -> int:
             "name": "Fraud (creditcard.csv)",
             "path": str(fraud_csv),
             "status": _status(fraud_csv.is_file()),
-            "readiness_status": _readiness_status(_status(fraud_csv.is_file())),
-            "blocking": _is_blocking(_status(fraud_csv.is_file())),
             "size_mb": _file_size_mb(fraud_csv),
             "schema": fraud_schema,
             "column_count": len(fraud_header),
@@ -277,8 +262,6 @@ def main() -> int:
             "name": "Cyber (UNSW_NB15_training-set.csv)",
             "path": str(cyber_csv),
             "status": _status(cyber_csv.is_file()),
-            "readiness_status": _readiness_status(_status(cyber_csv.is_file())),
-            "blocking": _is_blocking(_status(cyber_csv.is_file())),
             "size_mb": _file_size_mb(cyber_csv),
             "schema": cyber_schema,
             "column_count": len(cyber_header),
@@ -294,8 +277,6 @@ def main() -> int:
             "name": "Behavior (online_shoppers_intention.csv)",
             "path": str(behavior_csv),
             "status": _status(behavior_csv.is_file()),
-            "readiness_status": _readiness_status(_status(behavior_csv.is_file())),
-            "blocking": _is_blocking(_status(behavior_csv.is_file())),
             "size_mb": _file_size_mb(behavior_csv),
             "schema": behavior_schema,
             "column_count": len(behavior_header),
@@ -340,15 +321,7 @@ def main() -> int:
             "source_root_raw": str(voice_raw_root),
             "source_root_balanced": str(voice_balanced_root),
             "voice_source": voice_source,
-            "voice_source_resolution": "processed_balanced" if voice_root == voice_balanced_root else "raw",
-            "voice_source_note": (
-                "balanced view derived from raw voice data"
-                if voice_root == voice_balanced_root
-                else "raw voice source"
-            ),
             "status": "ok" if voice_total > 0 else "missing",
-            "readiness_status": _readiness_status("ok" if voice_total > 0 else "missing"),
-            "blocking": _is_blocking("ok" if voice_total > 0 else "missing"),
             "total_wav": voice_total,
             "details": voice_detail,
             "class_balance": {
@@ -384,8 +357,6 @@ def main() -> int:
             "name": "Brand (LogoDet-3K raw)",
             "path": [str(brand_raw_a), str(brand_raw_b)],
             "status": _status(brand_raw_ok),
-            "readiness_status": _readiness_status(_status(brand_raw_ok)),
-            "blocking": _is_blocking(_status(brand_raw_ok)),
         }
     )
     required.append(
@@ -393,8 +364,6 @@ def main() -> int:
             "name": "Brand (prepared YOLO dataset)",
             "path": str(brand_prepared),
             "status": brand_status,
-            "readiness_status": _readiness_status(brand_status),
-            "blocking": _is_blocking(brand_status),
             "note": brand_note,
             "yaml": brand_yaml,
             "train_exists": train_exists,
@@ -416,8 +385,6 @@ def main() -> int:
             "name": "Vision real/fake (raw)",
             "path": [str(vision_real), str(vision_fake)],
             "status": _status(vision_real.exists() and vision_fake.exists()),
-            "readiness_status": _readiness_status(_status(vision_real.exists() and vision_fake.exists())),
-            "blocking": _is_blocking(_status(vision_real.exists() and vision_fake.exists())),
             "real_images": vision_real_count,
             "fake_images": vision_fake_count,
             "real_capped": vision_real_capped,
@@ -434,8 +401,6 @@ def main() -> int:
             "name": "Celeb_V2 (deepfake)",
             "path": [str(celeb_train), str(celeb_val)],
             "status": _status(celeb_train.exists() and celeb_val.exists()),
-            "readiness_status": _readiness_status(_status(celeb_train.exists() and celeb_val.exists())),
-            "blocking": _is_blocking(_status(celeb_train.exists() and celeb_val.exists())),
             "train_images": celeb_train_count,
             "val_images": celeb_val_count,
             "train_capped": celeb_train_capped,
@@ -450,8 +415,6 @@ def main() -> int:
             "name": "Face emotion (image)",
             "path": str(face_emotion),
             "status": _status(face_emotion.exists()),
-            "readiness_status": _readiness_status(_status(face_emotion.exists())),
-            "blocking": _is_blocking(_status(face_emotion.exists())),
             "image_count": face_emotion_count,
             "count_capped": face_emotion_capped,
         }
@@ -466,8 +429,6 @@ def main() -> int:
             "name": "Video temporal (real/fake)",
             "path": [str(video_real), str(video_fake)],
             "status": _status(video_real.exists() and video_fake.exists()),
-            "readiness_status": _readiness_status(_status(video_real.exists() and video_fake.exists())),
-            "blocking": _is_blocking(_status(video_real.exists() and video_fake.exists())),
             "real_videos": video_real_count,
             "fake_videos": video_fake_count,
             "real_capped": video_real_capped,
@@ -483,8 +444,6 @@ def main() -> int:
             "name": "MovieLens recommender",
             "path": str(movielens),
             "status": _status(movielens.is_file()),
-            "readiness_status": _readiness_status(_status(movielens.is_file())),
-            "blocking": _is_blocking(_status(movielens.is_file())),
             "size_mb": _file_size_mb(movielens),
             "schema": movielens_schema,
             "column_count": len(movielens_header),
@@ -494,11 +453,6 @@ def main() -> int:
 
     payload = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
-        "status_vocabulary": {
-            "canonical": ["ready", "degraded", "blocked", "advisory"],
-            "legacy": ["ok", "warn", "missing", "needs_preprocess"],
-        },
-        "advisory": True,
         "required": required,
         "optional": optional,
     }
@@ -508,12 +462,10 @@ def main() -> int:
     lines = []
     lines.append("# Training Data Audit\n")
     lines.append(f"- Generated: {payload['generated_at']}\n")
-    lines.append("- Advisory: upstream evidence only; release readiness is determined by the release bar.\n")
 
     lines.append("## Required (production training)\n")
     for item in required:
         lines.append(f"- **{item['name']}** — `{item['path']}` — **{item['status']}**")
-        lines.append(f"  - readiness_status: {item['readiness_status']}")
         if "size_mb" in item and item["size_mb"]:
             lines.append(f"  - size: {item['size_mb']} MB")
         if item.get("schema"):
@@ -545,10 +497,6 @@ def main() -> int:
         if item.get("details"):
             if item.get("voice_source"):
                 lines.append(f"  - source: {item['voice_source']}")
-            if item.get("voice_source_resolution"):
-                lines.append(f"  - voice_source_resolution: {item['voice_source_resolution']}")
-            if item.get("voice_source_note"):
-                lines.append(f"  - voice_source_note: {item['voice_source_note']}")
             for detail in item["details"]:
                 suffix = " (capped)" if detail["count_capped"] else ""
                 probe = detail.get("probe") or {}
@@ -590,7 +538,6 @@ def main() -> int:
     lines.append("\n## Optional (extended training)\n")
     for item in optional:
         lines.append(f"- **{item['name']}** — `{item['path']}` — **{item['status']}**")
-        lines.append(f"  - readiness_status: {item['readiness_status']}")
         if "size_mb" in item and item["size_mb"]:
             lines.append(f"  - size: {item['size_mb']} MB")
         if item.get("schema"):

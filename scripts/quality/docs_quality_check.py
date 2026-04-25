@@ -5,7 +5,6 @@ import argparse
 import datetime as dt
 import json
 import re
-import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -23,8 +22,6 @@ RE_SENTENCE = re.compile(r"[^.!?]+[.!?]")
 RE_CODE_FENCE = re.compile(r"```.*?```", re.DOTALL)
 RE_OWNER = re.compile(r"^-\s*Owner:\s*(.+)$", re.MULTILINE)
 RE_LAST_VERIFIED = re.compile(r"^-\s*Last verified:\s*(.+)$", re.MULTILINE)
-READ_RETRY_ATTEMPTS = 3
-READ_RETRY_SLEEP_SECONDS = 0.5
 
 
 @dataclass
@@ -106,7 +103,7 @@ def _parse_manifest_fallback(raw: str) -> dict[str, Any]:
 def _load_manifest(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise SystemExit(f"Manifest not found: {path}")
-    raw = _read_text(path)
+    raw = path.read_text(encoding="utf-8")
     if yaml is not None:
         payload = yaml.safe_load(raw)
     else:
@@ -116,24 +113,6 @@ def _load_manifest(path: Path) -> dict[str, Any]:
     payload.setdefault("documents", [])
     payload.setdefault("readme_schema", {}).setdefault("required_sections", [])
     return payload
-
-
-def _read_text(path: Path) -> str:
-    last_error: Exception | None = None
-    for attempt in range(READ_RETRY_ATTEMPTS):
-        try:
-            return path.read_text(encoding="utf-8", errors="ignore")
-        except TimeoutError as exc:
-            last_error = exc
-        except OSError as exc:
-            # macOS filesystem/desktop sync providers can intermittently raise ETIMEDOUT (errno 60).
-            if getattr(exc, "errno", None) != 60:
-                raise
-            last_error = exc
-        if attempt < READ_RETRY_ATTEMPTS - 1:
-            time.sleep(READ_RETRY_SLEEP_SECONDS)
-    assert last_error is not None
-    raise last_error
 
 
 def _find_h2_duplicates(text: str) -> list[str]:
@@ -283,7 +262,7 @@ def run_checks(mode: str, threshold: int, manifest_path: Path) -> int:
             continue
 
         existing_docs += 1
-        text = _read_text(path)
+        text = path.read_text(encoding="utf-8", errors="ignore")
 
         duplicates = _find_h2_duplicates(text)
         if duplicates:
