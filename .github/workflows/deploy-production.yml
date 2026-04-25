@@ -1,0 +1,154 @@
+name: Production Release Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: production-release-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "20"
+  JAVA_VERSION: "21"
+
+jobs:
+  python-api:
+    name: Python API Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-ci.txt
+          pip install black ruff PyYAML
+      - name: Waiver validation
+        run: python scripts/quality/quality_thresholds.py check --waivers quality/waivers.yml --no-active
+      - name: Lint and format check
+        run: |
+          ruff check app src scripts tests
+          black --check app src scripts tests
+      - name: API, health, auth, and config tests
+        env:
+          AUTH_BYPASS: "true"
+          RAG_EMBED_BACKEND: hashing
+          HF_HUB_OFFLINE: "1"
+          TRANSFORMERS_OFFLINE: "1"
+        run: |
+          pytest -q \
+            tests/test_health.py \
+            tests/test_main_bootstrap.py \
+            tests/test_auth_password.py \
+            tests/test_api_v1_contract.py \
+            tests/test_production.py
+      - name: Artifact manifest validation
+        run: python scripts/artifact_gate.py
+      - name: Strict model quality gate
+        run: python scripts/model_quality_gate.py
+
+  gateway:
+    name: Kotlin GraphQL Gateway Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - name: Run gateway tests
+        run: |
+          cd services/gateway-kotlin
+          chmod +x ./gradlew
+          ./gradlew clean test
+
+  next-web:
+    name: Next Command Center Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui-web/next/package-lock.json
+      - name: Install Next dependencies
+        run: |
+          cd ui-web/next
+          npm ci --no-audit --no-fund
+      - name: Lint, test, and build
+        run: |
+          cd ui-web/next
+          npm run lint
+          npm run test:ci
+          npm run build
+
+  docker-vm:
+    name: Docker VM Gate
+    runs-on: ubuntu-latest
+    needs: [python-api, gateway, next-web]
+    env:
+      SECRET_KEY: ci-secret-key-that-is-long-enough
+      POSTGRES_PASSWORD: ci-postgres-password
+      DATABASE_URL: postgresql+psycopg2://sentifargo:ci-postgres-password@postgres:5432/sentifargo
+      CORS_ORIGINS: https://sentifargo.example.com
+      ALLOWED_HOSTS: sentifargo.example.com
+      GRAFANA_PASSWORD: ci-grafana-password
+      BOOTSTRAP_TOKEN: ci-bootstrap-token
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Validate production compose
+        run: docker compose -f docker-compose.production.yml config
+      - name: Build production API image
+        run: docker build -f Dockerfile.production --target production -t sentifargo-api:production .
+      - name: Build Kotlin gateway image
+        run: docker build -f services/gateway-kotlin/Dockerfile -t sentifargo-gateway:production services/gateway-kotlin
+      - name: Build Next web image
+        run: docker build -f ui-web/next/Dockerfile -t sentifargo-web:production ui-web/next
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: sentifargo-api:production
+          format: spdx-json
+          output-file: reports/sbom.spdx.json
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: sentifargo-api:production
+          format: sarif
+          output: reports/trivy-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-security-reports
+          path: |
+            reports/sbom.spdx.json
+            reports/trivy-results.sarif

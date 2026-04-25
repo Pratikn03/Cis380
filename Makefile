@@ -23,7 +23,7 @@ help:
 	@echo "  make prod-check     Run production readiness checker"
 	@echo "  make docker-build   Build Docker production image"
 	@echo "  make docker-up      Docker Compose (dev) up --build"
-	@echo "  make docker-up-prod Docker Compose (production profile) up -d"
+	@echo "  make docker-up-prod Docker Compose production stack up -d"
 	@echo "  make docker-down    Docker Compose down"
 	@echo "  make gateway-test   Run Kotlin gateway tests with Java 21"
 	@echo "  make gateway-run    Run Kotlin GraphQL gateway (./gradlew bootRun)"
@@ -73,7 +73,7 @@ docker-up:
 	docker compose up --build
 
 docker-up-prod:
-	docker compose -f docker-compose.production.yml --profile production up -d --build
+	docker compose -f docker-compose.production.yml up -d --build
 
 docker-down:
 	docker compose down

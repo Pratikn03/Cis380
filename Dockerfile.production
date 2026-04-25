@@ -3,20 +3,6 @@
 # Multi-stage build for optimized image size
 # ============================================
 
-# Stage 0: Frontend Builder
-FROM node:20-alpine as frontend-builder
-
-WORKDIR /app/ui-web/frontend
-
-# Install frontend deps
-COPY ui-web/frontend/package*.json ./
-RUN npm ci
-
-# Build React UI
-COPY ui-web/frontend/ ./
-RUN npm run build
-
-# Stage 1: Builder
 FROM python:3.11-slim as builder
 
 WORKDIR /build
@@ -37,9 +23,6 @@ COPY requirements.txt requirements-optional.txt ./
 RUN pip install --no-cache-dir --upgrade pip wheel setuptools && \
     pip install --no-cache-dir -r requirements.txt
 
-# ============================================
-# Stage 2: Production Runtime
-# ============================================
 FROM python:3.11-slim as production
 
 # Security: Create non-root user
@@ -61,11 +44,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy application code
-COPY --chown=Sentifargo:Sentifargo . .
-
-# Copy built frontend assets
-COPY --from=frontend-builder /app/ui-web/frontend/dist /app/ui-web/frontend/dist
+# Copy production application code and curated release artifacts.
+COPY --chown=Sentifargo:Sentifargo alembic ./alembic
+COPY --chown=Sentifargo:Sentifargo app ./app
+COPY --chown=Sentifargo:Sentifargo artifacts ./artifacts
+COPY --chown=Sentifargo:Sentifargo configs ./configs
+COPY --chown=Sentifargo:Sentifargo data ./data
+COPY --chown=Sentifargo:Sentifargo deploy ./deploy
+COPY --chown=Sentifargo:Sentifargo models ./models
+COPY --chown=Sentifargo:Sentifargo scripts ./scripts
+COPY --chown=Sentifargo:Sentifargo src ./src
+COPY --chown=Sentifargo:Sentifargo alembic.ini dvc.lock dvc.yaml pyproject.toml ./
 
 # Create necessary directories with proper permissions
 RUN mkdir -p /app/logs /app/data/monitoring /app/artifacts \
@@ -77,11 +66,12 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
     APP_ENV=production \
     LOG_LEVEL=INFO \
+    MODEL_MANIFEST_PATH=artifacts/release/model-manifest.json \
     PORT=8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:${PORT}/health || exit 1
+    CMD curl -f http://localhost:${PORT}/health/live || exit 1
 
 # Expose port
 EXPOSE ${PORT}

@@ -19,8 +19,6 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 COMPOSE_FILE="${PROJECT_ROOT}/docker-compose.production.yml"
 ENV_FILE="${PROJECT_ROOT}/.env"
 
-# Default values
-PROFILE="default"
 ACTION="deploy"
 
 # ============================================
@@ -62,14 +60,11 @@ Commands:
     health          Check service health
 
 Options:
-    -p, --profile   Deployment profile (default, monitoring, production)
     -e, --env-file  Path to environment file (default: .env)
     -h, --help      Show this help message
 
 Examples:
-    $0 deploy                    # Deploy with default profile
-    $0 deploy -p monitoring      # Deploy with monitoring stack
-    $0 deploy -p production      # Full production deployment
+    $0 deploy                    # Deploy the production Docker VM stack
     $0 logs -f                   # Follow logs
     $0 status                    # Check status
 
@@ -106,47 +101,40 @@ check_requirements() {
     log_success "All requirements met"
 }
 
+compose() {
+    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
+}
+
 build_images() {
     log_info "Building Docker images..."
     
     cd "$PROJECT_ROOT"
     
-    docker compose -f "$COMPOSE_FILE" build --no-cache
+    compose build --no-cache
     
     log_success "Images built successfully"
 }
 
 deploy() {
-    log_info "Deploying Sentifargo with profile: $PROFILE"
+    log_info "Deploying Sentifargo production stack"
     
     cd "$PROJECT_ROOT"
     
-    # Build profile arguments
-    local profile_args=""
-    case $PROFILE in
-        monitoring)
-            profile_args="--profile monitoring"
-            ;;
-        production)
-            profile_args="--profile monitoring --profile production"
-            ;;
-    esac
-    
     # Pull latest images
     log_info "Pulling latest images..."
-    docker compose -f "$COMPOSE_FILE" $profile_args pull
+    compose pull --ignore-buildable || true
 
     # Start core dependencies first
     log_info "Starting database + cache..."
-    docker compose -f "$COMPOSE_FILE" $profile_args up -d postgres redis
+    compose up -d postgres redis
 
     # Run migrations before starting the API
     log_info "Running database migrations..."
-    docker compose -f "$COMPOSE_FILE" $profile_args run --rm Sentifargo-api alembic upgrade head
+    compose run --rm migrate
 
     # Start services
     log_info "Starting services..."
-    docker compose -f "$COMPOSE_FILE" $profile_args up -d
+    compose up -d
     
     # Wait for services to be healthy
     log_info "Waiting for services to be healthy..."
@@ -163,7 +151,7 @@ stop_services() {
     log_info "Stopping all services..."
     
     cd "$PROJECT_ROOT"
-    docker compose -f "$COMPOSE_FILE" --profile monitoring --profile production down
+    compose down
     
     log_success "All services stopped"
 }
@@ -179,7 +167,7 @@ show_status() {
     log_info "Service Status:"
     
     cd "$PROJECT_ROOT"
-    docker compose -f "$COMPOSE_FILE" --profile monitoring --profile production ps
+    compose ps
 }
 
 show_logs() {
@@ -193,7 +181,7 @@ show_logs() {
         follow_flag="-f"
     fi
     
-    docker compose -f "$COMPOSE_FILE" logs $follow_flag
+    compose logs $follow_flag
 }
 
 clean_up() {
@@ -205,7 +193,7 @@ clean_up() {
         log_info "Cleaning up..."
         
         cd "$PROJECT_ROOT"
-        docker compose -f "$COMPOSE_FILE" --profile monitoring --profile production down -v --remove-orphans
+        compose down -v --remove-orphans
         
         # Remove dangling images
         docker image prune -f
@@ -265,7 +253,7 @@ import sys
 
 payload = json.loads(os.environ["READY_JSON"])
 components = {item["name"]: item["status"] for item in payload.get("components", [])}
-required = ["database", "redis", "worker"]
+required = ["database", "redis", "worker", "model_manifest", "disk", "memory"]
 missing = [name for name in required if components.get(name) != "healthy"]
 if payload.get("status") == "unhealthy" or missing:
     print(f"missing required ready components: {', '.join(missing) if missing else 'status=unhealthy'}")
@@ -274,7 +262,9 @@ raise SystemExit(0)
 PY
                 then
                     log_success "API readiness checks passed"
-                    curl -s "${api_url}/health/detailed" | python3 -m json.tool 2>/dev/null || true
+                    if [[ -n "${AUTH_TOKEN:-}" ]]; then
+                        curl -s -H "Authorization: Bearer ${AUTH_TOKEN}" "${api_url}/health/detailed" | python3 -m json.tool 2>/dev/null || true
+                    fi
                     return 0
                 fi
             fi
@@ -297,10 +287,6 @@ PY
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -p|--profile)
-            PROFILE="$2"
-            shift 2
-            ;;
         -e|--env-file)
             ENV_FILE="$2"
             shift 2

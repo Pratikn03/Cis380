@@ -17,19 +17,24 @@ scrape_configs:
       - targets: ['localhost:9090']
 
   # Sentifargo API metrics
-  - job_name: 'Sentifargo-api'
+  - job_name: 'sentifargo-api'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['Sentifargo-api:8000']
+      - targets: ['api:8000']
     relabel_configs:
       - source_labels: [__address__]
         target_label: instance
-        replacement: 'Sentifargo-api'
+        replacement: 'sentifargo-api'
+
+  - job_name: 'sentifargo-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['gateway:8081']
 
   # Redis metrics (if using redis_exporter)
   - job_name: 'redis'
     static_configs:
-      - targets: ['redis:6379']
+      - targets: ['redis-exporter:9121']
 
 # Alertmanager configuration (optional)
 # alerting:

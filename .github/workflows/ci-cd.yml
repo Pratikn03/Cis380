@@ -133,7 +133,7 @@ jobs:
         with:
           lfs: true
       - name: Build image
-        run: docker build -t sentifargo-api .
+        run: docker build -f Dockerfile.production --target production -t sentifargo-api .
 
   contract-gate:
     name: Contract Gate
