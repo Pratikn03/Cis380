@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import hashlib
 import hmac
 import os
+import time
 from typing import TYPE_CHECKING, Callable
 
 from fastapi import Depends, Header, HTTPException, status
@@ -94,6 +95,35 @@ def _extract_bearer(authorization: str | None) -> str | None:
     return authorization.split(" ", 1)[1].strip()
 
 
+def _is_token_blocked(token: str) -> bool:
+    redis_url = os.getenv("REDIS_URL", "").strip()
+    if not redis_url:
+        return False
+    try:
+        import redis
+
+        client = redis.from_url(redis_url, socket_connect_timeout=0.2, socket_timeout=0.2)
+        digest = hashlib.sha256(token.encode("utf-8")).hexdigest()
+        return bool(client.exists(f"auth:blocked:{digest}"))
+    except Exception:
+        return False
+
+
+def block_access_token(token: str, ttl_seconds: int | None = None) -> None:
+    redis_url = os.getenv("REDIS_URL", "").strip()
+    if not redis_url:
+        return
+    try:
+        import redis
+
+        ttl = ttl_seconds or max(60, ACCESS_TOKEN_EXPIRE_MINUTES * 60)
+        client = redis.from_url(redis_url, socket_connect_timeout=0.5, socket_timeout=0.5)
+        digest = hashlib.sha256(token.encode("utf-8")).hexdigest()
+        client.setex(f"auth:blocked:{digest}", ttl, str(int(time.time())))
+    except Exception:
+        return
+
+
 def _create_token(data: dict, expires_delta: timedelta) -> str:
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
@@ -120,6 +150,8 @@ def _decode_token(token: str) -> dict:
 
 
 def verify_access_token(token: str, db: Session) -> "User":
+    if _is_token_blocked(token):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token revoked")
     try:
         payload = _decode_token(token)
         if payload.get("type") != "access":

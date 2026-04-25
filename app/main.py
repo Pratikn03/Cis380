@@ -95,9 +95,11 @@ _serve_legacy_ui = os.getenv("SERVE_LEGACY_UI", "false").lower() in {"1", "true"
 _app_risk_router = None  # Unified risk scoring
 _app_monitor_router = None  # System monitoring
 _app_chat_router = None  # Canonical chat/orchestrator
+_app_agent_router = None  # Agent streaming surface
 _app_recommender_router = None  # Canonical recommendations
 _app_fraud_router = None  # Fraud scoring
 _app_cyber_router = None  # Cyber scoring
+_app_cyber_timeline_router = None  # Cyber timeline drilldown
 _app_behavior_router = None  # Behavior scoring
 _app_fusion_router = None  # Cross-domain fusion scoring
 _app_voice_router = None  # Voice/audio analysis
@@ -147,6 +149,12 @@ except Exception as exc:  # pragma: no cover
     _app_chat_router = None
 
 try:  # pragma: no cover
+    from app.api.agent import router as _app_agent_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.agent router unavailable: %s", exc)
+    _app_agent_router = None
+
+try:  # pragma: no cover
     from app.api.recommender import router as _app_recommender_router
 except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.api.recommender router unavailable: %s", exc)
@@ -163,6 +171,12 @@ try:  # pragma: no cover
 except Exception as exc:  # pragma: no cover
     logging.getLogger("omnichatx").warning("app.api.cyber router unavailable: %s", exc)
     _app_cyber_router = None
+
+try:  # pragma: no cover
+    from app.api.cyber_timeline import router as _app_cyber_timeline_router
+except Exception as exc:  # pragma: no cover
+    logging.getLogger("omnichatx").warning("app.api.cyber_timeline router unavailable: %s", exc)
+    _app_cyber_timeline_router = None
 
 try:  # pragma: no cover
     from app.api.behavior import router as _app_behavior_router
@@ -384,12 +398,16 @@ if _app_monitor_router is not None:
     app.include_router(_app_monitor_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_chat_router is not None:
     app.include_router(_app_chat_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_agent_router is not None:
+    app.include_router(_app_agent_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_recommender_router is not None:
     app.include_router(_app_recommender_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_fraud_router is not None:
     app.include_router(_app_fraud_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_cyber_router is not None:
     app.include_router(_app_cyber_router, prefix="/api", dependencies=[Depends(require_auth)])
+if _app_cyber_timeline_router is not None:
+    app.include_router(_app_cyber_timeline_router, dependencies=[Depends(require_auth)])
 if _app_behavior_router is not None:
     app.include_router(_app_behavior_router, prefix="/api", dependencies=[Depends(require_auth)])
 if _app_fusion_router is not None:

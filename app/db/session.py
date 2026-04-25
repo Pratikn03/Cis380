@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.core import settings
+from app.core.config import settings
 
 
 def _engine_kwargs() -> dict:
