@@ -3,6 +3,16 @@ import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import CommandCenter from "./pages/CommandCenter";
 import Chat from "./pages/Chat";
+import Agent from "./pages/Agent";
+import Fraud from "./pages/Fraud";
+import Cyber from "./pages/Cyber";
+import Brand from "./pages/Brand";
+import Behavior from "./pages/Behavior";
+import Recommender from "./pages/Recommender";
+import RAG from "./pages/RAG";
+import Admin from "./pages/Admin";
+import Health from "./pages/Health";
+import Settings from "./pages/Settings";
 
 const resolveBase = () => {
   const baseUrl = import.meta.env.BASE_URL || "/";
@@ -25,6 +35,16 @@ export default function App() {
             <Routes>
               <Route path="/" element={<CommandCenter />} />
               <Route path="/command-center" element={<CommandCenter />} />
+              <Route path="/agent" element={<Agent />} />
+              <Route path="/fraud" element={<Fraud />} />
+              <Route path="/cyber" element={<Cyber />} />
+              <Route path="/brand" element={<Brand />} />
+              <Route path="/behavior" element={<Behavior />} />
+              <Route path="/recommender" element={<Recommender />} />
+              <Route path="/rag" element={<RAG />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/health" element={<Health />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/chat" element={<Chat />} />
             </Routes>
           </div>

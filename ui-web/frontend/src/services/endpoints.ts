@@ -89,3 +89,59 @@ export const visionVideoPredict = (payload: FormData) =>
   api.post("/api/vision/video/predict", payload, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+
+export const agentEscalate = (payload: {
+  message: string;
+  route?: string;
+  severity?: string;
+  evidence?: Record<string, unknown>;
+  user_id?: string;
+}) => api.post("/api/agent/escalate", payload);
+
+export const healthDetailed = () => api.get("/health/detailed");
+
+export const cyberTimeline = (params?: {
+  window?: number;
+  limit?: number;
+  severity?: string;
+  event_type?: string;
+}) => api.get("/api/cyber/timeline", { params });
+
+export const cyberTimelineEvents = (params?: { limit?: number; severity?: string }) =>
+  api.get("/api/cyber/timeline/events", { params });
+
+export const cyberTimelineSummary = () => api.get("/api/cyber/timeline/summary");
+
+export const fraudExplain = (payload: { features: number[]; amount?: number }) =>
+  api.post("/api/fraud/explain", payload);
+
+export const adminModelRegistry = () => api.get("/api/v1/admin/model-registry");
+
+export const featureFlags = () => api.get("/api/v1/admin/feature-flags");
+
+export const updateFeatureFlags = (flags: Record<string, boolean>) =>
+  api.put("/api/v1/admin/feature-flags", { flags });
+
+export const auditLogs = (params?: { limit?: number; action?: string }) =>
+  api.get("/api/v1/admin/audit-logs", { params });
+
+export const userSettings = () => api.get("/api/v1/users/me/settings");
+
+export const updateUserSettings = (payload: {
+  theme: string;
+  default_model: string;
+  agent_token_cap: number;
+}) => api.put("/api/v1/users/me/settings", payload);
+
+export const logout = () => api.post("/api/v1/auth/logout");
+
+export const passwordResetRequest = (payload: { username?: string; email?: string }) =>
+  api.post("/api/v1/auth/password-reset/request", payload);
+
+export const passwordResetConfirm = (payload: { token: string; new_password: string }) =>
+  api.post("/api/v1/auth/password-reset/confirm", payload);
+
+export const totpEnroll = () => api.post("/api/v1/auth/totp/enroll");
+
+export const totpVerify = (payload: { code: string }) =>
+  api.post("/api/v1/auth/totp/verify", payload);
