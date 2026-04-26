@@ -187,12 +187,29 @@ def write_brands_yaml(
     out_yaml_path: Path, train_images_dir: Path, val_images_dir: Path, class_list: Sequence[str]
 ) -> None:
     """Write ultralytics dataset yaml."""
-    # Ultralytics expects YAML with keys: path/train/val/names.
-    # Keep paths absolute to avoid surprises when training from different CWDs.
+    dataset_root = out_yaml_path.parent.resolve()
+
+    def _find_project_root(path: Path) -> Path | None:
+        for parent in (path, *path.parents):
+            if (parent / ".git").exists() or (parent / "pyproject.toml").exists():
+                return parent
+        return None
+
+    def _relative_to(path: Path, root: Path) -> str:
+        try:
+            return path.resolve().relative_to(root.resolve()).as_posix()
+        except ValueError:
+            return str(path.resolve())
+
+    project_root = _find_project_root(dataset_root)
+    dataset_path = (
+        _relative_to(dataset_root, project_root) if project_root is not None else str(dataset_root)
+    )
+
     payload = {
-        "path": str(out_yaml_path.parent.resolve()),
-        "train": str(train_images_dir.resolve()),
-        "val": str(val_images_dir.resolve()),
+        "path": dataset_path,
+        "train": _relative_to(train_images_dir, dataset_root),
+        "val": _relative_to(val_images_dir, dataset_root),
         "names": list(class_list),
     }
     out_yaml_path.parent.mkdir(parents=True, exist_ok=True)
