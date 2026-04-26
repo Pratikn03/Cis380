@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import sys
 from pathlib import Path
@@ -14,7 +15,12 @@ if __package__ in {None, ""}:
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
 
-from scripts.voice.ssl_utils import AudioDataCollator, build_label_maps, load_manifest, prepare_dataset
+from scripts.voice.ssl_utils import (
+    AudioDataCollator,
+    build_label_maps,
+    load_manifest,
+    prepare_dataset,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -29,9 +35,16 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     try:
-        from transformers import AutoFeatureExtractor, AutoModelForAudioClassification, Trainer, TrainingArguments
+        from transformers import (
+            AutoFeatureExtractor,
+            AutoModelForAudioClassification,
+            Trainer,
+            TrainingArguments,
+        )
     except ImportError as exc:
-        raise SystemExit("Missing dependencies. Install transformers + datasets + torchaudio + soundfile.") from exc
+        raise SystemExit(
+            "Missing dependencies. Install transformers + datasets + torchaudio + soundfile."
+        ) from exc
 
     args = parse_args()
     test_df = load_manifest(args.test_manifest)
@@ -59,12 +72,18 @@ def main() -> None:
         report_to="none",
     )
 
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        data_collator=AudioDataCollator(feature_extractor),
-        tokenizer=feature_extractor,
-    )
+    trainer_kwargs = {
+        "model": model,
+        "args": training_args,
+        "data_collator": AudioDataCollator(feature_extractor),
+    }
+    trainer_sig = inspect.signature(Trainer.__init__)
+    if "tokenizer" in trainer_sig.parameters:
+        trainer_kwargs["tokenizer"] = feature_extractor
+    elif "processing_class" in trainer_sig.parameters:
+        trainer_kwargs["processing_class"] = feature_extractor
+
+    trainer = Trainer(**trainer_kwargs)
 
     preds = trainer.predict(test_ds)
     logits = preds.predictions
@@ -75,7 +94,12 @@ def main() -> None:
         "accuracy": accuracy_score(labels, y_pred),
         "macro_f1": f1_score(labels, y_pred, average="macro"),
         "uar": balanced_accuracy_score(labels, y_pred),
-        "report": classification_report(labels, y_pred, target_names=[id2label[i] for i in range(len(id2label))], output_dict=True),
+        "report": classification_report(
+            labels,
+            y_pred,
+            target_names=[id2label[i] for i in range(len(id2label))],
+            output_dict=True,
+        ),
     }
 
     args.json_out.parent.mkdir(parents=True, exist_ok=True)

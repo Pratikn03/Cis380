@@ -53,13 +53,32 @@ def _resample_audio(audio: np.ndarray, orig_sr: int, target_sr: int) -> np.ndarr
         ) from exc
 
 
+def resolve_audio_path(path: str) -> Path:
+    """Resolve stale manifest paths against the local voice audio directory."""
+    candidate = Path(path)
+    if candidate.exists():
+        return candidate
+
+    basename = candidate.name
+    local_audio = Path("data/raw/voice/AudioWAV") / basename
+    if local_audio.exists():
+        return local_audio
+
+    matches = list(Path("data/raw/voice").glob(f"**/{basename}"))
+    if matches:
+        return matches[0]
+
+    return candidate
+
+
 def load_audio(path: str, target_sr: int) -> np.ndarray:
     try:
         import soundfile as sf
     except Exception as exc:
         raise SystemExit("soundfile is required for SSL voice training.") from exc
 
-    audio, sr = sf.read(path)
+    audio_path = resolve_audio_path(path)
+    audio, sr = sf.read(audio_path)
     if audio.ndim > 1:
         audio = np.mean(audio, axis=1)
     audio = audio.astype(np.float32)
@@ -67,7 +86,9 @@ def load_audio(path: str, target_sr: int) -> np.ndarray:
     return audio
 
 
-def prepare_dataset(df: pd.DataFrame, feature_extractor: Any, label2id: dict[str, int], num_workers: int):
+def prepare_dataset(
+    df: pd.DataFrame, feature_extractor: Any, label2id: dict[str, int], num_workers: int
+):
     import datasets
 
     target_sr = int(getattr(feature_extractor, "sampling_rate", 16000))
