@@ -1,0 +1,483 @@
+{
+  "generated_at": "2026-04-26T15:36:43+00:00",
+  "status": "red",
+  "models": [
+    {
+      "name": "fraud",
+      "status": "red",
+      "artifact": "models/fraud/supervised/fraud_model.pkl",
+      "metricsFile": "experiments/fraud/metrics/metrics.json",
+      "metrics": {
+        "test.roc_auc": 0.7682327735437844,
+        "test.f1": 0.5506072874493927
+      },
+      "thresholds": [
+        {
+          "metric": "test.roc_auc",
+          "actual": 0.7682327735437844,
+          "expected": 0.8214741065580803,
+          "operator": ">=",
+          "passed": false,
+          "baseline": "test.roc_auc"
+        },
+        {
+          "metric": "test.f1",
+          "actual": 0.5506072874493927,
+          "expected": 0.65,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        }
+      ],
+      "failures": [
+        {
+          "domain": "fraud",
+          "metric": "test.roc_auc",
+          "operator": ">=",
+          "expected": 0.8214741065580803,
+          "actual": 0.7682327735437844,
+          "baseline": "test.roc_auc",
+          "passed": false
+        },
+        {
+          "domain": "fraud",
+          "metric": "test.f1",
+          "operator": ">=",
+          "expected": 0.65,
+          "actual": 0.5506072874493927,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "fraud",
+          "metric": "test.roc_auc",
+          "baseline": 0.8053667711353728,
+          "actual": 0.7682327735437844,
+          "max_regression_pct": 2.0,
+          "actual_regression_pct": 4.610818,
+          "passed": false
+        },
+        {
+          "domain": "fraud",
+          "metric": "test.f1",
+          "baseline": 0.6903553299492385,
+          "actual": 0.5506072874493927,
+          "max_regression_pct": 2.0,
+          "actual_regression_pct": 20.242915,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "name": "cyber",
+      "status": "red",
+      "artifact": "models/cyber/supervised/cyber_model.pkl",
+      "metricsFile": "experiments/cyber/metrics/metrics.json",
+      "metrics": {
+        "test.f1": 0.9785536159600997,
+        "test.roc_auc": 0.9974359199830689
+      },
+      "thresholds": [
+        {
+          "metric": "test.f1",
+          "actual": 0.9785536159600997,
+          "expected": 0.9822347667275445,
+          "operator": ">=",
+          "passed": false,
+          "baseline": "test.f1"
+        },
+        {
+          "metric": "test.roc_auc",
+          "actual": 0.9974359199830689,
+          "expected": 0.98,
+          "operator": ">=",
+          "passed": true,
+          "baseline": null
+        }
+      ],
+      "failures": [
+        {
+          "domain": "cyber",
+          "metric": "test.f1",
+          "operator": ">=",
+          "expected": 0.9822347667275445,
+          "actual": 0.9785536159600997,
+          "baseline": "test.f1",
+          "passed": false
+        }
+      ]
+    },
+    {
+      "name": "behavior",
+      "status": "green",
+      "artifact": "models/behavior/behavior_lof.pkl",
+      "metricsFile": "experiments/behavior/metrics/metrics.json",
+      "metrics": {
+        "autoencoder_roc_auc": 0.6993122473276316,
+        "autoencoder_f1": 0.416988416988417,
+        "autoencoder_fpr": 0.03165438980688831
+      },
+      "thresholds": [
+        {
+          "metric": "autoencoder_roc_auc",
+          "actual": 0.6993122473276316,
+          "expected": 0.6898310322318133,
+          "operator": ">=",
+          "passed": true,
+          "baseline": "autoencoder_roc_auc"
+        },
+        {
+          "metric": "autoencoder_f1",
+          "actual": 0.416988416988417,
+          "expected": 0.382007722007722,
+          "operator": ">=",
+          "passed": true,
+          "baseline": "autoencoder_f1"
+        },
+        {
+          "metric": "autoencoder_fpr",
+          "actual": 0.03165438980688831,
+          "expected": 0.03316742982281505,
+          "operator": "<=",
+          "passed": true,
+          "baseline": "autoencoder_fpr"
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "vision_deepfake",
+      "status": "red",
+      "artifact": "models/vision/yolo_cls/best.pt",
+      "metricsFile": "experiments/vision/metrics/metrics.json",
+      "metrics": {},
+      "thresholds": [
+        {
+          "metric": "roc_auc",
+          "actual": null,
+          "expected": 0.85,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        },
+        {
+          "metric": "f1",
+          "actual": null,
+          "expected": 0.8,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        },
+        {
+          "metric": "accuracy",
+          "actual": null,
+          "expected": 0.85,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        }
+      ],
+      "failures": [
+        {
+          "domain": "vision_deepfake",
+          "metric": "roc_auc",
+          "operator": ">=",
+          "expected": 0.85,
+          "actual": null,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "vision_deepfake",
+          "metric": "f1",
+          "operator": ">=",
+          "expected": 0.8,
+          "actual": null,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "vision_deepfake",
+          "metric": "accuracy",
+          "operator": ">=",
+          "expected": 0.85,
+          "actual": null,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "vision_deepfake",
+          "metric": "artifact_exists",
+          "operator": "exists",
+          "expected": true,
+          "actual": false,
+          "path": "models/vision/yolo_cls/best.pt",
+          "passed": false
+        }
+      ]
+    },
+    {
+      "name": "vision_face_emotion",
+      "status": "red",
+      "artifact": "models/vision/face_emotion/model.pt",
+      "metricsFile": "models/vision/face_emotion/metrics.json",
+      "metrics": {
+        "best_val_acc": 0.014285714285714285
+      },
+      "thresholds": [
+        {
+          "metric": "best_val_acc",
+          "actual": 0.014285714285714285,
+          "expected": 0.014571428571428572,
+          "operator": ">=",
+          "passed": false,
+          "baseline": "best_val_acc"
+        }
+      ],
+      "failures": [
+        {
+          "domain": "vision_face_emotion",
+          "metric": "best_val_acc",
+          "operator": ">=",
+          "expected": 0.014571428571428572,
+          "actual": 0.014285714285714285,
+          "baseline": "best_val_acc",
+          "passed": false
+        }
+      ]
+    },
+    {
+      "name": "vision_temporal",
+      "status": "red",
+      "artifact": "models/vision/video_temporal_model.pkl",
+      "metricsFile": "experiments/vision/video_temporal/metrics.json",
+      "metrics": {
+        "accuracy": 0.64
+      },
+      "thresholds": [
+        {
+          "metric": "accuracy",
+          "actual": 0.64,
+          "expected": 0.75,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        }
+      ],
+      "failures": [
+        {
+          "domain": "vision_temporal",
+          "metric": "accuracy",
+          "operator": ">=",
+          "expected": 0.75,
+          "actual": 0.64,
+          "baseline": null,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "name": "brand",
+      "status": "red",
+      "artifact": "artifacts/brand/yolo_logo_det.pt",
+      "metricsFile": "models/brand/full/results.csv",
+      "metrics": {
+        "metrics_map50_b": 0.0
+      },
+      "thresholds": [
+        {
+          "metric": "metrics_map50_b",
+          "actual": 0.0,
+          "expected": 0.85,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        }
+      ],
+      "failures": [
+        {
+          "domain": "brand",
+          "metric": "metrics_map50_b",
+          "operator": ">=",
+          "expected": 0.85,
+          "actual": 0.0,
+          "baseline": null,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "name": "voice",
+      "status": "red",
+      "artifact": "models/voice_emotion_ssl",
+      "metricsFile": "reports/voice_emotion_eval.json",
+      "metrics": {
+        "macro_f1": 0.14299586547850726,
+        "uar": 0.2219047619047619
+      },
+      "thresholds": [
+        {
+          "metric": "macro_f1",
+          "actual": 0.14299586547850726,
+          "expected": 0.6,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        },
+        {
+          "metric": "uar",
+          "actual": 0.2219047619047619,
+          "expected": 0.6,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        }
+      ],
+      "failures": [
+        {
+          "domain": "voice",
+          "metric": "macro_f1",
+          "operator": ">=",
+          "expected": 0.6,
+          "actual": 0.14299586547850726,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "voice",
+          "metric": "uar",
+          "operator": ">=",
+          "expected": 0.6,
+          "actual": 0.2219047619047619,
+          "baseline": null,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "name": "recommender",
+      "status": "red",
+      "artifact": "models/recommender/recommender_model.pkl",
+      "metricsFile": "experiments/recommender/metrics/metrics.json",
+      "metrics": {
+        "recall_at_10": 0.004,
+        "ndcg_at_10": 0.0018572106393741415
+      },
+      "thresholds": [
+        {
+          "metric": "recall_at_10",
+          "actual": 0.004,
+          "expected": 0.1,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        },
+        {
+          "metric": "ndcg_at_10",
+          "actual": 0.0018572106393741415,
+          "expected": 0.05,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        }
+      ],
+      "failures": [
+        {
+          "domain": "recommender",
+          "metric": "recall_at_10",
+          "operator": ">=",
+          "expected": 0.1,
+          "actual": 0.004,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "recommender",
+          "metric": "ndcg_at_10",
+          "operator": ">=",
+          "expected": 0.05,
+          "actual": 0.0018572106393741415,
+          "baseline": null,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "name": "fusion",
+      "status": "green",
+      "artifact": "models/fusion/fusion_meta_model.pkl",
+      "metricsFile": "experiments/fusion/metrics/metrics.json",
+      "metrics": {
+        "roc_auc": 0.9493101379724056,
+        "f1": 0.7096774193548387
+      },
+      "thresholds": [
+        {
+          "metric": "roc_auc",
+          "actual": 0.9493101379724056,
+          "expected": 0.9,
+          "operator": ">=",
+          "passed": true,
+          "baseline": null
+        },
+        {
+          "metric": "f1",
+          "actual": 0.7096774193548387,
+          "expected": 0.7,
+          "operator": ">=",
+          "passed": true,
+          "baseline": null
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "rag",
+      "status": "red",
+      "artifact": "data/processed/rag",
+      "metricsFile": "metrics/rag_eval.json",
+      "metrics": {
+        "mrr": 0.0,
+        "recall_at_k.10": 0.0
+      },
+      "thresholds": [
+        {
+          "metric": "mrr",
+          "actual": 0.0,
+          "expected": 0.7,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        },
+        {
+          "metric": "recall_at_k.10",
+          "actual": 0.0,
+          "expected": 0.7,
+          "operator": ">=",
+          "passed": false,
+          "baseline": null
+        }
+      ],
+      "failures": [
+        {
+          "domain": "rag",
+          "metric": "mrr",
+          "operator": ">=",
+          "expected": 0.7,
+          "actual": 0.0,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "rag",
+          "metric": "recall_at_k.10",
+          "operator": ">=",
+          "expected": 0.7,
+          "actual": 0.0,
+          "baseline": null,
+          "passed": false
+        }
+      ]
+    }
+  ]
+}

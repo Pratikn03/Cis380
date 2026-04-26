@@ -7,112 +7,134 @@ stages:
       hash: md5
       md5: 4b47aa3d7120be3e13ff1a207cc885d7
       size: 490
+      isexec: true
     - path: configs/fraud_config.yaml
       hash: md5
       md5: 0e67a70721fbf405d05eeaf0d3f644b0
       size: 366
+      isexec: true
     - path: data/raw/fraud/
       hash: md5
-      md5: 0d7fc0479034fb2f455ab3a847a5417b.dir
-      size: 644363535
-      nfiles: 2
+      md5: c1a2a26d4d5d8e46a5740e3b9bb9a14a.dir
+      size: 644372920
+      nfiles: 6
     - path: src/scripts/run_fraud_experiment.py
       hash: md5
-      md5: ced8f75e2fc6423d7910ddc1ba79e15b
-      size: 5941
+      md5: 77981ba90c7f491f9ae7ed7b0a732e84
+      size: 10829
+      isexec: true
     - path: src/train/train_fraud.py
       hash: md5
-      md5: a9200bed13c1e37bf770f1beb59cb766
-      size: 432
+      md5: 2ef9852a231364f4bb4ea74005574205
+      size: 1122
+      isexec: true
     - path: src/uais/data/load_fraud_data.py
       hash: md5
       md5: e3bc93646e7b60bc75a420bf47693856
       size: 6857
+      isexec: true
     - path: src/uais/features/fraud_features.py
       hash: md5
       md5: 18f84785d2f9b9cb85ff77783b910881
       size: 6311
+      isexec: true
     outs:
     - path: experiments/fraud/metrics/metrics.json
       hash: md5
-      md5: 5f7ae0b1a485cd8ab367656b8b7542db
-      size: 668
+      md5: e3d5de17c37bac95d5f394c70ee28feb
+      size: 1776
+      isexec: true
   train_cyber_model:
-    cmd: Sentifargo_CYBER_SAMPLE_SIZE=200000 PYTHONPATH=src python -m src.train.train_cyber
+    cmd: PYTHONPATH=src python -m src.train.train_cyber
     deps:
     - path: configs/base_config.yaml
       hash: md5
       md5: 4b47aa3d7120be3e13ff1a207cc885d7
       size: 490
+      isexec: true
     - path: configs/cyber_config.yaml
       hash: md5
-      md5: ec1fba7e831914d104cd0cdbde3ae1e8
-      size: 469
+      md5: 2c684d122c943ec26b39d5c00677da40
+      size: 573
+      isexec: true
     - path: data/raw/cyber/
       hash: md5
-      md5: de195f2dc0e97bdb27f450178619d12d.dir
-      size: 1268120194
-      nfiles: 16
+      md5: 188dcbb4bd146f44b3fce2ebc1934212.dir
+      size: 634069513
+      nfiles: 12
     - path: src/scripts/run_cyber_experiment.py
       hash: md5
-      md5: 7aad7ca90c886c0b4935a214798bae19
-      size: 4373
+      md5: 8eb15a00f37cfc2b9dc328cb9795fb2c
+      size: 4406
+      isexec: true
     - path: src/train/train_cyber.py
       hash: md5
-      md5: 378880f4bae8b332c1d98e96fbc5d6ff
-      size: 432
+      md5: eed90de57d53cb9460048f66836b0240
+      size: 1122
+      isexec: true
     - path: src/uais/data/load_cyber_data.py
       hash: md5
-      md5: 24b16da18991b45a946db34eb8acda9e
-      size: 5721
+      md5: d921e6fdbf4ae7a9d00c3206c88ef19d
+      size: 7039
+      isexec: true
     - path: src/uais/features/cyber_features.py
       hash: md5
       md5: 526f1cfb7c717e3fbb9322621d2bfb01
       size: 2658
+      isexec: true
     outs:
     - path: experiments/cyber/metrics/metrics.json
       hash: md5
-      md5: 9d5da762050daf98a7f95adf127c3424
-      size: 641
+      md5: b16f5a3cd31ffeba0e57338a2fd4a049
+      size: 672
+      isexec: true
   train_behavior_model:
-    cmd: Sentifargo_BEHAVIOR_SAMPLE_SIZE=100000 PYTHONPATH=src python -m src.train.train_behavior
+    cmd: PYTHONPATH=src python -m src.train.train_behavior
     deps:
     - path: configs/base_config.yaml
       hash: md5
       md5: 4b47aa3d7120be3e13ff1a207cc885d7
       size: 490
+      isexec: true
     - path: configs/behavior_config.yaml
       hash: md5
-      md5: 99eb1f939a7cca42413e1fbf53147d1c
-      size: 360
+      md5: 7fe712c2ac9a4083d03ac52745b2e9de
+      size: 466
+      isexec: true
     - path: data/raw/behavior/
       hash: md5
-      md5: 7fe73da634333a0d0400f8612a1a5b45.dir
-      size: 21006846605
+      md5: cc6f101b2e2293e47b394f6f29672ff2.dir
+      size: 4856927684
       nfiles: 28
     - path: src/scripts/run_behavior_experiment.py
       hash: md5
-      md5: e4bc0be3262f8602729b023ab8e3210a
-      size: 3915
+      md5: 456867a67c04ddc43d56d6d1f99fff34
+      size: 7411
+      isexec: true
     - path: src/train/train_behavior.py
       hash: md5
-      md5: 234d4742fa9a14ed58a928b1b06c7f83
-      size: 493
+      md5: c40fdd2387eba1f0afb2347fdb2c503b
+      size: 1183
+      isexec: true
     - path: src/uais/data/load_behavior_data.py
       hash: md5
       md5: 638fc0403c06559d0141048b1264b2b9
       size: 5354
+      isexec: true
     - path: src/uais/features/behavior_features.py
       hash: md5
       md5: c383b14be190d91002e1ef638fb91d9a
       size: 2388
+      isexec: true
     outs:
     - path: experiments/behavior/metrics/metrics.json
       hash: md5
-      md5: 125f12b39fec7ddd9fe386ddc70c4ddc
-      size: 426
+      md5: eafc1a942096b164023a0ae4a5fbfc47
+      size: 1004
+      isexec: true
   train_vision_model:
-    cmd: VISION_EPOCHS=1 VISION_MAX_BATCHES_PER_EPOCH=100 PYTHONPATH=src bash scripts/run_train_vision.sh
+    cmd: VISION_EPOCHS=1 VISION_MAX_BATCHES_PER_EPOCH=100 PYTHONPATH=src bash 
+      scripts/run_train_vision.sh
     deps:
     - path: data/processed/vision/
       hash: md5
@@ -135,15 +157,22 @@ stages:
   train_recommender:
     cmd: PYTHONPATH=src python -m src.train.train_recommender
     deps:
+    - path: data/raw/recommendation/
+      hash: md5
+      md5: 4a8e4c2cb62c1b71016f719d82552f3c.dir
+      size: 5181797401
+      nfiles: 34
     - path: src/train/train_recommender.py
       hash: md5
-      md5: 31c55f7ab867fb15fafe7bbcfa97d074
-      size: 5715
+      md5: 51cca3dc5205a9dd31a6786f0b64cbaf
+      size: 10043
+      isexec: true
     outs:
     - path: experiments/recommender/metrics/metrics.json
       hash: md5
-      md5: 2c2a91fc253b4c5281cdb1d56a87562f
-      size: 539
+      md5: 037d32863917eeecdbc6dc19ffcc98ba
+      size: 348
+      isexec: true
   evaluate_all:
     cmd: PYTHONPATH=src python -m uais.evaluation.evaluate_all
     deps:

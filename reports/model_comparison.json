@@ -1,0 +1,92 @@
+[
+  {
+    "model": "fraud",
+    "metric": "test.roc_auc",
+    "value": 0.7682327735437844
+  },
+  {
+    "model": "fraud",
+    "metric": "test.f1",
+    "value": 0.5506072874493927
+  },
+  {
+    "model": "cyber",
+    "metric": "test.f1",
+    "value": 0.9785536159600997
+  },
+  {
+    "model": "cyber",
+    "metric": "test.roc_auc",
+    "value": 0.9974359199830689
+  },
+  {
+    "model": "behavior",
+    "metric": "autoencoder_roc_auc",
+    "value": 0.6993122473276316
+  },
+  {
+    "model": "behavior",
+    "metric": "autoencoder_f1",
+    "value": 0.416988416988417
+  },
+  {
+    "model": "behavior",
+    "metric": "autoencoder_fpr",
+    "value": 0.03165438980688831
+  },
+  {
+    "model": "vision_face_emotion",
+    "metric": "best_val_acc",
+    "value": 0.014285714285714285
+  },
+  {
+    "model": "vision_temporal",
+    "metric": "accuracy",
+    "value": 0.64
+  },
+  {
+    "model": "brand",
+    "metric": "metrics_map50_b",
+    "value": 0.0
+  },
+  {
+    "model": "voice",
+    "metric": "macro_f1",
+    "value": 0.14299586547850726
+  },
+  {
+    "model": "voice",
+    "metric": "uar",
+    "value": 0.2219047619047619
+  },
+  {
+    "model": "recommender",
+    "metric": "recall_at_10",
+    "value": 0.004
+  },
+  {
+    "model": "recommender",
+    "metric": "ndcg_at_10",
+    "value": 0.0018572106393741415
+  },
+  {
+    "model": "fusion",
+    "metric": "roc_auc",
+    "value": 0.9493101379724056
+  },
+  {
+    "model": "fusion",
+    "metric": "f1",
+    "value": 0.7096774193548387
+  },
+  {
+    "model": "rag",
+    "metric": "mrr",
+    "value": 0.0
+  },
+  {
+    "model": "rag",
+    "metric": "recall_at_k.10",
+    "value": 0.0
+  }
+]

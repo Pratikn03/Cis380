@@ -1,0 +1,938 @@
+{
+  "status": "fail",
+  "results": [
+    {
+      "domain": "fraud",
+      "status": "fail",
+      "metricsFile": "experiments/fraud/metrics/metrics.json",
+      "artifact": "models/fraud/supervised/fraud_model.pkl",
+      "artifactExists": true,
+      "thresholds": [
+        {
+          "domain": "fraud",
+          "metric": "test.roc_auc",
+          "operator": ">=",
+          "expected": 0.8214741065580803,
+          "actual": 0.7682327735437844,
+          "baseline": "test.roc_auc",
+          "passed": false
+        },
+        {
+          "domain": "fraud",
+          "metric": "test.f1",
+          "operator": ">=",
+          "expected": 0.65,
+          "actual": 0.5506072874493927,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "regressions": [
+        {
+          "domain": "fraud",
+          "metric": "test.roc_auc",
+          "baseline": 0.8053667711353728,
+          "actual": 0.7682327735437844,
+          "max_regression_pct": 2.0,
+          "actual_regression_pct": 4.610818,
+          "passed": false
+        },
+        {
+          "domain": "fraud",
+          "metric": "test.f1",
+          "baseline": 0.6903553299492385,
+          "actual": 0.5506072874493927,
+          "max_regression_pct": 2.0,
+          "actual_regression_pct": 20.242915,
+          "passed": false
+        }
+      ],
+      "failures": [
+        {
+          "domain": "fraud",
+          "metric": "test.roc_auc",
+          "operator": ">=",
+          "expected": 0.8214741065580803,
+          "actual": 0.7682327735437844,
+          "baseline": "test.roc_auc",
+          "passed": false
+        },
+        {
+          "domain": "fraud",
+          "metric": "test.f1",
+          "operator": ">=",
+          "expected": 0.65,
+          "actual": 0.5506072874493927,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "fraud",
+          "metric": "test.roc_auc",
+          "baseline": 0.8053667711353728,
+          "actual": 0.7682327735437844,
+          "max_regression_pct": 2.0,
+          "actual_regression_pct": 4.610818,
+          "passed": false
+        },
+        {
+          "domain": "fraud",
+          "metric": "test.f1",
+          "baseline": 0.6903553299492385,
+          "actual": 0.5506072874493927,
+          "max_regression_pct": 2.0,
+          "actual_regression_pct": 20.242915,
+          "passed": false
+        }
+      ],
+      "selectedMetrics": {
+        "test.roc_auc": 0.7682327735437844,
+        "test.f1": 0.5506072874493927
+      },
+      "allMetrics": {
+        "val.roc_auc": 0.8927662512871071,
+        "val_roc_auc": 0.8927662512871071,
+        "val.pr_auc": 0.536755213929474,
+        "val_pr_auc": 0.536755213929474,
+        "val.f1": 0.6880733944954128,
+        "val_f1": 0.6880733944954128,
+        "val.precision": 0.625,
+        "val_precision": 0.625,
+        "val.recall": 0.7653061224489796,
+        "val_recall": 0.7653061224489796,
+        "val.accuracy": 0.9988062007338354,
+        "val_accuracy": 0.9988062007338354,
+        "test.roc_auc": 0.7682327735437844,
+        "test_roc_auc": 0.7682327735437844,
+        "test.pr_auc": 0.5729331009701085,
+        "test_pr_auc": 0.5729331009701085,
+        "test.f1": 0.5506072874493927,
+        "test_f1": 0.5506072874493927,
+        "test.precision": 0.4594594594594595,
+        "test_precision": 0.4594594594594595,
+        "test.recall": 0.6868686868686869,
+        "test_recall": 0.6868686868686869,
+        "test.accuracy": 0.9980513324672589,
+        "test_accuracy": 0.9980513324672589,
+        "hybrid.roc_auc": 0.9611787111215562,
+        "hybrid_roc_auc": 0.9611787111215562,
+        "hybrid.pr_auc": 0.6011491590393437,
+        "hybrid_pr_auc": 0.6011491590393437,
+        "hybrid.f1": 0.5333333333333333,
+        "hybrid_f1": 0.5333333333333333,
+        "hybrid.precision": 0.4358974358974359,
+        "hybrid_precision": 0.4358974358974359,
+        "hybrid.recall": 0.6868686868686869,
+        "hybrid_recall": 0.6868686868686869,
+        "hybrid.accuracy": 0.9979108879603946,
+        "hybrid_accuracy": 0.9979108879603946,
+        "tuning.enabled": true,
+        "tuning_enabled": true,
+        "tuning.backend": "deterministic_grid",
+        "tuning_backend": "deterministic_grid",
+        "tuning.trials.0.params.model_type": "hist_gb",
+        "tuning_trials_0_params_model_type": "hist_gb",
+        "tuning.trials.0.params.random_state": 42,
+        "tuning_trials_0_params_random_state": 42,
+        "tuning.trials.0.params.max_depth": 3,
+        "tuning_trials_0_params_max_depth": 3,
+        "tuning.trials.0.params.learning_rate": 0.05,
+        "tuning_trials_0_params_learning_rate": 0.05,
+        "tuning.trials.0.params.max_iter": 200,
+        "tuning_trials_0_params_max_iter": 200,
+        "tuning.trials.0.params.n_estimators": 300,
+        "tuning_trials_0_params_n_estimators": 300,
+        "tuning.trials.0.roc_auc": 0.8494541301739557,
+        "tuning_trials_0_roc_auc": 0.8494541301739557,
+        "tuning.trials.1.params.model_type": "hist_gb",
+        "tuning_trials_1_params_model_type": "hist_gb",
+        "tuning.trials.1.params.random_state": 43,
+        "tuning_trials_1_params_random_state": 43,
+        "tuning.trials.1.params.max_depth": 4,
+        "tuning_trials_1_params_max_depth": 4,
+        "tuning.trials.1.params.learning_rate": 0.1,
+        "tuning_trials_1_params_learning_rate": 0.1,
+        "tuning.trials.1.params.max_iter": 200,
+        "tuning_trials_1_params_max_iter": 200,
+        "tuning.trials.1.params.n_estimators": 300,
+        "tuning_trials_1_params_n_estimators": 300,
+        "tuning.trials.1.roc_auc": 0.3765279743256885,
+        "tuning_trials_1_roc_auc": 0.3765279743256885,
+        "tuning.trials.2.params.model_type": "hist_gb",
+        "tuning_trials_2_params_model_type": "hist_gb",
+        "tuning.trials.2.params.random_state": 44,
+        "tuning_trials_2_params_random_state": 44,
+        "tuning.trials.2.params.max_depth": 6,
+        "tuning_trials_2_params_max_depth": 6,
+        "tuning.trials.2.params.learning_rate": 0.08,
+        "tuning_trials_2_params_learning_rate": 0.08,
+        "tuning.trials.2.params.max_iter": 200,
+        "tuning_trials_2_params_max_iter": 200,
+        "tuning.trials.2.params.n_estimators": 300,
+        "tuning_trials_2_params_n_estimators": 300,
+        "tuning.trials.2.roc_auc": 0.8927662512871071,
+        "tuning_trials_2_roc_auc": 0.8927662512871071,
+        "tuning.best_value": 0.8927662512871071,
+        "tuning_best_value": 0.8927662512871071,
+        "tuning.best_params.model_type": "hist_gb",
+        "tuning_best_params_model_type": "hist_gb",
+        "tuning.best_params.random_state": 44,
+        "tuning_best_params_random_state": 44,
+        "tuning.best_params.max_depth": 6,
+        "tuning_best_params_max_depth": 6,
+        "tuning.best_params.learning_rate": 0.08,
+        "tuning_best_params_learning_rate": 0.08,
+        "tuning.best_params.max_iter": 200,
+        "tuning_best_params_max_iter": 200,
+        "tuning.best_params.n_estimators": 300,
+        "tuning_best_params_n_estimators": 300
+      }
+    },
+    {
+      "domain": "cyber",
+      "status": "fail",
+      "metricsFile": "experiments/cyber/metrics/metrics.json",
+      "artifact": "models/cyber/supervised/cyber_model.pkl",
+      "artifactExists": true,
+      "thresholds": [
+        {
+          "domain": "cyber",
+          "metric": "test.f1",
+          "operator": ">=",
+          "expected": 0.9822347667275445,
+          "actual": 0.9785536159600997,
+          "baseline": "test.f1",
+          "passed": false
+        },
+        {
+          "domain": "cyber",
+          "metric": "test.roc_auc",
+          "operator": ">=",
+          "expected": 0.98,
+          "actual": 0.9974359199830689,
+          "baseline": null,
+          "passed": true
+        }
+      ],
+      "regressions": [],
+      "failures": [
+        {
+          "domain": "cyber",
+          "metric": "test.f1",
+          "operator": ">=",
+          "expected": 0.9822347667275445,
+          "actual": 0.9785536159600997,
+          "baseline": "test.f1",
+          "passed": false
+        }
+      ],
+      "selectedMetrics": {
+        "test.f1": 0.9785536159600997,
+        "test.roc_auc": 0.9974359199830689
+      },
+      "allMetrics": {
+        "val.roc_auc": 0.9972826002706876,
+        "val_roc_auc": 0.9972826002706876,
+        "val.pr_auc": 0.9979562460690692,
+        "val_pr_auc": 0.9979562460690692,
+        "val.f1": 0.9804138541551399,
+        "val_f1": 0.9804138541551399,
+        "val.precision": 0.9835701598579041,
+        "val_precision": 0.9835701598579041,
+        "val.recall": 0.9772777410103685,
+        "val_recall": 0.9772777410103685,
+        "val.accuracy": 0.9785011538928702,
+        "val_accuracy": 0.9785011538928702,
+        "test.roc_auc": 0.9974359199830689,
+        "test_roc_auc": 0.9974359199830689,
+        "test.pr_auc": 0.9979993131917836,
+        "test_pr_auc": 0.9979993131917836,
+        "test.f1": 0.9785536159600997,
+        "test_f1": 0.9785536159600997,
+        "test.precision": 0.9834038761416797,
+        "test_precision": 0.9834038761416797,
+        "test.recall": 0.97375096503805,
+        "test_recall": 0.97375096503805,
+        "test.accuracy": 0.9764984514483512,
+        "test_accuracy": 0.9764984514483512,
+        "anomaly.roc_auc": 0.34086980109038123,
+        "anomaly_roc_auc": 0.34086980109038123,
+        "anomaly.pr_auc": 0.4530130301373698,
+        "anomaly_pr_auc": 0.4530130301373698,
+        "anomaly.f1": 0.031412523403370085,
+        "anomaly_f1": 0.031412523403370085,
+        "anomaly.precision": 0.2760511882998172,
+        "anomaly_precision": 0.2760511882998172,
+        "anomaly.recall": 0.01665379949266571,
+        "anomaly_recall": 0.01665379949266571,
+        "anomaly.accuracy": 0.4345053743851339,
+        "anomaly_accuracy": 0.4345053743851339
+      }
+    },
+    {
+      "domain": "behavior",
+      "status": "pass",
+      "metricsFile": "experiments/behavior/metrics/metrics.json",
+      "artifact": "models/behavior/behavior_lof.pkl",
+      "artifactExists": true,
+      "thresholds": [
+        {
+          "domain": "behavior",
+          "metric": "autoencoder_roc_auc",
+          "operator": ">=",
+          "expected": 0.6898310322318133,
+          "actual": 0.6993122473276316,
+          "baseline": "autoencoder_roc_auc",
+          "passed": true
+        },
+        {
+          "domain": "behavior",
+          "metric": "autoencoder_f1",
+          "operator": ">=",
+          "expected": 0.382007722007722,
+          "actual": 0.416988416988417,
+          "baseline": "autoencoder_f1",
+          "passed": true
+        },
+        {
+          "domain": "behavior",
+          "metric": "autoencoder_fpr",
+          "operator": "<=",
+          "expected": 0.03316742982281505,
+          "actual": 0.03165438980688831,
+          "baseline": "autoencoder_fpr",
+          "passed": true
+        }
+      ],
+      "regressions": [],
+      "failures": [],
+      "selectedMetrics": {
+        "autoencoder_roc_auc": 0.6993122473276316,
+        "autoencoder_f1": 0.416988416988417,
+        "autoencoder_fpr": 0.03165438980688831
+      },
+      "allMetrics": {
+        "autoencoder_roc_auc": 0.6993122473276316,
+        "autoencoder_pr_auc": 0.20115953632942166,
+        "autoencoder_f1": 0.416988416988417,
+        "autoencoder_precision": 0.4044943820224719,
+        "autoencoder_recall": 0.4302788844621514,
+        "autoencoder_accuracy": 0.9427379598028062,
+        "autoencoder_threshold": 0.0029643164022091872,
+        "lof_roc_auc": 0.4735217997212821,
+        "lof_pr_auc": 0.04759196056124384,
+        "lof_f1": 0.0,
+        "lof_precision": 0.0,
+        "lof_recall": 0.0,
+        "lof_accuracy": 0.9019719378081152,
+        "lof_threshold": 2.9161568442749446,
+        "autoencoder_confusion.tn": 4864,
+        "autoencoder_confusion_tn": 4864,
+        "autoencoder_confusion.fp": 159,
+        "autoencoder_confusion_fp": 159,
+        "autoencoder_confusion.fn": 143,
+        "autoencoder_confusion_fn": 143,
+        "autoencoder_confusion.tp": 108,
+        "autoencoder_confusion_tp": 108,
+        "autoencoder_fpr": 0.03165438980688831,
+        "lof_confusion.tn": 4757,
+        "lof_confusion_tn": 4757,
+        "lof_confusion.fp": 266,
+        "lof_confusion_fp": 266,
+        "lof_confusion.fn": 251,
+        "lof_confusion_fn": 251,
+        "lof_confusion.tp": 0,
+        "lof_confusion_tp": 0,
+        "lof_fpr": 0.05295640055743579,
+        "augmentation.enabled": true,
+        "augmentation_enabled": true,
+        "augmentation.ratio": 0.05,
+        "augmentation_ratio": 0.05,
+        "augmentation.max_rows": 1500,
+        "augmentation_max_rows": 1500,
+        "augmentation.seed": 42,
+        "augmentation_seed": 42,
+        "augmentation.summary.rows": 17580.0,
+        "augmentation_summary_rows": 17580.0,
+        "augmentation.summary.positives": 837.0,
+        "augmentation_summary_positives": 837.0,
+        "augmentation.summary.positive_ratio": 0.04761092150170648,
+        "augmentation_summary_positive_ratio": 0.04761092150170648
+      }
+    },
+    {
+      "domain": "vision_deepfake",
+      "status": "fail",
+      "metricsFile": "experiments/vision/metrics/metrics.json",
+      "artifact": "models/vision/yolo_cls/best.pt",
+      "artifactExists": false,
+      "thresholds": [
+        {
+          "domain": "vision_deepfake",
+          "metric": "roc_auc",
+          "operator": ">=",
+          "expected": 0.85,
+          "actual": null,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "vision_deepfake",
+          "metric": "f1",
+          "operator": ">=",
+          "expected": 0.8,
+          "actual": null,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "vision_deepfake",
+          "metric": "accuracy",
+          "operator": ">=",
+          "expected": 0.85,
+          "actual": null,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "regressions": [],
+      "failures": [
+        {
+          "domain": "vision_deepfake",
+          "metric": "roc_auc",
+          "operator": ">=",
+          "expected": 0.85,
+          "actual": null,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "vision_deepfake",
+          "metric": "f1",
+          "operator": ">=",
+          "expected": 0.8,
+          "actual": null,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "vision_deepfake",
+          "metric": "accuracy",
+          "operator": ">=",
+          "expected": 0.85,
+          "actual": null,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "vision_deepfake",
+          "metric": "artifact_exists",
+          "operator": "exists",
+          "expected": true,
+          "actual": false,
+          "path": "models/vision/yolo_cls/best.pt",
+          "passed": false
+        }
+      ],
+      "selectedMetrics": {},
+      "allMetrics": {}
+    },
+    {
+      "domain": "vision_face_emotion",
+      "status": "fail",
+      "metricsFile": "models/vision/face_emotion/metrics.json",
+      "artifact": "models/vision/face_emotion/model.pt",
+      "artifactExists": true,
+      "thresholds": [
+        {
+          "domain": "vision_face_emotion",
+          "metric": "best_val_acc",
+          "operator": ">=",
+          "expected": 0.014571428571428572,
+          "actual": 0.014285714285714285,
+          "baseline": "best_val_acc",
+          "passed": false
+        }
+      ],
+      "regressions": [],
+      "failures": [
+        {
+          "domain": "vision_face_emotion",
+          "metric": "best_val_acc",
+          "operator": ">=",
+          "expected": 0.014571428571428572,
+          "actual": 0.014285714285714285,
+          "baseline": "best_val_acc",
+          "passed": false
+        }
+      ],
+      "selectedMetrics": {
+        "best_val_acc": 0.014285714285714285
+      },
+      "allMetrics": {
+        "best_val_acc": 0.014285714285714285,
+        "history.0.epoch": 1.0,
+        "history_0_epoch": 1.0,
+        "history.0.train_loss": 1.9557857990264893,
+        "history_0_train_loss": 1.9557857990264893,
+        "history.0.train_acc": 0.11785714285714285,
+        "history_0_train_acc": 0.11785714285714285,
+        "history.0.val_loss": 1.9675719806126186,
+        "history_0_val_loss": 1.9675719806126186,
+        "history.0.val_acc": 0.014285714285714285,
+        "history_0_val_acc": 0.014285714285714285
+      }
+    },
+    {
+      "domain": "vision_temporal",
+      "status": "fail",
+      "metricsFile": "experiments/vision/video_temporal/metrics.json",
+      "artifact": "models/vision/video_temporal_model.pkl",
+      "artifactExists": true,
+      "thresholds": [
+        {
+          "domain": "vision_temporal",
+          "metric": "accuracy",
+          "operator": ">=",
+          "expected": 0.75,
+          "actual": 0.64,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "regressions": [],
+      "failures": [
+        {
+          "domain": "vision_temporal",
+          "metric": "accuracy",
+          "operator": ">=",
+          "expected": 0.75,
+          "actual": 0.64,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "selectedMetrics": {
+        "accuracy": 0.64
+      },
+      "allMetrics": {
+        "accuracy": 0.64,
+        "f1": 0.625,
+        "roc_auc": 0.6612,
+        "n_train": 299,
+        "n_test": 100,
+        "n_total": 399,
+        "failures": 1,
+        "fps": 1.0,
+        "max_frames": 30,
+        "feature_names.0": "flip_rate",
+        "feature_names_0": "flip_rate",
+        "feature_names.1": "flip_count",
+        "feature_names_1": "flip_count",
+        "feature_names.2": "frames_used",
+        "feature_names_2": "frames_used",
+        "feature_names.3": "fps",
+        "feature_names_3": "fps",
+        "feature_names.4": "max_conf_mean",
+        "feature_names_4": "max_conf_mean",
+        "feature_names.5": "max_conf_std",
+        "feature_names_5": "max_conf_std",
+        "feature_names.6": "prob_l1_mean",
+        "feature_names_6": "prob_l1_mean",
+        "feature_names.7": "prob_l1_std",
+        "feature_names_7": "prob_l1_std",
+        "feature_names.8": "emb_cos_mean",
+        "feature_names_8": "emb_cos_mean",
+        "feature_names.9": "emb_cos_std",
+        "feature_names_9": "emb_cos_std",
+        "feature_names.10": "pixel_diff_mean",
+        "feature_names_10": "pixel_diff_mean",
+        "feature_names.11": "pixel_diff_std",
+        "feature_names_11": "pixel_diff_std",
+        "feature_names.12": "entropy_mean",
+        "feature_names_12": "entropy_mean",
+        "feature_names.13": "entropy_std",
+        "feature_names_13": "entropy_std"
+      }
+    },
+    {
+      "domain": "brand",
+      "status": "fail",
+      "metricsFile": "models/brand/full/results.csv",
+      "artifact": "artifacts/brand/yolo_logo_det.pt",
+      "artifactExists": true,
+      "thresholds": [
+        {
+          "domain": "brand",
+          "metric": "metrics_map50_b",
+          "operator": ">=",
+          "expected": 0.85,
+          "actual": 0.0,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "regressions": [],
+      "failures": [
+        {
+          "domain": "brand",
+          "metric": "metrics_map50_b",
+          "operator": ">=",
+          "expected": 0.85,
+          "actual": 0.0,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "selectedMetrics": {
+        "metrics_map50_b": 0.0
+      },
+      "allMetrics": {
+        "epoch": "1",
+        "time": "3861.9",
+        "train/box_loss": "1.71374",
+        "train_box_loss": "1.71374",
+        "train/cls_loss": "1.84312",
+        "train_cls_loss": "1.84312",
+        "train/dfl_loss": "1.45776",
+        "train_dfl_loss": "1.45776",
+        "metrics/precision(B)": "0",
+        "metrics_precision_b": "0",
+        "metrics/recall(B)": "0",
+        "metrics_recall_b": "0",
+        "metrics/mAP50(B)": "0",
+        "metrics_map50_b": "0",
+        "metrics/mAP50-95(B)": "0",
+        "metrics_map50_95_b": "0",
+        "val/box_loss": "0",
+        "val_box_loss": "0",
+        "val/cls_loss": "0",
+        "val_cls_loss": "0",
+        "val/dfl_loss": "0",
+        "val_dfl_loss": "0",
+        "lr/pg0": "0.000666475",
+        "lr_pg0": "0.000666475",
+        "lr/pg1": "0.000666475",
+        "lr_pg1": "0.000666475",
+        "lr/pg2": "0.000666475",
+        "lr_pg2": "0.000666475"
+      }
+    },
+    {
+      "domain": "voice",
+      "status": "fail",
+      "metricsFile": "reports/voice_emotion_eval.json",
+      "artifact": "models/voice_emotion_ssl",
+      "artifactExists": true,
+      "thresholds": [
+        {
+          "domain": "voice",
+          "metric": "macro_f1",
+          "operator": ">=",
+          "expected": 0.6,
+          "actual": 0.14299586547850726,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "voice",
+          "metric": "uar",
+          "operator": ">=",
+          "expected": 0.6,
+          "actual": 0.2219047619047619,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "regressions": [],
+      "failures": [
+        {
+          "domain": "voice",
+          "metric": "macro_f1",
+          "operator": ">=",
+          "expected": 0.6,
+          "actual": 0.14299586547850726,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "voice",
+          "metric": "uar",
+          "operator": ">=",
+          "expected": 0.6,
+          "actual": 0.2219047619047619,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "selectedMetrics": {
+        "macro_f1": 0.14299586547850726,
+        "uar": 0.2219047619047619
+      },
+      "allMetrics": {
+        "accuracy": 0.18902439024390244,
+        "macro_f1": 0.14299586547850726,
+        "uar": 0.2219047619047619,
+        "report.angry.precision": 0.4722222222222222,
+        "report_angry_precision": 0.4722222222222222,
+        "report.angry.recall": 0.060714285714285714,
+        "report_angry_recall": 0.060714285714285714,
+        "report.angry.f1-score": 0.10759493670886076,
+        "report_angry_f1_score": 0.10759493670886076,
+        "report.angry.support": 280.0,
+        "report_angry_support": 280.0,
+        "report.fearful.precision": 0.18764302059496568,
+        "report_fearful_precision": 0.18764302059496568,
+        "report.fearful.recall": 0.5857142857142857,
+        "report_fearful_recall": 0.5857142857142857,
+        "report.fearful.f1-score": 0.28422876949740034,
+        "report_fearful_f1_score": 0.28422876949740034,
+        "report.fearful.support": 140.0,
+        "report_fearful_support": 140.0,
+        "report.happy.precision": 0.03571428571428571,
+        "report_happy_precision": 0.03571428571428571,
+        "report.happy.recall": 0.007142857142857143,
+        "report_happy_recall": 0.007142857142857143,
+        "report.happy.f1-score": 0.011904761904761904,
+        "report_happy_f1_score": 0.011904761904761904,
+        "report.happy.support": 140.0,
+        "report_happy_support": 140.0,
+        "report.neutral.precision": 0.2190082644628099,
+        "report_neutral_precision": 0.2190082644628099,
+        "report.neutral.recall": 0.44166666666666665,
+        "report_neutral_recall": 0.44166666666666665,
+        "report.neutral.f1-score": 0.292817679558011,
+        "report_neutral_f1_score": 0.292817679558011,
+        "report.neutral.support": 120.0,
+        "report_neutral_support": 120.0,
+        "report.sad.precision": 0.025974025974025976,
+        "report_sad_precision": 0.025974025974025976,
+        "report.sad.recall": 0.014285714285714285,
+        "report_sad_recall": 0.014285714285714285,
+        "report.sad.f1-score": 0.018433179723502304,
+        "report_sad_f1_score": 0.018433179723502304,
+        "report.sad.support": 140.0,
+        "report_sad_support": 140.0,
+        "report.accuracy": 0.18902439024390244,
+        "report_accuracy": 0.18902439024390244,
+        "report.macro avg.precision": 0.18811236379366186,
+        "report_macro_avg_precision": 0.18811236379366186,
+        "report.macro avg.recall": 0.2219047619047619,
+        "report_macro_avg_recall": 0.2219047619047619,
+        "report.macro avg.f1-score": 0.14299586547850726,
+        "report_macro_avg_f1_score": 0.14299586547850726,
+        "report.macro avg.support": 820.0,
+        "report_macro_avg_support": 820.0,
+        "report.weighted avg.precision": 0.23586536643587588,
+        "report_weighted_avg_precision": 0.23586536643587588,
+        "report.weighted avg.recall": 0.18902439024390244,
+        "report_weighted_avg_recall": 0.18902439024390244,
+        "report.weighted avg.f1-score": 0.13329761388175043,
+        "report_weighted_avg_f1_score": 0.13329761388175043,
+        "report.weighted avg.support": 820.0,
+        "report_weighted_avg_support": 820.0
+      }
+    },
+    {
+      "domain": "recommender",
+      "status": "fail",
+      "metricsFile": "experiments/recommender/metrics/metrics.json",
+      "artifact": "models/recommender/recommender_model.pkl",
+      "artifactExists": true,
+      "thresholds": [
+        {
+          "domain": "recommender",
+          "metric": "recall_at_10",
+          "operator": ">=",
+          "expected": 0.1,
+          "actual": 0.004,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "recommender",
+          "metric": "ndcg_at_10",
+          "operator": ">=",
+          "expected": 0.05,
+          "actual": 0.0018572106393741415,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "regressions": [],
+      "failures": [
+        {
+          "domain": "recommender",
+          "metric": "recall_at_10",
+          "operator": ">=",
+          "expected": 0.1,
+          "actual": 0.004,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "recommender",
+          "metric": "ndcg_at_10",
+          "operator": ">=",
+          "expected": 0.05,
+          "actual": 0.0018572106393741415,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "selectedMetrics": {
+        "recall_at_10": 0.004,
+        "ndcg_at_10": 0.0018572106393741415
+      },
+      "allMetrics": {
+        "recall_at_10": 0.004,
+        "ndcg_at_10": 0.0018572106393741415,
+        "eval_users": 5000,
+        "train_interactions": 9857356,
+        "test_interactions": 138054,
+        "item_count": 27278,
+        "source": "movielens",
+        "nrows": null,
+        "embedding.backend": "sentence_transformer",
+        "embedding_backend": "sentence_transformer",
+        "embedding.model": "sentence-transformers/all-MiniLM-L6-v2",
+        "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "embedding.dim": 384,
+        "embedding_dim": 384
+      }
+    },
+    {
+      "domain": "fusion",
+      "status": "pass",
+      "metricsFile": "experiments/fusion/metrics/metrics.json",
+      "artifact": "models/fusion/fusion_meta_model.pkl",
+      "artifactExists": true,
+      "thresholds": [
+        {
+          "domain": "fusion",
+          "metric": "roc_auc",
+          "operator": ">=",
+          "expected": 0.9,
+          "actual": 0.9493101379724056,
+          "baseline": null,
+          "passed": true
+        },
+        {
+          "domain": "fusion",
+          "metric": "f1",
+          "operator": ">=",
+          "expected": 0.7,
+          "actual": 0.7096774193548387,
+          "baseline": null,
+          "passed": true
+        }
+      ],
+      "regressions": [],
+      "failures": [],
+      "selectedMetrics": {
+        "roc_auc": 0.9493101379724056,
+        "f1": 0.7096774193548387
+      },
+      "allMetrics": {
+        "roc_auc": 0.9493101379724056,
+        "pr_auc": 0.8129871119702631,
+        "f1": 0.7096774193548387,
+        "precision": 0.6875,
+        "recall": 0.7333333333333333,
+        "accuracy": 0.9973126306360107,
+        "cv_roc_auc_mean": 0.967127098142388
+      }
+    },
+    {
+      "domain": "rag",
+      "status": "fail",
+      "metricsFile": "metrics/rag_eval.json",
+      "artifact": "data/processed/rag",
+      "artifactExists": true,
+      "thresholds": [
+        {
+          "domain": "rag",
+          "metric": "mrr",
+          "operator": ">=",
+          "expected": 0.7,
+          "actual": 0.0,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "rag",
+          "metric": "recall_at_k.10",
+          "operator": ">=",
+          "expected": 0.7,
+          "actual": 0.0,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "regressions": [],
+      "failures": [
+        {
+          "domain": "rag",
+          "metric": "mrr",
+          "operator": ">=",
+          "expected": 0.7,
+          "actual": 0.0,
+          "baseline": null,
+          "passed": false
+        },
+        {
+          "domain": "rag",
+          "metric": "recall_at_k.10",
+          "operator": ">=",
+          "expected": 0.7,
+          "actual": 0.0,
+          "baseline": null,
+          "passed": false
+        }
+      ],
+      "selectedMetrics": {
+        "mrr": 0.0,
+        "recall_at_k.10": 0.0
+      },
+      "allMetrics": {
+        "mrr": 0.0,
+        "recall_at_k.1": 0.0,
+        "recall_at_k_1": 0.0,
+        "recall_at_k.3": 0.0,
+        "recall_at_k_3": 0.0,
+        "recall_at_k.5": 0.0,
+        "recall_at_k_5": 0.0,
+        "recall_at_k.10": 0.0,
+        "recall_at_k_10": 0.0,
+        "precision_at_k.1": 0.0,
+        "precision_at_k_1": 0.0,
+        "precision_at_k.3": 0.0,
+        "precision_at_k_3": 0.0,
+        "precision_at_k.5": 0.0,
+        "precision_at_k_5": 0.0,
+        "precision_at_k.10": 0.0,
+        "precision_at_k_10": 0.0,
+        "ndcg_at_k.1": 0.0,
+        "ndcg_at_k_1": 0.0,
+        "ndcg_at_k.3": 0.0,
+        "ndcg_at_k_3": 0.0,
+        "ndcg_at_k.5": 0.0,
+        "ndcg_at_k_5": 0.0,
+        "ndcg_at_k.10": 0.0,
+        "ndcg_at_k_10": 0.0,
+        "hit_rate_at_k.1": 0.0,
+        "hit_rate_at_k_1": 0.0,
+        "hit_rate_at_k.3": 0.0,
+        "hit_rate_at_k_3": 0.0,
+        "hit_rate_at_k.5": 0.0,
+        "hit_rate_at_k_5": 0.0,
+        "hit_rate_at_k.10": 0.0,
+        "hit_rate_at_k_10": 0.0,
+        "map": 0.0,
+        "num_queries": 2,
+        "avg_retrieved": 0.0,
+        "avg_relevant": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "recall_at_10": 0.004,
+  "ndcg_at_10": 0.0018572106393741415,
+  "eval_users": 5000,
+  "train_interactions": 9857356,
+  "test_interactions": 138054,
+  "item_count": 27278,
+  "source": "movielens",
+  "nrows": null,
+  "embedding": {
+    "backend": "sentence_transformer",
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "dim": 384
+  }
+}

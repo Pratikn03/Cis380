@@ -1,0 +1,41 @@
+{
+  "autoencoder_roc_auc": 0.6993122473276316,
+  "autoencoder_pr_auc": 0.20115953632942166,
+  "autoencoder_f1": 0.416988416988417,
+  "autoencoder_precision": 0.4044943820224719,
+  "autoencoder_recall": 0.4302788844621514,
+  "autoencoder_accuracy": 0.9427379598028062,
+  "autoencoder_threshold": 0.0029643164022091872,
+  "lof_roc_auc": 0.4735217997212821,
+  "lof_pr_auc": 0.04759196056124384,
+  "lof_f1": 0.0,
+  "lof_precision": 0.0,
+  "lof_recall": 0.0,
+  "lof_accuracy": 0.9019719378081152,
+  "lof_threshold": 2.9161568442749446,
+  "autoencoder_confusion": {
+    "tn": 4864,
+    "fp": 159,
+    "fn": 143,
+    "tp": 108
+  },
+  "autoencoder_fpr": 0.03165438980688831,
+  "lof_confusion": {
+    "tn": 4757,
+    "fp": 266,
+    "fn": 251,
+    "tp": 0
+  },
+  "lof_fpr": 0.05295640055743579,
+  "augmentation": {
+    "enabled": true,
+    "ratio": 0.05,
+    "max_rows": 1500,
+    "seed": 42,
+    "summary": {
+      "rows": 17580.0,
+      "positives": 837.0,
+      "positive_ratio": 0.04761092150170648
+    }
+  }
+}
