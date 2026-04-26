@@ -1,4 +1,4 @@
-.PHONY: help install test run streamlit train-all train-vision prod-check docker-build docker-up docker-up-prod docker-down gateway-test gateway-run quality-fast quality-test quality-data quality-docs-fast quality-docs quality-all
+.PHONY: help install test run dev dev-down api web scrub streamlit train-all train-vision train-fraud train-cyber train-behavior train-recommender eval promote model-quality-gate prod-check docker-build docker-up docker-up-prod docker-down gateway-test gateway-run quality-fast quality-test quality-data quality-docs-fast quality-docs quality-all
 
 ifneq ("$(wildcard .venv/bin/python)","")
 PY ?= .venv/bin/python
@@ -11,12 +11,24 @@ help:
 	@echo ""
 	@echo "Sentifargo - Common Commands"
 	@echo ""
+	@echo "  make dev            Boot full local stack: postgres+redis (docker), API (:8000), web (:5173)"
+	@echo "  make dev-down       Stop the local postgres+redis containers"
+	@echo "  make api            Start only the FastAPI backend (APP_ENV=development)"
+	@echo "  make web            Start only the Vite frontend"
+	@echo "  make scrub          Remove macOS AppleDouble (._*) ghost files"
 	@echo "  make install        Install Python deps (requirements.txt)"
 	@echo "  make test           Run pytest"
 	@echo "  make run            Start FastAPI (uvicorn app.main:app --reload)"
-	@echo "  make streamlit      Start Streamlit UI (app/streamlit_chatbot/app.py)"
+	@echo "  make streamlit      Start legacy Streamlit UI (app/streamlit_chatbot/app.py)"
+	@echo "  make train-fraud    Train fraud model (DVC stage)"
+	@echo "  make train-cyber    Train cyber model (DVC stage, full data)"
+	@echo "  make train-behavior Train behavior model (DVC stage, full data)"
+	@echo "  make train-recommender  Train recommender model (DVC stage)"
 	@echo "  make train-all      Train core models (scripts/train_all.py)"
 	@echo "  make train-vision   Train vision stack (scripts/train_all_vision.py)"
+	@echo "  make eval           Evaluate all trained models (DVC evaluate_all)"
+	@echo "  make promote        Promote passing artifacts into artifacts/release"
+	@echo "  make model-quality-gate Validate release manifest and promotion gates"
 	@echo "  make rag-index      Build/rebuild DSA document index"
 	@echo "  make rag-eval       Run DSA retrieval evaluation"
 	@echo "  make rag-query      Query DSA index (QUERY=...)"
@@ -45,8 +57,44 @@ test:
 run:
 	$(PY) -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
+dev:
+	bash scripts/dev.sh
+
+dev-down:
+	docker compose -f docker-compose.dev.yml down
+
+api:
+	APP_ENV=development $(PY) -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+
+web:
+	cd ui-web/frontend && npm run dev
+
+scrub:
+	bash scripts/scrub_appledouble.sh
+
 streamlit:
 	Sentifargo_BACKEND=$${Sentifargo_BACKEND:-http://localhost:8000} $(PY) -m streamlit run app/streamlit_chatbot/app.py
+
+train-fraud:
+	PATH="$(CURDIR)/.venv/bin:$$PATH" $(PY) -m dvc repro --single-item train_fraud_model
+
+train-cyber:
+	PATH="$(CURDIR)/.venv/bin:$$PATH" $(PY) -m dvc repro --single-item train_cyber_model
+
+train-behavior:
+	PATH="$(CURDIR)/.venv/bin:$$PATH" $(PY) -m dvc repro --single-item train_behavior_model
+
+train-recommender:
+	PATH="$(CURDIR)/.venv/bin:$$PATH" $(PY) -m dvc repro --single-item train_recommender
+
+eval:
+	PYTHONPATH=src $(PY) -m uais.evaluation.evaluate_all
+
+promote:
+	$(PY) scripts/promote_model.py --all
+
+model-quality-gate:
+	PYTHONPATH=. $(PY) scripts/model_quality_gate.py
 
 train-all:
 	$(PY) scripts/train_all.py
