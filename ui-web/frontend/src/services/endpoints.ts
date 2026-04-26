@@ -89,7 +89,7 @@ export const dsaRagIngest = (payload: { filename?: string; content?: string }) =
   api.post("/api/dsa-rag/ingest", payload);
 
 export const visionVideoPredict = (payload: FormData) =>
-  api.post("/api/vision/video/predict", payload, {
+  api.post("/api/vision/video_temporal/predict", payload, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 

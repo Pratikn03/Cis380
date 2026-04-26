@@ -180,7 +180,7 @@ describe("compatibility endpoint wrappers", () => {
       expect.objectContaining({ headers: { "Content-Type": "multipart/form-data" } }),
     );
     expect(postSpy).toHaveBeenCalledWith(
-      "/api/vision/video/predict",
+      "/api/vision/video_temporal/predict",
       payload,
       expect.objectContaining({ headers: { "Content-Type": "multipart/form-data" } }),
     );

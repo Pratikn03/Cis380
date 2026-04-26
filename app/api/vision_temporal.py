@@ -22,6 +22,12 @@ router = APIRouter(prefix="/vision/video_temporal", tags=["vision-temporal"])
 _model: tuple[Any, str] | None = None
 
 
+def _checkpoint_state_dict(checkpoint: Any) -> Any:
+    if isinstance(checkpoint, dict):
+        return checkpoint.get("state_dict") or checkpoint.get("model_state_dict") or checkpoint
+    return checkpoint
+
+
 def _load_model() -> tuple[Any, str]:
     import torch
 
@@ -34,7 +40,7 @@ def _load_model() -> tuple[Any, str]:
     model = TemporalDeepfakeLSTM(hidden=256, backbone="mobilenet_v3_small", freeze_backbone=True)
     checkpoint = os.environ.get("TEMPORAL_MODEL_PATH", "artifacts/vision_temporal/temporal_lstm.pt")
     if os.path.exists(checkpoint):
-        state = torch.load(checkpoint, map_location=device)
+        state = _checkpoint_state_dict(torch.load(checkpoint, map_location=device))
         model.load_state_dict(state)
     model.to(device)
     model.eval()
