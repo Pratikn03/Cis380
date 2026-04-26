@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import os
 import tempfile
+from typing import Any
 
 import cv2
 import numpy as np
-import torch
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.logger import logger
 
-from app.models.vision.temporal.model import TemporalDeepfakeLSTM
 from app.utils.uploads import (
     MAX_VIDEO_BYTES,
     VIDEO_EXTENSIONS,
@@ -20,10 +19,14 @@ from app.utils.uploads import (
 
 router = APIRouter(prefix="/vision/video_temporal", tags=["vision-temporal"])
 
-_model: tuple[TemporalDeepfakeLSTM, str] | None = None
+_model: tuple[Any, str] | None = None
 
 
-def _load_model() -> tuple[TemporalDeepfakeLSTM, str]:
+def _load_model() -> tuple[Any, str]:
+    import torch
+
+    from app.models.vision.temporal.model import TemporalDeepfakeLSTM
+
     global _model
     if _model is not None:
         return _model
@@ -39,7 +42,9 @@ def _load_model() -> tuple[TemporalDeepfakeLSTM, str]:
     return _model
 
 
-def _sample_clip(path: str, clip_len: int, size: int) -> torch.Tensor:
+def _sample_clip(path: str, clip_len: int, size: int) -> Any:
+    import torch
+
     cap = cv2.VideoCapture(path)
     frames = []
     while len(frames) < clip_len:
@@ -85,6 +90,8 @@ async def predict(file: UploadFile = File(...)):
 
         tensor = _sample_clip(tmp_path, clip_len=clip_len, size=size)
         model, device = _load_model()
+        import torch
+
         tensor = tensor.to(device)
         with torch.no_grad():
             logits = model(tensor)

@@ -17,12 +17,22 @@ async def predict_brand(
     Detect brands/logos in an uploaded image.
     """
     try:
-        from src.vision.brand.recognizer import predict_image_bytes
+        import io
+
+        from PIL import Image
+
+        from src.vision.brand.recognizer import model_path, predict_image_bytes
 
         image_bytes = await file.read()
+        image = Image.open(io.BytesIO(image_bytes))
+        width, height = image.size
         detections = predict_image_bytes(image_bytes, conf=conf, kind=kind)
         return {
             "filename": file.filename,
+            "kind": kind,
+            "confidence_threshold": conf,
+            "model_path": model_path(kind),
+            "image": {"width": width, "height": height},
             "detections": detections,
             "count": len(detections),
         }

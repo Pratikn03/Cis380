@@ -16,10 +16,13 @@ export const riskAnalyze = (payload: {
   transaction_amount: number;
 }) => api.post("/api/risk/analyze", payload);
 
-export const brandPredict = (payload: FormData, kind?: string) =>
+export const brandPredict = (payload: FormData, kind?: string, conf?: number) =>
   api.post("/api/vision/brand/predict", payload, {
     headers: { "Content-Type": "multipart/form-data" },
-    params: kind ? { kind } : undefined,
+    params: {
+      ...(kind ? { kind } : {}),
+      ...(typeof conf === "number" ? { conf } : {}),
+    },
   });
 
 export const voiceEmotion = (payload: FormData) =>

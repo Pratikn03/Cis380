@@ -98,6 +98,7 @@ def predict_image_bytes(
         from PIL import Image
 
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        image_width, image_height = img.size
     except Exception as exc:
         raise ValueError(f"Invalid image bytes: {exc}") from exc
 
@@ -135,11 +136,21 @@ def predict_image_bytes(
         except Exception:
             cid = 0
         brand = names.get(cid, str(cid))
+        width = max(float(x2) - float(x1), 0.0)
+        height = max(float(y2) - float(y1), 0.0)
+        bbox_percent = [
+            (float(x1) / image_width) * 100.0 if image_width else 0.0,
+            (float(y1) / image_height) * 100.0 if image_height else 0.0,
+            (width / image_width) * 100.0 if image_width else 0.0,
+            (height / image_height) * 100.0 if image_height else 0.0,
+        ]
         detections.append(
             {
                 "brand": str(brand),
                 "confidence": float(p),
                 "bbox": [float(x1), float(y1), float(x2), float(y2)],
+                "bbox_xyxy": [float(x1), float(y1), float(x2), float(y2)],
+                "bbox_percent": bbox_percent,
             }
         )
 
