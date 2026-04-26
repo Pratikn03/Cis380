@@ -17,6 +17,17 @@ def _model_registry() -> dict[str, Path]:
     default_logo = Path("artifacts/brand/yolo_logo_det.pt")
     logo_path = os.getenv("BRAND_MODEL_LOGO_PATH")
 
+    # In local development, prefer the latest one-class detector produced by the
+    # training script. The release artifact path remains canonical in production.
+    if not logo_path and os.getenv("APP_ENV", "development").strip().lower() != "production":
+        for candidate in (
+            Path("models/brand/full/weights/best.pt"),
+            Path("models/brand/fast_run_1epoch/weights/best.pt"),
+        ):
+            if candidate.exists():
+                default_logo = candidate
+                break
+
     # Fallback: If default artifact missing, check for local training run
     if not logo_path and not default_logo.exists():
         local_run = Path("runs/detect/train/weights/best.pt")
