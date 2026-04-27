@@ -50,6 +50,8 @@ def risk_analyze(payload: RiskPayload, explain: bool = True) -> dict[str, Any]:
         out["fusion_meta"] = scores.get("fusion_meta")
     if "gemini_analysis" in scores:
         out["gemini_analysis"] = scores.get("gemini_analysis")
+    if "feature_warnings" in scores:
+        out["feature_warnings"] = scores.get("feature_warnings")
 
     if explain:
         out["explanation"] = explain_decision(

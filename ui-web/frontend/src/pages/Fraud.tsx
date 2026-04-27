@@ -29,6 +29,20 @@ export default function Fraud() {
       .map(([label, value]) => ({ label, value: Math.abs(Number(value)) }));
   }, [explain]);
 
+  // The model expects a fixed feature shape; when the user submits fewer
+  // values the API silently zero-pads, which masks the score. We warn here
+  // so the operator knows the score reflects "supplied + zeros", not
+  // their full row.
+  const featureWarning = useMemo(() => {
+    if (!result) return null;
+    const expected = Number((result as any).expected_features || 0);
+    const supplied = Number((result as any).input_features || 0);
+    if (expected && supplied && supplied !== expected) {
+      return `You supplied ${supplied} features; the model expects ${expected}. Missing slots were zero-padded — the score may be unreliable.`;
+    }
+    return null;
+  }, [result]);
+
   const run = async () => {
     setError(null);
     const values = parseFeatures(features);
@@ -56,6 +70,11 @@ export default function Fraud() {
         </Panel>
         <div className="space-y-4">
           <Panel title="Decision">
+            {featureWarning && (
+              <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                {featureWarning}
+              </div>
+            )}
             {result ? <JsonBlock value={result} /> : <p className="text-sm text-fog">Run a transaction score.</p>}
           </Panel>
           <Panel title="Decision Boundary Explainer">

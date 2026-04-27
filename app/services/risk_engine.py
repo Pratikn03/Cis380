@@ -205,21 +205,37 @@ def _analyze_complex_patterns(payload: Mapping[str, Any]) -> Dict[str, Any]:
 
 def analyze_risk(payload: Mapping[str, Any]) -> Dict[str, Any]:
     start = time.perf_counter()
+    feature_warnings: dict[str, dict[str, Any]] = {}
     try:
         models = _load_models()
         base = _build_feature_vector(payload)
+        supplied_features = int(base.shape[1]) if base.ndim == 2 else int(base.size)
 
         def _score(name: str) -> float:
             model = models.get(name)
             if model is None:
+                feature_warnings[name] = {"available": False, "supplied": supplied_features}
                 return 0.0
 
             # Some sklearn estimators store the number of expected features.
             expected = int(getattr(model, "n_features_in_", 0) or 0)
             feats = _pad_features(base, expected) if expected else base
+            if expected and supplied_features < expected:
+                feature_warnings[name] = {
+                    "available": True,
+                    "supplied": supplied_features,
+                    "expected": expected,
+                    "padded": expected - supplied_features,
+                }
             try:
                 score = _score_model(model, feats)
             except Exception:
+                feature_warnings[name] = {
+                    "available": True,
+                    "supplied": supplied_features,
+                    "expected": expected,
+                    "error": "score_model_failed",
+                }
                 # If the model is strict about feature counts, fall back to a safe zero score.
                 return 0.0
             return float(min(max(score, 0.0), 1.0))
@@ -262,6 +278,7 @@ def analyze_risk(payload: Mapping[str, Any]) -> Dict[str, Any]:
             "fraud_risk": fraud_risk,
             "fusion_risk": fusion_risk,
             "fusion_meta": fusion_meta,
+            "feature_warnings": feature_warnings,
             **gemini_result,
         }
     except Exception as exc:

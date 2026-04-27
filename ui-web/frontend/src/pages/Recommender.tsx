@@ -13,6 +13,14 @@ export default function Recommender() {
     return items.length ? Number((tags.size / items.length).toFixed(2)) : 0;
   }, [items]);
 
+  // The recommender model is two-tower; until it's trained, the API
+  // falls back to catalogue order with score=0.0 for every item. Surface
+  // that to the operator instead of pretending the empty scores are real.
+  const untrained = useMemo(
+    () => items.length > 0 && items.every((item: any) => Number(item.score || 0) === 0),
+    [items],
+  );
+
   const run = async () => {
     setError(null);
     try {
@@ -35,6 +43,15 @@ export default function Recommender() {
           <p className="mt-4 text-sm text-fog">Diversity metric: <strong>{diversity}</strong></p>
         </Panel>
         <Panel title="Recommendations">
+          {untrained && (
+            <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              Recommender model is not yet trained — every item is returning a score of 0.0
+              and the catalogue order is alphabetical, not personalised. Run{" "}
+              <code className="rounded bg-amber-100 px-1">make train-recommender</code>{" "}
+              then <code className="rounded bg-amber-100 px-1">make promote</code> to enable
+              real ranking.
+            </div>
+          )}
           <div className="grid gap-3 md:grid-cols-2">
             {items.map((item: any) => (
               <article key={item.item_id || item.title} className="rounded-md border border-line bg-white p-3">
