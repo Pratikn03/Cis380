@@ -66,7 +66,7 @@ class AuditEntry:
 
     id: str
     timestamp: str
-    event_type: str  # "request", "response", "error", "alert"
+    event_type: str  # "request", "response", "error", "alert", "trace_start", "trace_end", "tool_span"
     user_id: str
     session_id: Optional[str]
     route: Optional[str]
@@ -76,6 +76,7 @@ class AuditEntry:
     latency_ms: Optional[float]
     metadata: Dict[str, Any] = field(default_factory=dict)
     error: Optional[str] = None
+    trace_id: Optional[str] = None
 
     def to_dict(self) -> Dict:
         return asdict(self)
@@ -380,6 +381,109 @@ class AuditLogger:
         log_method(f"[ALERT:{severity.upper()}] {alert_type} | {message[:100]}")
 
         return alert_id
+
+    def log_trace_start(
+        self,
+        user_id: str,
+        text: str,
+        session_id: Optional[str] = None,
+        metadata: Optional[Dict] = None,
+    ) -> str:
+        """Open a multi-step agent trace. Returns the trace_id used by
+        log_tool_span and log_trace_end."""
+        trace_id = f"trace_{uuid.uuid4().hex[:12]}"
+        entry = AuditEntry(
+            id=trace_id,
+            timestamp=self._now(),
+            event_type="trace_start",
+            user_id=user_id,
+            session_id=session_id,
+            route="agent",
+            text=(text or "")[:500],
+            answer=None,
+            confidence=None,
+            latency_ms=None,
+            metadata=metadata or {},
+            trace_id=trace_id,
+        )
+        self._add_entry(entry)
+        self._logger.info(
+            f"[TRACE_START] {trace_id} | user={user_id} | len={len(text or '')}"
+        )
+        return trace_id
+
+    def log_tool_span(
+        self,
+        trace_id: str,
+        tool_name: str,
+        args_summary: str,
+        result_summary: str,
+        latency_ms: float,
+        error: Optional[str] = None,
+        metadata: Optional[Dict] = None,
+    ) -> None:
+        """Record a single tool invocation inside an agent trace."""
+        entry = AuditEntry(
+            id=f"span_{uuid.uuid4().hex[:10]}",
+            timestamp=self._now(),
+            event_type="tool_span",
+            user_id="agent",
+            session_id=None,
+            route=tool_name,
+            text=args_summary[:500] if args_summary else None,
+            answer=result_summary[:500] if result_summary else None,
+            confidence=None,
+            latency_ms=latency_ms,
+            metadata={"tool": tool_name, **(metadata or {})},
+            error=error,
+            trace_id=trace_id,
+        )
+        self._add_entry(entry)
+        self._update_stats(route=f"tool:{tool_name}", latency_ms=latency_ms, error=bool(error))
+        if error:
+            self._logger.warning(
+                f"[TOOL_SPAN] {trace_id} | tool={tool_name} | latency={latency_ms:.1f}ms | error={error[:80]}"
+            )
+        else:
+            self._logger.info(
+                f"[TOOL_SPAN] {trace_id} | tool={tool_name} | latency={latency_ms:.1f}ms"
+            )
+
+    def log_trace_end(
+        self,
+        trace_id: str,
+        answer: Optional[str],
+        confidence: Optional[float],
+        latency_ms: float,
+        usage: Optional[Dict] = None,
+        metadata: Optional[Dict] = None,
+    ) -> None:
+        """Close an agent trace with final answer and total latency."""
+        entry = AuditEntry(
+            id=trace_id,
+            timestamp=self._now(),
+            event_type="trace_end",
+            user_id="agent",
+            session_id=None,
+            route="agent",
+            text=None,
+            answer=(answer or "")[:500],
+            confidence=confidence,
+            latency_ms=latency_ms,
+            metadata={"usage": usage or {}, **(metadata or {})},
+            trace_id=trace_id,
+        )
+        self._add_entry(entry)
+        self._update_stats(route="agent", latency_ms=latency_ms)
+        conf_str = f"{confidence:.2f}" if confidence is not None else "n/a"
+        self._logger.info(
+            f"[TRACE_END] {trace_id} | conf={conf_str} | latency={latency_ms:.1f}ms"
+        )
+
+    def get_trace(self, trace_id: str) -> List[Dict]:
+        """Return every entry for a single agent trace, in chronological order."""
+        with self._lock:
+            return [e.to_dict() for e in self._entries if e.trace_id == trace_id]
 
     def get_recent(self, n: int = 100) -> List[Dict]:
         """Get recent log entries."""
