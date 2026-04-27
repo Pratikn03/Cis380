@@ -208,10 +208,27 @@ def check_token_query(token: str | None) -> None:
         verify_access_token(token, db)
 
 
+class _BypassUser:
+    """Stand-in returned by get_current_user when AUTH_BYPASS is enabled in
+    dev. Mimics just enough of the real User model that role checks pass."""
+
+    id = "auth-bypass"
+    username = "dev-bypass"
+    is_active = True
+
+    class _AllRoles:
+        def __init__(self) -> None:
+            self.name = "admin"
+
+    roles = [_AllRoles()]
+
+
 def get_current_user(
     creds: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(_get_db),
 ) -> "User":
+    if _auth_bypass_enabled():
+        return _BypassUser()  # type: ignore[return-value]
     if creds is None or not creds.credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -222,12 +239,19 @@ def get_current_user(
 
 def require_roles(*required: str) -> Callable:
     def _require(user: "User" = Depends(get_current_user)) -> "User":
+        if _auth_bypass_enabled():
+            return user
         user_roles = {role.name for role in user.roles}
         if not user_roles.intersection(required):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
         return user
 
     return _require
+
+
+def require_role(role: str) -> Callable:
+    """Singular alias for ``require_roles(role)``."""
+    return require_roles(role)
 
 
 def ensure_role(db: Session, name: str, permissions: dict | None = None) -> "Role":

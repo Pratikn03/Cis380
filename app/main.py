@@ -332,6 +332,14 @@ app = FastAPI(
     version="0.2",  # API version
 )
 
+# OpenTelemetry: idempotent and best-effort. No-op when SDK absent.
+try:
+    from app.core.tracing import setup_tracing  # noqa: E402
+
+    setup_tracing(app)
+except Exception:  # pragma: no cover - never block startup on tracing
+    pass
+
 # ==============================================================================
 # PRODUCTION MIDDLEWARE - Security headers, rate limits, CORS, request IDs
 # ==============================================================================

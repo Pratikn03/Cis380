@@ -259,6 +259,24 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return forwarded.split(",")[0].strip()
         return request.client.host if request.client else "unknown"
 
+    def _rate_key(self, request: Request) -> str:
+        """Compose a rate-limit bucket key.
+
+        Authenticated requests get a per-user bucket so a noisy client IP
+        cannot starve a legitimate logged-in user, and a single user across
+        many IPs still hits a single quota. Anonymous requests fall back
+        to the IP only.
+        """
+        ip = self._get_client_ip(request)
+        auth = request.headers.get("authorization", "")
+        if auth.lower().startswith("bearer ") and len(auth) > 16:
+            # Hash the token so we never log the secret directly.
+            import hashlib
+
+            digest = hashlib.sha256(auth.encode("utf-8")).hexdigest()[:16]
+            return f"u:{digest}:ip:{ip}"
+        return f"ip:{ip}"
+
     def _is_rate_limited(self, client_ip: str) -> bool:
         """Check if client is rate limited."""
         if self.redis_client is not None:
@@ -297,7 +315,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if request.url.path in ["/health", "/metrics", "/ready"]:
             return await call_next(request)
 
-        client_ip = self._get_client_ip(request)
+        client_ip = self._rate_key(request)
 
         if self._is_rate_limited(client_ip):
             request_id = getattr(request.state, "request_id", str(uuid.uuid4()))

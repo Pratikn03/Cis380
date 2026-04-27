@@ -9,7 +9,7 @@ import struct
 import time
 from typing import Any
 
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -26,10 +26,25 @@ from app.core.auth import (
     verify_password,
     security,
 )
+from app.core.auth_audit import log_auth_event
 from app.core.config import settings
 from app.db.models import Role, User
 from app.db.session import get_db
 from app.services.audit import record_audit
+
+
+def _client_meta(request: Request | None) -> tuple[str | None, str | None]:
+    """Extract IP + User-Agent for auth_audit rows."""
+    if request is None:
+        return None, None
+    ip = None
+    fwd = request.headers.get("x-forwarded-for", "")
+    if fwd:
+        ip = fwd.split(",")[0].strip()
+    elif request.client:
+        ip = request.client.host
+    ua = request.headers.get("user-agent")
+    return ip, ua
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 admin_router = APIRouter(prefix="/admin", tags=["admin"])
@@ -175,32 +190,73 @@ def _consume_reset_token(token: str) -> str | None:
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
+def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)) -> TokenResponse:
+    ip, ua = _client_meta(request)
     user = db.query(User).filter(User.username == payload.username).first()
     if not user or not verify_password(payload.password, user.hashed_password):
+        log_auth_event(
+            event_type="login_failure",
+            username=payload.username,
+            ip_address=ip,
+            user_agent=ua,
+            metadata={"reason": "bad_credentials"},
+        )
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     if not user.is_active:
+        log_auth_event(
+            event_type="login_failure",
+            user_id=user.id,
+            username=user.username,
+            ip_address=ip,
+            user_agent=ua,
+            metadata={"reason": "inactive"},
+        )
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User inactive")
     if user.totp_enabled:
         secret = _decrypt_secret(user.totp_secret)
         if not secret or not payload.totp_code or not _verify_totp(secret, payload.totp_code):
+            log_auth_event(
+                event_type="login_failure",
+                user_id=user.id,
+                username=user.username,
+                ip_address=ip,
+                user_agent=ua,
+                metadata={"reason": "bad_totp"},
+            )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid TOTP code"
             )
     access = create_access_token(user.id)
     refresh = create_refresh_token(user.id)
     record_audit(db, action="login", target=user.username, user_id=user.id)
+    log_auth_event(
+        event_type="login_success",
+        user_id=user.id,
+        username=user.username,
+        ip_address=ip,
+        user_agent=ua,
+        metadata={"totp_used": bool(user.totp_enabled)},
+    )
     return TokenResponse(access_token=access, refresh_token=refresh)
 
 
 @router.post("/logout", response_model=LogoutResponse)
 def logout(
+    request: Request,
     creds: HTTPAuthorizationCredentials = Depends(security),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> LogoutResponse:
+    ip, ua = _client_meta(request)
     block_access_token(creds.credentials)
     record_audit(db, action="logout", target=user.username, user_id=user.id)
+    log_auth_event(
+        event_type="logout",
+        user_id=user.id,
+        username=user.username,
+        ip_address=ip,
+        user_agent=ua,
+    )
     return LogoutResponse(status="logged_out")
 
 
@@ -261,39 +317,62 @@ def totp_enroll(
 @router.post("/totp/verify")
 def totp_verify(
     payload: TotpVerifyRequest,
+    request: Request,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
+    ip, ua = _client_meta(request)
     secret = _decrypt_secret(user.totp_secret)
     if not secret or not _verify_totp(secret, payload.code):
+        log_auth_event(
+            event_type="mfa_verify",
+            user_id=user.id,
+            username=user.username,
+            ip_address=ip,
+            user_agent=ua,
+            metadata={"result": "fail"},
+        )
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid TOTP code")
     user.totp_enabled = True
     db.add(user)
     db.commit()
     record_audit(db, action="totp_enabled", target=user.username, user_id=user.id)
+    log_auth_event(
+        event_type="mfa_enroll",
+        user_id=user.id,
+        username=user.username,
+        ip_address=ip,
+        user_agent=ua,
+        metadata={"result": "ok"},
+    )
     return {"enabled": True}
 
 
 @router.post("/refresh", response_model=TokenResponse)
-def refresh(payload: RefreshRequest, db: Session = Depends(get_db)) -> TokenResponse:
+def refresh(payload: RefreshRequest, request: Request, db: Session = Depends(get_db)) -> TokenResponse:
     from jose import JWTError, jwt
     from app.core import settings
 
+    ip, ua = _client_meta(request)
     try:
         claims = jwt.decode(
             payload.refresh_token, settings.security.secret_key, algorithms=["HS256"]
         )
         if claims.get("type") != "refresh":
+            log_auth_event(event_type="login_failure", ip_address=ip, user_agent=ua, metadata={"reason": "refresh_wrong_type"})
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
         user_id = claims.get("sub")
     except JWTError as exc:
+        log_auth_event(event_type="login_failure", ip_address=ip, user_agent=ua, metadata={"reason": "refresh_jwt_error"})
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         ) from exc
 
     user = db.get(User, user_id)
     if not user or not user.is_active:
+        log_auth_event(event_type="login_failure", user_id=user_id, ip_address=ip, user_agent=ua, metadata={"reason": "refresh_inactive"})
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User inactive")
+    log_auth_event(event_type="refresh", user_id=user.id, username=user.username, ip_address=ip, user_agent=ua)
     return TokenResponse(
         access_token=create_access_token(user.id),
         refresh_token=create_refresh_token(user.id),
@@ -309,6 +388,196 @@ def me(user: User = Depends(get_current_user)) -> dict[str, Any]:
         "roles": [r.name for r in user.roles],
         "is_active": user.is_active,
     }
+
+
+@admin_router.get("/audit", dependencies=[Depends(require_roles("admin"))])
+def admin_audit(
+    event_type: str | None = None,
+    user_id: str | None = None,
+    since: str | None = None,
+    until: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Read security events from auth_audit and (optionally) the agent_calls
+    cost log. Admin-only.
+
+    Query parameters:
+      event_type: filter to one auth_audit event_type (login_success, etc.)
+      user_id: filter by user
+      since/until: ISO-8601 datetimes
+      limit/offset: pagination (1-1000 / 0-...)
+    """
+    from datetime import datetime
+    from app.db.models import AuthAudit, AgentCall
+
+    if not 1 <= limit <= 1000:
+        raise HTTPException(status_code=400, detail="limit must be in [1,1000]")
+    if offset < 0:
+        raise HTTPException(status_code=400, detail="offset must be >= 0")
+
+    def _parse(ts: str | None) -> datetime | None:
+        if not ts:
+            return None
+        try:
+            return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=f"invalid datetime: {ts}") from exc
+
+    since_dt = _parse(since)
+    until_dt = _parse(until)
+
+    q = db.query(AuthAudit)
+    if event_type:
+        q = q.filter(AuthAudit.event_type == event_type)
+    if user_id:
+        q = q.filter(AuthAudit.user_id == user_id)
+    if since_dt:
+        q = q.filter(AuthAudit.created_at >= since_dt)
+    if until_dt:
+        q = q.filter(AuthAudit.created_at <= until_dt)
+    total_auth = q.count()
+    rows = (
+        q.order_by(AuthAudit.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    auth_events = [
+        {
+            "id": r.id,
+            "event_type": r.event_type,
+            "user_id": r.user_id,
+            "username": r.username,
+            "ip_address": r.ip_address,
+            "user_agent": r.user_agent,
+            "metadata": r.metadata_json,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        }
+        for r in rows
+    ]
+
+    # Agent call summary for the same window (admin dashboards lean on it).
+    aq = db.query(AgentCall)
+    if user_id:
+        aq = aq.filter(AgentCall.user_id == user_id)
+    if since_dt:
+        aq = aq.filter(AgentCall.created_at >= since_dt)
+    if until_dt:
+        aq = aq.filter(AgentCall.created_at <= until_dt)
+    total_agent = aq.count()
+    recent_agent = (
+        aq.order_by(AgentCall.created_at.desc()).limit(10).all()
+    )
+    agent_summary = {
+        "total": total_agent,
+        "recent": [
+            {
+                "trace_id": r.trace_id,
+                "user_id": r.user_id,
+                "intent": r.intent,
+                "answer_source": r.answer_source,
+                "tool_calls": r.tool_calls,
+                "latency_ms": r.latency_ms,
+                "cost_usd": float(r.cost_usd) if r.cost_usd is not None else None,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r in recent_agent
+        ],
+    }
+
+    return {
+        "auth_audit": {
+            "total": total_auth,
+            "limit": limit,
+            "offset": offset,
+            "events": auth_events,
+        },
+        "agent_calls": agent_summary,
+    }
+
+
+@admin_router.get("/review", dependencies=[Depends(require_roles("admin", "analyst"))])
+def list_review_queue(
+    status_filter: str = "pending",
+    limit: int = 50,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """List items waiting on analyst review (active-learning queue)."""
+    from app.db.models import ReviewQueue
+
+    if not 1 <= limit <= 500:
+        raise HTTPException(status_code=400, detail="limit must be in [1,500]")
+    q = db.query(ReviewQueue).filter(ReviewQueue.status == status_filter)
+    total = q.count()
+    rows = q.order_by(ReviewQueue.created_at.desc()).offset(offset).limit(limit).all()
+    return {
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "items": [
+            {
+                "id": r.id,
+                "trace_id": r.trace_id,
+                "session_id": r.session_id,
+                "user_id": r.user_id,
+                "intent": r.intent,
+                "confidence": r.confidence,
+                "model_answer": r.model_answer,
+                "payload": r.payload,
+                "status": r.status,
+                "label": r.label,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r in rows
+        ],
+    }
+
+
+class ReviewLabelRequest(BaseModel):
+    label: str
+    notes: str | None = None
+    status: str = "labeled"  # labeled | discarded
+
+
+@admin_router.post(
+    "/review/{item_id}", dependencies=[Depends(require_roles("admin", "analyst"))]
+)
+def label_review_item(
+    item_id: int,
+    payload: ReviewLabelRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Analyst applies a label and removes the item from the queue."""
+    from datetime import datetime as _dt
+
+    from app.db.models import ReviewQueue
+
+    if payload.status not in ("labeled", "discarded"):
+        raise HTTPException(status_code=400, detail="status must be labeled|discarded")
+    row = db.get(ReviewQueue, item_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="not_found")
+    if row.status != "pending":
+        raise HTTPException(status_code=409, detail=f"already {row.status}")
+    row.label = payload.label[:64]
+    row.notes = payload.notes
+    row.status = payload.status
+    row.reviewed_by = user.username
+    row.reviewed_at = _dt.utcnow()
+    db.add(row)
+    db.commit()
+    record_audit(
+        db,
+        action="review_labeled",
+        target=str(row.id),
+        user_id=user.id if hasattr(user, "id") else None,
+    )
+    return {"id": row.id, "status": row.status, "label": row.label}
 
 
 @admin_router.get("/users", dependencies=[Depends(require_roles("admin"))])
