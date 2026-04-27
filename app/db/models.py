@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, JSON, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -155,3 +155,65 @@ class Incident(Base):
     description: Mapped[str] = mapped_column(Text, default="")
     evidence: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class AuthAudit(Base):
+    """Security event log: login_success, login_failure, logout, refresh,
+    role_change, mfa_enroll, mfa_verify. Queried by /api/v1/admin/audit."""
+
+    __tablename__ = "auth_audit"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    user_id: Mapped[str | None] = mapped_column(String(128), index=True, nullable=True)
+    username: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    event_type: Mapped[str] = mapped_column(String(32), index=True)
+    ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    metadata_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+
+class ReviewQueue(Base):
+    """Active-learning queue. Low-confidence agent runs land here so an
+    analyst can label them; the labels feed the next retrain cycle."""
+
+    __tablename__ = "review_queue"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    trace_id: Mapped[str] = mapped_column(String(64), index=True)
+    session_id: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
+    user_id: Mapped[str | None] = mapped_column(String(128), index=True, nullable=True)
+    intent: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    payload: Mapped[dict] = mapped_column(JSON)
+    model_answer: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    status: Mapped[str] = mapped_column(String(16), default="pending", index=True)
+    label: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reviewed_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class AgentCall(Base):
+    """One row per multi-agent run. Drives cost / latency / cache dashboards."""
+
+    __tablename__ = "agent_calls"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    trace_id: Mapped[str] = mapped_column(String(64), index=True)
+    session_id: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
+    user_id: Mapped[str] = mapped_column(String(128), index=True)
+    intent: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    answer_source: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    stop_reason: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    tool_calls: Mapped[int] = mapped_column(Integer, default=0)
+    input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    output_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    cache_read_input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    cache_creation_input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    latency_ms: Mapped[float] = mapped_column(Float, default=0.0)
+    cost_usd: Mapped[float] = mapped_column(Numeric(10, 6), default=0.0)
+    confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)

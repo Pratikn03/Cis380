@@ -1,0 +1,5 @@
+{"id": "behavior-01", "message": "user is accessing files outside their normal working hours", "expected_intent": "behavior", "must_call_any": ["behavior_score", "risk_score"]}
+{"id": "behavior-02", "message": "insider threat — employee is downloading large amounts of data", "expected_intent": "behavior", "must_call_any": ["behavior_score"]}
+{"id": "behavior-03", "message": "this user's behavior deviates from their baseline pattern", "expected_intent": "behavior", "must_call_any": ["behavior_score"]}
+{"id": "behavior-04", "message": "anomalous click patterns — 200 clicks per minute is unusual", "expected_intent": "behavior", "must_call_any": ["behavior_score"]}
+{"id": "behavior-05", "message": "track unusual user activity over the last hour", "expected_intent": "behavior", "must_call_any": ["behavior_score"]}

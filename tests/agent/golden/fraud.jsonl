@@ -1,0 +1,5 @@
+{"id": "fraud-01", "message": "is this transaction fraudulent: $5000 card payment from RU at 3am", "expected_intent": "fraud", "must_call_any": ["fraud_score", "risk_score"]}
+{"id": "fraud-02", "message": "I want to report a suspicious charge on my credit card", "expected_intent": "fraud", "must_call_any": ["fraud_score"]}
+{"id": "fraud-03", "message": "someone made an unauthorized $200 transaction last night", "expected_intent": "fraud", "must_call_any": ["fraud_score"]}
+{"id": "fraud-04", "message": "check this $50 grocery purchase for fraud", "expected_intent": "fraud", "must_call_any": ["fraud_score"]}
+{"id": "fraud-05", "message": "phishing attempt — they tried to steal my card details", "expected_intent": "fraud", "must_call_any": []}

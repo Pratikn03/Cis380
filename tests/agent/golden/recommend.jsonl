@@ -1,0 +1,5 @@
+{"id": "rec-01", "message": "suggest a movie to watch tonight", "expected_intent": "recommend", "must_call_any": ["recommend"]}
+{"id": "rec-02", "message": "recommend summer wear under $50", "expected_intent": "recommend", "must_call_any": ["recommend"]}
+{"id": "rec-03", "message": "what laptop should I buy for ML training", "expected_intent": "recommend", "must_call_any": ["recommend"]}
+{"id": "rec-04", "message": "best electric cars 2026", "expected_intent": "recommend", "must_call_any": ["recommend"]}
+{"id": "rec-05", "message": "online courses to learn data engineering", "expected_intent": "recommend", "must_call_any": ["recommend"]}

@@ -1,0 +1,5 @@
+{"id": "cyber-01", "message": "we detected a malware intrusion on the network", "expected_intent": "cyber", "must_call_any": ["cyber_score", "risk_score"]}
+{"id": "cyber-02", "message": "is there a security breach happening right now?", "expected_intent": "cyber", "must_call_any": ["cyber_score"]}
+{"id": "cyber-03", "message": "ddos attack on the api gateway", "expected_intent": "cyber", "must_call_any": ["cyber_score"]}
+{"id": "cyber-04", "message": "ransomware indicators on the endpoint", "expected_intent": "cyber", "must_call_any": ["cyber_score"]}
+{"id": "cyber-05", "message": "firewall logs show repeated unauthorized login attempts from the same IP", "expected_intent": "cyber", "must_call_any": ["cyber_score"]}

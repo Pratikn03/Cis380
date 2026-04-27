@@ -1,0 +1,5 @@
+{"id": "rag-01", "message": "what does the policy say about password rotation", "expected_intent": "rag", "must_call_any": ["rag_search"]}
+{"id": "rag-02", "message": "search the manual for incident response procedures", "expected_intent": "rag", "must_call_any": ["rag_search"]}
+{"id": "rag-03", "message": "look up the definition of insider threat in our documentation", "expected_intent": "rag", "must_call_any": ["rag_search"]}
+{"id": "rag-04", "message": "retrieve information about mfa requirements for admins", "expected_intent": "rag", "must_call_any": ["rag_search"]}
+{"id": "rag-05", "message": "find the policy document on acceptable use", "expected_intent": "rag", "must_call_any": ["rag_search"]}
