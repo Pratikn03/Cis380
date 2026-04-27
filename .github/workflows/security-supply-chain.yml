@@ -1,0 +1,114 @@
+name: security-supply-chain
+
+# Container scanning, SBOM generation, and dependency audits.
+# Runs on every push to main + PR + nightly to catch new CVEs in pinned
+# dependencies and the production Docker image.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "27 3 * * *"  # nightly at 03:27 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write   # for SARIF upload (trivy)
+
+jobs:
+  pip-audit:
+    name: pip-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --upgrade pip pip-audit
+      - name: Audit installed Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip-audit --strict --ignore-vuln GHSA-xxxx-xxxx-xxxx \
+            --format columns
+
+  contract:
+    name: openapi contract (schemathesis)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      APP_ENV: development
+      AUTH_BYPASS: "true"
+      RAG_EMBED_BACKEND: hashing
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - run: pip install --upgrade pip
+      - run: pip install -r requirements.txt schemathesis
+      - run: pytest -q tests/contract --maxfail=5
+
+  npm-audit:
+    name: npm-audit (frontend)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui-web/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ui-web/frontend/package-lock.json
+      - run: npm ci
+      - run: npm audit --audit-level=high
+
+  trivy-image:
+    name: trivy (production image)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build production image
+        run: docker build -f Dockerfile.production --target production -t sentifargo:scan .
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: sentifargo:scan
+          format: sarif
+          output: trivy.sarif
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+
+  sbom:
+    name: SBOM (syft)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build production image
+        run: docker build -f Dockerfile.production --target production -t sentifargo:sbom .
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: sentifargo:sbom
+          format: spdx-json
+          output-file: sbom.spdx.json
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: sbom.spdx.json
+          retention-days: 90

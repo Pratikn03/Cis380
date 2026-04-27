@@ -1,0 +1,72 @@
+name: agent-eval
+
+# Runs the multi-agent eval harness against golden queries. Triggered:
+#   - nightly (catches model/prompt drift)
+#   - on PRs that touch agent code or golden cases
+#   - manually
+#
+# Failures gate deployments via the agent-eval-required commit status.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/agent/**"
+      - "app/api/v1/agent.py"
+      - "tests/agent/golden/**"
+      - "scripts/run_agent_eval.py"
+  pull_request:
+    branches: [main]
+    paths:
+      - "app/agent/**"
+      - "app/api/v1/agent.py"
+      - "tests/agent/golden/**"
+      - "scripts/run_agent_eval.py"
+  schedule:
+    - cron: "13 4 * * *"  # nightly at 04:13 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    name: golden-queries
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      APP_ENV: development
+      LLM_MODE: ${{ secrets.ANTHROPIC_API_KEY && 'auto' || 'offline' }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      AGENT_PLANNER_MODEL: claude-opus-4-7
+      AGENT_TRIAGE_MODEL: claude-haiku-4-5
+      AGENT_SYNTHESIS_MODEL: claude-haiku-4-5
+      RAG_EMBED_BACKEND: hashing
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - run: pip install --upgrade pip
+      - run: pip install -r requirements.txt
+      - name: Run agent eval harness
+        run: |
+          # Threshold is lenient when offline (76% on legacy fallback) and
+          # tight (90%) when online with real Claude.
+          if [ -z "${ANTHROPIC_API_KEY}" ]; then
+            python scripts/run_agent_eval.py --threshold 0.70
+          else
+            python scripts/run_agent_eval.py --threshold 0.90
+          fi
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-eval-${{ github.sha }}
+          path: reports/agent_eval_*.json
+          retention-days: 30
