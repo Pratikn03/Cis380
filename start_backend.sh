@@ -1,15 +1,24 @@
 #!/bin/bash
+# Canonical backend launcher. Replaces the old root main.py-based script.
+# For full dev (backend + frontend + local infra), use `make dev` instead.
 
-echo "🚀 Starting Universal Anomaly Intelligence Backend API..."
-echo "ℹ️  This API is ready to connect to your Production (React/Next.js) frontend."
+set -euo pipefail
 
-# 1. Check if port 8001 is in use and kill it
-if lsof -ti :8001 >/dev/null; then
-    echo "Freeing port 8001..."
-    lsof -ti :8001 | xargs kill -9
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "$ROOT"
+
+PORT="${PORT:-8000}"
+
+echo "Starting Sentifargo API (app.main:app) on http://0.0.0.0:${PORT}"
+
+if lsof -ti ":${PORT}" >/dev/null 2>&1; then
+    echo "Freeing port ${PORT}..."
+    lsof -ti ":${PORT}" | xargs kill -9 || true
 fi
 
-# 2. Start the Backend API
-echo "📡 Server listening on http://0.0.0.0:8001"
-echo "👉 Point your React app API calls to: http://localhost:8001"
-python main.py
+if [ -f ".venv/bin/activate" ]; then
+    # shellcheck disable=SC1091
+    source .venv/bin/activate
+fi
+
+exec python -m uvicorn app.main:app --host 0.0.0.0 --port "${PORT}" "$@"

@@ -1,4 +1,10 @@
 # ============================================
+# macOS
+# ============================================
+.DS_Store
+**/._*
+
+# ============================================
 # Python
 # ============================================
 __pycache__/
@@ -24,11 +30,17 @@ venv.bak/
 # ============================================
 .env
 .env.local
+.env.production
 .env.*.local
 .env.backup.*
 .env.save
 !.env.example
+!.env.development
 !.env.production.example
+
+# Production secrets directory (file-backed Docker secrets)
+/secrets/
+!/secrets/README.md
 
 # ============================================
 # IDEs and Editors
@@ -276,6 +288,13 @@ dmypy.json
 src/models/
 src/experiments/
 datasets/
+
+# Playwright MCP scratch logs
+.playwright-mcp/
+
+# Local dev SQLite (gitignored — created by alembic upgrade head locally)
+data/sentifargo-dev.db
+data/sentifargo-dev.db-journal
 
 # ============================================
 # Keep These

@@ -1,0 +1,48 @@
+# Local infra for `make dev`. Boots Postgres + Redis on host ports so the
+# uvicorn process running on the host can reach them at localhost.
+#
+# Resolves the boot warnings:
+#   could not translate host name "postgres" to address: nodename nor servname
+#   Redis rate limit check failed; using in-memory fallback.
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up -d
+#   docker compose -f docker-compose.dev.yml down
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: sentifargo-dev-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sentifargo
+      POSTGRES_USER: sentifargo
+      POSTGRES_PASSWORD: sentifargo
+    ports:
+      - "5432:5432"
+    volumes:
+      - sentifargo-dev-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentifargo -d sentifargo"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: sentifargo-dev-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - sentifargo-dev-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  sentifargo-dev-postgres:
+  sentifargo-dev-redis:

@@ -1,25 +1,32 @@
 #!/bin/bash
+# Boots the canonical stack: FastAPI backend (:8000) + Vite frontend (:5173).
+# Prefer `make dev` — this script remains for muscle memory.
 
-echo "🚀 Starting Universal Anomaly Intelligence..."
+set -euo pipefail
 
-# 1. Check if port 8001 is in use and kill it (prevents 'Address already in use' errors)
-if lsof -ti :8001 >/dev/null; then
-    echo "Freeing port 8001..."
-    lsof -ti :8001 | xargs kill -9
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "$ROOT"
+
+API_PORT="${API_PORT:-8000}"
+WEB_PORT="${WEB_PORT:-5173}"
+
+if lsof -ti ":${API_PORT}" >/dev/null 2>&1; then
+    echo "Freeing port ${API_PORT}..."
+    lsof -ti ":${API_PORT}" | xargs kill -9 || true
 fi
 
-# 2. Start the Backend API in the background
-echo "Starting FastAPI Backend..."
-python main.py &
-BACKEND_PID=$!
+if [ -f ".venv/bin/activate" ]; then
+    # shellcheck disable=SC1091
+    source .venv/bin/activate
+fi
 
-# Wait for backend to spin up
+echo "Starting FastAPI backend on :${API_PORT}..."
+python -m uvicorn app.main:app --host 0.0.0.0 --port "${API_PORT}" &
+BACKEND_PID=$!
+trap 'kill $BACKEND_PID 2>/dev/null || true' EXIT
+
 sleep 3
 
-# 3. Start the Streamlit Frontend
-echo "Starting Streamlit Frontend..."
-streamlit run app.py
-
-# 4. Cleanup: Kill the backend when you stop this script (Ctrl+C)
-trap "kill $BACKEND_PID" EXIT
-wait
+echo "Starting Vite frontend on :${WEB_PORT}..."
+cd ui-web/frontend
+exec npm run dev -- --port "${WEB_PORT}"

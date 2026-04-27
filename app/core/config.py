@@ -41,7 +41,22 @@ def _load_dotenv_defaults(env_path: Path) -> None:
         os.environ[key] = value
 
 
-_load_dotenv_defaults(Path(__file__).resolve().parents[2] / ".env")
+def _load_env_chain(repo_root: Path) -> None:
+    """Load env files in priority order. Earlier wins because the loader
+    only fills keys that are not yet present in os.environ.
+
+      1. .env.local                  (machine-local overrides, gitignored)
+      2. .env.<APP_ENV>              (e.g. .env.development; APP_ENV from process env)
+      3. .env                        (base/production defaults committed for the prod target)
+    """
+    _load_dotenv_defaults(repo_root / ".env.local")
+    app_env = os.environ.get("APP_ENV", "").strip().lower()
+    if app_env:
+        _load_dotenv_defaults(repo_root / f".env.{app_env}")
+    _load_dotenv_defaults(repo_root / ".env")
+
+
+_load_env_chain(Path(__file__).resolve().parents[2])
 
 
 class DatabaseSettings(BaseModel):
@@ -131,6 +146,21 @@ class ExternalAPISettings(BaseModel):
     openai_model: str = Field(default="gpt-4")
     openai_max_tokens: int = Field(default=2000, ge=100)
     huggingface_token: str | None = None
+    anthropic_api_key: str | None = None
+
+
+class AgentSettings(BaseModel):
+    """Multi-agent (Claude) configuration."""
+
+    planner_model: str = Field(default="claude-opus-4-7")
+    triage_model: str = Field(default="claude-haiku-4-5")
+    synthesis_model: str = Field(default="claude-haiku-4-5")
+    thinking_budget: int = Field(default=4000, ge=0, le=64000)
+    max_tool_calls: int = Field(default=8, ge=1, le=64)
+    max_tokens_per_turn: int = Field(default=30000, ge=1024, le=200000)
+    cache_ttl_seconds: int = Field(default=300, ge=60, le=3600)
+    confidence_escalation_threshold: float = Field(default=0.6, ge=0.0, le=1.0)
+    llm_mode: Literal["offline", "online", "auto"] = Field(default="auto")
 
 
 class MonitoringSettings(BaseModel):
@@ -179,6 +209,7 @@ class Settings(BaseModel):
     external_apis: ExternalAPISettings = Field(default_factory=ExternalAPISettings)
     monitoring: MonitoringSettings = Field(default_factory=MonitoringSettings)
     features: FeatureFlags = Field(default_factory=FeatureFlags)
+    agent: AgentSettings = Field(default_factory=AgentSettings)
 
     @property
     def is_production(self) -> bool:
@@ -273,6 +304,20 @@ def _load_settings_from_env() -> Settings:
             openai_model=os.getenv("OPENAI_MODEL", "gpt-4"),
             openai_max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "2000")),
             huggingface_token=os.getenv("HUGGINGFACE_TOKEN"),
+            anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
+        ),
+        agent=AgentSettings(
+            planner_model=os.getenv("AGENT_PLANNER_MODEL", "claude-opus-4-7"),
+            triage_model=os.getenv("AGENT_TRIAGE_MODEL", "claude-haiku-4-5"),
+            synthesis_model=os.getenv("AGENT_SYNTHESIS_MODEL", "claude-haiku-4-5"),
+            thinking_budget=int(os.getenv("AGENT_THINKING_BUDGET", "4000")),
+            max_tool_calls=int(os.getenv("AGENT_MAX_TOOL_CALLS", "8")),
+            max_tokens_per_turn=int(os.getenv("AGENT_MAX_TOKENS_PER_TURN", "30000")),
+            cache_ttl_seconds=int(os.getenv("AGENT_CACHE_TTL_SECONDS", "300")),
+            confidence_escalation_threshold=float(
+                os.getenv("AGENT_CONFIDENCE_ESCALATION_THRESHOLD", "0.6")
+            ),
+            llm_mode=os.getenv("LLM_MODE", "auto"),  # type: ignore
         ),
         monitoring=MonitoringSettings(
             prometheus_enabled=os.getenv("PROMETHEUS_ENABLED", "true").lower() == "true",

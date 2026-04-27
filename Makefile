@@ -1,4 +1,4 @@
-.PHONY: help install test run dev dev-down api web scrub streamlit train-all train-vision train-fraud train-cyber train-behavior train-recommender eval promote model-quality-gate prod-check docker-build docker-up docker-up-prod docker-down gateway-test gateway-run quality-fast quality-test quality-data quality-docs-fast quality-docs quality-all
+.PHONY: help install test run dev dev-down api web scrub streamlit train-all train-vision train-fraud train-cyber train-behavior train-recommender train-brand train-video-temporal train-voice eval promote model-quality-gate prod-check docker-build docker-up docker-up-prod docker-down gateway-test gateway-run quality-fast quality-test quality-data quality-docs-fast quality-docs quality-all
 
 ifneq ("$(wildcard .venv/bin/python)","")
 PY ?= .venv/bin/python
@@ -24,6 +24,9 @@ help:
 	@echo "  make train-cyber    Train cyber model (DVC stage, full data)"
 	@echo "  make train-behavior Train behavior model (DVC stage, full data)"
 	@echo "  make train-recommender  Train recommender model (DVC stage)"
+	@echo "  make train-brand    Train brand/logo detector (DVC stage, full data)"
+	@echo "  make train-video-temporal Train video temporal model (full data)"
+	@echo "  make train-voice    Prepare, train, and evaluate SSL voice emotion model (full data)"
 	@echo "  make train-all      Train core models (scripts/train_all.py)"
 	@echo "  make train-vision   Train vision stack (scripts/train_all_vision.py)"
 	@echo "  make eval           Evaluate all trained models (DVC evaluate_all)"
@@ -72,6 +75,19 @@ web:
 scrub:
 	bash scripts/scrub_appledouble.sh
 
+contract:
+	APP_ENV=development AUTH_BYPASS=true $(PY) -m pytest -q tests/contract
+
+e2e:
+	APP_ENV=development AUTH_BYPASS=true $(PY) -m pytest -q -m e2e tests/e2e
+
+load:
+	@command -v k6 >/dev/null 2>&1 || { echo "k6 not installed — brew install k6 or see https://k6.io" >&2; exit 1; }
+	BASE_URL=$${BASE_URL:-http://localhost:8000} k6 run tests/load/agent_run.js
+
+agent-eval:
+	APP_ENV=development PYTHONPATH=. $(PY) scripts/run_agent_eval.py --threshold 0.7
+
 streamlit:
 	Sentifargo_BACKEND=$${Sentifargo_BACKEND:-http://localhost:8000} $(PY) -m streamlit run app/streamlit_chatbot/app.py
 
@@ -87,11 +103,25 @@ train-behavior:
 train-recommender:
 	PATH="$(CURDIR)/.venv/bin:$$PATH" $(PY) -m dvc repro --single-item train_recommender
 
+train-brand:
+	BRAND_SINGLE_CLASS=true $(PY) scripts/prepare_brand_data.py --single-class
+	BRAND_EPOCHS=50 BRAND_BATCH=16 BRAND_FRACTION=1.0 BRAND_TRAIN_MAX_IMAGES=0 BRAND_VAL_MAX_IMAGES=0 BRAND_VAL=true BRAND_SINGLE_CLS=false COPYFILE_DISABLE=1 PATH="$(CURDIR)/.venv/bin:$$PATH" $(PY) -m dvc repro --single-item train_brand_model
+
+train-video-temporal:
+	PYTHONPATH=src $(PY) src/train/train_video_temporal.py --max-per-class 0 --max-frames 0
+
+train-voice:
+	$(PY) scripts/prepare_voice_from_audiowav.py --mode link
+	$(PY) scripts/voice/build_emotion_manifest.py --data-root data/raw/voice --out data/raw/voice/manifest.csv
+	$(PY) scripts/voice/split_manifest.py --manifest data/raw/voice/manifest.csv --out-dir data/raw/voice --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
+	$(PY) scripts/voice/train_emotion_ssl.py --train-manifest data/raw/voice/manifest.train.csv --val-manifest data/raw/voice/manifest.val.csv --model microsoft/wavlm-base-plus --output-dir models/voice_emotion_ssl --epochs 50 --max-steps 0
+	$(PY) scripts/voice/eval_emotion_ssl.py --model-dir models/voice_emotion_ssl --test-manifest data/raw/voice/manifest.test.csv
+
 eval:
 	PYTHONPATH=src $(PY) -m uais.evaluation.evaluate_all
 
 promote:
-	$(PY) scripts/promote_model.py --all
+	$(PY) scripts/promote_model.py --all --promote-passing
 
 model-quality-gate:
 	PYTHONPATH=. $(PY) scripts/model_quality_gate.py
@@ -106,7 +136,7 @@ rag-index:
 	$(PY) -m src.cli rag index --rebuild
 
 rag-eval:
-	$(PY) scripts/rag/evaluate_dsa.py
+	PYTHONPATH=. $(PY) scripts/rag/evaluate_dsa.py
 
 rag-query:
 	$(PY) -m src.cli rag query "$(QUERY)"
