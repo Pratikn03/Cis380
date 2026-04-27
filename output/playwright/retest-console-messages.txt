@@ -1,0 +1,7 @@
+Total messages: 5 (Errors: 5, Warnings: 0)
+
+[ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8081/graphql:0
+[ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8081/graphql:0
+[ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8081/graphql:0
+[ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8081/graphql:0
+[ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8081/graphql:0
