@@ -296,6 +296,13 @@ datasets/
 data/sentifargo-dev.db
 data/sentifargo-dev.db-journal
 
+# Vite + TypeScript build caches
+ui-web/frontend/tsconfig*.tsbuildinfo
+ui-web/frontend/vite.config.*.timestamp-*.mjs
+
+# Kotlin build cache
+services/gateway-kotlin/.kotlin/
+
 # ============================================
 # Keep These
 # ============================================

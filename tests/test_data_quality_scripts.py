@@ -86,6 +86,61 @@ def test_make_splits_csv_is_deterministic(tmp_path):
     )
 
 
+def test_make_splits_csv_stratifies_and_logs_duplicates(tmp_path):
+    make_splits = _load_module("scripts.data.make_splits")
+
+    rows = {
+        "feature_a": list(range(100)) + [0],
+        "label": ([0] * 50) + ([1] * 50) + [0],
+    }
+    source_csv = tmp_path / "source.csv"
+    pd.DataFrame(rows).to_csv(source_csv, index=False)
+
+    out_dir = tmp_path / "splits"
+    manifest = tmp_path / "data" / "splits" / "fixture.json"
+    make_splits._split_csv(
+        csv_path=source_csv,
+        out_dir=out_dir,
+        seed=42,
+        train=0.7,
+        val=0.15,
+        label_col="label",
+        manifest_path=manifest,
+    )
+
+    payload = json.loads(manifest.read_text(encoding="utf-8"))
+    assert payload["strategy"] == "stratified"
+    assert payload["rows"]["excluded"] == 1
+    assert payload["exclusions"][0]["reason"] == "duplicate"
+
+    train_df = pd.read_csv(out_dir / "train.csv")
+    val_df = pd.read_csv(out_dir / "val.csv")
+    test_df = pd.read_csv(out_dir / "test.csv")
+    assert set(train_df["label"]) == {0, 1}
+    assert set(val_df["label"]) == {0, 1}
+    assert set(test_df["label"]) == {0, 1}
+
+
+def test_analyze_data_writes_one_screen_domain_audit(tmp_path):
+    analyze_data = _load_module("analyze_data")
+
+    domain = tmp_path / "data" / "raw" / "fraud"
+    domain.mkdir(parents=True)
+    (domain / "sample.csv").write_text(
+        "Time,Amount,Class\n1,10,0\n2,,1\n2,,1\n",
+        encoding="utf-8",
+    )
+
+    md_path, json_path = analyze_data.write_audit(domain)
+    payload = json.loads(json_path.read_text(encoding="utf-8"))
+    text = md_path.read_text(encoding="utf-8")
+
+    assert payload["row_count"] == 3
+    assert payload["duplicate_rows"] == 1
+    assert payload["target_column"] == "Class"
+    assert "Class balance" in text
+
+
 def test_training_data_audit_generates_reports(tmp_path):
     training_data_audit = _load_module("scripts.training_data_audit")
 
