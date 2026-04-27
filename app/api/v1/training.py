@@ -40,7 +40,10 @@ MODEL_PATHS: dict[str, tuple[Path, ...]] = {
         Path("models/behavior/behavior_autoencoder.pkl"),
         Path("models/behavior/behavior_lof.pkl"),
     ),
-    "vision_deepfake": (Path("models/vision/resnet/model.pt"),),
+    "vision_deepfake": (
+        Path("models/vision/yolo_cls/best.pt"),
+        Path("models/vision/resnet/model.pt"),
+    ),
     "vision_face_emotion": (Path("models/vision/face_emotion/model.pt"),),
     "vision_temporal": (
         Path("models/vision/video_temporal_model.pkl"),
@@ -58,7 +61,10 @@ MODEL_PATHS: dict[str, tuple[Path, ...]] = {
         Path("models/recommender/movielens_meta.joblib"),
     ),
     "fusion": (Path("models/fusion/fusion_meta_model.pkl"),),
-    "rag": (Path("data/dsa_embeddings/faiss.index"),),
+    "rag": (
+        Path("data/processed/rag/embeddings.npy"),
+        Path("data/dsa_embeddings/faiss.index"),
+    ),
 }
 
 
@@ -339,6 +345,8 @@ def _model_ready(root: Path, domain: str) -> bool:
         return any((root / p).exists() for p in paths)
     if domain == "vision_temporal":
         return any((root / p).exists() for p in paths)
+    if domain == "rag":
+        return any((root / p).exists() for p in paths)
     if domain == "recommender":
         primary = (root / "models/recommender/recommender_model.pkl").exists() and (
             root / "models/recommender/recommender_meta.joblib"
@@ -365,6 +373,7 @@ def _metrics_sources(
             [
                 root / "experiments" / "vision" / "video_temporal" / "metrics.json",
                 root / "experiments" / "vision" / "temporal_lstm" / "metrics.json",
+                root / "experiments" / "vision" / "metrics" / "metrics.json",
                 root / "models" / "vision" / "face_emotion" / "metrics.json",
             ]
         )
@@ -385,10 +394,13 @@ def _metrics_sources(
     elif domain == "voice":
         json_candidates.extend(
             [
+                root / "reports" / "voice_emotion_eval.json",
                 root / "reports" / "execution_voice_pipeline_summary.json",
                 root / "reports" / "evaluation_voice_metrics_summary.json",
             ]
         )
+    elif domain == "rag":
+        json_candidates.append(root / "metrics" / "rag_eval.json")
 
     metrics_parse_error = False
     for path in json_candidates:

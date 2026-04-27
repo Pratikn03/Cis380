@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Iterable
 
 
-DEFAULT_EMOTIONS = ["angry", "happy", "neutral", "sad", "fearful"]
+DEFAULT_EMOTIONS = ["angry", "happy", "neutral", "sad", "fearful", "disgust"]
 
 
 def _read_wav_stats(path: Path) -> tuple[float, int]:

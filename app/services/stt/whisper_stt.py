@@ -38,12 +38,11 @@ class WhisperSTT:
             device = os.getenv("STT_DEVICE", "cpu")
             compute_type = os.getenv("STT_COMPUTE_TYPE")
             if not compute_type:
-                normalize_audio = cls._bool_env("STT_NORMALIZE_AUDIO", "true")
                 device_lower = device.lower()
                 if device_lower.startswith("cuda") or device_lower.startswith("gpu"):
                     compute_type = "float16"
                 else:
-                    compute_type = "float32" if normalize_audio else "int8"
+                    compute_type = "int8"
             cls._model = cls._get_model_cls()(size, device=device, compute_type=compute_type)
         return cls._model
 

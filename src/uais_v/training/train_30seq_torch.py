@@ -35,7 +35,7 @@ def train_torch_30seq(
     X_dict: Dict[str, np.ndarray],
     y: np.ndarray,
     batch_size: int = 32,
-    epochs: int = 10,
+    epochs: int = 50,
     lr: float = 1e-3,
     latent_dim: int = 64,
     num_outputs: int = 2,

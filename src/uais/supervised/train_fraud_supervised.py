@@ -10,6 +10,7 @@ import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
+from sklearn.utils.class_weight import compute_sample_weight
 
 from uais.utils.metrics import compute_classification_metrics
 from uais.preprocessing.pipeline import build_tabular_pipeline
@@ -25,6 +26,7 @@ class FraudModelConfig:
     learning_rate: float = 0.1
     max_iter: int = 200  # for hist_gb or logistic regression
     n_estimators: int = 300  # used by xgboost/lightgbm/catboost
+    class_weight_balanced: bool = True
 
 
 def _build_model(config: FraudModelConfig):
@@ -108,7 +110,10 @@ def train_fraud_model(
         from sklearn.pipeline import Pipeline as SKPipeline
 
         estimator = SKPipeline([("preprocessor", pre), ("model", model)])
-        estimator.fit(X_train, y_train)
+        fit_kwargs = {}
+        if config.class_weight_balanced:
+            fit_kwargs["model__sample_weight"] = compute_sample_weight("balanced", y_train)
+        estimator.fit(X_train, y_train, **fit_kwargs)
     else:
         # Safety: if pipeline is disabled and non-numeric columns slipped through, raise early with guidance.
         if has_non_numeric:
@@ -117,7 +122,10 @@ def train_fraud_model(
                 f"Non-numeric columns detected {non_num}. "
                 "Re-run with use_pipeline=True to auto-encode categoricals."
             )
-        model.fit(X_train, y_train)
+        fit_kwargs = {}
+        if config.class_weight_balanced:
+            fit_kwargs["sample_weight"] = compute_sample_weight("balanced", y_train)
+        model.fit(X_train, y_train, **fit_kwargs)
         estimator = model
 
     # Predict probabilities for positive class (fraud).

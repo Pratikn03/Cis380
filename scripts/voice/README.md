@@ -12,6 +12,7 @@ Define the production-oriented voice emotion training and evaluation pipeline.
 ## Run locally
 ```bash
 python3 scripts/voice/audit_voice_dataset.py --data-root data/raw/voice --pattern '^(?P<speaker>\\d{4})_.*\\.wav$'
+python3 scripts/prepare_voice_from_audiowav.py --mode link
 python3 scripts/voice/build_emotion_manifest.py --data-root data/raw/voice --out data/raw/voice/manifest.csv
 python3 scripts/voice/split_manifest.py --manifest data/raw/voice/manifest.csv --out-dir data/raw/voice --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
 python3 scripts/voice/train_emotion_ssl.py --train-manifest data/raw/voice/manifest.train.csv --val-manifest data/raw/voice/manifest.val.csv --model microsoft/wavlm-base-plus --output-dir models/voice_emotion_ssl

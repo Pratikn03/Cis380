@@ -18,6 +18,6 @@ else:
     labels = df['label'].astype(int).tolist()
 
 save_dir = Path('models/nlp/distilbert')
-model, metrics, out_dir = train_distilbert(texts, labels, cfg, batch_size=cfg.num_labels * 4, epochs=1, save_dir=save_dir)
+model, metrics, out_dir = train_distilbert(texts, labels, cfg, batch_size=cfg.num_labels * 4, epochs=50, save_dir=save_dir)
 print('NLP metrics:', metrics)
 PY

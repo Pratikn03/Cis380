@@ -21,7 +21,7 @@ EMO_MAP = {
     "NEU": "neutral",
     "SAD": "sad",
     "FEA": "fearful",
-    "DIS": "angry",
+    "DIS": "disgust",
 }
 
 
@@ -36,6 +36,8 @@ class Stats:
     skipped: int = 0
     failed: int = 0
     link_fallback: int = 0
+    repaired: int = 0
+    duplicate_removed: int = 0
     per_class: dict[str, int] = field(default_factory=dict)
 
 
@@ -57,6 +59,26 @@ def _safe_copy(src: Path, dst: Path) -> bool:
         return False
     except OSError:
         return False
+
+
+def _repair_existing_layout(dst_root: Path, stats: Stats) -> None:
+    target_classes = set(EMO_MAP.values())
+    for folder in sorted(p for p in dst_root.iterdir() if p.is_dir() and p.name in target_classes):
+        for wav in sorted(folder.glob("*.wav")):
+            match = PATTERN.match(wav.name)
+            if not match:
+                continue
+            mapped = EMO_MAP.get(match.group("emotion").upper())
+            if not mapped or mapped == folder.name:
+                continue
+            dest = dst_root / mapped / wav.name
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            if dest.exists():
+                wav.unlink()
+                stats.duplicate_removed += 1
+            else:
+                shutil.move(str(wav), str(dest))
+                stats.repaired += 1
 
 
 def main() -> int:
@@ -97,10 +119,12 @@ def main() -> int:
         print(f"[prepare_voice_from_audiowav] Missing source directory: {src_dir}")
         return 2
 
+    dst_root.mkdir(parents=True, exist_ok=True)
     for cls in sorted(set(EMO_MAP.values())):
         (dst_root / cls).mkdir(parents=True, exist_ok=True)
 
     stats = Stats()
+    _repair_existing_layout(dst_root, stats)
 
     per_class_limit: dict[str, int] = {cls: 0 for cls in set(EMO_MAP.values())}
 
@@ -161,6 +185,8 @@ def main() -> int:
     print(f"link fallback copies: {stats.link_fallback}")
     print(f"skipped: {stats.skipped}")
     print(f"failed: {stats.failed}")
+    print(f"repaired stale labels: {stats.repaired}")
+    print(f"removed duplicate stale labels: {stats.duplicate_removed}")
     for cls in sorted(stats.per_class):
         print(f"{cls}: {stats.per_class[cls]}")
 

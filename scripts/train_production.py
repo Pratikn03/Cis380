@@ -57,15 +57,22 @@ def train_fraud_model():
     X = df.drop(columns=["Class"])
     y = df["Class"]
 
-    # Balance dataset
-    df_majority = df[df["Class"] == 0].sample(n=50000, random_state=42)
+    # Balance without discarding any original rows: keep the full dataset and
+    # add duplicated minority examples only to improve the training signal.
+    df_majority = df[df["Class"] == 0]
     df_minority = df[df["Class"] == 1]
-    df_minority_up = resample(df_minority, replace=True, n_samples=5000, random_state=42)
-    df_bal = pd.concat([df_majority, df_minority_up])
+    target_minority = max(len(df_minority), min(len(df_majority) // 10, 50_000))
+    extra_minority = max(0, target_minority - len(df_minority))
+    df_minority_up = (
+        resample(df_minority, replace=True, n_samples=extra_minority, random_state=42)
+        if extra_minority
+        else df_minority.head(0)
+    )
+    df_bal = pd.concat([df_majority, df_minority, df_minority_up])
 
     X = df_bal.drop(columns=["Class"])
     y = df_bal["Class"]
-    print(f"📊 Balanced: {len(df_bal):,} samples")
+    print(f"📊 Full-data balanced training rows: {len(df_bal):,} samples")
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
@@ -435,22 +442,29 @@ def train_brand_model():
             import subprocess
 
             subprocess.run(
-                [sys.executable, str(ROOT / "scripts/prepare_brand_data.py")],
+                [sys.executable, str(ROOT / "scripts/prepare_brand_data.py"), "--single-class"],
                 check=True,
                 cwd=str(ROOT),
+                env={**os.environ, "BRAND_SINGLE_CLASS": "true"},
             )
         except Exception as exc:
             print(f"⚠️ Brand data prep failed: {exc}")
             return None
 
     print(f"📂 Using data: {yaml_path}")
-    os.environ.setdefault("BRAND_EPOCHS", "1")
+    os.environ.setdefault("BRAND_EPOCHS", "50")
     os.environ.setdefault("BRAND_YOLO_MODEL", "yolov8n.pt")
-    # Fast, local-friendly defaults. Override with env vars for full training.
+    # Production defaults are full-data/full-epoch. Use explicit env overrides only
+    # for an intentional separate smoke test.
     os.environ.setdefault("BRAND_DEVICE", "auto")
-    os.environ.setdefault("BRAND_IMGSZ", "320")
-    os.environ.setdefault("BRAND_FRACTION", "0.1")
-    os.environ.setdefault("BRAND_VAL", "false")
+    os.environ.setdefault("BRAND_IMGSZ", "640")
+    os.environ.setdefault("BRAND_BATCH", "16")
+    os.environ.setdefault("BRAND_FRACTION", "1.0")
+    os.environ.setdefault("BRAND_VAL", "true")
+    os.environ.setdefault("BRAND_SINGLE_CLASS", "true")
+    os.environ.setdefault("BRAND_SINGLE_CLS", "false")
+    os.environ.setdefault("BRAND_TRAIN_MAX_IMAGES", "0")
+    os.environ.setdefault("BRAND_VAL_MAX_IMAGES", "0")
     try:
         _train_brand()
         return True
@@ -481,7 +495,7 @@ def train_face_emotion_model():
                 "--data-dir",
                 str(data_dir),
                 "--epochs",
-                "5",
+                "50",
             ],
             check=True,
             cwd=str(ROOT),

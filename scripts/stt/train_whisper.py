@@ -32,7 +32,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--language", type=str, default="en", help="Language code.")
     parser.add_argument("--output-dir", type=Path, default=Path("models/whisper_stt"))
-    parser.add_argument("--epochs", type=int, default=3)
+    parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument(
         "--grad-accum",

@@ -5,7 +5,7 @@ under `models/` and `experiments/`.
 
 It is intentionally conservative:
 - Runs fraud/cyber/behavior/fusion (fast-ish, pure sklearn).
-- Retrains voice emotion model (sampled) to keep artifact compatible.
+- Retrains voice emotion model on all available WAVs to keep artifact compatible.
 - Runs the recommender meta-action trainer.
 - Vision training is optional (can be heavy) and is OFF by default.
 
@@ -13,7 +13,7 @@ Usage:
   python scripts/train_all.py
   python scripts/train_all.py --with-vision
   python scripts/train_all.py --with-video-temporal
-  python scripts/train_all.py --voice-limit-per-class 500
+  python scripts/train_all.py --voice-limit-per-class 0
 """
 
 from __future__ import annotations
@@ -109,7 +109,7 @@ def main() -> int:
     parser.add_argument(
         "--voice-limit-per-class",
         type=int,
-        default=200,
+        default=0,
         help="Max WAVs per class to use for voice training (0 uses all).",
     )
     parser.add_argument(
@@ -125,7 +125,7 @@ def main() -> int:
     parser.add_argument(
         "--stt-bootstrap-limit",
         type=int,
-        default=200,
+        default=0,
         help="Max audio files for STT bootstrap (0 uses all).",
     )
     parser.add_argument(
@@ -223,7 +223,7 @@ def main() -> int:
                 "--split",
                 "test",
                 "--limit",
-                str(min(100, args.stt_bootstrap_limit) if args.stt_bootstrap_limit else 100),
+                str(args.stt_bootstrap_limit if args.stt_bootstrap_limit > 0 else 0),
                 "--language",
                 args.stt_language,
                 "--normalize",
@@ -249,21 +249,13 @@ def main() -> int:
 
     # Vision is optional/heavy.
     if args.with_vision:
-        # Sentifargo vision training entrypoints can vary by dataset. If you have
-        # a dedicated script, wire it here.
-        candidate = REPO_ROOT / "scripts" / "run_train_vision.sh"
-        if candidate.exists():
-            _run(["bash", str(candidate)])
-        else:
-            print(
-                "\n[train_all] --with-vision requested, but scripts/run_train_vision.sh not found; skipping."
-            )
+        _run([sys.executable, "scripts/train_all_vision.py"])
 
     if args.with_vision_full:
         candidate = REPO_ROOT / "scripts" / "train_all_vision_full.py"
         if candidate.exists():
-            vision_max_train = int(args.vision_full_max_train) if int(args.vision_full_max_train) > 0 else 512
-            vision_max_val = int(args.vision_full_max_val) if int(args.vision_full_max_val) > 0 else 128
+            vision_max_train = int(args.vision_full_max_train)
+            vision_max_val = int(args.vision_full_max_val)
             cmd = [
                 sys.executable,
                 str(candidate),
@@ -278,7 +270,7 @@ def main() -> int:
                 "--probe-timeout-sec",
                 "1.0",
                 "--max-seconds-per-model",
-                "1200",
+                "0",
                 "--freeze-backbone",
                 "--max-train",
                 str(vision_max_train),
@@ -299,24 +291,36 @@ def main() -> int:
 
     if args.with_brand:
         # Prepare dataset (idempotent) and train YOLO detector.
-        # Default to a fast local smoke-run (override via env vars for full training).
+        # Default to the production full-data run. Use explicit env overrides only
+        # when intentionally running a separate local smoke test.
         os.environ.setdefault("BRAND_YOLO_MODEL", "yolov8n.pt")
-        os.environ.setdefault("BRAND_EPOCHS", "1")
-        os.environ.setdefault("BRAND_IMGSZ", "320")
-        os.environ.setdefault("BRAND_BATCH", "8")
-        os.environ.setdefault("BRAND_FRACTION", "0.1")
-        os.environ.setdefault("BRAND_VAL", "false")
+        os.environ.setdefault("BRAND_EPOCHS", "50")
+        os.environ.setdefault("BRAND_IMGSZ", "640")
+        os.environ.setdefault("BRAND_BATCH", "16")
+        os.environ.setdefault("BRAND_FRACTION", "1.0")
+        os.environ.setdefault("BRAND_VAL", "true")
+        os.environ.setdefault("BRAND_SINGLE_CLASS", "true")
+        os.environ.setdefault("BRAND_SINGLE_CLS", "false")
         os.environ.setdefault("BRAND_CACHE", "false")
-        os.environ.setdefault("BRAND_DEVICE", "cpu")
-        os.environ.setdefault("BRAND_WORKERS", "0")
-        os.environ.setdefault("BRAND_TRAIN_MAX_IMAGES", "200")
-        os.environ.setdefault("BRAND_VAL_MAX_IMAGES", "50")
-        _run([sys.executable, "scripts/prepare_brand_data.py"])
+        os.environ.setdefault("BRAND_DEVICE", "auto")
+        os.environ.setdefault("BRAND_WORKERS", "4")
+        os.environ.setdefault("BRAND_TRAIN_MAX_IMAGES", "0")
+        os.environ.setdefault("BRAND_VAL_MAX_IMAGES", "0")
+        _run([sys.executable, "scripts/prepare_brand_data.py", "--single-class"])
         _run([sys.executable, "src/train/train_brand_logo_detector.py"])
 
     if args.with_video_temporal:
         # Trains a lightweight sklearn temporal model used by /api/vision/video/predict.
-        _run([sys.executable, "src/train/train_video_temporal.py"])
+        _run(
+            [
+                sys.executable,
+                "src/train/train_video_temporal.py",
+                "--max-per-class",
+                "0",
+                "--max-frames",
+                "0",
+            ]
+        )
 
     if args.with_face_emotion:
         # Trains a 7-class facial emotion classifier used by /api/vision/face_emotion/predict.

@@ -47,7 +47,7 @@ def train_gru_classifier(
     input_dim = sequences.shape[-1]
     hidden_dim = config.get("sequence", {}).get("hidden_dim", 32)
     batch_size = config.get("sequence", {}).get("batch_size", 32)
-    epochs = config.get("sequence", {}).get("epochs", 5)
+    epochs = config.get("sequence", {}).get("epochs", 50)
     lr = config.get("sequence", {}).get("lr", 1e-3)
 
     dataset = SequenceDataset(sequences, mask, labels)

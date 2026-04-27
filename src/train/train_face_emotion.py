@@ -250,7 +250,7 @@ def main() -> int:
         "--pretrained", action="store_true", help="Use pretrained ImageNet weights (resnet18 only)."
     )
     ap.add_argument("--image-size", type=int, default=96, help="Resize images to NxN.")
-    ap.add_argument("--epochs", type=int, default=5)
+    ap.add_argument("--epochs", type=int, default=50)
     ap.add_argument("--batch-size", type=int, default=64)
     ap.add_argument("--num-workers", type=int, default=0)
     ap.add_argument("--lr", type=float, default=1e-3)

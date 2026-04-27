@@ -1,7 +1,7 @@
 chunk_size: 800
 chunk_overlap: 120
 
-embedding_model: all-MiniLM-L6-v2
+embedding_model: BAAI/bge-small-en-v1.5
 index_type: faiss_flatip
 top_k_default: 6
 top_k_dense: 12

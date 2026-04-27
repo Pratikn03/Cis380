@@ -78,7 +78,7 @@ def _collect_images(roots: list[Path], *, base_path: Path) -> list[Path]:
         if not root.exists():
             continue
         for p in root.rglob("*"):
-            if p.is_file() and p.suffix.lower() in _IMAGE_EXTS:
+            if p.is_file() and not p.name.startswith("._") and p.suffix.lower() in _IMAGE_EXTS:
                 images.append(p)
     return images
 
@@ -181,11 +181,28 @@ def _default_out_path(project_root: Path, kind: str) -> Path:
 def main() -> int:
     """Train a YOLOv8 brand detector on the prepared YOLO dataset."""
     try:
-        from ultralytics import YOLO
+        from ultralytics import YOLO, settings
     except Exception as exc:
         raise RuntimeError(
             "ultralytics is not installed. Install dependencies from requirements.txt (ultralytics>=8.2.0)."
         ) from exc
+
+    try:
+        settings.update(
+            {
+                "clearml": False,
+                "comet": False,
+                "dvc": False,
+                "hub": False,
+                "mlflow": False,
+                "neptune": False,
+                "raytune": False,
+                "tensorboard": False,
+                "wandb": False,
+            }
+        )
+    except Exception as exc:
+        print(f"[brand_yolo] Could not disable Ultralytics callbacks: {exc}")
 
     project_root = Path(__file__).resolve().parents[2]
     kind = _normalize_kind(os.getenv("BRAND_KIND"))
@@ -196,7 +213,7 @@ def main() -> int:
             "Run scripts/prepare_brand_data.py --kind <logo|car|fashion> first."
         )
 
-    model_name = os.getenv("BRAND_YOLO_MODEL", "yolov8s.pt")
+    model_name = os.getenv("BRAND_YOLO_MODEL", "yolov8n.pt")
     epochs = int(os.getenv("BRAND_EPOCHS", "50"))
     imgsz = int(os.getenv("BRAND_IMGSZ", "640"))
     batch = int(os.getenv("BRAND_BATCH", "16"))
@@ -204,8 +221,10 @@ def main() -> int:
     device = _resolve_device(os.getenv("BRAND_DEVICE", "auto"))
     cache = _parse_cache(os.getenv("BRAND_CACHE", "false"))
     fraction = float(os.getenv("BRAND_FRACTION", "1.0"))
-    patience = int(os.getenv("BRAND_PATIENCE", "100"))
+    patience = int(os.getenv("BRAND_PATIENCE", str(max(epochs, 100))))
     val_enabled = _parse_bool(os.getenv("BRAND_VAL"), default=True)
+    single_cls = _parse_bool(os.getenv("BRAND_SINGLE_CLS"), default=False)
+    resume = _parse_bool(os.getenv("BRAND_RESUME"), default=False)
     seed = int(os.getenv("BRAND_SEED", "42"))
     train_max_images = int(os.getenv("BRAND_TRAIN_MAX_IMAGES", "0"))
     val_max_images = int(os.getenv("BRAND_VAL_MAX_IMAGES", "0"))
@@ -222,6 +241,11 @@ def main() -> int:
         val_max_images=val_max_images,
     )
 
+    run_name = os.getenv("BRAND_RUN_NAME", "full" if kind == "logo" else f"{kind}_full")
+    previous_last = project_root / "models" / "brand" / run_name / "weights" / "last.pt"
+    if resume and previous_last.exists():
+        model_name = str(previous_last)
+
     model = YOLO(model_name)
     train_kwargs: dict[str, Any] = {
         "data": str(data_yaml),
@@ -234,7 +258,14 @@ def main() -> int:
         "fraction": fraction,
         "patience": patience,
         "val": val_enabled,
+        "single_cls": single_cls,
+        "seed": seed,
+        "project": str(project_root / "models" / "brand"),
+        "name": run_name,
+        "exist_ok": True,
     }
+    if resume:
+        train_kwargs["resume"] = True
 
     print(
         "[brand_yolo] config:",
@@ -251,6 +282,8 @@ def main() -> int:
             "fraction": fraction,
             "patience": patience,
             "val": val_enabled,
+            "single_cls": single_cls,
+            "resume": resume,
             "seed": seed,
             "train_max_images": train_max_images,
             "val_max_images": val_max_images,

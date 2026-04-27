@@ -32,13 +32,17 @@ def main() -> None:
         print("[dsa-eval] Missing eval data. Expected eval/queries.jsonl and eval/qrels.jsonl")
         return
 
-    source_map = {}
+    source_map: dict[str, list[str]] = {}
     for path in scan_documents(settings.docs_dir):
         doc = load_document(path)
         if not doc:
             continue
-        source_map[str(path)] = doc.doc_id
-        source_map[path.name] = doc.doc_id
+        ids = [doc.doc_id]
+        for page in doc.pages:
+            # Index chunk IDs are deterministic per document/page/chunk order.
+            ids.append(f"{doc.doc_id}:{page.page_num}:0")
+        source_map[str(path)] = ids
+        source_map[path.name] = ids
 
     qrel_map = {}
     for row in qrels:
@@ -47,11 +51,11 @@ def main() -> None:
         rel_sources = row.get("relevant_sources") or []
         if rel_sources:
             for src in rel_sources:
-                doc_id = source_map.get(str(src)) or source_map.get(Path(str(src)).name)
-                if doc_id:
-                    rel.append(doc_id)
+                doc_ids = source_map.get(str(src)) or source_map.get(Path(str(src)).name)
+                if doc_ids:
+                    rel.extend(doc_ids)
         if qid:
-            qrel_map[qid] = rel
+            qrel_map[qid] = sorted({str(item) for item in rel})
 
     metrics = RetrievalMetrics(k_values=[1, 3, 5, 10])
     for row in queries:
@@ -60,11 +64,18 @@ def main() -> None:
         if not qid or not text:
             continue
         results = retrieve_context(text, top_k=10)
-        retrieved_ids = [r.get("doc_id") or r.get("chunk_id") for r in results]
+        retrieved_ids = []
+        for result in results:
+            doc_id = result.get("doc_id")
+            chunk_id = result.get("chunk_id")
+            if doc_id is not None:
+                retrieved_ids.append(str(doc_id))
+            if chunk_id is not None:
+                retrieved_ids.append(str(chunk_id))
         metrics.add_result(
             query_id=qid,
             query_text=text,
-            retrieved_ids=[str(x) for x in retrieved_ids if x is not None],
+            retrieved_ids=retrieved_ids,
             relevant_ids=[str(x) for x in qrel_map.get(qid, [])],
         )
 

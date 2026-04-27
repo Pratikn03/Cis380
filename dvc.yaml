@@ -1,8 +1,86 @@
 # DVC Pipeline Configuration
 # ==========================
-# Defines the ML pipeline stages for reproducibility
+# Production-oriented Phase 1 model gates and artifacts.
 
 stages:
+  data_audit:
+    cmd: python analyze_data.py --domain fraud --domain cyber --domain behavior --domain recommendation --domain nlp --domain vision --domain brand --domain voice --domain stt
+    deps:
+      - analyze_data.py
+    outs:
+      - data/raw/fraud/data_audit.md
+      - data/raw/fraud/data_audit.json
+      - data/raw/cyber/data_audit.md
+      - data/raw/cyber/data_audit.json
+      - data/raw/behavior/data_audit.md
+      - data/raw/behavior/data_audit.json
+      - data/raw/recommendation/data_audit.md
+      - data/raw/recommendation/data_audit.json
+      - data/raw/nlp/data_audit.md
+      - data/raw/nlp/data_audit.json
+      - data/raw/vision/data_audit.md
+      - data/raw/vision/data_audit.json
+      - data/raw/brand/data_audit.md
+      - data/raw/brand/data_audit.json
+      - data/raw/voice/data_audit.md
+      - data/raw/voice/data_audit.json
+      - data/raw/stt/data_audit.md
+      - data/raw/stt/data_audit.json
+
+  split_fraud:
+    cmd: python scripts/data/make_splits.py --task tabular --dataset fraud --domain fraud --path data/raw/fraud/creditcard.csv --label-col Class --train 0.7 --val 0.15 --test 0.15
+    deps:
+      - scripts/data/make_splits.py
+      - data/raw/fraud/creditcard.csv
+    outs:
+      - data/splits/fraud.json
+      - data/splits/fraud_exclusions.json
+
+  split_cyber:
+    cmd: python scripts/data/make_splits.py --task tabular --dataset cyber --domain cyber --path data/raw/cyber/UNSW_NB15_training-set.csv --label-col label --train 0.7 --val 0.15 --test 0.15
+    deps:
+      - scripts/data/make_splits.py
+      - data/raw/cyber/UNSW_NB15_training-set.csv
+    outs:
+      - data/splits/cyber.json
+      - data/splits/cyber_exclusions.json
+
+  split_behavior:
+    cmd: python scripts/data/make_splits.py --task tabular --dataset behavior --domain behavior --path data/raw/behavior/online_shoppers_intention.csv --label-col Revenue --train 0.7 --val 0.15 --test 0.15
+    deps:
+      - scripts/data/make_splits.py
+      - data/raw/behavior/online_shoppers_intention.csv
+    outs:
+      - data/splits/behavior.json
+      - data/splits/behavior_exclusions.json
+
+  split_recommender:
+    cmd: python scripts/data/make_splits.py --task tabular --dataset recommender --domain recommender --path "data/raw/recommendation/archive (5)/rating.csv" --label-col rating --train 0.7 --val 0.15 --test 0.15
+    deps:
+      - scripts/data/make_splits.py
+      - data/raw/recommendation/archive (5)/rating.csv
+    outs:
+      - data/splits/recommender.json
+      - data/splits/recommender_exclusions.json
+
+  split_vision:
+    cmd: python scripts/data/make_splits.py --task vision --dataset vision --domain vision_deepfake --path data/processed/vision --train 0.7 --val 0.15 --test 0.15
+    deps:
+      - scripts/data/make_splits.py
+      - data/processed/vision/
+    outs:
+      - data/splits/vision_deepfake.json
+      - data/splits/vision_deepfake_exclusions.json
+
+  split_brand:
+    cmd: python scripts/data/make_splits.py --task vision --dataset brand --domain brand --path data/processed/brand_yolo --train 0.7 --val 0.15 --test 0.15
+    deps:
+      - scripts/data/make_splits.py
+      - data/processed/brand_yolo/
+    outs:
+      - data/splits/brand.json
+      - data/splits/brand_exclusions.json
+
   train_fraud_model:
     cmd: PYTHONPATH=src python -m src.train.train_fraud
     deps:
@@ -18,7 +96,7 @@ stages:
           cache: false
 
   train_cyber_model:
-    cmd: Sentifargo_CYBER_SAMPLE_SIZE=200000 PYTHONPATH=src python -m src.train.train_cyber
+    cmd: PYTHONPATH=src python -m src.train.train_cyber
     deps:
       - src/train/train_cyber.py
       - src/scripts/run_cyber_experiment.py
@@ -32,7 +110,7 @@ stages:
           cache: false
 
   train_behavior_model:
-    cmd: Sentifargo_BEHAVIOR_SAMPLE_SIZE=100000 PYTHONPATH=src python -m src.train.train_behavior
+    cmd: PYTHONPATH=src python -m src.train.train_behavior
     deps:
       - src/train/train_behavior.py
       - src/scripts/run_behavior_experiment.py
@@ -45,40 +123,119 @@ stages:
       - experiments/behavior/metrics/metrics.json:
           cache: false
 
-  train_vision_model:
-    cmd: VISION_EPOCHS=1 VISION_MAX_BATCHES_PER_EPOCH=100 PYTHONPATH=src bash scripts/run_train_vision.sh
-    deps:
-      - scripts/run_train_vision.sh
-      - src/uais_v/training/train_vision.py
-      - src/uais_v/models/vision_resnet.py
-      - data/processed/vision/
-
   train_recommender:
     cmd: PYTHONPATH=src python -m src.train.train_recommender
     deps:
       - src/train/train_recommender.py
+      - data/raw/recommendation/
     metrics:
       - experiments/recommender/metrics/metrics.json:
+          cache: false
+
+  build_rag_index:
+    cmd: PYTHONPATH=src python scripts/build_rag_index.py --model BAAI/bge-small-en-v1.5
+    deps:
+      - scripts/build_rag_index.py
+      - app/rag/
+      - configs/rag.yaml
+      - data/raw/docs/
+    outs:
+      - data/processed/rag/
+
+  evaluate_rag:
+    cmd: PYTHONPATH=src python scripts/rag/evaluate_dsa.py
+    deps:
+      - scripts/rag/evaluate_dsa.py
+      - data/processed/rag/
+      - eval/queries.jsonl
+      - eval/qrels.jsonl
+    metrics:
+      - metrics/rag_eval.json:
+          cache: false
+
+  train_vision_model:
+    cmd: PYTHONPATH=src python -m src.train.train_vision_yolo_cls
+    deps:
+      - src/train/train_vision_yolo_cls.py
+      - data/processed/vision/
+    metrics:
+      - experiments/vision/metrics/metrics.json:
+          cache: false
+
+  train_brand_model:
+    cmd: PYTHONPATH=src python -m src.train.train_brand_logo_detector
+    deps:
+      - src/train/train_brand_logo_detector.py
+      - data/processed/brand_yolo/
+    outs:
+      - artifacts/brand/yolo_logo_det.pt
+
+  train_fusion_model:
+    cmd: PYTHONPATH=src python -m src.train.train_fusion
+    deps:
+      - src/train/train_fusion.py
+      - experiments/fraud/scores.csv
+      - experiments/cyber/scores.csv
+      - experiments/behavior/scores.csv
+    metrics:
+      - experiments/fusion/metrics/metrics.json:
           cache: false
 
   evaluate_all:
     cmd: PYTHONPATH=src python -m uais.evaluation.evaluate_all
     deps:
       - src/uais/evaluation/evaluate_all.py
+      - scripts/promote_model.py
+      - configs/promotion_gates.yaml
       - experiments/fraud/metrics/metrics.json
       - experiments/cyber/metrics/metrics.json
       - experiments/behavior/metrics/metrics.json
       - experiments/recommender/metrics/metrics.json
+      - experiments/fusion/metrics/metrics.json
+      - experiments/vision/metrics/metrics.json
+      - experiments/vision/video_temporal/metrics.json
+      - models/vision/face_emotion/metrics.json
+      - models/brand/full/results.csv
+      - metrics/rag_eval.json
     outs:
       - reports/evaluation_summary.json
-    plots:
-      - reports/model_comparison.json:
-          template: bar
-          x: model
-          y: accuracy
+      - reports/model_comparison.json
+
+  model_quality_gate:
+    cmd: python scripts/model_quality_gate.py --skip-sha
+    deps:
+      - scripts/model_quality_gate.py
+      - scripts/promote_model.py
+      - configs/promotion_gates.yaml
+      - artifacts/release/model-manifest.json
+    metrics:
+      - reports/MODEL_QUALITY_GATE.json:
+          cache: false
+
+  promote_release:
+    cmd: python scripts/promote_model.py --all
+    deps:
+      - scripts/promote_model.py
+      - configs/promotion_gates.yaml
+      - experiments/fraud/metrics/metrics.json
+      - experiments/cyber/metrics/metrics.json
+      - experiments/behavior/metrics/metrics.json
+      - experiments/recommender/metrics/metrics.json
+      - experiments/fusion/metrics/metrics.json
+      - experiments/vision/metrics/metrics.json
+      - experiments/vision/video_temporal/metrics.json
+      - models/vision/face_emotion/metrics.json
+      - models/brand/full/results.csv
+      - metrics/rag_eval.json
+    outs:
+      - artifacts/release/model-manifest.json
+    metrics:
+      - reports/PROMOTION_GATE.json:
+          cache: false
 
 params:
   - configs/base_config.yaml
   - configs/fraud_config.yaml
   - configs/cyber_config.yaml
   - configs/behavior_config.yaml
+  - configs/promotion_gates.yaml

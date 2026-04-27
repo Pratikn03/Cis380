@@ -12,6 +12,10 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data/raw/vision/face_emotion"
 MODEL_DIR = ROOT / "models/vision/face_emotion"
+FACE_EMOTION_EPOCHS = os.getenv("FACE_EMOTION_EPOCHS", "50")
+FACE_EMOTION_BATCH_SIZE = os.getenv("FACE_EMOTION_BATCH_SIZE", "64")
+FACE_EMOTION_IMAGE_SIZE = os.getenv("FACE_EMOTION_IMAGE_SIZE", "96")
+FACE_EMOTION_ARCH = os.getenv("FACE_EMOTION_ARCH", "small_cnn")
 
 
 def create_dummy_data():
@@ -52,13 +56,13 @@ def run_training():
         "--out-dir",
         str(MODEL_DIR),
         "--epochs",
-        "2",
+        FACE_EMOTION_EPOCHS,
         "--batch-size",
-        "8",
+        FACE_EMOTION_BATCH_SIZE,
         "--image-size",
-        "48",
+        FACE_EMOTION_IMAGE_SIZE,
         "--arch",
-        "small_cnn",
+        FACE_EMOTION_ARCH,
     ]
 
     try:

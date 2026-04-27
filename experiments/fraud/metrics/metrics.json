@@ -1,27 +1,29 @@
 {
   "val": {
-    "roc_auc": 0.8927662512871071,
-    "pr_auc": 0.536755213929474,
-    "f1": 0.6880733944954128,
-    "precision": 0.625,
-    "recall": 0.7653061224489796,
-    "accuracy": 0.9988062007338354
+    "roc_auc": 0.9806170362206048,
+    "pr_auc": 0.696542980010028,
+    "f1": 0.22764227642276422,
+    "precision": 0.13125,
+    "recall": 0.8571428571428571,
+    "accuracy": 0.9899931532100911
   },
   "test": {
-    "roc_auc": 0.7682327735437844,
-    "pr_auc": 0.5729331009701085,
-    "f1": 0.5506072874493927,
-    "precision": 0.4594594594594595,
-    "recall": 0.6868686868686869,
-    "accuracy": 0.9980513324672589
+    "roc_auc": 0.9776104608684668,
+    "pr_auc": 0.7762737355986425,
+    "f1": 0.8253968253968254,
+    "precision": 0.8666666666666667,
+    "recall": 0.7878787878787878,
+    "accuracy": 0.999420666409185,
+    "threshold": 0.9776941311160501
   },
   "hybrid": {
-    "roc_auc": 0.9611787111215562,
-    "pr_auc": 0.6011491590393437,
-    "f1": 0.5333333333333333,
-    "precision": 0.4358974358974359,
-    "recall": 0.6868686868686869,
-    "accuracy": 0.9979108879603946
+    "roc_auc": 0.9736311108908404,
+    "pr_auc": 0.7308515730995401,
+    "f1": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "accuracy": 0.9982619992275552,
+    "threshold": 0.9776941311160501
   },
   "tuning": {
     "enabled": true,
@@ -31,23 +33,25 @@
         "params": {
           "model_type": "hist_gb",
           "random_state": 42,
-          "max_depth": 3,
-          "learning_rate": 0.05,
-          "max_iter": 200,
-          "n_estimators": 300
+          "max_depth": 4,
+          "learning_rate": 0.08,
+          "max_iter": 300,
+          "n_estimators": 300,
+          "class_weight_balanced": true
         },
-        "roc_auc": 0.8494541301739557
+        "roc_auc": 0.9645560561420987
       },
       {
         "params": {
           "model_type": "hist_gb",
           "random_state": 43,
-          "max_depth": 4,
-          "learning_rate": 0.1,
-          "max_iter": 200,
-          "n_estimators": 300
+          "max_depth": 3,
+          "learning_rate": 0.05,
+          "max_iter": 500,
+          "n_estimators": 300,
+          "class_weight_balanced": true
         },
-        "roc_auc": 0.3765279743256885
+        "roc_auc": 0.9806170362206048
       },
       {
         "params": {
@@ -56,19 +60,21 @@
           "max_depth": 6,
           "learning_rate": 0.08,
           "max_iter": 200,
-          "n_estimators": 300
+          "n_estimators": 300,
+          "class_weight_balanced": true
         },
-        "roc_auc": 0.8927662512871071
+        "roc_auc": 0.9508500021713484
       }
     ],
-    "best_value": 0.8927662512871071,
+    "best_value": 0.9806170362206048,
     "best_params": {
       "model_type": "hist_gb",
-      "random_state": 44,
-      "max_depth": 6,
-      "learning_rate": 0.08,
-      "max_iter": 200,
-      "n_estimators": 300
+      "random_state": 43,
+      "max_depth": 3,
+      "learning_rate": 0.05,
+      "max_iter": 500,
+      "n_estimators": 300,
+      "class_weight_balanced": true
     }
   }
 }

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 import json
+import os
 import random
 import shutil
 import sys
@@ -28,7 +29,7 @@ IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 
 def _iter_images(root: Path) -> Iterator[Path]:
     for p in root.rglob("*"):
-        if p.is_file() and p.suffix.lower() in IMAGE_EXTS:
+        if p.is_file() and not p.name.startswith("._") and p.suffix.lower() in IMAGE_EXTS:
             yield p
 
 
@@ -73,13 +74,15 @@ def _safe_rel_stem(p: Path) -> str:
     return "__".join(p.with_suffix("").parts[-3:])
 
 
-def _copy_image(src: Path, dst: Path) -> None:
+def _copy_image(src: Path, dst: Path) -> bool:
     dst.parent.mkdir(parents=True, exist_ok=True)
     try:
-        shutil.copy2(src, dst)
+        # Copy image bytes only. copy2/copyxattr can create macOS AppleDouble
+        # sidecars on external volumes, which doubles the apparent YOLO dataset.
+        shutil.copyfile(src, dst)
+        return True
     except Exception:
-        # ignore copy failures
-        pass
+        return False
 
 
 def _image_size(img_path: Path) -> tuple[int, int] | None:
@@ -90,6 +93,32 @@ def _image_size(img_path: Path) -> tuple[int, int] | None:
             return int(im.size[0]), int(im.size[1])
     except Exception:
         return None
+
+
+def _parse_bool(value: str | None, *, default: bool) -> bool:
+    v = (value or "").strip().lower()
+    if not v:
+        return default
+    if v in {"1", "true", "yes", "on"}:
+        return True
+    if v in {"0", "false", "no", "off"}:
+        return False
+    raise ValueError("Expected a boolean value (true/false/1/0).")
+
+
+def _remove_appledouble_files(root: Path) -> int:
+    removed = 0
+    if not root.exists():
+        return removed
+    for p in root.rglob("._*"):
+        if not p.is_file():
+            continue
+        try:
+            p.unlink()
+            removed += 1
+        except OSError:
+            pass
+    return removed
 
 
 def main() -> int:
@@ -107,6 +136,12 @@ def main() -> int:
     ap.add_argument("--out_root", type=str, default=None)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--val_ratio", type=float, default=0.1)
+    ap.add_argument(
+        "--single-class",
+        action=argparse.BooleanOptionalAction,
+        default=_parse_bool(os.getenv("BRAND_SINGLE_CLASS"), default=True),
+        help="Collapse all annotations to one logo class for production logo detection.",
+    )
     args = ap.parse_args()
 
     kind = (args.kind or "").strip().lower()
@@ -131,6 +166,10 @@ def main() -> int:
     out_images_val = out_root / "images" / "val"
     out_labels_train = out_root / "labels" / "train"
     out_labels_val = out_root / "labels" / "val"
+
+    for generated_dir in [out_images_train, out_images_val, out_labels_train, out_labels_val]:
+        if generated_dir.exists():
+            shutil.rmtree(generated_dir)
 
     out_images_train.mkdir(parents=True, exist_ok=True)
     out_images_val.mkdir(parents=True, exist_ok=True)
@@ -275,8 +314,12 @@ def main() -> int:
     for _, boxes in samples:
         for b in boxes:
             class_set.add(str(b.cls_name))
-    class_list = sorted(class_set)
-    class_to_id = {c: i for i, c in enumerate(class_list)}
+    if args.single_class:
+        class_list = ["logo"]
+        class_to_id = {c: 0 for c in class_set}
+    else:
+        class_list = sorted(class_set)
+        class_to_id = {c: i for i, c in enumerate(class_list)}
 
     # deterministic split
     indices = list(range(len(samples)))
@@ -313,7 +356,9 @@ def main() -> int:
             continue
         w, h = size
 
-        _copy_image(img_path, out_img)
+        if not _copy_image(img_path, out_img):
+            print(f"[warn] skip image after copy failure: {img_path}")
+            continue
         write_yolo_label(out_lbl, boxes_xyxy=boxes, class_to_id=class_to_id, img_w=w, img_h=h)
 
         if split == "val":
@@ -327,6 +372,16 @@ def main() -> int:
             for b in boxes:
                 brand_counts_train[str(b.cls_name)] += 1
 
+        if (total_imgs_train + total_imgs_val) % 1000 == 0:
+            print(
+                "[prepare_brand_data] copied "
+                f"{total_imgs_train + total_imgs_val}/{len(samples)} images "
+                f"(train={total_imgs_train}, val={total_imgs_val})",
+                flush=True,
+            )
+
+    removed_sidecars = _remove_appledouble_files(out_root)
+
     yaml_path = out_root / "brands.yaml"
     write_brands_yaml(
         yaml_path,
@@ -337,6 +392,7 @@ def main() -> int:
 
     print("\n[prepare_brand_data] Done")
     print(f"format: {fmt}")
+    print(f"single_class: {bool(args.single_class)}")
     print(f"classes: {len(class_list)}")
     print(f"train_images: {total_imgs_train}  train_boxes: {total_boxes_train}")
     print(f"val_images:   {total_imgs_val}  val_boxes:   {total_boxes_val}")
@@ -351,6 +407,8 @@ def main() -> int:
 
     print(f"\nYOLO dataset written to: {out_root}")
     print(f"Config: {yaml_path}")
+    if removed_sidecars:
+        print(f"Removed AppleDouble sidecars: {removed_sidecars}")
     return 0
 
 

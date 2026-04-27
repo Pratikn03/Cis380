@@ -140,5 +140,6 @@ def scan_documents(root: Path) -> List[Path]:
         path
         for path in root.rglob("*")
         if path.is_file()
+        and not path.name.startswith("._")
         and (path.suffix.lower() in SUPPORTED_EXTS or path.suffix.lower() in IMAGE_EXTS)
     ]

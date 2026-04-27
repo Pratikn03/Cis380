@@ -18,7 +18,7 @@ def vision_pipeline(dataset_dir: str | None = None):
         if dataset_dir
         else project_root / "data" / "raw" / "vision" / "document_forgery"
     )
-    cfg = VisionConfig(dataset_dir=data_dir, epochs=1, batch_size=16, image_size=128)
+    cfg = VisionConfig(dataset_dir=data_dir, epochs=50, batch_size=16, image_size=128)
     try:
         logger.info("Starting vision pipeline on %s", data_dir)
         metrics = run_vision_experiment(cfg)

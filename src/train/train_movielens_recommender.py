@@ -1,7 +1,7 @@
 """Train a simple MovieLens-style recommender classifier (implicit: rating>=4).
 
-Note: `movielens.csv` can be very large (20M+ rows). By default this script trains
-on a sample for safety; pass `--sample-size 0` to use the full file.
+By default this script uses the full local MovieLens file. Pass a positive
+``--sample-size`` only for an explicit smoke/debug run.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ META_PATH = Path("models/recommender/movielens_meta.joblib")
 METRICS_PATH = Path("experiments/recommender/metrics/movielens_metrics.json")
 
 
-def load_data(*, sample_size: int = 200_000) -> pd.DataFrame:
+def load_data(*, sample_size: int = 0) -> pd.DataFrame:
     if not DATA_PATH.exists():
         raise FileNotFoundError(
             f"{DATA_PATH} not found. Place a CSV with columns userId,movieId,rating under data/raw/recommendation/."
@@ -91,7 +91,7 @@ def build_features(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, dict]:
     return X, y, meta
 
 
-def train(*, sample_size: int = 200_000):
+def train(*, sample_size: int = 0):
     df = load_data(sample_size=sample_size)
     X, y, meta = build_features(df)
 
@@ -125,8 +125,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--sample-size",
         type=int,
-        default=200_000,
-        help="Row count to load for faster training; 0 uses the full dataset.",
+        default=0,
+        help="Row count to load for faster debug runs; 0 uses the full dataset.",
     )
     args = parser.parse_args()
     train(sample_size=args.sample_size)

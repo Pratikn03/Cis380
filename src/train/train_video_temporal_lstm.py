@@ -42,9 +42,9 @@ def main() -> int:
     parser.add_argument("--clip-len", type=int, default=16)
     parser.add_argument("--size", type=int, default=224)
     parser.add_argument("--batch-size", type=int, default=2)
-    parser.add_argument("--epochs", type=int, default=1)
+    parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--max-per-class", type=int, default=200)
+    parser.add_argument("--max-per-class", type=int, default=0)
     parser.add_argument("--val-ratio", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(

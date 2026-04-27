@@ -5,6 +5,6 @@ data:
   label_column: label       # adjust if you have labels
 training:
   model_name: distilbert-base-uncased
-  max_samples: 10000
+  max_samples: 0            # 0 = use full dataset
   test_size: 0.2
   max_features: 5000        # for TF-IDF baseline

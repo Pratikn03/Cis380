@@ -588,7 +588,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Train full vision models (deepfake + real/fake).")
     parser.add_argument("--device", default="auto", help="auto|cpu|cuda|mps")
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
-    parser.add_argument("--epochs", type=int, default=3, help="Epochs per model.")
+    parser.add_argument("--epochs", type=int, default=50, help="Epochs per model.")
     parser.add_argument("--batch-size", type=int, default=64, help="Batch size.")
     parser.add_argument("--num-workers", type=int, default=0, help="DataLoader workers.")
     parser.add_argument(

@@ -85,7 +85,7 @@ def train_sequence_model(
 ) -> Tuple[nn.Module, float]:
     """Train a transformer or TCN classifier on sequence data."""
     batch_size = config.get("sequence", {}).get("batch_size", 64)
-    epochs = config.get("sequence", {}).get("epochs", 5)
+    epochs = config.get("sequence", {}).get("epochs", 50)
     lr = config.get("sequence", {}).get("lr", 1e-3)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

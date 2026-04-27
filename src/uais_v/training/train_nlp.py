@@ -47,7 +47,7 @@ def train_distilbert(
     labels: List[int],
     cfg: NLPTextConfig,
     batch_size: int = 8,
-    epochs: int = 1,
+    epochs: int = 50,
     lr: float = 5e-5,
     save_dir: Path | None = None,
 ) -> tuple[DistilBERTClassifier, dict, Path | None]:

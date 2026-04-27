@@ -19,7 +19,7 @@ class VisionConfig:
     dataset_dir: Path
     image_size: int = 224
     batch_size: int = 32
-    epochs: int = 3
+    epochs: int = 50
     validation_split: float = 0.2
     seed: int = 42
     backbone: str = "simple_cnn"  # supported: simple_cnn, resnet50/resnet18

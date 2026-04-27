@@ -69,6 +69,12 @@ class VectorStore:
     def search(self, query_vec: np.ndarray, top_k: int = 5) -> List[Dict[str, object]]:
         if not self.embeddings.size:
             return []
+        if query_vec.shape[-1] != self.embeddings.shape[1]:
+            raise ValueError(
+                "RAG embedding dimension mismatch: "
+                f"query={query_vec.shape[-1]} index={self.embeddings.shape[1]}. "
+                "Rebuild the RAG index with the configured embedding model."
+            )
         if self._index is not None:
             normalized = self._normalize(query_vec.reshape(1, -1))
             scores, idxs = self._index.search(normalized, min(top_k, len(self.metadata)))

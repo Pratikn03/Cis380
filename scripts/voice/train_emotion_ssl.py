@@ -103,14 +103,14 @@ def parse_args() -> argparse.Namespace:
         default="transformers",
         choices=["transformers", "torchaudio"],
     )
-    ap.add_argument("--model", type=str, default="microsoft/wavlm-base-plus")
+    ap.add_argument("--model", type=str, default="facebook/wav2vec2-base")
     ap.add_argument("--bundle", type=str, default="WAVLM_BASE_PLUS")
     ap.add_argument("--torch-checkpoint-dir", type=Path, default=Path("models/torchaudio_backbones"))
     ap.add_argument("--require-local-backbone", dest="require_local_backbone", action="store_true", default=True)
     ap.add_argument("--no-require-local-backbone", dest="require_local_backbone", action="store_false")
     ap.add_argument("--device", type=str, default="auto")
     ap.add_argument("--output-dir", type=Path, default=Path("models/voice_emotion_ssl"))
-    ap.add_argument("--epochs", type=int, default=10)
+    ap.add_argument("--epochs", type=int, default=50)
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--grad-accum", type=int, default=1)
     ap.add_argument("--learning-rate", type=float, default=1e-4)

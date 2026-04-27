@@ -1,0 +1,244 @@
+schema_version: 1
+release_name: sentifargo-phase1-production
+required_domains:
+  - fraud
+  - cyber
+  - behavior
+  - vision_deepfake
+  - vision_face_emotion
+  - vision_temporal
+  - brand
+  - voice
+  - recommender
+  - fusion
+  - rag
+optional_domains:
+  - stt
+default_relative_improvement_pct: 2.0
+default_max_regression_pct: 2.0
+
+domains:
+  fraud:
+    model_name: fraud-supervised
+    version: "1.0.0"
+    artifact: models/fraud/supervised/fraud_model.pkl
+    metrics: experiments/fraud/metrics/metrics.json
+    dataset: data/raw/fraud
+    dataset_version_source: data/raw/fraud
+    framework: sklearn
+    baselines:
+      test.roc_auc: 0.8053667711353728
+      test.f1: 0.6903553299492385
+    gates:
+      - metric: test.roc_auc
+        op: ">="
+        baseline: test.roc_auc
+        relative_min_delta_pct: 2.0
+      - metric: test.f1
+        op: ">="
+        value: 0.65
+  cyber:
+    model_name: cyber-supervised
+    version: "1.0.0"
+    artifact: models/cyber/supervised/cyber_model.pkl
+    metrics: experiments/cyber/metrics/metrics.json
+    dataset: data/raw/cyber
+    dataset_version_source: data/raw/cyber
+    framework: sklearn
+    baselines:
+      test.f1: 0.9629752614975926
+      test.roc_auc: 0.9936136166496263
+    gates:
+      - metric: test.f1
+        op: ">="
+        value: 0.94
+      - metric: test.roc_auc
+        op: ">="
+        value: 0.98
+  behavior:
+    model_name: behavior-anomaly
+    version: "1.0.0"
+    artifact: models/behavior/behavior_lof.pkl
+    metrics: experiments/behavior/metrics/metrics.json
+    dataset: data/raw/behavior
+    dataset_version_source: data/raw/behavior
+    framework: sklearn
+    lower_is_better:
+      - autoencoder_fpr
+      - lof_fpr
+    baselines:
+      autoencoder_roc_auc: 0.6763049335606013
+      autoencoder_f1: 0.3745173745173745
+      autoencoder_fpr: 0.03384431614572964
+    gates:
+      - metric: autoencoder_roc_auc
+        op: ">="
+        baseline: autoencoder_roc_auc
+        relative_min_delta_pct: 2.0
+      - metric: autoencoder_f1
+        op: ">="
+        baseline: autoencoder_f1
+        relative_min_delta_pct: 2.0
+      - metric: autoencoder_fpr
+        op: "<="
+        baseline: autoencoder_fpr
+        relative_min_delta_pct: 2.0
+  vision_deepfake:
+    model_name: vision-yolo-real-fake
+    version: "1.0.0"
+    artifact: models/vision/yolo_cls/best.pt
+    metrics: experiments/vision/metrics/metrics.json
+    dataset: data/processed/vision
+    dataset_version_source: data/processed/vision
+    framework: ultralytics
+    baselines:
+      roc_auc: 0.91
+      f1: 0.78
+      accuracy: 0.89
+    gates:
+      - metric: roc_auc
+        op: ">="
+        value: 0.85
+      - metric: f1
+        op: ">="
+        value: 0.80
+      - metric: accuracy
+        op: ">="
+        value: 0.85
+  vision_face_emotion:
+    model_name: vision-face-emotion
+    version: "1.0.0"
+    artifact: models/vision/face_emotion/model.pt
+    metrics: models/vision/face_emotion/metrics.json
+    dataset: data/raw/vision/face_emotion_clean
+    dataset_version_source: data/raw/vision/face_emotion_clean
+    framework: torch
+    baselines:
+      best_val_acc: 0.014285714285714285
+    gates:
+      - metric: best_val_acc
+        op: ">="
+        baseline: best_val_acc
+        relative_min_delta_pct: 2.0
+  vision_temporal:
+    model_name: vision-temporal
+    version: "1.0.0"
+    artifact: models/vision/video_temporal_model.pkl
+    metrics: experiments/vision/video_temporal/metrics.json
+    dataset: data/raw/vision/video
+    dataset_version_source: data/raw/vision/video
+    framework: sklearn
+    baselines:
+      accuracy: 0.64
+      f1: 0.625
+      roc_auc: 0.6612
+    gates:
+      - metric: accuracy
+        op: ">="
+        value: 0.75
+  brand:
+    model_name: brand-yolo-logo
+    version: "1.0.0"
+    artifact: artifacts/brand/yolo_logo_det.pt
+    metrics: models/brand/full/results.csv
+    dataset: data/processed/brand_yolo
+    dataset_version_source: data/processed/brand_yolo
+    framework: ultralytics
+    baselines:
+      metrics_map50_b: 0.0
+    gates:
+      - metric: metrics_map50_b
+        op: ">="
+        value: 0.85
+  voice:
+    model_name: voice-emotion
+    version: "1.0.0"
+    artifact: models/voice_emotion_ssl
+    metrics: reports/voice_emotion_eval.json
+    dataset: data/raw/voice
+    dataset_version_source: data/raw/voice
+    framework: transformers
+    baselines: {}
+    gates:
+      - metric: macro_f1
+        op: ">="
+        value: 0.60
+      - metric: uar
+        op: ">="
+        value: 0.60
+  recommender:
+    model_name: recommender-two-tower
+    version: "1.0.0"
+    artifact: models/recommender/recommender_model.pkl
+    metrics: experiments/recommender/metrics/metrics.json
+    dataset: data/raw/recommendation
+    dataset_version_source: data/raw/recommendation
+    framework: sentence-transformers
+    baselines:
+      recall_at_10: 0.0
+      ndcg_at_10: 0.0
+    gates:
+      - metric: recall_at_10
+        op: ">="
+        value: 0.10
+      - metric: ndcg_at_10
+        op: ">="
+        value: 0.05
+  fusion:
+    model_name: fusion-meta-model
+    version: "1.0.0"
+    artifact: models/fusion/fusion_meta_model.pkl
+    metrics: experiments/fusion/metrics/metrics.json
+    dataset: experiments
+    dataset_version_source: experiments/fusion
+    framework: sklearn
+    baselines:
+      roc_auc: 0.9493101379724056
+      f1: 0.7096774193548387
+    gates:
+      - metric: roc_auc
+        op: ">="
+        value: 0.90
+      - metric: f1
+        op: ">="
+        value: 0.70
+  rag:
+    model_name: rag-bge-small-index
+    version: "1.0.0"
+    artifact: data/processed/rag
+    metrics: metrics/rag_eval.json
+    dataset: data/raw/docs
+    dataset_version_source: data/raw/docs
+    framework: sentence-transformers
+    baselines:
+      mrr: 0.0
+      recall_at_k.10: 0.0
+    gates:
+      - metric: mrr
+        op: ">="
+        value: 0.70
+      - metric: recall_at_k.10
+        op: ">="
+        value: 0.70
+  stt:
+    model_name: stt-faster-whisper-small-int8
+    version: "1.0.0"
+    artifact: models/faster-whisper-small-int8
+    metrics: reports/stt_eval.json
+    dataset: data/raw/stt
+    dataset_version_source: data/raw/stt
+    framework: faster-whisper
+    lower_is_better:
+      - avg_wer
+      - avg_cer
+      - avg_latency_sec
+    baselines:
+      avg_wer: 0.37825814536340846
+      avg_cer: 0.2423141186299081
+    gates:
+      - metric: avg_wer
+        op: "<="
+        value: 0.30
+      - metric: errors
+        op: "<="
+        value: 0

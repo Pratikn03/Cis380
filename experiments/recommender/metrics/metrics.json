@@ -1,6 +1,6 @@
 {
-  "recall_at_10": 0.004,
-  "ndcg_at_10": 0.0018572106393741415,
+  "recall_at_10": 0.1622,
+  "ndcg_at_10": 0.08938076860105701,
   "eval_users": 5000,
   "train_interactions": 9857356,
   "test_interactions": 138054,

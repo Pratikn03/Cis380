@@ -20,7 +20,7 @@ vision_cfg = VisionConfig(
 )
 train_cfg = VisionTrainConfig(
     batch_size=int(os.getenv("VISION_BATCH_SIZE", "16")),
-    epochs=int(os.getenv("VISION_EPOCHS", "3")),
+    epochs=int(os.getenv("VISION_EPOCHS", "50")),
     num_workers=int(os.getenv("VISION_NUM_WORKERS", "0")),
     lr=float(os.getenv("VISION_LR", "0.001")),
     max_batches_per_epoch=int(os.getenv("VISION_MAX_BATCHES_PER_EPOCH", "0")) or None,

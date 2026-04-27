@@ -57,7 +57,7 @@ def main() -> int:
         "--seed", type=int, default=42, help="Random seed (forwarded to full training)."
     )
     parser.add_argument(
-        "--epochs", type=int, default=3, help="Epochs per model (forwarded to full training)."
+        "--epochs", type=int, default=50, help="Epochs per model (forwarded to full training)."
     )
     parser.add_argument(
         "--batch-size", type=int, default=64, help="Batch size (forwarded to full training)."
@@ -128,11 +128,28 @@ def main() -> int:
         )
 
     if not args.skip_brand:
-        _run([sys.executable, "scripts/prepare_brand_data.py"])
+        os.environ.setdefault("BRAND_SINGLE_CLASS", "true")
+        os.environ.setdefault("BRAND_SINGLE_CLS", "false")
+        os.environ.setdefault("BRAND_EPOCHS", "50")
+        os.environ.setdefault("BRAND_FRACTION", "1.0")
+        os.environ.setdefault("BRAND_BATCH", "16")
+        os.environ.setdefault("BRAND_VAL", "true")
+        os.environ.setdefault("BRAND_TRAIN_MAX_IMAGES", "0")
+        os.environ.setdefault("BRAND_VAL_MAX_IMAGES", "0")
+        _run([sys.executable, "scripts/prepare_brand_data.py", "--single-class"])
         _run([sys.executable, "-m", "src.train.train_brand_logo_detector"])
 
     if not args.skip_temporal:
-        _run([sys.executable, "src/train/train_video_temporal.py"])
+        _run(
+            [
+                sys.executable,
+                "src/train/train_video_temporal.py",
+                "--max-per-class",
+                "0",
+                "--max-frames",
+                "0",
+            ]
+        )
 
     print("\n✅ Vision training complete.")
     print("   - Deepfake/RealFake weights: models/vision/*.pt")

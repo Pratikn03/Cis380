@@ -17,7 +17,7 @@ from uais.data.load_cyber_data import load_cyber_data
 from uais.features.cyber_features import build_cyber_feature_table
 from uais.supervised.train_cyber_supervised import CyberModelConfig, train_cyber_model
 from uais.utils.logging_utils import setup_logging
-from uais.utils.metrics import compute_classification_metrics
+from uais.utils.metrics import best_f1_threshold, compute_classification_metrics
 from uais.utils.paths import domain_paths, ensure_directories
 
 logger = setup_logging(__name__)
@@ -69,11 +69,21 @@ def main():
     logger.info("Validation metrics: %s", val_metrics)
 
     if hasattr(model, "predict_proba"):
+        val_proba = model.predict_proba(X_val)[:, 1]
+    else:
+        val_scores = model.decision_function(X_val)
+        val_proba = 1.0 / (1.0 + np.exp(-val_scores))
+    decision_threshold = best_f1_threshold(y_val.values, val_proba)
+
+    if hasattr(model, "predict_proba"):
         test_proba = model.predict_proba(X_test)[:, 1]
     else:
         scores = model.decision_function(X_test)
         test_proba = 1.0 / (1.0 + np.exp(-scores))
-    test_metrics = compute_classification_metrics(y_test.values, test_proba, threshold=0.5)
+    test_metrics = compute_classification_metrics(
+        y_test.values, test_proba, threshold=decision_threshold
+    )
+    test_metrics["threshold"] = float(decision_threshold)
     logger.info("Test metrics: %s", test_metrics)
 
     contam = train_cfg.get("anomaly_contamination", 0.07)

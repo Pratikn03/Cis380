@@ -1,113 +1,77 @@
 from __future__ import annotations
 
 import json
-import math
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from scripts.promote_model import DEFAULT_GATES, evaluate_domain, load_gates
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REPORTS_DIR = REPO_ROOT / "reports"
 
-METRIC_SOURCES = {
-    "fraud": REPO_ROOT / "experiments" / "fraud" / "metrics" / "metrics.json",
-    "cyber": REPO_ROOT / "experiments" / "cyber" / "metrics" / "metrics.json",
-    "behavior": REPO_ROOT / "experiments" / "behavior" / "metrics" / "metrics.json",
-    "recommender": REPO_ROOT / "experiments" / "recommender" / "metrics" / "metrics.json",
-}
 
-
-def _load_json(path: Path) -> dict[str, Any] | None:
-    if not path.exists():
-        return None
-    try:
-        with path.open("r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return None
-
-
-def _safe_float(value: Any) -> float | None:
-    if value is None:
-        return None
-    try:
-        out = float(value)
-    except Exception:
-        return None
-    if math.isnan(out) or math.isinf(out):
-        return None
-    return out
-
-
-def _pick_metric(data: dict[str, Any] | None, key: str) -> float | None:
-    if not data:
-        return None
-    val = data.get(key)
-    return _safe_float(val)
-
-
-def _extract_summary(name: str, data: dict[str, Any] | None) -> dict[str, Any] | None:
-    if not data:
-        return None
-
-    if name in ("fraud", "cyber"):
-        test = data.get("test", {})
-        return {
-            "name": name,
-            "accuracy": _pick_metric(test, "accuracy"),
-            "f1": _pick_metric(test, "f1"),
-            "roc_auc": _pick_metric(test, "roc_auc"),
+def _compact_thresholds(result: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "metric": item.get("metric"),
+            "actual": item.get("actual"),
+            "expected": item.get("expected"),
+            "operator": item.get("operator"),
+            "passed": item.get("passed"),
+            "baseline": item.get("baseline"),
         }
+        for item in result.get("thresholds", [])
+    ]
 
-    if name == "behavior":
-        ae_acc = _pick_metric(data, "autoencoder_accuracy")
-        lof_acc = _pick_metric(data, "lof_accuracy")
-        acc = max([v for v in (ae_acc, lof_acc) if v is not None], default=None)
-        return {
-            "name": name,
-            "accuracy": acc,
-            "autoencoder_accuracy": ae_acc,
-            "lof_accuracy": lof_acc,
-        }
 
-    if name == "recommender":
-        return {
-            "name": name,
-            "accuracy": _pick_metric(data, "accuracy"),
-        }
-
-    return None
+def _summary_row(result: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "name": result["domain"],
+        "status": "green" if result["status"] == "pass" else "red",
+        "artifact": result.get("artifact"),
+        "metricsFile": result.get("metricsFile"),
+        "metrics": result.get("selectedMetrics", {}),
+        "thresholds": _compact_thresholds(result),
+        "failures": result.get("failures", []),
+    }
 
 
 def main() -> None:
-    summaries: list[dict[str, Any]] = []
-    comparisons: list[dict[str, Any]] = []
+    gates = load_gates(DEFAULT_GATES)
+    required = list(gates.get("required_domains") or gates["domains"].keys())
+    results = [
+        evaluate_domain(domain, gates["domains"][domain], gates)
+        for domain in required
+        if domain in gates["domains"]
+    ]
+    summaries = [_summary_row(result) for result in results]
+    comparisons = []
+    for result in summaries:
+        for metric, value in result.get("metrics", {}).items():
+            if isinstance(value, (int, float)):
+                comparisons.append(
+                    {"model": result["name"], "metric": metric, "value": float(value)}
+                )
 
-    for name, path in METRIC_SOURCES.items():
-        payload = _load_json(path)
-        summary = _extract_summary(name, payload)
-        if summary is None:
-            continue
-        summaries.append(summary)
-        if summary.get("accuracy") is not None:
-            comparisons.append({"model": name, "accuracy": summary["accuracy"]})
-
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    summary_out = REPORTS_DIR / "evaluation_summary.json"
-    comparison_out = REPORTS_DIR / "model_comparison.json"
-
-    summary_payload = {
-        "generated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+    status = "green" if all(result["status"] == "green" for result in summaries) else "red"
+    payload = {
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "status": status,
         "models": summaries,
     }
-    with summary_out.open("w", encoding="utf-8") as f:
-        json.dump(summary_payload, f, indent=2)
 
-    with comparison_out.open("w", encoding="utf-8") as f:
-        json.dump(comparisons, f, indent=2)
-
-    print(f"Wrote {summary_out}")
-    print(f"Wrote {comparison_out}")
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    (REPORTS_DIR / "evaluation_summary.json").write_text(
+        json.dumps(payload, indent=2), encoding="utf-8"
+    )
+    (REPORTS_DIR / "model_comparison.json").write_text(
+        json.dumps(comparisons, indent=2), encoding="utf-8"
+    )
+    print(f"Wrote {REPORTS_DIR / 'evaluation_summary.json'}")
+    print(f"Wrote {REPORTS_DIR / 'model_comparison.json'}")
+    if status != "green":
+        raise SystemExit("Evaluation failed: one or more production domains are red.")
 
 
 if __name__ == "__main__":

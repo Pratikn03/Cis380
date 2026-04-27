@@ -18,7 +18,7 @@ from keras import ops, random
 class VAEConfig:
     dataset_path: Path
     latent_dim: int = 16
-    epochs: int = 20
+    epochs: int = 50
     batch_size: int = 128
     test_size: float = 0.2
     random_state: int = 42

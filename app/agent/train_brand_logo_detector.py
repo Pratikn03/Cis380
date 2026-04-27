@@ -29,7 +29,7 @@ def main():
 
     # 2. Config
     model_name = os.getenv("BRAND_YOLO_MODEL", "yolov8n.pt")
-    epochs = int(os.getenv("BRAND_EPOCHS", "5"))
+    epochs = int(os.getenv("BRAND_EPOCHS", "50"))
     imgsz = int(os.getenv("BRAND_IMGSZ", "640"))
     batch = int(os.getenv("BRAND_BATCH", "16"))
 

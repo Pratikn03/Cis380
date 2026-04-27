@@ -36,7 +36,7 @@ from uais_v.evaluation.metrics import classification_metrics
 @dataclass
 class VisionTrainConfig:
     batch_size: int = 16
-    epochs: int = 3
+    epochs: int = 50
     lr: float = 1e-3
     num_workers: int = 2
     max_batches_per_epoch: int | None = None
