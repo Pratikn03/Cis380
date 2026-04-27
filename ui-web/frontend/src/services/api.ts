@@ -66,24 +66,54 @@ api.interceptors.response.use(
   },
 );
 
+/**
+ * SSE event names produced by /api/v1/agent/run.
+ *
+ * Legacy aliases (`step`, `token`, `citation`, `final`) are kept so the old
+ * /api/agent/stream consumer keeps compiling; new code should consume the
+ * v1 names directly.
+ */
 export type AgentStreamEvent =
+  | { type: "trace_start"; data: Record<string, unknown> }
+  | { type: "triage"; data: Record<string, unknown> }
+  | { type: "thinking_delta"; data: { text?: string } }
+  | { type: "tool_call"; data: Record<string, unknown> }
+  | { type: "tool_result"; data: Record<string, unknown> }
+  | { type: "tool_error"; data: Record<string, unknown> }
+  | { type: "safety_blocked"; data: Record<string, unknown> }
+  | { type: "final_message"; data: Record<string, unknown> }
+  | { type: "usage"; data: Record<string, unknown> }
+  | { type: "final_envelope"; data: { envelope?: Record<string, unknown> } }
+  | { type: "trace_end"; data: Record<string, unknown> }
+  // legacy /api/agent/stream aliases:
   | { type: "step"; data: Record<string, unknown> }
   | { type: "token"; data: { text?: string } }
   | { type: "citation"; data: Record<string, unknown> }
   | { type: "final"; data: Record<string, unknown> }
   | { type: "error"; data: Record<string, unknown> };
 
+export interface AgentStreamOptions {
+  /** Override the endpoint. Defaults to /api/v1/agent/run. */
+  url?: string;
+  /** AbortSignal to stop the stream early. */
+  signal?: AbortSignal;
+}
+
 export async function fetchAgentStream(
   payload: FormData,
   onEvent: (event: AgentStreamEvent) => void,
+  options: AgentStreamOptions = {},
 ) {
   const base = api.defaults.baseURL || resolveApiBase();
-  const url = `${String(base).replace(/\/$/, "")}/api/agent/stream`;
+  const url =
+    options.url ||
+    `${String(base).replace(/\/$/, "")}/api/v1/agent/run`;
   const token = localStorage.getItem(authStorage.access);
   const response = await fetch(url, {
     method: "POST",
     body: payload,
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    signal: options.signal,
   });
   if (!response.ok || !response.body) {
     throw new Error(`Agent stream failed (${response.status})`);
@@ -103,7 +133,12 @@ export async function fetchAgentStream(
       const dataLine = frame.split("\n").find((line) => line.startsWith("data:"));
       if (!eventLine || !dataLine) continue;
       const type = eventLine.replace("event:", "").trim() as AgentStreamEvent["type"];
-      const data = JSON.parse(dataLine.replace("data:", "").trim());
+      let data: Record<string, unknown>;
+      try {
+        data = JSON.parse(dataLine.replace("data:", "").trim());
+      } catch {
+        continue;
+      }
       onEvent({ type, data } as AgentStreamEvent);
     }
   }

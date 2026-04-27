@@ -29,6 +29,11 @@ export default function Agent() {
   const [error, setError] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const confidence = useMemo(() => {
+    if (!finalMeta) return undefined;
+    // /api/v1/agent/run envelope shape
+    if (typeof finalMeta.confidence === "number") return finalMeta.confidence as number;
+    if (typeof finalMeta.intent_confidence === "number") return finalMeta.intent_confidence as number;
+    // legacy /api/agent/stream shape
     const result = finalMeta?.result as Record<string, unknown> | undefined;
     const intent = result?.intent_confidence as Record<string, unknown> | undefined;
     return typeof intent?.confidence === "number" ? intent.confidence : undefined;
@@ -53,11 +58,52 @@ export default function Agent() {
   };
 
   const handleEvent = (event: AgentStreamEvent) => {
+    // /api/v1/agent/run events
+    if (event.type === "triage") {
+      setSteps((prev) => [...prev, { kind: "triage", ...event.data }]);
+      return;
+    }
+    if (event.type === "thinking_delta") {
+      appendAssistantToken(String(event.data.text || ""));
+      return;
+    }
+    if (event.type === "tool_call") {
+      setSteps((prev) => [...prev, { kind: "tool_call", ...event.data }]);
+      return;
+    }
+    if (event.type === "tool_result") {
+      setSteps((prev) => [...prev, { kind: "tool_result", ...event.data }]);
+      return;
+    }
+    if (event.type === "tool_error") {
+      setSteps((prev) => [...prev, { kind: "tool_error", ...event.data }]);
+      return;
+    }
+    if (event.type === "safety_blocked") {
+      setError(`Output blocked by safety classifier: ${event.data.reason || "unknown"}`);
+      return;
+    }
+    if (event.type === "final_envelope") {
+      const envelope = (event.data.envelope as Record<string, unknown>) || event.data;
+      setFinalMeta(envelope);
+      const answer = String(envelope.answer || "");
+      if (answer) appendAssistantToken(answer);
+      const cites = (envelope.citations as unknown[]) || [];
+      if (cites.length) setCitations(cites);
+      return;
+    }
+    if (event.type === "trace_start" || event.type === "usage" || event.type === "trace_end" || event.type === "final_message") {
+      return;
+    }
+    if (event.type === "error") {
+      setError(String((event.data as Record<string, unknown>).message || "Agent request failed"));
+      return;
+    }
+    // legacy /api/agent/stream events still supported
     if (event.type === "step") setSteps((prev) => [...prev, event.data]);
     if (event.type === "token") appendAssistantToken(String(event.data.text || ""));
     if (event.type === "citation") setCitations((prev) => [...prev, event.data.citation]);
     if (event.type === "final") setFinalMeta(event.data);
-    if (event.type === "error") setError(String(event.data.detail || "Agent request failed"));
   };
 
   const submit = async () => {
