@@ -1,0 +1,84 @@
+# Compose overlay that swaps nginx for Caddy with automatic Let's Encrypt
+# TLS, Docker secrets for sensitive env, and blue/green-friendly volume
+# layout. Compose with the production file:
+#
+#   docker compose -f docker-compose.production.yml -f docker-compose.caddy.yml up -d
+#
+# Required env (in /etc/sentifargo/.env on the host, gitignored):
+#   SENTIFARGO_DOMAIN=app.example.com
+#   CADDY_ACME_EMAIL=ops@example.com
+#
+# Required secrets (created with `docker secret create` or as files in
+# ./secrets/):
+#   secrets/postgres_password.txt
+#   secrets/secret_key.txt
+#   secrets/anthropic_api_key.txt
+#   secrets/grafana_password.txt
+
+services:
+  caddy:
+    image: caddy:2.8
+    container_name: sentifargo-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
+    environment:
+      SENTIFARGO_DOMAIN: ${SENTIFARGO_DOMAIN:?SENTIFARGO_DOMAIN must be set}
+      CADDY_ACME_EMAIL: ${CADDY_ACME_EMAIL:?CADDY_ACME_EMAIL must be set}
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data         # ACME certs persist here
+      - caddy-config:/config
+      - ./ui-web/frontend/dist:/srv/web/dist:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [sentifargo]
+
+  api:
+    secrets:
+      - postgres_password
+      - secret_key
+      - anthropic_api_key
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      SECRET_KEY_FILE: /run/secrets/secret_key
+      ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
+
+  worker:
+    secrets:
+      - postgres_password
+      - secret_key
+      - anthropic_api_key
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      SECRET_KEY_FILE: /run/secrets/secret_key
+      ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
+
+  postgres:
+    secrets:
+      - postgres_password
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+
+  grafana:
+    secrets:
+      - grafana_password
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_password
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+  secret_key:
+    file: ./secrets/secret_key.txt
+  anthropic_api_key:
+    file: ./secrets/anthropic_api_key.txt
+  grafana_password:
+    file: ./secrets/grafana_password.txt
+
+volumes:
+  caddy-data:
+  caddy-config:

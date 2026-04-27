@@ -1,0 +1,61 @@
+# Caddy reverse proxy with automatic Let's Encrypt TLS.
+# Replaces nginx for production deployments. Set SENTIFARGO_DOMAIN and
+# CADDY_ACME_EMAIL via the compose env (see docs/runbook_secrets.md).
+#
+# Blue/green: this file always proxies upstream "api". The deploy script
+# updates /etc/caddy/upstream.conf at switch time and reloads Caddy.
+
+{
+    email {$CADDY_ACME_EMAIL}
+    admin off
+}
+
+{$SENTIFARGO_DOMAIN} {
+    encode zstd gzip
+
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self' data:; frame-ancestors 'none'"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        -Server
+    }
+
+    # Static frontend (built React assets)
+    handle_path /assets/* {
+        root * /srv/web/dist/assets
+        file_server
+    }
+
+    handle / {
+        root * /srv/web/dist
+        try_files {path} /index.html
+        file_server
+    }
+
+    # API + SSE
+    handle /api/* {
+        reverse_proxy api:8000 {
+            flush_interval -1   # disable buffering for SSE
+            transport http {
+                read_buffer 8192
+                write_buffer 8192
+            }
+        }
+    }
+
+    # Prometheus scrape (gated to internal IPs at the docker network level)
+    handle /metrics {
+        @internal remote_ip 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
+        reverse_proxy @internal api:8000
+        respond 403
+    }
+
+    log {
+        output stdout
+        format json
+    }
+}
