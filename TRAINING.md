@@ -37,6 +37,16 @@ python3 scripts/train_all_vision_full.py
 python3 scripts/train_production.py
 ```
 
+### Voice emotion workflows
+```bash
+make train-voice      # fast MFCC/sklearn API baseline
+make train-voice-ssl  # production SSL fine-tuning path
+```
+
+The MFCC baseline is useful for fast API verification, but it is not expected to
+meet production voice-emotion gates on speaker-independent six-class evaluation.
+Use `train-voice-ssl` with a fresh SSL output directory for production metrics.
+
 ## Test and quality commands
 ```bash
 python3 scripts/training_data_audit.py

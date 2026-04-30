@@ -153,7 +153,7 @@ domains:
   voice:
     model_name: voice-emotion
     version: "1.0.0"
-    artifact: models/voice_emotion_ssl
+    artifact: models/voice_emotion_ssl_6class
     metrics: reports/voice_emotion_eval.json
     dataset: data/raw/voice
     dataset_version_source: data/raw/voice

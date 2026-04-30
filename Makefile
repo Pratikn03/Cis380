@@ -1,4 +1,4 @@
-.PHONY: help install test run dev dev-down api web scrub streamlit train-all train-vision train-fraud train-cyber train-behavior train-recommender train-brand train-video-temporal train-voice eval promote model-quality-gate prod-check docker-build docker-up docker-up-prod docker-down gateway-test gateway-run quality-fast quality-test quality-data quality-docs-fast quality-docs quality-all
+.PHONY: help install test run dev dev-down api web scrub streamlit train-all train-vision train-fraud train-cyber train-behavior train-recommender train-brand train-video-temporal train-voice train-voice-ssl eval promote model-quality-gate prod-check docker-build docker-up docker-up-prod docker-down gateway-test gateway-run quality-fast quality-test quality-data quality-docs-fast quality-docs quality-all
 
 ifneq ("$(wildcard .venv/bin/python)","")
 PY ?= .venv/bin/python
@@ -6,6 +6,17 @@ else
 PY ?= python3
 endif
 PIP ?= $(PY) -m pip
+VOICE_EPOCHS ?= 50
+VOICE_BATCH ?= 64
+VOICE_RF_ESTIMATORS ?= 600
+VOICE_RF_MAX_DEPTH ?= 32
+VOICE_SSL_MODEL ?= microsoft/wavlm-base-plus
+VOICE_SSL_OUTPUT ?= models/voice_emotion_ssl_6class
+VOICE_SSL_EPOCHS ?= 50
+VOICE_SSL_BATCH ?= 16
+VOICE_SSL_DEVICE ?= auto
+VOICE_SSL_MAX_STEPS ?= 0
+VOICE_SSL_NUM_WORKERS ?= 2
 
 help:
 	@echo ""
@@ -26,7 +37,8 @@ help:
 	@echo "  make train-recommender  Train recommender model (DVC stage)"
 	@echo "  make train-brand    Train brand/logo detector (DVC stage, full data)"
 	@echo "  make train-video-temporal Train video temporal model (full data)"
-	@echo "  make train-voice    Prepare, train, and evaluate SSL voice emotion model (full data)"
+	@echo "  make train-voice    Prepare, train, and evaluate fast API-backed MFCC voice baseline"
+	@echo "  make train-voice-ssl Prepare, fine-tune, and evaluate production SSL voice model"
 	@echo "  make train-all      Train core models (scripts/train_all.py)"
 	@echo "  make train-vision   Train vision stack (scripts/train_all_vision.py)"
 	@echo "  make eval           Evaluate all trained models (DVC evaluate_all)"
@@ -114,8 +126,15 @@ train-voice:
 	$(PY) scripts/prepare_voice_from_audiowav.py --mode link
 	$(PY) scripts/voice/build_emotion_manifest.py --data-root data/raw/voice --out data/raw/voice/manifest.csv
 	$(PY) scripts/voice/split_manifest.py --manifest data/raw/voice/manifest.csv --out-dir data/raw/voice --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
-	$(PY) scripts/voice/train_emotion_ssl.py --train-manifest data/raw/voice/manifest.train.csv --val-manifest data/raw/voice/manifest.val.csv --model microsoft/wavlm-base-plus --output-dir models/voice_emotion_ssl --epochs 50 --max-steps 0
-	$(PY) scripts/voice/eval_emotion_ssl.py --model-dir models/voice_emotion_ssl --test-manifest data/raw/voice/manifest.test.csv
+	$(PY) scripts/voice/train_emotion_mfcc.py --train-manifest data/raw/voice/manifest.train.csv --val-manifest data/raw/voice/manifest.val.csv --output-model models/voice_emotion.pkl --epochs $(VOICE_EPOCHS) --batch-size $(VOICE_BATCH) --rf-estimators $(VOICE_RF_ESTIMATORS) --rf-max-depth $(VOICE_RF_MAX_DEPTH)
+	$(PY) scripts/voice/eval_emotion_mfcc.py --model models/voice_emotion.pkl --test-manifest data/raw/voice/manifest.test.csv
+
+train-voice-ssl:
+	$(PY) scripts/prepare_voice_from_audiowav.py --mode link
+	$(PY) scripts/voice/build_emotion_manifest.py --data-root data/raw/voice --out data/raw/voice/manifest.csv
+	$(PY) scripts/voice/split_manifest.py --manifest data/raw/voice/manifest.csv --out-dir data/raw/voice --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
+	$(PY) scripts/voice/train_emotion_ssl.py --train-manifest data/raw/voice/manifest.train.csv --val-manifest data/raw/voice/manifest.val.csv --model $(VOICE_SSL_MODEL) --output-dir $(VOICE_SSL_OUTPUT) --epochs $(VOICE_SSL_EPOCHS) --batch-size $(VOICE_SSL_BATCH) --device $(VOICE_SSL_DEVICE) --num-workers $(VOICE_SSL_NUM_WORKERS) --max-steps $(VOICE_SSL_MAX_STEPS)
+	$(PY) scripts/voice/eval_emotion_ssl.py --model-dir $(VOICE_SSL_OUTPUT) --test-manifest data/raw/voice/manifest.test.csv --batch-size $(VOICE_SSL_BATCH) --num-workers $(VOICE_SSL_NUM_WORKERS)
 
 eval:
 	PYTHONPATH=src $(PY) -m uais.evaluation.evaluate_all
