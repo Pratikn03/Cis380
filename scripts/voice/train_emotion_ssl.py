@@ -20,9 +20,11 @@ if __package__ in {None, ""}:
 from scripts.voice.ssl_utils import (
     AudioDataCollator,
     build_label_maps,
+    ensure_compatible_label_map,
     load_audio,
     load_manifest,
     prepare_dataset,
+    resolve_trainer_eval_sampler,
 )
 
 
@@ -192,6 +194,11 @@ def train_torchaudio(args: argparse.Namespace) -> None:
     train_df = load_manifest(args.train_manifest)
     val_df = load_manifest(args.val_manifest)
     label2id, id2label = build_label_maps(train_df)
+    ensure_compatible_label_map(
+        args.output_dir,
+        label2id,
+        resume_from_checkpoint=args.resume_from_checkpoint,
+    )
 
     labels = train_df["label"].map(label2id).to_numpy()
     class_counts = np.bincount(labels, minlength=len(label2id)).astype(np.float64)
@@ -368,7 +375,7 @@ def train_torchaudio(args: argparse.Namespace) -> None:
         "majority_baseline_accuracy": baseline_acc,
         "args": vars(args),
     }
-    (args.output_dir / "run_config.json").write_text(json.dumps(run_meta, indent=2))
+    (args.output_dir / "run_config.json").write_text(json.dumps(run_meta, indent=2, default=str))
 
     bundle_cfg.hidden_dim = hidden_dim
     bundle_cfg.num_labels = len(label2id)
@@ -513,6 +520,11 @@ def main() -> None:
     val_df = load_manifest(args.val_manifest)
 
     label2id, id2label = build_label_maps(train_df)
+    ensure_compatible_label_map(
+        args.output_dir,
+        label2id,
+        resume_from_checkpoint=args.resume_from_checkpoint,
+    )
 
     labels = train_df["label"].map(label2id).to_numpy()
     class_counts = np.bincount(labels, minlength=len(label2id)).astype(np.float64)
@@ -537,7 +549,7 @@ def main() -> None:
         "majority_baseline_accuracy": baseline_acc,
         "args": vars(args),
     }
-    (args.output_dir / "run_config.json").write_text(json.dumps(run_meta, indent=2))
+    (args.output_dir / "run_config.json").write_text(json.dumps(run_meta, indent=2, default=str))
 
     feature_extractor = AutoFeatureExtractor.from_pretrained(args.model)
     sampling_rate = int(getattr(feature_extractor, "sampling_rate", 16000))
@@ -674,9 +686,9 @@ def main() -> None:
                 f"step={self.state.global_step} epoch={self.state.epoch}"
             )
 
-        def training_step(self, model, inputs):
+        def training_step(self, model, inputs, *args, **kwargs):
             self._maybe_unfreeze()
-            return super().training_step(model, inputs)
+            return super().training_step(model, inputs, *args, **kwargs)
 
         def get_train_dataloader(self):
             if self.train_dataset is None:
@@ -706,7 +718,7 @@ def main() -> None:
 
             return DataLoader(
                 eval_dataset,
-                sampler=self.get_eval_sampler(eval_dataset),
+                sampler=resolve_trainer_eval_sampler(self, eval_dataset),
                 batch_size=self.args.eval_batch_size,
                 collate_fn=self.eval_collator or self.data_collator,
                 drop_last=self.args.dataloader_drop_last,
@@ -740,6 +752,8 @@ def main() -> None:
     }
     if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
         training_kwargs["dataloader_pin_memory"] = False
+    if args.device == "cpu":
+        training_kwargs["use_cpu"] = True
 
     if args.gradient_checkpointing:
         training_kwargs["gradient_checkpointing"] = True

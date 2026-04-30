@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -28,6 +29,65 @@ def build_label_maps(df: pd.DataFrame) -> tuple[dict[str, int], dict[int, str]]:
     label2id = {label: i for i, label in enumerate(labels)}
     id2label = {i: label for label, i in label2id.items()}
     return label2id, id2label
+
+
+def _read_existing_label2id(path: Path) -> dict[str, int] | None:
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise SystemExit(f"could not read SSL voice label map: {path}: {exc}") from exc
+    raw = payload.get("label2id")
+    if not isinstance(raw, dict):
+        return None
+    try:
+        return {str(label): int(idx) for label, idx in raw.items()}
+    except Exception as exc:
+        raise SystemExit(f"invalid SSL voice label map: {path}: {exc}") from exc
+
+
+def ensure_compatible_label_map(
+    output_dir: Path,
+    expected_label2id: dict[str, int],
+    *,
+    resume_from_checkpoint: str | None,
+) -> None:
+    """Reject stale SSL output dirs before mixing incompatible artifacts.
+
+    Interrupted runs can leave a fresh run_config.json beside an old label_map.json
+    and model checkpoint. That makes evaluation/prediction fail later in a less
+    obvious way, so fail early unless the existing labels exactly match the new run.
+    """
+
+    expected = {str(label): int(idx) for label, idx in expected_label2id.items()}
+    label_sources = [output_dir / "label_map.json", output_dir / "config.json"]
+    for source in label_sources:
+        existing = _read_existing_label2id(source)
+        if existing is None or existing == expected:
+            continue
+        missing = sorted(set(expected) - set(existing))
+        extra = sorted(set(existing) - set(expected))
+        resume_hint = (
+            f" resume_from_checkpoint={resume_from_checkpoint!r} was provided,"
+            if resume_from_checkpoint
+            else ""
+        )
+        raise SystemExit(
+            "stale SSL voice output directory: "
+            f"{output_dir}.{resume_hint} Existing labels do not match this run. "
+            f"missing={missing} extra={extra}. "
+            "Use a fresh --output-dir or remove the stale SSL artifact first."
+        )
+
+
+def resolve_trainer_eval_sampler(trainer: Any, eval_dataset: Any) -> Any:
+    sampler_fn = getattr(trainer, "get_eval_sampler", None)
+    if sampler_fn is None:
+        sampler_fn = getattr(trainer, "_get_eval_sampler", None)
+    if sampler_fn is None:
+        return None
+    return sampler_fn(eval_dataset)
 
 
 def _resample_audio(audio: np.ndarray, orig_sr: int, target_sr: int) -> np.ndarray:
