@@ -202,3 +202,22 @@ stages:
       hash: md5
       md5: b24c45eb4bad339cb8ae418654eeb333
       size: 250
+  train_brand_model:
+    cmd: PYTHONPATH=src python -m src.train.train_brand_logo_detector
+    deps:
+    - path: data/processed/brand_yolo/
+      hash: md5
+      md5: 44537924d21bee1cf2a320e2db2c7239.dir
+      size: 283660833
+      nfiles: 49551
+    - path: src/train/train_brand_logo_detector.py
+      hash: md5
+      md5: 2c4f4ca9970468c63488a4d76d6612ea
+      size: 11302
+      isexec: true
+    outs:
+    - path: artifacts/brand/yolo_logo_det.pt
+      hash: md5
+      md5: efb8b92986d788531c62e8bf92ef2f4f
+      size: 6236138
+      isexec: true
