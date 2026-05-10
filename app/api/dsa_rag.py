@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Any, Optional
 
@@ -10,6 +11,8 @@ from app.rag_dsa.ingest import ingest
 from app.rag_dsa.pipeline import run_dsa_rag
 from app.rag_dsa.config import settings
 from app.utils.uploads import MAX_DOC_BYTES, TEXT_EXTENSIONS, read_upload_bytes, validate_upload
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/dsa-rag")
 
@@ -28,7 +31,8 @@ def ask(req: AskRequest) -> dict[str, Any]:
     try:
         return run_dsa_rag(req.query)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        logger.exception("RAG pipeline error: %s", exc)
+        raise HTTPException(status_code=500, detail="An internal error occurred processing your query.")
 
 
 @router.post("/ingest")

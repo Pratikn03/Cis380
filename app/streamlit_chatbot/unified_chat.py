@@ -1046,8 +1046,8 @@ def render_unified_chat(
 
                     # Add debug info in expander (only in development)
                     if os.getenv("DEBUG_MODE") == "true":
-                        reply += "\n\n---\n**Debug Info:**"
-                        reply += f"\n```json\n{str(res)[:500]}\n```"
+                        safe_keys = {k: v for k, v in res.items() if k in {"status", "model", "tokens_used"}} if isinstance(res, dict) else {}
+                        reply += f"\n\n---\n**Debug Info:** `{safe_keys}`"
 
                 else:
                     error_msg = (

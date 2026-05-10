@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -55,7 +55,7 @@ def build_index(rebuild: bool = False, db: Session = Depends(get_db)) -> dict[st
         progress=0.0,
         message="queued",
         payload={"rebuild": rebuild},
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc).replace(tzinfo=None),
     )
     db.add(job)
     db.commit()
@@ -75,7 +75,7 @@ def evaluate_rag(db: Session = Depends(get_db)) -> dict[str, Any]:
         progress=0.0,
         message="queued",
         payload={},
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc).replace(tzinfo=None),
     )
     db.add(job)
     db.commit()

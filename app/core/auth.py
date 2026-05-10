@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 import binascii
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
 import hmac
 import os
@@ -83,8 +83,11 @@ def _auth_token() -> str | None:
     return settings.security.auth_token or os.getenv("AUTH_TOKEN") or None
 
 
+_BYPASS_BLOCKED_ENVS = {"production", "staging", "qa"}
+
+
 def _auth_bypass_enabled() -> bool:
-    return os.getenv("AUTH_BYPASS", "false").lower() == "true" and settings.app_env != "production"
+    return os.getenv("AUTH_BYPASS", "false").lower() == "true" and settings.app_env not in _BYPASS_BLOCKED_ENVS
 
 
 def _extract_bearer(authorization: str | None) -> str | None:
@@ -126,7 +129,7 @@ def block_access_token(token: str, ttl_seconds: int | None = None) -> None:
 
 def _create_token(data: dict, expires_delta: timedelta) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
+    expire = datetime.now(timezone.utc) + expires_delta
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.security.secret_key, algorithm=ALGORITHM)
 

@@ -294,10 +294,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         now = time.time()
         window_start = now - self.window_seconds
 
-        # Clean old entries
-        self.request_counts[client_ip] = [
-            ts for ts in self.request_counts[client_ip] if ts > window_start
-        ]
+        # Prune timestamps outside the current window.
+        recent = [ts for ts in self.request_counts[client_ip] if ts > window_start]
+        if recent:
+            self.request_counts[client_ip] = recent
+        else:
+            # Remove the key entirely so the dict doesn't grow without bound.
+            del self.request_counts[client_ip]
 
         # Check rate limit
         if len(self.request_counts[client_ip]) >= self.requests_per_minute:
@@ -524,6 +527,11 @@ def setup_production_middleware(
 
     # 6. CORS (always last - first executed)
     resolved_origins = cors_origins or ["*"]
+    if "*" in resolved_origins and len(resolved_origins) > 1:
+        raise ValueError(
+            "CORS misconfiguration: wildcard '*' must not be combined with specific origins. "
+            "Use either '*' alone or a list of explicit origins."
+        )
     allow_credentials = resolved_origins != ["*"]
     app.add_middleware(
         CORSMiddleware,

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, JSON, Numeric, String, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Index, Integer, JSON, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -11,6 +11,11 @@ from app.db.base import Base
 
 def _uuid() -> str:
     return str(uuid4())
+
+
+def _utcnow() -> datetime:
+    """Return a naive UTC datetime (tz-stripped for DateTime columns)."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class UserRole(Base):
@@ -44,7 +49,7 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     totp_secret: Mapped[str | None] = mapped_column(Text, nullable=True)
     totp_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     roles: Mapped[list[Role]] = relationship(
         "Role",
@@ -62,7 +67,7 @@ class Dataset(Base):
     size_bytes: Mapped[int] = mapped_column(Integer, default=0)
     license: Mapped[str] = mapped_column(String, default="unknown")
     description: Mapped[str] = mapped_column(Text, default="")
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
 class Document(Base):
@@ -72,7 +77,7 @@ class Document(Base):
     filename: Mapped[str] = mapped_column(String, index=True)
     content_hash: Mapped[str] = mapped_column(String, index=True)
     source: Mapped[str] = mapped_column(String, default="upload")
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
 class RagChunk(Base):
@@ -93,7 +98,7 @@ class RagQueryLog(Base):
     avg_score: Mapped[float] = mapped_column(Float, default=0.0)
     latency_ms: Mapped[float] = mapped_column(Float, default=0.0)
     meta: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
 
 
 class Run(Base):
@@ -103,7 +108,7 @@ class Run(Base):
     run_type: Mapped[str] = mapped_column(String, index=True)
     metrics: Mapped[dict] = mapped_column(JSON, default=dict)
     artifacts: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
 class ModelVersion(Base):
@@ -117,7 +122,7 @@ class ModelVersion(Base):
     artifact_path: Mapped[str] = mapped_column(String, default="")
     status: Mapped[str] = mapped_column(String, index=True, default="staging")
     card_path: Mapped[str] = mapped_column(String, default="")
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
 class Job(Base):
@@ -130,7 +135,7 @@ class Job(Base):
     progress: Mapped[float] = mapped_column(Float, default=0.0)
     message: Mapped[str] = mapped_column(Text, default="")
     payload: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
@@ -143,7 +148,7 @@ class AuditLog(Base):
     action: Mapped[str] = mapped_column(String, index=True)
     target: Mapped[str] = mapped_column(String, default="")
     meta: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
 class Incident(Base):
@@ -154,7 +159,7 @@ class Incident(Base):
     severity: Mapped[str] = mapped_column(String, default="low")
     description: Mapped[str] = mapped_column(Text, default="")
     evidence: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
 class AuthAudit(Base):
@@ -170,7 +175,7 @@ class AuthAudit(Base):
     ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
     metadata_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
 
 
 class ReviewQueue(Base):
@@ -178,11 +183,19 @@ class ReviewQueue(Base):
     analyst can label them; the labels feed the next retrain cycle."""
 
     __tablename__ = "review_queue"
+    __table_args__ = (
+        Index("ix_review_queue_status_created_at", "status", "created_at"),
+    )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     trace_id: Mapped[str] = mapped_column(String(64), index=True)
     session_id: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
-    user_id: Mapped[str | None] = mapped_column(String(128), index=True, nullable=True)
+    user_id: Mapped[str | None] = mapped_column(
+        String(128),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        index=True,
+        nullable=True,
+    )
     intent: Mapped[str | None] = mapped_column(String(32), nullable=True)
     payload: Mapped[dict] = mapped_column(JSON)
     model_answer: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -191,7 +204,7 @@ class ReviewQueue(Base):
     label: Mapped[str | None] = mapped_column(String(64), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     reviewed_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
@@ -199,11 +212,18 @@ class AgentCall(Base):
     """One row per multi-agent run. Drives cost / latency / cache dashboards."""
 
     __tablename__ = "agent_calls"
+    __table_args__ = (
+        Index("ix_agent_calls_user_id_created_at", "user_id", "created_at"),
+    )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     trace_id: Mapped[str] = mapped_column(String(64), index=True)
     session_id: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
-    user_id: Mapped[str] = mapped_column(String(128), index=True)
+    user_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        index=True,
+    )
     intent: Mapped[str | None] = mapped_column(String(32), nullable=True)
     answer_source: Mapped[str | None] = mapped_column(String(32), nullable=True)
     stop_reason: Mapped[str | None] = mapped_column(String(32), nullable=True)
@@ -216,4 +236,4 @@ class AgentCall(Base):
     cost_usd: Mapped[float] = mapped_column(Numeric(10, 6), default=0.0)
     confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
