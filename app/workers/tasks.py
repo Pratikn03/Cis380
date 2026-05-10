@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 from typing import Any
 
@@ -64,7 +64,7 @@ def rag_index(self, job_id: str, rebuild: bool = False) -> dict:
         job_id,
         status="running",
         progress=0.1,
-        started_at=datetime.utcnow(),
+        started_at=datetime.now(timezone.utc).replace(tzinfo=None),
         message="starting",
     )
     append_job_log(job_id, "Starting RAG index build")
@@ -76,7 +76,7 @@ def rag_index(self, job_id: str, rebuild: bool = False) -> dict:
             status="done",
             progress=1.0,
             message="completed",
-            finished_at=datetime.utcnow(),
+            finished_at=datetime.now(timezone.utc).replace(tzinfo=None),
         )
         _record_job_metrics(job_type, "done", time.perf_counter() - start)
         return stats
@@ -87,7 +87,7 @@ def rag_index(self, job_id: str, rebuild: bool = False) -> dict:
             status="failed",
             progress=1.0,
             message=str(exc),
-            finished_at=datetime.utcnow(),
+            finished_at=datetime.now(timezone.utc).replace(tzinfo=None),
         )
         _record_job_metrics(job_type, "failed", time.perf_counter() - start)
         raise
@@ -101,7 +101,7 @@ def rag_eval(self, job_id: str) -> dict:
         job_id,
         status="running",
         progress=0.1,
-        started_at=datetime.utcnow(),
+        started_at=datetime.now(timezone.utc).replace(tzinfo=None),
         message="starting",
     )
     append_job_log(job_id, "Evaluating RAG metrics")
@@ -112,7 +112,7 @@ def rag_eval(self, job_id: str) -> dict:
             status="done",
             progress=1.0,
             message="completed",
-            finished_at=datetime.utcnow(),
+            finished_at=datetime.now(timezone.utc).replace(tzinfo=None),
         )
         _record_job_metrics(job_type, "done", time.perf_counter() - start)
         return {"status": "ok"}
@@ -123,7 +123,7 @@ def rag_eval(self, job_id: str) -> dict:
             status="failed",
             progress=1.0,
             message=str(exc),
-            finished_at=datetime.utcnow(),
+            finished_at=datetime.now(timezone.utc).replace(tzinfo=None),
         )
         _record_job_metrics(job_type, "failed", time.perf_counter() - start)
         raise
@@ -137,7 +137,7 @@ def train_model(self, job_id: str, script: str, args: list[str] | None = None) -
         job_id,
         status="running",
         progress=0.1,
-        started_at=datetime.utcnow(),
+        started_at=datetime.now(timezone.utc).replace(tzinfo=None),
         message="starting",
     )
     append_job_log(job_id, f"Training via {script}")
@@ -149,7 +149,7 @@ def train_model(self, job_id: str, script: str, args: list[str] | None = None) -
             status="done",
             progress=1.0,
             message="completed",
-            finished_at=datetime.utcnow(),
+            finished_at=datetime.now(timezone.utc).replace(tzinfo=None),
         )
         _record_job_metrics(job_type, "done", time.perf_counter() - start)
         return {"status": "ok"}
@@ -160,7 +160,7 @@ def train_model(self, job_id: str, script: str, args: list[str] | None = None) -
             status="failed",
             progress=1.0,
             message=str(exc),
-            finished_at=datetime.utcnow(),
+            finished_at=datetime.now(timezone.utc).replace(tzinfo=None),
         )
         _record_job_metrics(job_type, "failed", time.perf_counter() - start)
         raise

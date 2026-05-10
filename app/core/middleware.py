@@ -294,10 +294,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         now = time.time()
         window_start = now - self.window_seconds
 
-        # Clean old entries
-        self.request_counts[client_ip] = [
-            ts for ts in self.request_counts[client_ip] if ts > window_start
-        ]
+        # Prune timestamps outside the current window.
+        recent = [ts for ts in self.request_counts[client_ip] if ts > window_start]
+        if recent:
+            self.request_counts[client_ip] = recent
+        else:
+            # Remove the key entirely so the dict doesn't grow without bound.
+            del self.request_counts[client_ip]
 
         # Check rate limit
         if len(self.request_counts[client_ip]) >= self.requests_per_minute:
