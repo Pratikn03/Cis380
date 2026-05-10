@@ -524,6 +524,11 @@ def setup_production_middleware(
 
     # 6. CORS (always last - first executed)
     resolved_origins = cors_origins or ["*"]
+    if "*" in resolved_origins and len(resolved_origins) > 1:
+        raise ValueError(
+            "CORS misconfiguration: wildcard '*' must not be combined with specific origins. "
+            "Use either '*' alone or a list of explicit origins."
+        )
     allow_credentials = resolved_origins != ["*"]
     app.add_middleware(
         CORSMiddleware,

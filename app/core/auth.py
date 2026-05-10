@@ -83,8 +83,11 @@ def _auth_token() -> str | None:
     return settings.security.auth_token or os.getenv("AUTH_TOKEN") or None
 
 
+_BYPASS_BLOCKED_ENVS = {"production", "staging", "qa"}
+
+
 def _auth_bypass_enabled() -> bool:
-    return os.getenv("AUTH_BYPASS", "false").lower() == "true" and settings.app_env != "production"
+    return os.getenv("AUTH_BYPASS", "false").lower() == "true" and settings.app_env not in _BYPASS_BLOCKED_ENVS
 
 
 def _extract_bearer(authorization: str | None) -> str | None:

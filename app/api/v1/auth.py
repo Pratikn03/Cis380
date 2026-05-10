@@ -276,8 +276,6 @@ def password_reset_request(
         token = secrets.token_urlsafe(32)
         _store_reset_token(user.id, token)
         record_audit(db, action="password_reset_requested", target=user.username, user_id=user.id)
-        if settings.app_env != "production":
-            response["reset_token"] = token
     return response
 
 

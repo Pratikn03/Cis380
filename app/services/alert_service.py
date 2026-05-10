@@ -36,8 +36,10 @@ USAGE:
 
 from __future__ import annotations
 
+import ipaddress
 import json
 import smtplib
+import socket
 import threading
 import queue
 import logging
@@ -48,6 +50,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from enum import Enum
 from typing import Dict, List, Optional, Any, Callable
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 from urllib.error import URLError
 import uuid
@@ -163,6 +166,41 @@ class ConsoleChannel(AlertChannel):
         return self._enabled
 
 
+def _validate_webhook_url(url: str) -> None:
+    """Reject private/loopback URLs to prevent SSRF via webhook registration."""
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError(f"Webhook URL must use http or https, got: {parsed.scheme!r}")
+    host = (parsed.hostname or "").strip().lower()
+    if not host:
+        raise ValueError("Webhook URL has no valid host.")
+    # Check if host is a bare IP address.
+    try:
+        ip = ipaddress.ip_address(host)
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast:
+            raise ValueError(f"Webhook URL resolves to a private/internal address: {host}")
+    except ValueError as exc:
+        # Re-raise SSRF block; for non-IP hosts fall through to DNS check.
+        if "private" in str(exc) or "internal" in str(exc) or "loopback" in str(exc):
+            raise
+    # DNS-resolve the hostname and check resulting IPs.
+    try:
+        results = socket.getaddrinfo(host, None)
+        for (_, _, _, _, sockaddr) in results:
+            ip_str = sockaddr[0]
+            try:
+                ip = ipaddress.ip_address(ip_str)
+                if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast:
+                    raise ValueError(
+                        f"Webhook host {host!r} resolves to a private/internal address: {ip_str}"
+                    )
+            except ValueError as exc:
+                if "private" in str(exc) or "internal" in str(exc) or "loopback" in str(exc):
+                    raise
+    except socket.gaierror:
+        pass  # Let urlopen handle DNS failures at send time.
+
+
 class WebhookChannel(AlertChannel):
     """Webhook alert channel (supports Slack, Discord, custom)."""
 
@@ -173,6 +211,7 @@ class WebhookChannel(AlertChannel):
         method: str = "POST",
         timeout: int = 10,
     ):
+        _validate_webhook_url(url)
         self.url = url
         self.headers = headers or {"Content-Type": "application/json"}
         self.method = method
