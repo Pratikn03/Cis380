@@ -161,6 +161,39 @@ def _reset_digest(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
+_RESET_RATE: dict[str, tuple[int, float]] = {}  # in-memory fallback for rate limiting
+_RESET_RATE_LIMIT = 3       # max requests per window
+_RESET_RATE_WINDOW = 3600   # 1 hour in seconds
+
+
+def _check_reset_rate_limit(identifier: str) -> bool:
+    """Return True if this identifier has exceeded the password-reset rate limit.
+
+    Uses Redis when available; falls back to an in-memory counter so the
+    protection works even without Redis (at the cost of per-process scope).
+    Identifier is hashed before storage so we never persist raw usernames.
+    """
+    digest = hashlib.sha256(identifier.encode("utf-8")).hexdigest()[:24]
+    client = _redis_client()
+    if client is not None:
+        try:
+            key = f"auth:reset-rate:{digest}"
+            count = int(client.incr(key))
+            if count == 1:
+                client.expire(key, _RESET_RATE_WINDOW)
+            return count > _RESET_RATE_LIMIT
+        except Exception:
+            pass  # fall through to in-memory
+
+    now = time.time()
+    count, window_start = _RESET_RATE.get(digest, (0, now))
+    if now - window_start > _RESET_RATE_WINDOW:
+        count, window_start = 0, now
+    count += 1
+    _RESET_RATE[digest] = (count, window_start)
+    return count > _RESET_RATE_LIMIT
+
+
 def _store_reset_token(user_id: str, token: str, ttl_seconds: int = 900) -> None:
     digest = _reset_digest(token)
     client = _redis_client()
@@ -264,6 +297,13 @@ def logout(
 def password_reset_request(
     payload: PasswordResetRequest, db: Session = Depends(get_db)
 ) -> dict[str, Any]:
+    identifier = payload.username or payload.email or ""
+    if _check_reset_rate_limit(identifier):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many password reset requests. Please try again later.",
+        )
+
     query = db.query(User)
     user = None
     if payload.username:

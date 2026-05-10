@@ -462,27 +462,41 @@ async def check_model_manifest() -> ComponentHealth:
 
 
 async def check_disk_space() -> ComponentHealth:
-    """Check disk space availability."""
+    """Check disk space on the partitions that matter most for operations."""
     start = time.time()
     try:
         import shutil
 
-        total, used, free = shutil.disk_usage("/")
+        # Check both root and the data directory (may live on a separate volume).
+        data_path = os.getenv("DATA_DIR", "./data")
+        paths_to_check = ["/", data_path]
+        min_free_gb = float("inf")
+        min_path = "/"
+        for path in paths_to_check:
+            try:
+                _, _, free = shutil.disk_usage(path)
+                free_gb = free / (1024**3)
+                if free_gb < min_free_gb:
+                    min_free_gb = free_gb
+                    min_path = path
+            except OSError:
+                pass
 
-        free_gb = free / (1024**3)
+        free_gb = min_free_gb
+        total, used, _ = shutil.disk_usage(min_path)
         used_percent = (used / total) * 100
 
         latency = (time.time() - start) * 1000
 
         if free_gb > 10:
             status = HealthStatus.HEALTHY
-            message = f"Sufficient disk space: {free_gb:.1f}GB free"
+            message = f"Sufficient disk space: {free_gb:.1f}GB free ({min_path})"
         elif free_gb > 2:
             status = HealthStatus.DEGRADED
-            message = f"Low disk space: {free_gb:.1f}GB free"
+            message = f"Low disk space: {free_gb:.1f}GB free ({min_path})"
         else:
             status = HealthStatus.UNHEALTHY
-            message = f"Critical disk space: {free_gb:.1f}GB free"
+            message = f"Critical disk space: {free_gb:.1f}GB free ({min_path})"
 
         return ComponentHealth(
             name="disk",

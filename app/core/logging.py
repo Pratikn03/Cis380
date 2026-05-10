@@ -6,6 +6,7 @@ Structured logging with JSON output for production environments
 import logging
 import sys
 import json
+import threading
 from datetime import datetime
 from typing import Any, Dict, Optional
 from pathlib import Path
@@ -230,29 +231,48 @@ def configure_root_logger(
     logging.getLogger("torch").setLevel(logging.WARNING)
 
 
+# Thread-local stack so concurrent requests each maintain their own context
+# without racing on the global log record factory.
+_log_context_local: threading.local = threading.local()
+
+
+def _get_context_extras() -> list[dict]:
+    return getattr(_log_context_local, "extras", [])
+
+
+def _sentifargo_log_factory(*args, **kwargs) -> logging.LogRecord:  # type: ignore[misc]
+    """Module-level factory installed once; reads per-thread extras stack."""
+    record = _sentifargo_log_factory._base_factory(*args, **kwargs)  # type: ignore[attr-defined]
+    for extra in _get_context_extras():
+        for key, value in extra.items():
+            setattr(record, key, value)
+    return record
+
+
+# Install once at import time; avoids repeated setLogRecordFactory calls.
+_sentifargo_log_factory._base_factory = logging.getLogRecordFactory()  # type: ignore[attr-defined]
+logging.setLogRecordFactory(_sentifargo_log_factory)
+
+
 class LogContext:
-    """Context manager for adding extra fields to log records."""
+    """Thread-safe context manager for adding extra fields to log records.
+
+    Uses a per-thread extras stack instead of replacing the global factory
+    on every __enter__, which was not thread-safe under concurrent requests.
+    """
 
     def __init__(self, logger: logging.Logger, **kwargs):
         self.logger = logger
         self.extra = kwargs
-        self._old_factory = None
 
     def __enter__(self):
-        self._old_factory = logging.getLogRecordFactory()
-        extra = self.extra
-
-        def factory(*args, **kwargs):
-            record = self._old_factory(*args, **kwargs)
-            for key, value in extra.items():
-                setattr(record, key, value)
-            return record
-
-        logging.setLogRecordFactory(factory)
+        stack = getattr(_log_context_local, "extras", [])
+        _log_context_local.extras = stack + [self.extra]
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        logging.setLogRecordFactory(self._old_factory)
+        stack = getattr(_log_context_local, "extras", [])
+        _log_context_local.extras = stack[:-1]
         return False
 
 

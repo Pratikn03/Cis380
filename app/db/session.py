@@ -14,6 +14,8 @@ def _engine_kwargs() -> dict:
     else:
         kwargs["pool_size"] = settings.database.pool_size
         kwargs["max_overflow"] = settings.database.max_overflow
+        # Hard deadline so pool exhaustion or a slow DB doesn't stall the process.
+        kwargs["connect_args"] = {"connect_timeout": 10}
     return kwargs
 
 
